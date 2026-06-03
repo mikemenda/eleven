@@ -1,7 +1,8 @@
-// Eleven XI Logo — matches official brand mark
 const Logo = ({ size = 40, showWordmark = false, className = '' }) => {
-  const h = size
-  const w = showWordmark ? size * 3.8 : size * 0.9
+  const vw = showWordmark ? 520 : 220
+  const vh = 60
+  const displayW = showWordmark ? size * (520/60) : size * (220/60)
+  const displayH = size
 
   return (
     <div
@@ -9,29 +10,29 @@ const Logo = ({ size = 40, showWordmark = false, className = '' }) => {
       style={{ display: 'inline-flex', alignItems: 'center' }}
     >
       <svg
-        width={w}
-        height={h}
-        viewBox="0 0 152 40"
+        width={displayW}
+        height={displayH}
+        viewBox={`0 0 ${vw} ${vh}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* X — bold, wide, sharp diagonal strokes */}
-        <line x1="1" y1="1" x2="28" y2="39" stroke="#4ade80" strokeWidth="7" strokeLinecap="square"/>
-        <line x1="29" y1="1" x2="2" y2="39" stroke="#4ade80" strokeWidth="7" strokeLinecap="square"/>
+        {/* X — two thick diagonal bars with cutout at crossing */}
+        <polygon points="0,0 22,0 110,60 88,60" fill="#4ade80" />
+        <polygon points="110,0 132,0 44,60 22,60" fill="#4ade80" />
+        <polygon points="56,30 66,24 76,30 66,36" fill="#0a1520" />
 
-        {/* I — thin, tall, no serifs, tight to X */}
-        <rect x="35" y="1" width="5" height="38" fill="#4ade80" />
+        {/* I — thin tall bar */}
+        <rect x="148" y="0" width="16" height="60" rx="0" fill="#4ade80" />
 
-        {/* eleven wordmark — off-white, lowercase */}
         {showWordmark && (
           <text
-            x="50"
-            y="30"
-            fontFamily="'Barlow', sans-serif"
-            fontWeight="300"
-            fontSize="26"
-            letterSpacing="1"
-            fill="#e2f5e2"
+            x="200"
+            y="46"
+            fontFamily="'Barlow', -apple-system, BlinkMacSystemFont, sans-serif"
+            fontWeight="600"
+            fontSize="52"
+            letterSpacing="-0.5"
+            fill="#e8e0d0"
           >
             eleven
           </text>
