@@ -1,6 +1,7 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────── */
 .page {
   min-height: calc(100vh - 56px);
-  padding: 32px 20px;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0) + 16px);
 }
 
 .inner {
@@ -8,97 +9,735 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 0;
   animation: fadeUp 0.35s ease both;
 }
 
-.contextBanner {
+.loadWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── SECTION WRAPPER ────────────────────────────────────────────── */
+.section {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.currentSectionElevated {
+  background: var(--surface-2);
+}
+
+.sectionLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.sectionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionRow .sectionLabel {
+  margin-bottom: 0;
+}
+
+.sectionLink {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.sectionLink:hover { color: var(--accent); }
+
+/* ─── SECTION 1: CLUB HERO ───────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 16px 0;
+  min-height: 160px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.heroPitchLines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 40px,
+      rgba(74, 222, 128, 0.025) 40px,
+      rgba(74, 222, 128, 0.025) 41px
+    );
+  pointer-events: none;
+}
+
+.heroGlow {
+  position: absolute;
+  top: -60px;
+  left: -40px;
+  width: 280px;
+  height: 200px;
+  background: radial-gradient(ellipse at center, rgba(74, 222, 128, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.heroBody {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.heroLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.heroClub {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dot { color: var(--text-dim); }
+
+.heroRight { flex-shrink: 0; }
+
+.heroStats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  min-width: 72px;
+  text-align: center;
+}
+
+.heroStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.heroStatVal {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.heroStatLabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.heroStatDivider {
+  width: 24px;
+  height: 1px;
+  background: var(--border);
+}
+
+.heroCrestLine {
+  position: relative;
+  height: 4px;
+  margin: 0 -16px;
+  opacity: 0.8;
+}
+
+/* ─── SECTION 2: DYNASTY SCORE ───────────────────────────────────── */
+.dynastyCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.dynastyMain {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dynastyScore {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.dynastyRight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dynastyTier {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.dynastyAcross {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dynastyPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.dynastyPill {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 9px;
+  border-radius: 20px;
+  border: 1px solid;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.dynastyPill:hover { opacity: 0.75; }
+
+/* Dynasty tier colors */
+.tierElite   { color: var(--accent); }
+.tierStrong  { color: var(--warning); }
+.tierAvg     { color: var(--text-muted); }
+.tierRebuild { color: var(--danger); }
+.tierNone    { color: var(--text-dim); }
+
+.pillElite   { color: #166534; background: rgba(74,222,128,0.18); border-color: rgba(74,222,128,0.35); }
+.pillStrong  { color: #92400e; background: rgba(251,191,36,0.18); border-color: rgba(251,191,36,0.35); }
+.pillAvg     { color: var(--text-muted); background: var(--surface-2); border-color: var(--border); }
+.pillRebuild { color: #b91c1c; background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.25); }
+.pillNone    { color: var(--text-dim); background: var(--surface); border-color: var(--border); }
+
+/* ─── SECTION 3: TROPHY CABINET ──────────────────────────────────── */
+.cabinetScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
+.cabinetScroll::-webkit-scrollbar { display: none; }
+
+.cabinetRow {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.trophyCard {
+  flex-shrink: 0;
+  width: 72px;
+  min-height: 84px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px 4px;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.trophyWon {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+}
+
+.trophyWon:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.trophyGhost {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.trophyIcon {
+  font-size: 22px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.trophyGhost .trophyIcon { color: var(--text-dim); }
+
+.trophyShort {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.trophyCount {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.trophySeasons {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-3);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  z-index: 10;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.cabinetEmpty {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* ─── SECTION 4: CAREER TIMELINE ─────────────────────────────────── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.timelineRow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  text-decoration: none;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+
+.timelineRow:hover { opacity: 0.82; }
+
+.timelineBar {
+  width: 4px;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+.barElite   { background: var(--accent); }
+.barStrong  { background: var(--warning); }
+.barAvg     { background: rgba(226,245,226,0.25); }
+.barRebuild { background: var(--danger); }
+.barNone    { background: var(--border); }
+
+.timelineCard {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.crestDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.timelineLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 36px;
 }
 
-.clubLabel {
+.timelineLabel {
   font-family: var(--font-display);
   font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 800;
   color: var(--text);
+  letter-spacing: 0.02em;
 }
 
-.sep {
-  color: var(--text-dim);
-}
-
-.gameLabel {
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.timelineYear {
+  font-family: var(--font-mono);
+  font-size: 9px;
   color: var(--text-muted);
 }
 
-.comingSoon {
+.timelineBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.timelineRight {
+  flex-shrink: 0;
+}
+
+.badge {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+}
+
+.badgeGold {
+  background: rgba(251,191,36,0.18);
+  color: #92400e;
+}
+
+.badgeUcl {
+  background: rgba(59,130,246,0.18);
+  color: #1e3a8a;
+}
+
+.scorePill {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.scorePillNone {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 3px 8px;
+}
+
+/* ─── SECTION 5: CLUB LEGENDS ────────────────────────────────────── */
+.legendsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.legendCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 40px 32px;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  text-decoration: none;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.legendCard:hover {
+  border-color: var(--accent-border);
+  background: var(--surface-2);
+}
+
+.legendImg {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.legendAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.legendInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.legendName {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+.legendPos {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+
+.legendStat {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legendStatus {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.statusActive  { color: var(--accent); }
+.statusLegend  { color: var(--warning); }
+.statusSold    { color: var(--text-dim); }
+
+/* ─── SECTION 6: CURRENT SEASON ──────────────────────────────────── */
+.currentCard {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.phase {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.title {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.desc {
-  font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.featureList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.featureItem {
+.currentRow {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
-  color: var(--text-muted);
-  font-family: var(--font-body);
 }
 
-.featureDot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+.currentLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.currentLabel {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.currentYear {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.currentBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.logMatchBtn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.logMatchBtn:hover { opacity: 0.7; }
+
+.currentEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.currentEmptyText {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION 7: QUICK ACTIONS ───────────────────────────────────── */
+.quickActions {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+}
+
+.ctaPrimary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   background: var(--accent);
-  opacity: 0.5;
-  flex-shrink: 0;
+  color: #080d1a;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.ctaPrimary:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.ctaGhost {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.ctaGhost:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* ─── ADD BUTTON ──────────────────────────────────────────────────── */
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px dashed var(--text-dim);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+
+.addBtn:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* ─── EMPTY STATES ───────────────────────────────────────────────── */
+.emptyCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
 }
