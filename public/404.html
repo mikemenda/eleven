@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Eleven</title>
+    <script>
+      // Redirect all 404s back to index.html for React Router
+      const path = window.location.pathname.replace('/eleven', '') || '/'
+      sessionStorage.setItem('redirect', path)
+      window.location.replace('/eleven/')
+    </script>
+  </head>
+  <body></body>
+</html>

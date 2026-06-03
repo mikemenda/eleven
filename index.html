@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/eleven/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#080d1a" />
     <meta name="description" content="Eleven — FC Career Mode Companion" />
@@ -10,6 +10,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Eleven" />
     <title>Eleven — FC Career Mode Companion</title>
+    <script>
+      // Handle redirect from 404.html
+      const redirect = sessionStorage.getItem('redirect')
+      if (redirect) {
+        sessionStorage.removeItem('redirect')
+        window.history.replaceState(null, '', '/eleven' + redirect)
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
