@@ -61,6 +61,7 @@ body {
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh; /* iOS Safari: excludes collapsing browser chrome */
   display: flex;
   flex-direction: column;
 }

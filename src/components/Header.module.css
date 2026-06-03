@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 max(20px, env(safe-area-inset-right, 20px)) 0 max(20px, env(safe-area-inset-left, 20px));
   height: 56px;
   background: rgba(8, 13, 26, 0.92);
   backdrop-filter: blur(12px);
@@ -26,6 +26,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .badge {
@@ -72,6 +74,9 @@
 
 .badgeLabel {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
 /* ─── USER AREA ──────────────────────────────────────────────────── */

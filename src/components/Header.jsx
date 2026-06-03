@@ -22,7 +22,7 @@ const Header = () => {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <Logo size={32} showWordmark className={styles.logo} />
+        <Logo size={32} showWordmark maxWidth={172} className={styles.logo} />
       </div>
 
       <div className={styles.context}>

@@ -1,8 +1,12 @@
-const Logo = ({ size = 40, showWordmark = false, className = '' }) => {
+const Logo = ({ size = 40, showWordmark = false, className = '', maxWidth }) => {
   const vw = showWordmark ? 520 : 220
   const vh = 60
-  const displayW = showWordmark ? size * (520/60) : size * (220/60)
-  const displayH = size
+  // Natural width based on size prop
+  const naturalW = showWordmark ? size * (520 / 60) : size * (220 / 60)
+  // In header contexts a maxWidth cap is passed to prevent overflow on narrow viewports
+  const displayW = maxWidth ? Math.min(naturalW, maxWidth) : naturalW
+  // Scale height proportionally if width was capped
+  const displayH = displayW * (vh / vw)
 
   return (
     <div

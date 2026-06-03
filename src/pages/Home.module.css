@@ -1,6 +1,7 @@
 /* ─── PAGE SHELL ─────────────────────────────────────────────────── */
 .page {
   min-height: calc(100vh - 56px);
+  min-height: calc(100dvh - 56px);
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0) + 16px);
 }
 

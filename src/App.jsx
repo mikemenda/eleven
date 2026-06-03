@@ -14,7 +14,8 @@ const RequireAuth = ({ children }) => {
 
   if (loading) return (
     <div style={{
-      minHeight: '100vh', display: 'flex',
+      minHeight: '100dvh',
+      display: 'flex',
       alignItems: 'center', justifyContent: 'center'
     }}>
       <div style={{
@@ -79,7 +80,7 @@ const Shell = () => {
 
 const PlaceholderPage = ({ title, phase }) => (
   <div style={{
-    minHeight: 'calc(100vh - 56px)',
+    minHeight: 'calc(100dvh - 56px)',
     display: 'flex', alignItems: 'center',
     justifyContent: 'center', padding: 20,
     paddingBottom: 'calc(60px + 20px)'
