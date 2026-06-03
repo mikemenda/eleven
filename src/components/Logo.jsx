@@ -1,4 +1,4 @@
-// Eleven XI Logo — geometric mark on pitch texture
+// Eleven XI Logo — geometric mark
 const Logo = ({ size = 40, showWordmark = false, className = '' }) => {
   return (
     <div
@@ -13,41 +13,17 @@ const Logo = ({ size = 40, showWordmark = false, className = '' }) => {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Pitch texture background */}
+        {/* Dark background */}
         <rect width="40" height="40" rx="6" fill="#0a1520" />
-        <rect width="40" height="40" rx="6" fill="url(#pitchLines)" />
 
-        {/* XI letterform — geometric, bold */}
-        {/* X left diagonal */}
-        <rect
-          x="6" y="8"
-          width="5" height="24"
-          rx="1.5"
-          fill="#4ade80"
-          transform="rotate(-20 13.5 20)"
-        />
-        {/* X right diagonal */}
-        <rect
-          x="15" y="8"
-          width="5" height="24"
-          rx="1.5"
-          fill="#4ade80"
-          transform="rotate(20 17.5 20)"
-        />
+        {/* X — two clean crossing lines */}
+        <line x1="5" y1="8" x2="16" y2="32" stroke="#4ade80" strokeWidth="4.5" strokeLinecap="round"/>
+        <line x1="16" y1="8" x2="5" y2="32" stroke="#4ade80" strokeWidth="4.5" strokeLinecap="round"/>
 
-        {/* I — vertical bar */}
-        <rect x="28" y="8" width="5" height="24" rx="1.5" fill="#4ade80" />
-        {/* I — top serif */}
-        <rect x="25.5" y="8" width="10" height="3.5" rx="1" fill="#4ade80" />
-        {/* I — bottom serif */}
-        <rect x="25.5" y="28.5" width="10" height="3.5" rx="1" fill="#4ade80" />
-
-        <defs>
-          <pattern id="pitchLines" x="0" y="0" width="40" height="8" patternUnits="userSpaceOnUse">
-            <rect width="40" height="8" fill="transparent" />
-            <rect y="7" width="40" height="0.5" fill="rgba(74,222,128,0.06)" />
-          </pattern>
-        </defs>
+        {/* I — vertical bar with top and bottom serifs */}
+        <rect x="24" y="8" width="4" height="24" rx="1" fill="#4ade80" />
+        <rect x="21" y="8" width="10" height="3.5" rx="1" fill="#4ade80" />
+        <rect x="21" y="28.5" width="10" height="3.5" rx="1" fill="#4ade80" />
       </svg>
 
       {/* Wordmark */}
