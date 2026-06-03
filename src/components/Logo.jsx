@@ -1,47 +1,42 @@
-// Eleven XI Logo — geometric mark
+// Eleven XI Logo — matches official brand mark
 const Logo = ({ size = 40, showWordmark = false, className = '' }) => {
+  const h = size
+  const w = showWordmark ? size * 3.8 : size * 0.9
+
   return (
     <div
       className={`eleven-logo ${className}`}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
+      style={{ display: 'inline-flex', alignItems: 'center' }}
     >
-      {/* XI Mark */}
       <svg
-        width={size}
-        height={size}
-        viewBox="0 0 40 40"
+        width={w}
+        height={h}
+        viewBox="0 0 152 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Dark background */}
-        <rect width="40" height="40" rx="6" fill="#0a1520" />
+        {/* X — bold, wide, sharp diagonal strokes */}
+        <line x1="1" y1="1" x2="28" y2="39" stroke="#4ade80" strokeWidth="7" strokeLinecap="square"/>
+        <line x1="29" y1="1" x2="2" y2="39" stroke="#4ade80" strokeWidth="7" strokeLinecap="square"/>
 
-        {/* X — two clean crossing lines */}
-        <line x1="5" y1="8" x2="16" y2="32" stroke="#4ade80" strokeWidth="4.5" strokeLinecap="round"/>
-        <line x1="16" y1="8" x2="5" y2="32" stroke="#4ade80" strokeWidth="4.5" strokeLinecap="round"/>
+        {/* I — thin, tall, no serifs, tight to X */}
+        <rect x="35" y="1" width="5" height="38" fill="#4ade80" />
 
-        {/* I — vertical bar with top and bottom serifs */}
-        <rect x="24" y="8" width="4" height="24" rx="1" fill="#4ade80" />
-        <rect x="21" y="8" width="10" height="3.5" rx="1" fill="#4ade80" />
-        <rect x="21" y="28.5" width="10" height="3.5" rx="1" fill="#4ade80" />
+        {/* eleven wordmark — off-white, lowercase */}
+        {showWordmark && (
+          <text
+            x="50"
+            y="30"
+            fontFamily="'Barlow', sans-serif"
+            fontWeight="300"
+            fontSize="26"
+            letterSpacing="1"
+            fill="#e2f5e2"
+          >
+            eleven
+          </text>
+        )}
       </svg>
-
-      {/* Wordmark */}
-      {showWordmark && (
-        <span
-          style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 800,
-            fontSize: size * 0.65,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#e2f5e2',
-            lineHeight: 1
-          }}
-        >
-          eleven
-        </span>
-      )}
     </div>
   )
 }
