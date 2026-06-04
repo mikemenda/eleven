@@ -1,0 +1,344 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────── */
+.page {
+  min-height: calc(100dvh - 56px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0) + 16px);
+}
+
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeUp 0.35s ease both;
+}
+
+/* ─── PAGE HEADER ────────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 24px 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pageEyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+
+.pageTitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #080d1a;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+
+.addBtn:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-green);
+}
+
+.addBtn:active { transform: translateY(0); }
+
+/* ─── LEGEND ─────────────────────────────────────────────────────── */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ─── SECTION ────────────────────────────────────────────────────── */
+.section {
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-child { border-bottom: none; }
+
+.sectionLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ─── SEASON ROW ─────────────────────────────────────────────────── */
+.row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+
+.row:hover { opacity: 0.82; }
+.row:active { opacity: 0.65; }
+
+/* Left colour bar — accent by default; could later reflect dynasty tier */
+.rowBar {
+  width: 4px;
+  flex-shrink: 0;
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.rowCard {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ─── ROW COLUMNS ────────────────────────────────────────────────── */
+.rowLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 44px;
+  flex-shrink: 0;
+}
+
+.rowLabel {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.rowYear {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.rowCenter {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.leaguePos {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.wdl,
+.pts {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.rowRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── BADGES ─────────────────────────────────────────────────────── */
+.badge {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+}
+
+.badgeChampions {
+  background: rgba(251, 191, 36, 0.18);
+  color: #d97706;
+}
+
+.badgeRunnerUp {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--accent);
+}
+
+.badgeDefault {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+/* ─── DYNASTY SCORE PILLS ────────────────────────────────────────── */
+.scorePill {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.scorePillNone {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 3px 8px;
+}
+
+.pillElite   { background: rgba(74,222,128,0.18); color: #166534; border: 1px solid rgba(74,222,128,0.35); }
+.pillStrong  { background: rgba(251,191,36,0.18); color: #92400e; border: 1px solid rgba(251,191,36,0.35); }
+.pillAvg     { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
+.pillRebuild { background: rgba(248,113,113,0.12); color: #b91c1c; border: 1px solid rgba(248,113,113,0.25); }
+.pillNone    { background: var(--surface); color: var(--text-dim); border: 1px solid var(--border); }
+
+/* ─── STATUS DOT ─────────────────────────────────────────────────── */
+.statusDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusDotLive { background: var(--accent); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+.statusDotDone { background: var(--text-dim); }
+
+/* ─── LOADING ────────────────────────────────────────────────────── */
+.loadWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── EMPTY STATE ────────────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 64px 24px 32px;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 280px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.emptyBtn {
+  height: 44px;
+  padding: 0 24px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #080d1a;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.emptyBtn:hover {
+  background: var(--accent-light);
+  box-shadow: var(--shadow-green);
+}

@@ -69,6 +69,19 @@ export const updateSeason = async (seasonId, data) => {
   return updateDoc(doc(db, 'seasons', seasonId), data)
 }
 
+export const getSeason = async (seasonId) => {
+  const snap = await getDoc(doc(db, 'seasons', seasonId))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() }
+}
+
+export const getTrophiesForSeason = async (seasonId) => {
+  const q = query(collection(db, 'trophies'), where('seasonId', '==', seasonId))
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
+
 // ─── MATCHES ─────────────────────────────────────────────────────────────────
 
 export const getMatches = async (seasonId) => {

@@ -6,6 +6,8 @@ import NavBar from './components/NavBar'
 import GameSelector from './pages/GameSelector'
 import ClubSelector from './pages/ClubSelector'
 import Home from './pages/Home'
+import Seasons from './pages/Seasons'
+import SeasonDetail from './pages/SeasonDetail'
 import Login from './pages/Login'
 import './styles/global.css'
 
@@ -120,8 +122,8 @@ const InnerApp = () => (
         <Header />
         <Routes>
           <Route path="/home"        element={<Home />} />
-          <Route path="/seasons"     element={<PlaceholderPage title="Seasons"        phase={3} />} />
-          <Route path="/seasons/:id" element={<PlaceholderPage title="Season Detail"  phase={3} />} />
+          <Route path="/seasons"     element={<Seasons />} />
+          <Route path="/seasons/:id" element={<SeasonDetail />} />
           <Route path="/players"     element={<PlaceholderPage title="Players"        phase={4} />} />
           <Route path="/players/:id" element={<PlaceholderPage title="Player Profile" phase={4} />} />
           <Route path="/rivals"      element={<PlaceholderPage title="Rivals"         phase={5} />} />
