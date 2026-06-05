@@ -1,8 +1,9 @@
 /* ─── PAGE SHELL ─────────────────────────────────────────────────── */
 .page {
+  background: var(--en-bg);
   min-height: calc(100vh - 56px);
   min-height: calc(100dvh - 56px);
-  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0) + 16px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0) + 24px);
 }
 
 .inner {
@@ -10,7 +11,6 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 0;
   animation: fadeUp 0.35s ease both;
 }
 
@@ -22,521 +22,489 @@
 }
 
 .spinner {
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--en-rule);
+  border-top-color: var(--en-blue);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── SECTION WRAPPER ────────────────────────────────────────────── */
-.section {
-  padding: 20px 16px;
-  border-bottom: 1px solid var(--border);
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.currentSectionElevated {
-  background: var(--surface-2);
-}
-
+/* ─── SHARED SECTION LABELS ──────────────────────────────────────── */
 .sectionLabel {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
+  font-family: var(--font-plex);
+  font-size: 9px;
+  font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 12px;
+  color: var(--en-text-4);
+  margin-bottom: 16px;
 }
 
-.sectionRow {
+.sectionLabelRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-.sectionRow .sectionLabel {
+.sectionLabelRow .sectionLabel {
   margin-bottom: 0;
 }
 
 .sectionLink {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--en-blue);
   text-decoration: none;
-  transition: color 0.15s;
+  transition: opacity 0.15s;
 }
 
-.sectionLink:hover { color: var(--accent); }
+.sectionLink:hover { opacity: 0.7; }
 
-/* ─── SECTION 1: CLUB HERO ───────────────────────────────────────── */
+/* ─── SECTION 1: HERO ────────────────────────────────────────────── */
 .hero {
-  position: relative;
-  overflow: hidden;
-  padding: 28px 16px 0;
-  min-height: 160px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  padding: 32px 20px 28px;
+  border-bottom: 0.5px solid var(--en-rule);
 }
 
-.heroPitchLines {
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 40px,
-      rgba(74, 222, 128, 0.025) 40px,
-      rgba(74, 222, 128, 0.025) 41px
-    );
-  pointer-events: none;
-}
-
-.heroGlow {
-  position: absolute;
-  top: -60px;
-  left: -40px;
-  width: 280px;
-  height: 200px;
-  background: radial-gradient(ellipse at center, rgba(74, 222, 128, 0.07) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.heroBody {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.heroLeft {
-  flex: 1;
-  min-width: 0;
-}
-
-.heroClub {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 7vw, 36px);
-  font-weight: 900;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 8px;
+.heroEyebrow {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  color: var(--en-text-4);
+  margin-bottom: 8px;
+}
+
+.heroClubPre {
+  font-family: var(--font-playfair);
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--en-text-2);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.heroClubName {
+  font-family: var(--font-playfair);
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(42px, 11vw, 56px);
+  color: var(--en-text-1);
+  line-height: 0.92;
+  letter-spacing: -2px;
+  margin-bottom: 16px;
 }
 
 .heroMeta {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--en-text-2);
+  line-height: 1.5;
+}
+
+.heroRule {
+  height: 0.5px;
+  background: var(--en-rule);
+  margin-top: 24px;
+}
+
+/* ─── SECTION 2: TROPHY CABINET ──────────────────────────────────── */
+.cabinet {
+  padding: 28px 20px 0;
+  border-bottom: 0.5px solid var(--en-rule);
+  padding-bottom: 0;
+}
+
+.cabinetShelf {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.dot { color: var(--text-dim); }
-
-.heroRight { flex-shrink: 0; }
-
-.heroStats {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  min-width: 72px;
-  text-align: center;
-}
-
-.heroStat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-
-.heroStatVal {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1;
-}
-
-.heroStatLabel {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.heroStatDivider {
-  width: 24px;
-  height: 1px;
-  background: var(--border);
-}
-
-.heroCrestLine {
-  position: relative;
-  height: 4px;
-  margin: 0 -16px;
-  opacity: 0.8;
-}
-
-/* ─── SECTION 2: DYNASTY SCORE ───────────────────────────────────── */
-.dynastyCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-
-.dynastyMain {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.dynastyScore {
-  font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 900;
-  color: var(--accent);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  flex-shrink: 0;
-}
-
-.dynastyRight {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.dynastyTier {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-.dynastyAcross {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.dynastyPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.dynastyPill {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 4px 9px;
-  border-radius: 20px;
-  border: 1px solid;
-  cursor: pointer;
-  text-decoration: none;
-  transition: opacity 0.15s;
-}
-
-.dynastyPill:hover { opacity: 0.75; }
-
-/* Dynasty tier colors */
-.tierElite   { color: var(--accent); }
-.tierStrong  { color: var(--warning); }
-.tierAvg     { color: var(--text-muted); }
-.tierRebuild { color: var(--danger); }
-.tierNone    { color: var(--text-dim); }
-
-.pillElite   { color: #166534; background: rgba(74,222,128,0.18); border-color: rgba(74,222,128,0.35); }
-.pillStrong  { color: #92400e; background: rgba(251,191,36,0.18); border-color: rgba(251,191,36,0.35); }
-.pillAvg     { color: var(--text-muted); background: var(--surface-2); border-color: var(--border); }
-.pillRebuild { color: #b91c1c; background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.25); }
-.pillNone    { color: var(--text-dim); background: var(--surface); border-color: var(--border); }
-
-/* ─── SECTION 3: TROPHY CABINET ──────────────────────────────────── */
-.cabinetScroll {
+  gap: 20px;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  padding-bottom: 20px;
   scrollbar-width: none;
-  margin: 0 -16px;
-  padding: 0 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
-.cabinetScroll::-webkit-scrollbar { display: none; }
+.cabinetShelf::-webkit-scrollbar { display: none; }
 
-.cabinetRow {
-  display: flex;
-  gap: 8px;
-  padding-bottom: 4px;
-}
-
-.trophyCard {
+.trophyItem {
   flex-shrink: 0;
-  width: 72px;
-  min-height: 84px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 8px 4px;
-  transition: all 0.15s;
-  position: relative;
-}
-
-.trophyWon {
-  border-color: var(--accent-border);
-  background: var(--accent-dim);
-}
-
-.trophyWon:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-
-.trophyGhost {
-  opacity: 0.28;
+  gap: 6px;
   cursor: default;
 }
 
-.trophyIcon {
-  font-size: 22px;
-  color: var(--accent);
-  line-height: 1;
+.trophyItemGhost {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.18;
 }
 
-.trophyGhost .trophyIcon { color: var(--text-dim); }
+.trophySvgWon {
+  width: 44px;
+  height: 58px;
+  color: var(--en-gold);
+  flex-shrink: 0;
+}
 
-.trophyShort {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  text-align: center;
+.trophySvgGhost {
+  width: 44px;
+  height: 58px;
+  color: var(--en-text-5);
+  flex-shrink: 0;
 }
 
 .trophyCount {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--accent);
-}
-
-.trophySeasons {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--surface-3);
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  font-size: 11px;
-  color: var(--text);
-  white-space: nowrap;
-  z-index: 10;
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.cabinetEmpty {
-  font-size: 12px;
-  color: var(--text-dim);
-  margin-top: 10px;
-  font-style: italic;
-}
-
-/* ─── SECTION 4: CAREER TIMELINE ─────────────────────────────────── */
-.timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 12px;
-}
-
-.timelineRow {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  text-decoration: none;
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: opacity 0.15s;
-}
-
-.timelineRow:hover { opacity: 0.82; }
-
-.timelineBar {
-  width: 4px;
-  flex-shrink: 0;
-  border-radius: 0;
-}
-
-.barElite   { background: var(--accent); }
-.barStrong  { background: var(--warning); }
-.barAvg     { background: rgba(226,245,226,0.25); }
-.barRebuild { background: var(--danger); }
-.barNone    { background: var(--border); }
-
-.timelineCard {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: none;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.timelineLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 36px;
-}
-
-.timelineLabel {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: 0.02em;
-}
-
-.timelineYear {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--text-muted);
-}
-
-.timelineBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  flex: 1;
-}
-
-.timelineRight {
-  flex-shrink: 0;
-}
-
-.badge {
-  font-family: var(--font-display);
-  font-size: 9px;
+  font-family: var(--font-playfair);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 16px;
+  color: var(--en-text-1);
+  line-height: 1;
+  letter-spacing: -0.3px;
+}
+
+.trophyName {
+  font-family: var(--font-plex);
+  font-size: 8px;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  padding: 3px 7px;
-  border-radius: var(--radius-sm);
+  color: var(--en-text-4);
+  text-align: center;
+  max-width: 52px;
+  line-height: 1.3;
 }
 
-.badgeGold {
-  background: rgba(251,191,36,0.18);
-  color: #92400e;
-}
+.trophyItem .trophyName { color: var(--en-text-3); }
 
-.badgeUcl {
-  background: rgba(59,130,246,0.18);
-  color: #1e3a8a;
-}
-
-.scorePill {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 20px;
-}
-
-.scorePillNone {
-  font-size: 11px;
-  color: var(--text-dim);
-  padding: 3px 8px;
-}
-
-/* ─── SECTION 5: CLUB LEGENDS ────────────────────────────────────── */
-.legendsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.legendCard {
+.cabinetTotal {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  text-decoration: none;
-  transition: all 0.15s;
-  cursor: pointer;
+  padding: 12px 0;
+  border-top: 0.5px solid var(--en-rule);
+  border-bottom: 0.5px solid var(--en-rule);
+  margin-bottom: 0;
 }
 
-.legendCard:hover {
-  border-color: var(--accent-border);
-  background: var(--surface-2);
+.cabinetTotalNum {
+  font-family: var(--font-playfair);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--en-gold);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.cabinetTotalLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  line-height: 1.4;
+}
+
+.cabinetEmpty {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-4);
+  font-style: italic;
+  padding: 12px 0 20px;
+  border-top: 0.5px solid var(--en-rule);
+}
+
+/* ─── SECTION 3: CLUB LEGACY ─────────────────────────────────────── */
+.legacy {
+  padding: 28px 20px 0;
+  border-bottom: 0.5px solid var(--en-rule);
+  padding-bottom: 28px;
+}
+
+/* Ruled grid — two columns separated by a vertical hairline */
+.legacyGrid {
+  display: grid;
+  grid-template-columns: 1fr 0.5px 1fr;
+  gap: 0;
+  border-top: 0.5px solid var(--en-rule);
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+/* Insert vertical rule as pseudo-element column */
+.legacyGrid::after {
+  display: none;
+}
+
+.legacyStat,
+.legacyStatFeatured {
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Second row — add top rule */
+.legacyGrid > :nth-child(n+4) {
+  border-top: 0.5px solid var(--en-rule);
+}
+
+/* Vertical divider between column pairs */
+.legacyGrid > :nth-child(odd):not(:last-child) {
+  border-right: 0.5px solid var(--en-rule);
+}
+
+.legacyVal {
+  font-family: var(--font-plex);
+  font-weight: 500;
+  font-size: 30px;
+  color: var(--en-text-2);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.legacyValFeatured {
+  font-family: var(--font-plex);
+  font-weight: 500;
+  font-size: 34px;
+  color: var(--en-text-1);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.legacyLabel {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--en-text-3);
+  margin-top: 0;
+}
+
+/* ─── SECTION 4: DYNASTY ARC ─────────────────────────────────────── */
+.dynasty {
+  padding: 28px 20px 24px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+/* The baseline rule the scores sit on */
+.arcBaseline {
+  border-bottom: 0.5px solid var(--en-rule);
+  padding-bottom: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.arcBaseline::-webkit-scrollbar { display: none; }
+
+.arcRow {
+  display: flex;
+  gap: 0;
+  align-items: flex-end;
+  min-width: max-content;
+}
+
+.arcGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  padding-bottom: 10px;
+  text-decoration: none;
+  border-right: 0.5px solid var(--en-rule-faint);
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.arcGroup:first-child { padding-left: 0; }
+.arcGroup:last-child  { border-right: none; }
+.arcGroup:hover       { opacity: 0.7; }
+
+.arcSeasonLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  line-height: 1;
+}
+
+.arcSeasonPeak {
+  color: var(--en-blue);
+}
+
+/* Score sizes encode narrative — bigger = better season */
+.arcScore {
+  font-family: var(--font-playfair);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.3px;
+}
+
+.arcScore_peak {
+  font-size: 28px;
+  color: var(--en-text-1);
+}
+
+.arcScore_mid {
+  font-size: 22px;
+  color: var(--en-text-2);
+}
+
+.arcScore_dip {
+  font-size: 17px;
+  color: var(--en-text-3);
+}
+
+.arcScore_none {
+  font-size: 20px;
+  color: var(--en-text-4);
+}
+
+.arcPips {
+  display: flex;
+  gap: 3px;
+  min-height: 6px;
+  align-items: center;
+}
+
+.pipGreen {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--en-green);
+  flex-shrink: 0;
+}
+
+.pipGold {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--en-gold);
+  flex-shrink: 0;
+}
+
+.arcLegend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.arcLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-plex);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+
+.arcLegendDot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.arcLegendBlue { background: var(--en-blue); }
+
+/* ─── SECTION 5: CLUB LEGENDS ────────────────────────────────────── */
+.legends {
+  padding: 28px 20px 24px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+.legendsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 13px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.legendRow:last-child { border-bottom: none; }
+.legendRow:hover      { opacity: 0.75; }
+
+.legendShirtNum {
+  font-family: var(--font-playfair);
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--en-text-5);
+  line-height: 1;
+  width: 28px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.legendDivider {
+  width: 0.5px;
+  height: 36px;
+  background: var(--en-rule);
+  margin: 0 12px;
+  flex-shrink: 0;
+}
+
+.legendFace {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0.5px solid var(--en-rule);
+  background: var(--en-surface);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-right: 12px;
 }
 
 .legendImg {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--border);
-  flex-shrink: 0;
+  border-radius: 50%;
 }
 
-.legendAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  flex-shrink: 0;
+.legendSilhouette {
+  width: 22px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text-muted);
-  letter-spacing: 0.03em;
+}
+
+.legendSilhouette svg {
+  width: 100%;
+  height: 100%;
 }
 
 .legendInfo {
@@ -544,201 +512,134 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
 }
 
 .legendName {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text);
+  font-family: var(--font-playfair);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--en-text-1);
+  letter-spacing: -0.2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: 0.01em;
+  line-height: 1.1;
 }
 
-.legendPos {
-  font-family: var(--font-mono);
+.legendRole {
+  font-family: var(--font-plex);
   font-size: 9px;
-  color: var(--text-dim);
-  letter-spacing: 0.08em;
-}
-
-.legendStat {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.legendStatus {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--en-text-4);
 }
 
-.statusActive  { color: var(--accent); }
-.statusLegend  { color: var(--warning); }
-.statusSold    { color: var(--text-dim); }
-
-/* ─── SECTION 6: CURRENT SEASON ──────────────────────────────────── */
-.currentCard {
+.legendStatBlock {
+  flex-shrink: 0;
+  text-align: right;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
 }
 
-.currentRow {
+.legendStatVal {
+  font-family: var(--font-plex);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--en-text-2);
+  line-height: 1;
+}
+
+.legendStatLabel {
+  font-family: var(--font-plex);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+
+.statusActive  { color: var(--en-green); }
+.statusLegend  { color: var(--en-gold); }
+.statusSold    { color: var(--en-text-4); }
+
+.emptyText {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-4);
+  font-style: italic;
+}
+
+/* ─── SECTION 6: LOG MATCH ACTION ────────────────────────────────── */
+.logSection {
+  padding: 24px 20px 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
 }
 
-.currentLeft {
+.logBtn {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.currentLabel {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--text);
-  letter-spacing: 0.02em;
-}
-
-.currentYear {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.currentBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  flex: 1;
-}
-
-.logMatchBtn {
-  display: inline-flex;
   align-items: center;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--en-blue-dim);
+  border: 0.5px solid var(--en-blue);
+  border-radius: 2px;
   text-decoration: none;
-  transition: opacity 0.15s;
+  transition: background 0.15s;
 }
 
-.logMatchBtn:hover { opacity: 0.7; }
+.logBtn:hover { background: #0f1f3a; }
 
-.currentEmpty {
+.logBtnLeft {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 12px;
+  color: var(--en-blue);
 }
 
-.currentEmptyText {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-/* ─── SECTION 7: QUICK ACTIONS ───────────────────────────────────── */
-.quickActions {
-  display: flex;
-  gap: 8px;
-  padding: 16px;
-}
-
-.ctaPrimary {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: var(--accent);
-  color: #080d1a;
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.ctaPrimary:hover {
-  background: var(--accent-light);
-  transform: translateY(-1px);
-}
-
-.ctaGhost {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  text-decoration: none;
-  transition: all 0.15s;
-}
-
-.ctaGhost:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
-}
-
-/* ─── ADD BUTTON ──────────────────────────────────────────────────── */
-.addBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  border: 1px dashed var(--text-dim);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  font-size: 12px;
+.logBtnText {
+  font-family: var(--font-playfair);
   font-weight: 700;
+  font-size: 16px;
+  color: #4a7abf;
+  letter-spacing: -0.2px;
+  line-height: 1.1;
+}
+
+.logBtnSub {
+  font-family: var(--font-plex);
+  font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--en-blue);
+  margin-top: 3px;
+}
+
+.logBtnArrow {
+  font-family: var(--font-inter);
+  font-size: 18px;
+  color: var(--en-blue);
+}
+
+.secondaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  background: transparent;
+  border: 0.5px solid var(--en-rule);
+  border-radius: 2px;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--en-text-4);
   text-decoration: none;
-  transition: all 0.15s;
-  margin-top: 8px;
+  transition: border-color 0.15s, color 0.15s;
 }
 
-.addBtn:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
-}
-
-/* ─── EMPTY STATES ───────────────────────────────────────────────── */
-.emptyCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 16px;
-  text-align: center;
-}
-
-.emptyText {
-  font-size: 13px;
-  color: var(--text-dim);
-  font-style: italic;
+.secondaryBtn:hover {
+  border-color: var(--en-text-4);
+  color: var(--en-text-3);
 }

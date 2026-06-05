@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -33,6 +33,28 @@
 
   --shadow-green: 0 0 24px rgba(74, 222, 128, 0.15);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+  /* ── European Nights design system ── */
+  --en-bg:          #080B12;
+  --en-surface:     #13151C;
+  --en-surface-2:   #1A1E28;
+  --en-blue:        #1E3A8A;
+  --en-blue-dim:    #0A1628;
+  --en-blue-mid:    #1E2A3A;
+  --en-gold:        #D4AF37;
+  --en-gold-dim:    #1A1200;
+  --en-green:       #4ADE80;
+  --en-green-dim:   #061A0A;
+  --en-text-1:      #F2F1ED;
+  --en-text-2:      #AEB7C8;
+  --en-text-3:      #6B7A8D;
+  --en-text-4:      #2A3A52;
+  --en-text-5:      #1E2A3A;
+  --en-rule:        #1E2A3A;
+  --en-rule-faint:  #0E1018;
+  --font-playfair:  'Playfair Display', Georgia, serif;
+  --font-inter:     'Inter', system-ui, sans-serif;
+  --font-plex:      'IBM Plex Mono', 'JetBrains Mono', monospace;
 
   /* Pitch texture overlay */
   --pitch-lines: repeating-linear-gradient(

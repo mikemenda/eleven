@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110" fill="currentColor">
+  <!-- The iconic "big ears" - two large round handles at top -->
+  <path d="M22 22 Q8 18 6 30 Q4 42 16 46 Q20 48 24 46 L26 42 Q18 44 14 38 Q10 32 16 28 Q18 26 22 27 Z"/>
+  <path d="M58 22 Q72 18 74 30 Q76 42 64 46 Q60 48 56 46 L54 42 Q62 44 66 38 Q70 32 64 28 Q62 26 58 27 Z"/>
+  <!-- Upper bowl - UCL cup is relatively narrow at top -->
+  <path d="M26 16 Q24 18 22 22 L22 27 Q26 24 28 24 L52 24 Q54 24 58 27 L58 22 Q56 18 54 16 Z"/>
+  <!-- Bowl body -->
+  <path d="M22 27 L24 46 L56 46 L58 27 Q54 24 52 24 L28 24 Q26 24 22 27 Z"/>
+  <!-- Lid ring -->
+  <ellipse cx="40" cy="16" rx="14" ry="4"/>
+  <!-- Stem top knop -->
+  <path d="M24 46 L26 54 L54 54 L56 46 Z"/>
+  <rect x="28" y="54" width="24" height="5" rx="2"/>
+  <!-- Slender stem - UCL has a distinctive long thin stem -->
+  <rect x="36" y="59" width="8" height="26" rx="1"/>
+  <!-- Stem mid knop -->
+  <rect x="30" y="72" width="20" height="5" rx="2"/>
+  <!-- Base -->
+  <path d="M30 85 L28 90 Q27 94 30 95 L50 95 Q53 94 52 90 L50 85 Z"/>
+  <rect x="24" y="95" width="32" height="5" rx="2"/>
+  <rect x="20" y="100" width="40" height="5" rx="2"/>
+</svg>

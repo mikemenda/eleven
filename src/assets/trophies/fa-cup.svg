@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110" fill="currentColor">
+  <!-- Lid finial -->
+  <circle cx="40" cy="6" r="4"/>
+  <rect x="38" y="10" width="4" height="5"/>
+  <!-- Lid -->
+  <path d="M28 15 Q28 12 40 12 Q52 12 52 15 L54 22 L26 22 Z"/>
+  <!-- Lid ring -->
+  <rect x="26" y="22" width="28" height="4" rx="1"/>
+  <!-- Upper bowl - FA Cup is tall and elegant -->
+  <path d="M26 26 Q18 28 16 36 Q14 46 22 50 L24 52 L56 52 L58 50 Q66 46 64 36 Q62 28 54 26 Z"/>
+  <!-- Handles - FA Cup has elegant curved handles -->
+  <path d="M22 32 Q10 32 10 40 Q10 48 20 48 L22 46 L22 42 Q14 44 14 40 Q14 36 20 36 Z"/>
+  <path d="M58 32 Q70 32 70 40 Q70 48 60 48 L58 46 L58 42 Q66 44 66 40 Q66 36 60 36 Z"/>
+  <!-- Waist -->
+  <path d="M24 52 L26 60 L54 60 L56 52 Z"/>
+  <!-- Mid knop -->
+  <rect x="27" y="60" width="26" height="6" rx="2"/>
+  <!-- Stem -->
+  <rect x="35" y="66" width="10" height="18" rx="1"/>
+  <!-- Lower knop -->
+  <rect x="29" y="78" width="22" height="5" rx="2"/>
+  <!-- Base -->
+  <path d="M26 83 L24 89 Q23 93 26 94 L54 94 Q57 93 56 89 L54 83 Z"/>
+  <rect x="20" y="94" width="40" height="5" rx="2"/>
+  <rect x="16" y="99" width="48" height="5" rx="2"/>
+</svg>

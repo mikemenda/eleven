@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110" fill="currentColor">
+  <!-- UECL trophy is modern with a distinctive multi-pointed star/geometric top -->
+  <!-- Star burst top decoration -->
+  <path d="M40 4 L41.8 9.5 L47.5 9.5 L43 13 L44.8 18.5 L40 15.2 L35.2 18.5 L37 13 L32.5 9.5 L38.2 9.5 Z"/>
+  <!-- Geometric angular bowl - UECL has a more angular modern design -->
+  <path d="M26 26 L22 28 L19 36 L20 46 L24 52 L30 56 L50 56 L56 52 L60 46 L61 36 L58 28 L54 26 L46 22 L34 22 Z"/>
+  <!-- Inner geometric ring detail -->
+  <path d="M30 30 L27 36 L28 44 L32 50 L48 50 L52 44 L53 36 L50 30 L44 26 L36 26 Z" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+  <!-- No traditional handles - UECL is handleless -->
+  <!-- Stem -->
+  <path d="M30 56 L32 64 L48 64 L50 56 Z"/>
+  <rect x="29" y="64" width="22" height="6" rx="2"/>
+  <rect x="36" y="70" width="8" height="16" rx="1"/>
+  <rect x="30" y="80" width="20" height="5" rx="2"/>
+  <!-- Base -->
+  <path d="M28 85 L26 92 Q25 96 28 97 L52 97 Q55 96 54 92 L52 85 Z"/>
+  <rect x="22" y="97" width="36" height="5" rx="2"/>
+  <rect x="18" y="102" width="44" height="4" rx="2"/>
+</svg>
