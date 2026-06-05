@@ -1,0 +1,144 @@
+.page {
+  background: var(--en-bg);
+  min-height: calc(100dvh - 56px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
+}
+.inner { max-width: 640px; margin: 0 auto; animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── MUSEUM HEADER ── */
+.museumHeader {
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, var(--en-gold-dim) 0%, var(--en-bg) 60%);
+  border-bottom: 0.5px solid rgba(212,175,55,0.15);
+  max-width: 640px; margin: 0 auto;
+}
+.museumGlow {
+  position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 150px;
+  background: radial-gradient(ellipse, rgba(212,175,55,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.headerInner {
+  position: relative; padding: 28px 20px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.headerLabel {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--en-gold);
+  opacity: 0.7;
+}
+.headerTitle {
+  font-family: var(--font-playfair); font-size: 28px; font-weight: 700;
+  color: var(--en-text-1); text-align: center;
+}
+.headerCount {
+  display: flex; align-items: baseline; gap: 6px; margin-top: 4px;
+}
+.countNum {
+  font-family: var(--font-plex); font-size: 32px; font-weight: 500; line-height: 1;
+  color: var(--en-gold);
+}
+.countLabel {
+  font-family: var(--font-plex); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--en-text-3);
+}
+
+/* ── TROPHY SHELF ── */
+.shelf {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1px; padding: 0;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+.trophyCard {
+  background: var(--en-surface); border: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 20px 12px 16px;
+  cursor: pointer; text-align: center; position: relative;
+  transition: background 0.15s;
+  border-right: 0.5px solid var(--en-rule);
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.trophyCard:hover:not(:disabled) { background: var(--en-surface-2); }
+.trophyCardWon { cursor: pointer; }
+.trophyCardUnearned { opacity: 0.35; cursor: default; }
+
+.trophyVis { position: relative; width: 64px; height: 72px; }
+.trophyImg {
+  width: 100%; height: 100%; object-fit: contain;
+}
+.trophyFallback {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.trophyWon { filter: drop-shadow(0 0 8px rgba(212,175,55,0.35)); }
+.trophyUnearned { filter: grayscale(1); }
+
+.trophyGlow {
+  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  width: 40px; height: 16px;
+  background: radial-gradient(ellipse, rgba(212,175,55,0.3) 0%, transparent 70%);
+}
+
+.trophyName {
+  font-family: var(--font-inter); font-size: 11px; font-weight: 600;
+  color: var(--en-text-1); line-height: 1.3; text-align: center;
+}
+.trophyRegion {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; color: var(--en-text-4); text-transform: uppercase;
+}
+.trophyCount {
+  font-family: var(--font-plex); font-size: 18px; font-weight: 500;
+  color: var(--en-gold); line-height: 1;
+}
+.trophyNone {
+  font-family: var(--font-plex); font-size: 14px; color: var(--en-text-5);
+}
+
+.trophySeasons {
+  display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
+  margin-top: 6px; padding-top: 8px;
+  border-top: 0.5px solid var(--en-rule);
+  width: 100%;
+}
+.trophySeason {
+  font-family: var(--font-plex); font-size: 10px;
+  background: var(--en-gold-dim); color: var(--en-gold);
+  padding: 2px 8px; border-radius: 3px;
+  letter-spacing: 0.06em;
+}
+
+/* ── TIMELINE ── */
+.timeline { padding: 24px 20px; }
+.timelineLabel {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--en-text-4); margin-bottom: 16px;
+}
+.timelineRow {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.timelineSeason {
+  font-family: var(--font-plex); font-size: 11px; font-weight: 500;
+  color: var(--en-text-3); letter-spacing: 0.08em; min-width: 32px;
+}
+.timelineTrophies { display: flex; flex-wrap: wrap; gap: 6px; }
+.timelineTrophy {
+  font-family: var(--font-inter); font-size: 12px;
+  background: rgba(212,175,55,0.08); color: var(--en-gold);
+  padding: 3px 10px; border-radius: 4px;
+  border: 0.5px solid rgba(212,175,55,0.2);
+}
+
+.loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
+.spinner {
+  width: 24px; height: 24px;
+  border: 1.5px solid var(--en-rule); border-top-color: var(--en-gold);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

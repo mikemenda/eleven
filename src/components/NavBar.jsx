@@ -51,13 +51,25 @@ const NAV_ITEMS = [
     ),
   },
   {
-    path: '/log-match',
-    label: 'Log',
+    path: '/museum',
+    label: 'Museum',
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M10 7V10L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M10 6V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M3 18H17M4 10H16V18H4V10ZM10 2L16 10H4L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M8 14V18M12 14V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    path: '/sporting-director',
+    label: 'Director',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="7" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+        <circle cx="13" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M2 17C2 14.5 4 13 7 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M13 13C16 13 18 14.5 18 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M10 14V17M10 14L8 12M10 14L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },

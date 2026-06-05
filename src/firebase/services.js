@@ -21,10 +21,7 @@ export const getGames = async () => {
 }
 
 export const addGame = async (title) => {
-  return addDoc(collection(db, 'games'), {
-    title,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'games'), { title, createdAt: serverTimestamp() })
 }
 
 // ─── CLUBS ───────────────────────────────────────────────────────────────────
@@ -36,10 +33,7 @@ export const getClubs = async (gameId) => {
 }
 
 export const addClub = async (data) => {
-  return addDoc(collection(db, 'clubs'), {
-    ...data,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'clubs'), { ...data, createdAt: serverTimestamp() })
 }
 
 export const updateClub = async (clubId, data) => {
@@ -59,10 +53,7 @@ export const getSeasons = async (clubId) => {
 }
 
 export const addSeason = async (data) => {
-  return addDoc(collection(db, 'seasons'), {
-    ...data,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'seasons'), { ...data, createdAt: serverTimestamp() })
 }
 
 export const updateSeason = async (seasonId, data) => {
@@ -81,7 +72,6 @@ export const getTrophiesForSeason = async (seasonId) => {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
-
 // ─── MATCHES ─────────────────────────────────────────────────────────────────
 
 export const getMatches = async (seasonId) => {
@@ -97,10 +87,7 @@ export const getMatchesByClub = async (clubId) => {
 }
 
 export const addMatch = async (data) => {
-  return addDoc(collection(db, 'matches'), {
-    ...data,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'matches'), { ...data, createdAt: serverTimestamp() })
 }
 
 // ─── PLAYERS ─────────────────────────────────────────────────────────────────
@@ -111,11 +98,14 @@ export const getPlayers = async (clubId) => {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
+export const getPlayer = async (playerId) => {
+  const snap = await getDoc(doc(db, 'players', playerId))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() }
+}
+
 export const addPlayer = async (data) => {
-  return addDoc(collection(db, 'players'), {
-    ...data,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'players'), { ...data, createdAt: serverTimestamp() })
 }
 
 export const updatePlayer = async (playerId, data) => {
@@ -130,11 +120,14 @@ export const getTransfers = async (clubId) => {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
+export const getTransfersBySeason = async (seasonId) => {
+  const q = query(collection(db, 'transfers'), where('seasonId', '==', seasonId))
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
 export const addTransfer = async (data) => {
-  return addDoc(collection(db, 'transfers'), {
-    ...data,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'transfers'), { ...data, createdAt: serverTimestamp() })
 }
 
 // ─── TROPHIES ────────────────────────────────────────────────────────────────
@@ -146,10 +139,7 @@ export const getTrophies = async (clubId) => {
 }
 
 export const addTrophy = async (data) => {
-  return addDoc(collection(db, 'trophies'), {
-    ...data,
-    createdAt: serverTimestamp()
-  })
+  return addDoc(collection(db, 'trophies'), { ...data, createdAt: serverTimestamp() })
 }
 
 // ─── GOALS ───────────────────────────────────────────────────────────────────
@@ -160,6 +150,105 @@ export const getGoals = async (matchId) => {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
+export const getGoalsByClub = async (clubId) => {
+  const q = query(collection(db, 'goals'), where('clubId', '==', clubId))
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
 export const addGoal = async (data) => {
   return addDoc(collection(db, 'goals'), data)
+}
+
+// ─── RIVALS (derived from matches — no separate collection needed) ────────────
+// getRivalData builds H2H stats from match documents keyed by opponent name.
+// All computation is client-side to avoid extra Firestore collections.
+
+export const getRivalStats = (matches) => {
+  const map = {}
+  for (const m of matches) {
+    const opp = m.opponent
+    if (!opp) continue
+    if (!map[opp]) map[opp] = { opponent: opp, matches: [], narrative: m.rivalryNarrative || '' }
+    map[opp].matches.push(m)
+    if (m.rivalryNarrative) map[opp].narrative = m.rivalryNarrative
+  }
+  return Object.values(map).map(r => {
+    const w = r.matches.filter(m => m.score_for > m.score_against).length
+    const d = r.matches.filter(m => m.score_for === m.score_against).length
+    const l = r.matches.filter(m => m.score_for < m.score_against).length
+    const gf = r.matches.reduce((s, m) => s + (m.score_for || 0), 0)
+    const ga = r.matches.reduce((s, m) => s + (m.score_against || 0), 0)
+    return { ...r, played: r.matches.length, w, d, l, gf, ga, gd: gf - ga }
+  }).sort((a, b) => b.played - a.played)
+}
+
+// ─── RECORDS (computed client-side from players + seasons + matches) ──────────
+
+export const computeRecords = ({ players, seasons, matches, goals, transfers }) => {
+  // Individual records — from player career stats stored on player docs
+  const active = players.filter(p => p.apps > 0 || p.goals > 0)
+
+  const topScorer     = active.sort((a, b) => (b.goals || 0) - (a.goals || 0))[0] || null
+  const topAssists    = [...active].sort((a, b) => (b.assists || 0) - (a.assists || 0))[0] || null
+  const mostApps      = [...active].sort((a, b) => (b.apps || 0) - (a.apps || 0))[0] || null
+  const bestGpg       = active.filter(p => (p.apps || 0) >= 30)
+    .map(p => ({ ...p, gpg: (p.goals || 0) / p.apps }))
+    .sort((a, b) => b.gpg - a.gpg)[0] || null
+
+  // Season records
+  const byPts    = [...seasons].sort((a, b) => (b.leaguePts || 0) - (a.leaguePts || 0))[0] || null
+  const byGoals  = [...seasons].sort((a, b) => (b.leagueGF || 0) - (a.leagueGF || 0))[0] || null
+  const byGpg    = seasons.filter(s => s.leagueP > 0)
+    .map(s => ({ ...s, gpg: (s.leagueGF || 0) / s.leagueP }))
+    .sort((a, b) => b.gpg - a.gpg)[0] || null
+
+  // Biggest win — from matches
+  const wins = matches.filter(m => m.score_for > m.score_against)
+  const biggestWin = wins.sort((a, b) =>
+    (b.score_for - b.score_against) - (a.score_for - a.score_against)
+  )[0] || null
+
+  // UCL finals
+  const uclFinals = seasons.filter(s =>
+    s.uclResult === 'Champions' || s.uclResult === 'Runners-Up'
+  ).map(s => ({
+    season: s.label,
+    year: s.year,
+    result: s.uclResult,
+    opponent: s.uclFinalOpponent || s.uclTournamentWinner || '?',
+    score: s.uclFinalScore || '?',
+  }))
+
+  // GK records — from players with position GK
+  const gks = players.filter(p => p.position === 'GK')
+
+  // Transfer records
+  const ins  = transfers.filter(t => t.direction === 'IN')
+  const outs = transfers.filter(t => t.direction === 'OUT')
+  const highestIn   = ins.sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+  const highestOut  = outs.sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+
+  // Net spend per season
+  const netByseason = {}
+  for (const t of transfers) {
+    if (!t.seasonId) continue
+    if (!netByseason[t.seasonId]) netByseason[t.seasonId] = { in: 0, out: 0, seasonId: t.seasonId }
+    if (t.direction === 'IN')  netByseason[t.seasonId].in  += (t.fee_eur || 0)
+    if (t.direction === 'OUT') netByseason[t.seasonId].out += (t.fee_eur || 0)
+  }
+  const netSpends = Object.values(netByseason).map(n => ({
+    ...n,
+    net: n.in - n.out,
+    season: seasons.find(s => s.id === n.seasonId)?.label || '?'
+  }))
+  const biggestSpend = netSpends.sort((a, b) => b.net - a.net)[0] || null
+
+  return {
+    individual: { topScorer, topAssists, mostApps, bestGpg },
+    season: { byPts, byGoals, byGpg, biggestWin },
+    ucl: { finals: uclFinals },
+    gk: { keepers: gks },
+    transfers: { highestIn, highestOut, biggestSpend }
+  }
 }

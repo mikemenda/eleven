@@ -1,0 +1,123 @@
+.page {
+  background: var(--en-bg);
+  min-height: calc(100dvh - 56px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
+}
+.inner { max-width: 640px; margin: 0 auto; animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.topBar {
+  max-width: 640px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 20px;
+  position: sticky; top: 56px; background: var(--en-bg); z-index: 10;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.topLabel {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
+}
+.seasonPicker {
+  background: var(--en-surface); border: 0.5px solid var(--en-rule);
+  color: var(--en-text-2); border-radius: 5px;
+  font-family: var(--font-plex); font-size: 11px;
+  padding: 5px 8px; outline: none; cursor: pointer;
+}
+
+.summaryBar {
+  max-width: 640px; margin: 0 auto;
+  display: flex; border-bottom: 0.5px solid var(--en-rule);
+}
+.summaryItem {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 16px 8px;
+  border-right: 0.5px solid var(--en-rule);
+}
+.summaryItem:last-child { border-right: none; }
+.summaryVal {
+  font-family: var(--font-plex); font-size: 18px; font-weight: 500; line-height: 1;
+}
+.summaryKey {
+  font-family: var(--font-plex); font-size: 8px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--en-text-3);
+}
+
+.dirTabs {
+  max-width: 640px; margin: 0 auto;
+  display: flex; border-bottom: 0.5px solid var(--en-rule);
+}
+.dirTab {
+  flex: 1; padding: 12px 8px;
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  font-family: var(--font-plex); font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-text-3); cursor: pointer; transition: color 0.15s;
+}
+.dirActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
+
+.windowGroup {
+  margin: 20px 20px 0;
+  border: 0.5px solid var(--en-rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.windowHeader {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: var(--en-surface);
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.windowSeason {
+  font-family: var(--font-plex); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--en-text-3);
+}
+.windowName {
+  font-family: var(--font-plex); font-size: 11px; font-weight: 500;
+  color: var(--en-text-1); flex: 1;
+}
+.windowNet { font-family: var(--font-plex); font-size: 11px; font-weight: 500; }
+
+.transferRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.transferRow:last-child { border-bottom: none; }
+.transferArrow {
+  font-size: 12px; font-weight: 700;
+  width: 14px; flex-shrink: 0; text-align: center;
+}
+.transferInfo { flex: 1; min-width: 0; }
+.transferName {
+  font-family: var(--font-inter); font-size: 14px; font-weight: 600;
+  color: var(--en-text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.transferMeta {
+  display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap;
+}
+.transferPos {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--en-text-3);
+}
+.transferClubs {
+  font-family: var(--font-inter); font-size: 12px; color: var(--en-text-2);
+}
+.transferRule {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.transferFee {
+  font-family: var(--font-plex); font-size: 13px;
+  color: var(--en-gold); font-weight: 500; flex-shrink: 0;
+}
+
+.loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
+.spinner {
+  width: 24px; height: 24px;
+  border: 1.5px solid var(--en-rule); border-top-color: var(--en-blue);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 80px 20px; text-align: center; }
+.emptyIcon { font-size: 36px; }
+.emptyText { font-family: var(--font-inter); font-size: 15px; font-weight: 600; color: var(--en-text-2); }

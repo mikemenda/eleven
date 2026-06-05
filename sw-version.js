@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 10
+// Current: 11
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -11,4 +11,5 @@
 //   8 — Connect real Firebase project (eleven-c44a0) + S1 data seeded
 //   9 — Fix GitHub Pages BrowserRouter basename; Seasons + SeasonDetail storytelling redesign
 //   10 — European Nights migration: Seasons list + Season Detail
-const SW_VERSION = 10;
+//   11 — Phase 4+5: Players, PlayerProfile, Transfers, Records, Rivals, Museum, SportingDirector
+const SW_VERSION = 11;
