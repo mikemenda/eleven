@@ -14,115 +14,137 @@ function buildHeadline(season) {
     parts.push(`${season.leagueCompetition} champions`)
   if (season.uclResult === 'Champions') parts.push('UCL winners')
   if (season.uclResult === 'Runners-Up') parts.push('UCL finalists')
-  if (!parts.length && season.label) return `${season.label} — ${season.year || ''}`
+  if (!parts.length && season.label) return `${season.label}${season.year ? ` — ${season.year}` : ''}`
   return parts.join(' · ') || season.label
 }
 
 function buildDeck(season) {
   if (season.seasonDeck) return season.seasonDeck
-  if (season.narrativeText) return season.narrativeText.slice(0, 120) + (season.narrativeText.length > 120 ? '…' : '')
+  if (season.narrativeText) return season.narrativeText.slice(0, 110) + (season.narrativeText.length > 110 ? '…' : '')
   return null
 }
 
-function getTrophies(season) {
+function getHardware(season) {
   const trophies = []
+  const ucl = []
   if (season.leaguePosition === 1 && season.leagueCompetition)
-    trophies.push({ key: 'league', label: season.leagueCompetition, type: 'win' })
+    trophies.push({ key: 'lg', label: season.leagueCompetition, type: 'league' })
   if (season.uclResult === 'Champions')
-    trophies.push({ key: 'ucl', label: 'UCL', type: 'ucl' })
+    ucl.push({ key: 'ucl', label: 'UCL', type: 'ucl' })
   if (season.faCupResult === 'Winner')
     trophies.push({ key: 'fa', label: 'FA Cup', type: 'cup' })
   if (season.carabaoCupResult === 'Winner')
-    trophies.push({ key: 'carabao', label: 'Carabao', type: 'cup' })
-  return trophies
+    trophies.push({ key: 'cc', label: 'Carabao', type: 'cup' })
+  return { trophies, ucl }
 }
 
 function getRunnerUp(season) {
   if (season.uclResult === 'Runners-Up') {
     const opp = season.uclFinalOpponent || season.uclTournamentWinner || ''
-    return { label: 'UCL R-U', scoreline: season.uclFinalScore || null, opponent: opp }
+    return { label: 'UCL R-U', opponent: opp }
   }
   return null
 }
 
+function scoreClass(season) {
+  const d = season.dynastyScore
+  if (d == null) return styles.arcScore_none
+  if (d >= 85 || season.uclResult === 'Champions') return styles.arcScore_peak
+  if (d >= 70) return styles.arcScore_mid
+  if (d >= 60) return styles.arcScore_mid
+  return styles.arcScore_dip
+}
+
 function isPeak(season) {
-  return (season.dynastyScore != null && season.dynastyScore >= 85) ||
-    season.uclResult === 'Champions'
+  return (season.dynastyScore != null && season.dynastyScore >= 85) || season.uclResult === 'Champions'
 }
 
-function isLow(season) {
-  return season.dynastyScore != null && season.dynastyScore < 60 &&
-    season.uclResult !== 'Champions'
-}
+// ─── DYNASTY ARC ─────────────────────────────────────────────────────────────
 
-// Dynasty arc across all seasons
-function DynastyArc({ seasons }) {
+function DynastyArc({ seasons, onNavigate }) {
   if (!seasons.length) return null
-  const sorted = [...seasons].sort((a, b) => {
-    const la = a.label || '', lb = b.label || ''
-    return la.localeCompare(lb)
-  })
-  const max = Math.max(...sorted.map(s => s.dynastyScore || 0), 1)
+  const sorted = [...seasons].sort((a, b) => (a.label || '').localeCompare(b.label || ''))
+
   return (
-    <div className={styles.arcWrap}>
+    <div className={styles.arc}>
       <p className={styles.arcLabel}>Dynasty arc</p>
-      <div className={styles.arcBar}>
-        {sorted.map(s => {
-          const pct = s.dynastyScore ? Math.round((s.dynastyScore / max) * 100) : 8
-          const cls = isPeak(s) ? styles.arcSegPeak : isLow(s) ? styles.arcSegLow : styles.arcSeg
-          return (
-            <div key={s.id} className={cls}>
-              <div className={styles.arcFill} style={{ height: `${pct}%` }} />
-              <div className={styles.arcSegLabel}>{s.label}</div>
-            </div>
-          )
-        })}
+      <div className={styles.arcBaseline}>
+        <div className={styles.arcRow}>
+          {sorted.map(s => {
+            const { trophies, ucl } = getHardware(s)
+            const hasPeak = isPeak(s)
+            return (
+              <div
+                key={s.id}
+                className={styles.arcGroup}
+                onClick={() => onNavigate(s.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && onNavigate(s.id)}
+              >
+                <div className={styles.arcPips}>
+                  {ucl.map(t => <span key={t.key} className={styles.pipGold} />)}
+                  {trophies.map(t => <span key={t.key} className={styles.pipGreen} />)}
+                </div>
+                <span className={`${styles.arcScore} ${scoreClass(s)}`}>
+                  {s.dynastyScore ?? '—'}
+                </span>
+                <span className={styles.arcSeasonLabel}>{s.label}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
 }
 
-// Single season card on the timeline
-function SeasonCard({ season, onClick }) {
+// ─── SEASON ROW ───────────────────────────────────────────────────────────────
+
+function SeasonRow({ season, onClick }) {
   const headline = buildHeadline(season)
   const deck = buildDeck(season)
-  const trophies = getTrophies(season)
+  const { trophies, ucl } = getHardware(season)
   const runnerUp = getRunnerUp(season)
   const peak = isPeak(season)
-  const low = isLow(season)
+  const dip = season.dynastyScore != null && season.dynastyScore < 60 && !peak
+
+  const allTrophies = [...ucl, ...trophies]
 
   return (
-    <button
-      className={`${styles.card} ${peak ? styles.cardPeak : ''} ${low ? styles.cardLow : ''}`}
-      onClick={onClick}
-    >
-      <div className={styles.cardMeta}>
-        {season.label}{season.year ? ` · ${season.year}` : ''}
-        {!season.isComplete && <span className={styles.liveDot} />}
-      </div>
-      <div className={styles.cardHeadline}>{headline}</div>
-      {deck && <div className={styles.cardDeck}>{deck}</div>}
-      <div className={styles.cardBottom}>
-        <div className={styles.trophyRow}>
-          {trophies.map(t => (
-            <span key={t.key} className={`${styles.tPill} ${styles['tPill_' + t.type]}`}>
-              🏆 {t.label}
-            </span>
-          ))}
-          {runnerUp && (
-            <span className={styles.tRu}>
-              {runnerUp.opponent && (
-                <span className={styles.miniCrest}>{runnerUp.opponent.slice(0,3).toUpperCase()}</span>
-              )}
-              {runnerUp.label}{runnerUp.scoreline ? ` · ${runnerUp.scoreline}` : ''}
+    <button className={styles.seasonRow} onClick={onClick}>
+      <div className={`${styles.seasonRowAccent} ${peak ? styles.seasonRowAccentPeak : ''}`} />
+      <div className={styles.seasonRowBody}>
+        <div className={styles.rowMeta}>
+          <span className={styles.rowLabel}>{season.label}</span>
+          {season.year && <span className={styles.rowYear}>{season.year}</span>}
+        </div>
+        <div className={`${styles.rowHeadline} ${peak ? styles.rowHeadlinePeak : dip ? styles.rowHeadlineDip : ''}`}>
+          {headline}
+        </div>
+        {deck && <div className={styles.rowDeck}>{deck}</div>}
+        <div className={styles.rowFooter}>
+          <div className={styles.rowHardware}>
+            {allTrophies.map(t => (
+              <span
+                key={t.key}
+                className={t.type === 'ucl' ? styles.hwTrophy : t.type === 'league' ? styles.hwLeague : styles.hwTrophy}
+              >
+                {t.label}
+              </span>
+            ))}
+            {runnerUp && (
+              <span className={styles.hwRu}>
+                {runnerUp.opponent ? `${runnerUp.opponent} · UCL R-U` : 'UCL R-U'}
+              </span>
+            )}
+          </div>
+          {season.dynastyScore != null && (
+            <span className={`${styles.rowScore} ${peak ? styles.rowScorePeak : ''}`}>
+              {season.dynastyScore}
             </span>
           )}
         </div>
-        {season.dynastyScore != null && (
-          <span className={`${styles.dScore} ${peak ? styles.dScorePeak : ''}`}>
-            {season.dynastyScore}
-          </span>
-        )}
       </div>
     </button>
   )
@@ -163,19 +185,16 @@ const Seasons = () => {
 
   if (!activeGame || !activeClub) return null
 
-  // Sort newest first (by label descending)
-  const sorted = [...seasons].sort((a, b) => {
-    const la = a.label || '', lb = b.label || ''
-    return lb.localeCompare(la)
-  })
+  const sorted = [...seasons].sort((a, b) =>
+    (b.label || '').localeCompare(a.label || '')
+  )
 
   const filtered = filter === 'ucl'
     ? sorted.filter(s => s.uclEntered)
     : filter === 'trophies'
-      ? sorted.filter(s => getTrophies(s).length > 0)
+      ? sorted.filter(s => getHardware(s).trophies.length + getHardware(s).ucl.length > 0)
       : sorted
 
-  // Build identity line from club data
   const plTitles = seasons.filter(s => s.leaguePosition === 1).length
   const uclTitles = seasons.filter(s => s.uclResult === 'Champions').length
 
@@ -188,37 +207,45 @@ const Seasons = () => {
     <div className={styles.page}>
       <div className={styles.inner}>
 
+        {/* ── PAGE HEADER ── */}
         <div className={styles.pageHead}>
-          <div>
-            <p className={styles.eyebrow}>{activeClub.name} · {activeGame?.title}</p>
-            <h1 className={styles.pageTitle}>The {activeClub.name} story</h1>
-          </div>
-          <button className={styles.addBtn} onClick={() => setShowCreate(true)}>
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <p className={styles.eyebrow}>{activeClub.name} · {activeGame?.title}</p>
+          <h1 className={styles.pageTitle}>The {activeClub.name} story</h1>
+          <div className={styles.heroIdentityRule} />
+          {identityParts.length > 0 && (
+            <p className={styles.identityMeta}>{identityParts.join(' · ')}</p>
+          )}
+          <button className={styles.headAddBtn} onClick={() => setShowCreate(true)}>
+            <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
               <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
             New season
           </button>
         </div>
 
-        {identityParts.length > 0 && (
-          <p className={styles.identityLine}>{identityParts.join(' · ')}.</p>
+        {/* ── DYNASTY ARC ── */}
+        {seasons.length >= 2 && (
+          <DynastyArc seasons={seasons} onNavigate={id => navigate(`/seasons/${id}`)} />
         )}
 
-        {seasons.length >= 3 && <DynastyArc seasons={seasons} />}
-
-        <div className={styles.filters}>
-          {['all', 'ucl', 'trophies'].map(f => (
+        {/* ── FILTERS ── */}
+        <div className={styles.filterRow}>
+          {[
+            { key: 'all', label: 'All seasons' },
+            { key: 'ucl', label: 'UCL only' },
+            { key: 'trophies', label: 'Trophy seasons' },
+          ].map(f => (
             <button
-              key={f}
-              className={`${styles.filterChip} ${filter === f ? styles.filterActive : ''}`}
-              onClick={() => setFilter(f)}
+              key={f.key}
+              className={`${styles.filterTab} ${filter === f.key ? styles.filterTabActive : ''}`}
+              onClick={() => setFilter(f.key)}
             >
-              {f === 'all' ? 'All seasons' : f === 'ucl' ? 'UCL only' : 'Trophy seasons'}
+              {f.label}
             </button>
           ))}
         </div>
 
+        {/* ── SEASON LIST ── */}
         {loading ? (
           <div className={styles.loadWrap}><div className={styles.spinner} /></div>
         ) : filtered.length === 0 ? (
@@ -227,24 +254,22 @@ const Seasons = () => {
             {seasons.length === 0 && (
               <>
                 <p className={styles.emptyText}>Create your first season to start building your dynasty record.</p>
-                <button className={styles.emptyBtn} onClick={() => setShowCreate(true)}>+ Create Season</button>
+                <button className={styles.emptyBtn} onClick={() => setShowCreate(true)}>Create season</button>
               </>
             )}
           </div>
         ) : (
-          <div className={styles.timeline}>
+          <div className={styles.seasonList}>
             {filtered.map(s => (
-              <SeasonCard
+              <SeasonRow
                 key={s.id}
                 season={s}
                 onClick={() => navigate(`/seasons/${s.id}`)}
               />
             ))}
-            <button className={styles.addTimeline} onClick={() => setShowCreate(true)}>
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Log next season
+            <button className={styles.addRow} onClick={() => setShowCreate(true)}>
+              <span className={styles.addRowIcon}>+</span>
+              <span className={styles.addRowText}>Log next season</span>
             </button>
           </div>
         )}

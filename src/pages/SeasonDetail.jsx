@@ -26,6 +26,14 @@ const gd     = (gf, ga) => { const a = num(gf), b = num(ga); return (a != null &
 const fmtGD  = n => n == null ? '—' : (n > 0 ? `+${n}` : String(n))
 const ordinal = n => { if (!n) return ''; const s=['th','st','nd','rd'], v=n%100; return s[(v-20)%10]||s[v]||s[0] }
 
+function abbrev(name) {
+  if (!name) return '?'
+  const words = name.trim().split(/\s+/)
+  if (words.length === 1) return name.slice(0, 3).toUpperCase()
+  if (words.length === 2) return (words[0][0] + words[1].slice(0,2)).toUpperCase()
+  return words.map(w => w[0]).join('').slice(0,3).toUpperCase()
+}
+
 function leagueWarnings(f) {
   const w = []
   const p = num(f.leagueP), ww = num(f.leagueW), d = num(f.leagueD), l = num(f.leagueL), pts = num(f.leaguePts)
@@ -65,7 +73,6 @@ function seasonToForm(s) {
     uclLPP: disp(s.uclLPP), uclLPW: disp(s.uclLPW), uclLPD: disp(s.uclLPD),
     uclLPL: disp(s.uclLPL), uclLPGF: disp(s.uclLPGF), uclLPGA: disp(s.uclLPGA),
     uclLPPts: disp(s.uclLPPts),
-    // UCL knockout opponents
     uclR16Opponent: s.uclR16Opponent ?? '', uclR16Score: s.uclR16Score ?? '',
     uclQFOpponent:  s.uclQFOpponent  ?? '', uclQFScore:  s.uclQFScore  ?? '',
     uclSFOpponent:  s.uclSFOpponent  ?? '', uclSFScore:  s.uclSFScore  ?? '',
@@ -121,13 +128,6 @@ function formToDoc(f) {
 
 // ─── SMALL COMPONENTS ─────────────────────────────────────────────────────────
 
-const SectionRule = ({ label }) => (
-  <div className={styles.sectionRule}>
-    <span className={styles.sectionRuleLabel}>{label}</span>
-    <div className={styles.sectionRuleLine} />
-  </div>
-)
-
 const FieldGroup = ({ label, hint, error, children }) => (
   <div className={styles.fieldGroup}>
     {label && <label className={styles.fieldLabel}>{label}</label>}
@@ -173,11 +173,62 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
   </div>
 )
 
+// ─── TROPHY SVG (museum object, not emoji) ────────────────────────────────────
+
+const TrophySvg = ({ className }) => (
+  <svg className={className} viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 38c-8 0-14-7-14-16V8h28v14c0 9-6 16-14 16z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <path d="M8 12H4a3 3 0 0 0 0 6h4M36 12h4a3 3 0 0 1 0 6h-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M22 38v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M14 46h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M12 50h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="22" cy="20" r="4" stroke="currentColor" strokeWidth="1.2" fill="none" opacity="0.4"/>
+  </svg>
+)
+
+// ─── TROPHY SHELF (read-only) ─────────────────────────────────────────────────
+
+function TrophyShelf({ s }) {
+  const items = []
+
+  if (s.leaguePosition === 1 && s.leagueCompetition)
+    items.push({ key: 'lg', label: s.leagueCompetition, won: true })
+  if (s.uclResult === 'Champions')
+    items.push({ key: 'ucl', label: 'UEFA Champions League', won: true })
+  if (s.faCupResult === 'Winner')
+    items.push({ key: 'fa', label: 'FA Cup', won: true })
+  if (s.carabaoCupResult === 'Winner')
+    items.push({ key: 'cc', label: 'Carabao Cup', won: true })
+  if (s.uclResult === 'Runners-Up') {
+    const opp = s.uclFinalOpponent || s.uclTournamentWinner || ''
+    items.push({
+      key: 'ucl-ru', label: 'UCL Final', won: false,
+      sub: opp ? `Lost to ${opp}${s.uclFinalScore ? ` · ${s.uclFinalScore}` : ''}` : s.uclFinalScore || null
+    })
+  }
+
+  if (!items.length) return null
+
+  return (
+    <div className={styles.trophyShelf}>
+      <div className={styles.trophyShelfItems}>
+        {items.map(t => (
+          <div key={t.key} className={t.won ? styles.trophyItem : styles.trophyItemRu}>
+            <TrophySvg className={t.won ? styles.trophySvgWon : styles.trophySvgRu} />
+            <span className={t.won ? styles.trophyName : styles.trophyRuLabel}>{t.label}</span>
+            {t.sub && <span className={styles.trophyRuSub}>{t.sub}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── UCL PATH (read-only) ─────────────────────────────────────────────────────
 
 function UclPath({ s }) {
-  const isChampion  = s.uclResult === 'Champions'
-  const isRunnerUp  = s.uclResult === 'Runners-Up'
+  const isChampion = s.uclResult === 'Champions'
+  const isRunnerUp = s.uclResult === 'Runners-Up'
   const reachedFinal = isChampion || isRunnerUp
 
   const rounds = []
@@ -185,7 +236,7 @@ function UclPath({ s }) {
     rounds.push({
       stage: 'Group',
       abbr: 'LP',
-      score: `${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)} place`,
+      score: `${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)}`,
       isLoss: false,
     })
   }
@@ -225,52 +276,6 @@ function UclPath({ s }) {
             {r.opponent && <div className={styles.uclOppName}>{r.opponent}</div>}
           </div>
           {i < rounds.length - 1 && <div className={styles.uclArrow}>›</div>}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function abbrev(name) {
-  if (!name) return '?'
-  // Try to get meaningful 3-char abbrev
-  const words = name.trim().split(/\s+/)
-  if (words.length === 1) return name.slice(0, 3).toUpperCase()
-  if (words.length === 2) return (words[0][0] + words[1].slice(0,2)).toUpperCase()
-  return words.map(w => w[0]).join('').slice(0,3).toUpperCase()
-}
-
-// ─── TROPHY TILES (read-only) ─────────────────────────────────────────────────
-
-function TrophyTiles({ s }) {
-  const tiles = []
-  if (s.leaguePosition === 1 && s.leagueCompetition)
-    tiles.push({ key: 'lg', label: s.leagueCompetition, type: 'win', icon: '🏆' })
-  if (s.uclResult === 'Champions')
-    tiles.push({ key: 'ucl', label: 'UEFA Champions League', type: 'ucl', icon: '🏆' })
-  if (s.faCupResult === 'Winner')
-    tiles.push({ key: 'fa', label: 'FA Cup', type: 'cup', icon: '🏆' })
-  if (s.carabaoCupResult === 'Winner')
-    tiles.push({ key: 'cc', label: 'Carabao Cup', type: 'cup', icon: '🏆' })
-
-  // Runner-up
-  if (s.uclResult === 'Runners-Up') {
-    const opp = s.uclFinalOpponent || s.uclTournamentWinner || ''
-    tiles.push({
-      key: 'ucl-ru', label: 'UCL Final', type: 'ru', icon: '🥈',
-      sub: opp ? `Lost to ${opp}${s.uclFinalScore ? ` · ${s.uclFinalScore}` : ''}` : s.uclFinalScore || null
-    })
-  }
-
-  if (!tiles.length) return null
-
-  return (
-    <div className={styles.trophyTiles}>
-      {tiles.map(t => (
-        <div key={t.key} className={`${styles.trophyTile} ${styles['trophyTile_' + t.type]}`}>
-          <div className={styles.trophyIcon}>{t.icon}</div>
-          <div className={styles.trophyName}>{t.label}</div>
-          {t.sub && <div className={styles.trophySub}>{t.sub}</div>}
         </div>
       ))}
     </div>
@@ -409,25 +414,27 @@ const SeasonDetail = () => {
   const lWarn = editing ? leagueWarnings(f) : []
   const uWarn = editing ? uclWarnings(f)    : []
 
-  // ── Hero content ──
   const headline = s.seasonHeadline ||
     (s.leaguePosition === 1 ? `${s.leagueCompetition || 'League'} champions — ${s.label}` : s.label)
 
-  const hasTrophies = s.leaguePosition === 1 || s.uclResult === 'Champions' ||
+  const hasTrophyData = s.leaguePosition === 1 || s.uclResult === 'Champions' ||
     s.uclResult === 'Runners-Up' || s.faCupResult === 'Winner' || s.carabaoCupResult === 'Winner'
+
+  const hasCups = (s.faCupResult && s.faCupResult !== 'Did Not Enter') ||
+    (s.carabaoCupResult && s.carabaoCupResult !== 'Did Not Enter')
 
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
 
-        {/* ── Top bar ── */}
+        {/* ── TOP BAR ── */}
         <div className={styles.topBar}>
           <button className={styles.backBtn} onClick={() => {
             if (hasChanges) { setDlgDiscard(true); return }
             navigate('/seasons')
           }}>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M11 4L5 9l6 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M12 5L7 10l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
           <div className={styles.topCenter}>
@@ -442,7 +449,7 @@ const SeasonDetail = () => {
           </div>
         </div>
 
-        {/* ── Edit bar ── */}
+        {/* ── EDIT BAR ── */}
         {editing && (
           <div className={styles.editBar}>
             <span className={styles.editIndicator}><span className={styles.editDot} /> Editing</span>
@@ -455,13 +462,13 @@ const SeasonDetail = () => {
           </div>
         )}
 
-        {/* ── Locked bar ── */}
+        {/* ── LOCKED BAR ── */}
         {s.isComplete && !editing && (
           <div className={styles.lockedBar}>
             <span className={styles.lockedText}>
-              <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-                <rect x="1.5" y="5.5" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
-                <path d="M3.5 5.5V4a3 3 0 0 1 6 0v1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                <rect x="1.5" y="5.5" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M3.5 5.5V4a3 3 0 0 1 6 0v1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
               </svg>
               Locked
             </span>
@@ -469,12 +476,12 @@ const SeasonDetail = () => {
           </div>
         )}
 
-        {/* ── Action toolbar ── */}
+        {/* ── ACTION TOOLBAR ── */}
         {!s.isComplete && !editing && (
           <div className={styles.toolbar}>
             <button className={styles.editBtn} onClick={enterEdit}>
-              <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-                <path d="M8.5 2.5l2 2-6 6H2.5v-2l6-6z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                <path d="M8.5 2.5l2 2-6 6H2.5v-2l6-6z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Edit season
             </button>
@@ -489,87 +496,95 @@ const SeasonDetail = () => {
         ════════════════════════════════════════════════════════════ */}
         {!editing && (
           <>
-            {/* ── HERO ── */}
+            {/* ── SECTION 1: HERO (10/10) ── */}
             <div className={styles.hero}>
-              <p className={styles.heroEyebrow}>{s.label}{s.year ? ` · ${s.year}` : ''} · {s.leagueCompetition || 'Season'}</p>
+              <p className={styles.heroEyebrow}>
+                {s.label}{s.year ? ` · ${s.year}` : ''}{s.leagueCompetition ? ` · ${s.leagueCompetition}` : ''}
+              </p>
               <h1 className={styles.heroHeadline}>{headline}</h1>
+              <div className={styles.heroIdentityRule} />
               {s.narrativeText && (
-                <p className={styles.heroLede}>{s.narrativeText.split('\n')[0]}</p>
+                <p className={styles.heroLede}>
+                  {s.narrativeText.split('\n')[0]}
+                </p>
               )}
-              {hasTrophies && <TrophyTiles s={s} />}
             </div>
 
-            {/* ── THE STORY ── */}
+            {/* ── SECTION 2: TROPHY CABINET (9/10) ── */}
+            {hasTrophyData && <TrophyShelf s={s} />}
+
+            {/* ── SECTION 3: THE STORY (8/10) ── */}
             {s.narrativeText && (
-              <>
-                <SectionRule label="The story" />
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>The story</p>
                 <div className={styles.storyBody}>
                   {s.narrativeText.split('\n').filter(Boolean).map((para, i) => (
                     <p key={i}>{para}</p>
                   ))}
                 </div>
-              </>
+              </div>
             )}
 
-            {/* ── KEY MOMENTS ── */}
+            {/* ── SECTION 4: KEY MOMENTS (7/10) ── */}
             {s.keyMoments?.length > 0 && (
-              <>
-                <SectionRule label="Key moments" />
-                <div className={styles.moments}>
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>Key moments</p>
+                <div className={styles.momentsList}>
                   {s.keyMoments.map((m, i) => (
                     <div key={i} className={styles.moment}>
-                      <div className={styles.momentGem}>◆</div>
-                      <div className={styles.momentText}>{m}</div>
+                      <span className={styles.momentIndex}>{i + 1}</span>
+                      <span className={styles.momentText}>{m}</span>
                     </div>
                   ))}
                 </div>
-              </>
+              </div>
             )}
 
-            {/* ── THE LEAGUE ── */}
+            {/* ── SECTION 5: THE LEAGUE (5/10) ── */}
             {s.leaguePosition != null && (
-              <>
-                <SectionRule label="The league" />
-                <div className={styles.leagueStatement}>
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>The league</p>
+                <p className={styles.leagueStatement}>
                   {s.leaguePosition === 1
                     ? `${s.leagueCompetition || 'League'} champions.`
                     : `Finished ${s.leaguePosition}${ordinal(s.leaguePosition)} in the ${s.leagueCompetition || 'league'}.`
                   }
                   {s.leaguePts ? ` ${s.leaguePts} points.` : ''}
-                </div>
+                </p>
                 <button
                   className={styles.toggleBtn}
                   onClick={() => setShowLeagueRecord(v => !v)}
                 >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none"
                     style={{ transform: showLeagueRecord ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  {showLeagueRecord ? 'Hide' : 'Full season record'}
+                  {showLeagueRecord ? 'Hide record' : 'Full season record'}
                 </button>
                 {showLeagueRecord && s.leagueP != null && (
                   <div className={styles.recordGrid}>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueP}</div><div className={styles.rcLbl}>P</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueW}</div><div className={styles.rcLbl}>W</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueD}</div><div className={styles.rcLbl}>D</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueL}</div><div className={styles.rcLbl}>L</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueGF}</div><div className={styles.rcLbl}>GF</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueGA}</div><div className={styles.rcLbl}>GA</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{fmtGD(lGD)}</div><div className={styles.rcLbl}>GD</div></div>
-                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leaguePts}</div><div className={styles.rcLbl}>Pts</div></div>
+                    {[
+                      [s.leagueP, 'P'], [s.leagueW, 'W'], [s.leagueD, 'D'], [s.leagueL, 'L'],
+                      [s.leagueGF, 'GF'], [s.leagueGA, 'GA'], [fmtGD(lGD), 'GD'], [s.leaguePts, 'Pts']
+                    ].map(([val, lbl]) => (
+                      <div key={lbl} className={styles.recordCell}>
+                        <div className={styles.rcVal}>{val ?? '—'}</div>
+                        <div className={styles.rcLbl}>{lbl}</div>
+                      </div>
+                    ))}
                   </div>
                 )}
-              </>
+              </div>
             )}
 
-            {/* ── UCL JOURNEY ── */}
+            {/* ── SECTION 6: UCL JOURNEY (8/10) ── */}
             {s.uclEntered && (
-              <>
-                <SectionRule label="UCL journey" />
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>UCL journey</p>
                 {s.uclResult && (
                   <p className={styles.uclOpener}>
                     {s.uclResult === 'Champions'
-                      ? `Champions of Europe.${s.uclFinalOpponent ? ` ${s.uclFinalOpponent} defeated in the final.` : ''}`
+                      ? `Champions of Europe.${s.uclFinalOpponent ? ` ${s.uclFinalOpponent} defeated in the final${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.` : ''}`
                       : s.uclResult === 'Runners-Up'
                         ? `Reached the final — beaten${s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''}${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
                         : `Exited at the ${s.uclResult} stage.`
@@ -580,33 +595,34 @@ const SeasonDetail = () => {
                 {s.uclLPP != null && (
                   <>
                     <button className={styles.toggleBtn} onClick={() => setShowMDGrid(v => !v)}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"
                         style={{ transform: showMDGrid ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                        <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       {showMDGrid ? 'Hide group stage' : 'Group stage record'}
                     </button>
                     {showMDGrid && (
                       <div className={styles.recordGrid}>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPP}</div><div className={styles.rcLbl}>P</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPW}</div><div className={styles.rcLbl}>W</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPD}</div><div className={styles.rcLbl}>D</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPL}</div><div className={styles.rcLbl}>L</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPGF}</div><div className={styles.rcLbl}>GF</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPGA}</div><div className={styles.rcLbl}>GA</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{fmtGD(uGD)}</div><div className={styles.rcLbl}>GD</div></div>
-                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPPts}</div><div className={styles.rcLbl}>Pts</div></div>
+                        {[
+                          [s.uclLPP, 'P'], [s.uclLPW, 'W'], [s.uclLPD, 'D'], [s.uclLPL, 'L'],
+                          [s.uclLPGF, 'GF'], [s.uclLPGA, 'GA'], [fmtGD(uGD), 'GD'], [s.uclLPPts, 'Pts']
+                        ].map(([val, lbl]) => (
+                          <div key={lbl} className={styles.recordCell}>
+                            <div className={styles.rcVal}>{val ?? '—'}</div>
+                            <div className={styles.rcLbl}>{lbl}</div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </>
                 )}
-              </>
+              </div>
             )}
 
-            {/* ── CUP RESULTS ── */}
-            {(s.faCupResult || s.carabaoCupResult) && (
-              <>
-                <SectionRule label="Cups" />
+            {/* ── SECTION 7: CUPS (4/10) ── */}
+            {hasCups && (
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>Cups</p>
                 <div className={styles.cupRows}>
                   {s.faCupResult && s.faCupResult !== 'Did Not Enter' && (
                     <CupRow label="FA Cup" result={s.faCupResult} opponent={s.faCupFinalOpponent} winner={s.faCupWinner} />
@@ -615,29 +631,29 @@ const SeasonDetail = () => {
                     <CupRow label="Carabao Cup" result={s.carabaoCupResult} opponent={s.carabaoCupFinalOpponent} winner={s.carabaoCupWinner} />
                   )}
                 </div>
-              </>
+              </div>
             )}
 
-            {/* ── DYNASTY VERDICT ── */}
+            {/* ── SECTION 8: DYNASTY VERDICT (9/10) ── */}
             {(s.dynastyScore != null || s.dynastyVerdict) && (
-              <>
-                <SectionRule label="Dynasty verdict" />
+              <div className={styles.dynastyVerdictBlock}>
+                <p className={styles.sectionLabel}>Dynasty verdict</p>
                 {s.dynastyVerdict && (
-                  <div className={styles.dynastyVerdict}>"{s.dynastyVerdict}"</div>
+                  <p className={styles.dynastyVerdictText}>"{s.dynastyVerdict}"</p>
                 )}
                 {s.dynastyScore != null && (
-                  <div className={styles.dynastyScoreLine}>
+                  <div className={styles.dynastyScoreRow}>
                     <span className={styles.dynastyNum}>{s.dynastyScore}</span>
                     <span className={styles.dynastyOf}>/ 100</span>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </>
         )}
 
         {/* ════════════════════════════════════════════════════════════
-            EDIT FORM
+            EDIT FORM — logic unchanged
         ════════════════════════════════════════════════════════════ */}
         {editing && f && (
           <div className={styles.editForm}>
@@ -807,7 +823,7 @@ const SeasonDetail = () => {
                 <p className={styles.subHeading}>Key moments</p>
                 <span className={styles.momentsCount}>{f.keyMoments.filter(Boolean).length}/10</span>
               </div>
-              <div className={styles.momentsList}>
+              <div className={styles.momentsList_edit}>
                 {f.keyMoments.map((m, i) => (
                   <div key={i} className={styles.momentRow}>
                     <span className={styles.momentNum}>{i + 1}</span>
@@ -818,15 +834,15 @@ const SeasonDetail = () => {
                       placeholder="e.g. Álvarez hat-trick, UCL MD6 vs Celtic"
                     />
                     <button type="button" className={styles.momentRemove} onClick={() => removeMoment(i)} aria-label="Remove">
-                      <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                      <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                       </svg>
                     </button>
                   </div>
                 ))}
                 {f.keyMoments.length < 10 && (
                   <button type="button" className={styles.addMoment} onClick={addMoment}>
-                    <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+                    <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
                       <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
                     </svg>
                     Add moment
@@ -854,7 +870,7 @@ const SeasonDetail = () => {
           </div>
         )}
 
-        {/* ── Dialogs ── */}
+        {/* ── DIALOGS ── */}
         {dlgDiscard && (
           <Dialog title="Discard changes?" body="Unsaved edits will be lost." confirmLabel="Discard" confirmDanger onConfirm={doDiscard} onCancel={() => setDlgDiscard(false)} />
         )}
@@ -875,7 +891,7 @@ const SeasonDetail = () => {
 
 export default SeasonDetail
 
-// ─── CupRow ─────────────────────────────────────────────────────────────────
+// ─── CupRow ──────────────────────────────────────────────────────────────────
 function CupRow({ label, result, opponent, winner }) {
   return (
     <div className={styles.cupRow}>
