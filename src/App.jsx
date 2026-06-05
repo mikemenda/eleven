@@ -102,7 +102,7 @@ const PlaceholderPage = ({ title, phase }) => (
 )
 
 const App = () => (
-  <BrowserRouter>
+  <BrowserRouter basename="/eleven">
     <AuthProvider>
       <RequireAuth>
         <AppProvider>

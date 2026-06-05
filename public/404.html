@@ -4,10 +4,19 @@
     <meta charset="utf-8">
     <title>Eleven</title>
     <script>
-      // Redirect all 404s back to index.html for React Router
-      const path = window.location.pathname.replace('/eleven', '') || '/'
-      sessionStorage.setItem('redirect', path)
-      window.location.replace('/eleven/')
+      // GitHub Pages serves this for any unmatched path.
+      // Strip the /eleven base prefix and store the remainder,
+      // then redirect to the app root so React Router can hydrate.
+      var base = '/eleven'
+      var path = window.location.pathname
+      // Remove the base prefix to get the in-app path
+      var inApp = path.startsWith(base) ? path.slice(base.length) : path
+      if (!inApp || inApp === '') inApp = '/'
+      // Preserve query string and hash
+      var search = window.location.search
+      var hash = window.location.hash
+      sessionStorage.setItem('redirect', inApp + search + hash)
+      window.location.replace(base + '/')
     </script>
   </head>
   <body></body>

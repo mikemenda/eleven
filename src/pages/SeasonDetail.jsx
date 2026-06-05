@@ -13,7 +13,6 @@ import styles from './SeasonDetail.module.css'
 
 const UCL_RESULTS  = ['Champions', 'Runners-Up', 'SF', 'QF', 'R16', 'Playoff', 'LP Only']
 const CUP_ROUNDS   = ['Did Not Enter', 'R32', 'R16', 'QF', 'SF', 'Final', 'Winner']
-
 const LEAGUE_OPTIONS = [
   'Premier League', 'English Championship', 'La Liga',
   'Bundesliga', 'Serie A', 'Ligue 1',
@@ -21,11 +20,10 @@ const LEAGUE_OPTIONS = [
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-const num  = v => (v === '' || v == null) ? null : (isNaN(Number(v)) ? null : Number(v))
-const disp = v => (v == null) ? '' : String(v)
-const gd   = (gf, ga) => { const a = num(gf), b = num(ga); return (a != null && b != null) ? a - b : null }
-const gpg  = (gf, p)  => { const a = num(gf), b = num(p);  return (a && b && b > 0) ? (a / b).toFixed(2) : null }
-const fmtGD = n => n == null ? '—' : (n > 0 ? `+${n}` : String(n))
+const num    = v => (v === '' || v == null) ? null : (isNaN(Number(v)) ? null : Number(v))
+const disp   = v => (v == null) ? '' : String(v)
+const gd     = (gf, ga) => { const a = num(gf), b = num(ga); return (a != null && b != null) ? a - b : null }
+const fmtGD  = n => n == null ? '—' : (n > 0 ? `+${n}` : String(n))
 const ordinal = n => { if (!n) return ''; const s=['th','st','nd','rd'], v=n%100; return s[(v-20)%10]||s[v]||s[0] }
 
 function leagueWarnings(f) {
@@ -61,18 +59,27 @@ function seasonToForm(s) {
     uclEntered:             s.uclEntered  ?? false,
     uclResult:              s.uclResult   ?? '',
     uclTournamentWinner:    s.uclTournamentWinner ?? '',
+    uclFinalOpponent:       s.uclFinalOpponent ?? '',
+    uclFinalScore:          s.uclFinalScore ?? '',
     uclLeaguePhasePosition: disp(s.uclLeaguePhasePosition),
     uclLPP: disp(s.uclLPP), uclLPW: disp(s.uclLPW), uclLPD: disp(s.uclLPD),
     uclLPL: disp(s.uclLPL), uclLPGF: disp(s.uclLPGF), uclLPGA: disp(s.uclLPGA),
     uclLPPts: disp(s.uclLPPts),
+    // UCL knockout opponents
+    uclR16Opponent: s.uclR16Opponent ?? '', uclR16Score: s.uclR16Score ?? '',
+    uclQFOpponent:  s.uclQFOpponent  ?? '', uclQFScore:  s.uclQFScore  ?? '',
+    uclSFOpponent:  s.uclSFOpponent  ?? '', uclSFScore:  s.uclSFScore  ?? '',
     faCupResult:         s.faCupResult ?? '',
     faCupFinalOpponent:  s.faCupFinalOpponent ?? '',
     faCupWinner:         s.faCupWinner ?? '',
     carabaoCupResult:         s.carabaoCupResult ?? '',
     carabaoCupFinalOpponent:  s.carabaoCupFinalOpponent ?? '',
     carabaoCupWinner:         s.carabaoCupWinner ?? '',
-    narrativeText: s.narrativeText ?? '',
-    keyMoments:    (s.keyMoments?.length ? s.keyMoments : ['']),
+    seasonHeadline: s.seasonHeadline ?? '',
+    narrativeText:  s.narrativeText ?? '',
+    keyMoments:     (s.keyMoments?.length ? s.keyMoments : ['']),
+    dynastyVerdict: s.dynastyVerdict ?? '',
+    dynastyScore:   disp(s.dynastyScore),
   }
 }
 
@@ -89,25 +96,36 @@ function formToDoc(f) {
     uclEntered:             f.uclEntered,
     uclResult:              f.uclResult || null,
     uclTournamentWinner:    f.uclTournamentWinner.trim() || null,
+    uclFinalOpponent:       f.uclFinalOpponent.trim() || null,
+    uclFinalScore:          f.uclFinalScore.trim() || null,
     uclLeaguePhasePosition: num(f.uclLeaguePhasePosition),
     uclLPP: num(f.uclLPP), uclLPW: num(f.uclLPW), uclLPD: num(f.uclLPD),
     uclLPL: num(f.uclLPL), uclLPGF: num(f.uclLPGF), uclLPGA: num(f.uclLPGA),
     uclLPPts: num(f.uclLPPts),
+    uclR16Opponent: f.uclR16Opponent.trim() || null, uclR16Score: f.uclR16Score.trim() || null,
+    uclQFOpponent:  f.uclQFOpponent.trim()  || null, uclQFScore:  f.uclQFScore.trim()  || null,
+    uclSFOpponent:  f.uclSFOpponent.trim()  || null, uclSFScore:  f.uclSFScore.trim()  || null,
     faCupResult:         f.faCupResult || null,
     faCupFinalOpponent:  f.faCupFinalOpponent.trim() || null,
     faCupWinner:         f.faCupWinner.trim() || null,
     carabaoCupResult:        f.carabaoCupResult || null,
     carabaoCupFinalOpponent: f.carabaoCupFinalOpponent.trim() || null,
     carabaoCupWinner:        f.carabaoCupWinner.trim() || null,
-    narrativeText: f.narrativeText.trim() || null,
-    keyMoments:    f.keyMoments.map(k => k.trim()).filter(Boolean),
+    seasonHeadline: f.seasonHeadline.trim() || null,
+    narrativeText:  f.narrativeText.trim() || null,
+    keyMoments:     f.keyMoments.map(k => k.trim()).filter(Boolean),
+    dynastyVerdict: f.dynastyVerdict.trim() || null,
+    dynastyScore:   num(f.dynastyScore),
   }
 }
 
-// ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
+// ─── SMALL COMPONENTS ─────────────────────────────────────────────────────────
 
-const SectionLabel = ({ children }) => (
-  <p className={styles.sectionLabel}>{children}</p>
+const SectionRule = ({ label }) => (
+  <div className={styles.sectionRule}>
+    <span className={styles.sectionRuleLabel}>{label}</span>
+    <div className={styles.sectionRuleLine} />
+  </div>
 )
 
 const FieldGroup = ({ label, hint, error, children }) => (
@@ -119,27 +137,12 @@ const FieldGroup = ({ label, hint, error, children }) => (
   </div>
 )
 
-const TextInput = ({ className = '', ...props }) => (
-  <input className={`${styles.input} ${className}`} {...props} />
-)
+const TxtInput   = ({ className = '', ...p }) => <input className={`${styles.input} ${className}`} {...p} />
+const NumInput   = (p) => <input type="number" min="0" className={styles.input} {...p} />
+const SelInput   = ({ children, ...p }) => <select className={styles.select} {...p}>{children}</select>
+const DerivedFld = ({ value }) => <div className={styles.derivedField}>{value ?? '—'}</div>
+const Warning    = ({ children }) => <div className={styles.warning}>{children}</div>
 
-const NumInput = ({ ...props }) => (
-  <input type="number" min="0" className={styles.input} {...props} />
-)
-
-const SelectInput = ({ children, ...props }) => (
-  <select className={styles.select} {...props}>{children}</select>
-)
-
-const DerivedField = ({ value }) => (
-  <div className={styles.derivedField}>{value ?? '—'}</div>
-)
-
-const Warning = ({ children }) => (
-  <div className={styles.warning}>{children}</div>
-)
-
-// Confirm / trophy dialogs
 const Dialog = ({ title, body, confirmLabel, confirmDanger, onConfirm, onCancel }) => (
   <div className={styles.dialogBackdrop} onClick={e => { if (e.target === e.currentTarget) onCancel() }}>
     <div className={styles.dialog} role="dialog" aria-modal="true">
@@ -150,9 +153,7 @@ const Dialog = ({ title, body, confirmLabel, confirmDanger, onConfirm, onCancel 
         <button
           className={`${styles.dialogConfirm} ${confirmDanger ? styles.dialogConfirmDanger : ''}`}
           onClick={onConfirm}
-        >
-          {confirmLabel}
-        </button>
+        >{confirmLabel}</button>
       </div>
     </div>
   </div>
@@ -163,9 +164,7 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
     <div className={styles.dialog} role="dialog" aria-modal="true">
       <div className={styles.trophyIcon}>🏆</div>
       <h3 className={styles.dialogTitle}>Add to Trophy Cabinet?</h3>
-      <p className={styles.dialogBody}>
-        Add <strong>{competition}</strong> to your trophy cabinet for this season?
-      </p>
+      <p className={styles.dialogBody}>Add <strong>{competition}</strong> to your trophy cabinet for this season?</p>
       <div className={styles.dialogActions}>
         <button className={styles.dialogCancel} onClick={onSkip}>Skip</button>
         <button className={styles.dialogConfirm} onClick={onConfirm}>Add Trophy</button>
@@ -174,40 +173,109 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
   </div>
 )
 
-// Collapsible section
-const Section = ({ title, badge, defaultOpen = false, children }) => {
-  const [open, setOpen] = useState(defaultOpen)
+// ─── UCL PATH (read-only) ─────────────────────────────────────────────────────
+
+function UclPath({ s }) {
+  const isChampion  = s.uclResult === 'Champions'
+  const isRunnerUp  = s.uclResult === 'Runners-Up'
+  const reachedFinal = isChampion || isRunnerUp
+
+  const rounds = []
+  if (s.uclLeaguePhasePosition != null) {
+    rounds.push({
+      stage: 'Group',
+      abbr: 'LP',
+      score: `${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)} place`,
+      isLoss: false,
+    })
+  }
+  if (s.uclR16Opponent) rounds.push({ stage: 'R16', abbr: abbrev(s.uclR16Opponent), score: s.uclR16Score || '—', opponent: s.uclR16Opponent, isLoss: false })
+  if (s.uclQFOpponent)  rounds.push({ stage: 'QF',  abbr: abbrev(s.uclQFOpponent),  score: s.uclQFScore  || '—', opponent: s.uclQFOpponent,  isLoss: false })
+  if (s.uclSFOpponent)  rounds.push({ stage: 'SF',  abbr: abbrev(s.uclSFOpponent),  score: s.uclSFScore  || '—', opponent: s.uclSFOpponent,  isLoss: false })
+  if (reachedFinal) {
+    const opp = s.uclFinalOpponent || s.uclTournamentWinner || ''
+    rounds.push({
+      stage: 'Final',
+      abbr: abbrev(opp),
+      score: s.uclFinalScore || '—',
+      opponent: opp,
+      isLoss: isRunnerUp,
+      isWin: isChampion,
+    })
+  }
+
+  if (!rounds.length) return (
+    <p className={styles.dimText}>
+      {s.uclResult ? `Exited at ${s.uclResult}` : 'No UCL data recorded'}
+    </p>
+  )
+
   return (
-    <div className={styles.section}>
-      <button className={styles.sectionHeader} onClick={() => setOpen(v => !v)} aria-expanded={open}>
-        <div className={styles.sectionTitleRow}>
-          <span className={styles.sectionTitle}>{title}</span>
-          {badge && <span className={styles.sectionBadge}>{badge}</span>}
+    <div className={styles.uclPath}>
+      {rounds.map((r, i) => (
+        <div key={i} className={styles.uclNodeWrap}>
+          <div className={styles.uclNode}>
+            <div className={styles.uclStage}>{r.stage}</div>
+            <div className={`${styles.uclCrest} ${r.isLoss ? styles.uclCrestLoss : r.isWin ? styles.uclCrestWin : ''}`}>
+              {r.abbr}
+            </div>
+            <div className={`${styles.uclScore} ${r.isLoss ? styles.uclScoreLoss : styles.uclScorePass}`}>
+              {r.score}
+            </div>
+            {r.opponent && <div className={styles.uclOppName}>{r.opponent}</div>}
+          </div>
+          {i < rounds.length - 1 && <div className={styles.uclArrow}>›</div>}
         </div>
-        <svg
-          className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
-          width="16" height="16" viewBox="0 0 16 16" fill="none"
-        >
-          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-      {open && <div className={styles.sectionBody}>{children}</div>}
+      ))}
     </div>
   )
 }
 
-// Read-only stat row
-const StatRow = ({ label, value }) => (
-  <div className={styles.statRow}>
-    <span className={styles.statLabel}>{label}</span>
-    <span className={styles.statValue}>{value != null && value !== '' ? value : '—'}</span>
-  </div>
-)
+function abbrev(name) {
+  if (!name) return '?'
+  // Try to get meaningful 3-char abbrev
+  const words = name.trim().split(/\s+/)
+  if (words.length === 1) return name.slice(0, 3).toUpperCase()
+  if (words.length === 2) return (words[0][0] + words[1].slice(0,2)).toUpperCase()
+  return words.map(w => w[0]).join('').slice(0,3).toUpperCase()
+}
 
-// Read-only record bar (W/D/L etc.)
-const RecordBar = ({ children }) => (
-  <div className={styles.recordBar}>{children}</div>
-)
+// ─── TROPHY TILES (read-only) ─────────────────────────────────────────────────
+
+function TrophyTiles({ s }) {
+  const tiles = []
+  if (s.leaguePosition === 1 && s.leagueCompetition)
+    tiles.push({ key: 'lg', label: s.leagueCompetition, type: 'win', icon: '🏆' })
+  if (s.uclResult === 'Champions')
+    tiles.push({ key: 'ucl', label: 'UEFA Champions League', type: 'ucl', icon: '🏆' })
+  if (s.faCupResult === 'Winner')
+    tiles.push({ key: 'fa', label: 'FA Cup', type: 'cup', icon: '🏆' })
+  if (s.carabaoCupResult === 'Winner')
+    tiles.push({ key: 'cc', label: 'Carabao Cup', type: 'cup', icon: '🏆' })
+
+  // Runner-up
+  if (s.uclResult === 'Runners-Up') {
+    const opp = s.uclFinalOpponent || s.uclTournamentWinner || ''
+    tiles.push({
+      key: 'ucl-ru', label: 'UCL Final', type: 'ru', icon: '🥈',
+      sub: opp ? `Lost to ${opp}${s.uclFinalScore ? ` · ${s.uclFinalScore}` : ''}` : s.uclFinalScore || null
+    })
+  }
+
+  if (!tiles.length) return null
+
+  return (
+    <div className={styles.trophyTiles}>
+      {tiles.map(t => (
+        <div key={t.key} className={`${styles.trophyTile} ${styles['trophyTile_' + t.type]}`}>
+          <div className={styles.trophyIcon}>{t.icon}</div>
+          <div className={styles.trophyName}>{t.label}</div>
+          {t.sub && <div className={styles.trophySub}>{t.sub}</div>}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
@@ -216,29 +284,29 @@ const SeasonDetail = () => {
   const navigate  = useNavigate()
   const { activeGame, activeClub } = useApp()
 
-  const [season,  setSeason]  = useState(null)
+  const [season,   setSeason]   = useState(null)
   const [trophies, setTrophies] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [loadErr, setLoadErr] = useState(null)
+  const [loading,  setLoading]  = useState(true)
+  const [loadErr,  setLoadErr]  = useState(null)
 
-  // Edit state
-  const [editing,   setEditing]   = useState(false)
-  const [form,      setForm]      = useState(null)
-  const [origForm,  setOrigForm]  = useState(null)
-  const [saving,    setSaving]    = useState(false)
-  const [saveErr,   setSaveErr]   = useState(null)
+  const [editing,  setEditing]  = useState(false)
+  const [form,     setForm]     = useState(null)
+  const [origForm, setOrigForm] = useState(null)
+  const [saving,   setSaving]   = useState(false)
+  const [saveErr,  setSaveErr]  = useState(null)
 
-  // Dialog state
-  const [dlgDiscard,   setDlgDiscard]   = useState(false)
-  const [dlgComplete,  setDlgComplete]  = useState(false)
-  const [dlgUnlock,    setDlgUnlock]    = useState(false)
-  const [trophyQueue,  setTrophyQueue]  = useState([])
+  const [showLeagueRecord, setShowLeagueRecord] = useState(false)
+  const [showMDGrid,       setShowMDGrid]       = useState(false)
+
+  const [dlgDiscard,  setDlgDiscard]  = useState(false)
+  const [dlgComplete, setDlgComplete] = useState(false)
+  const [dlgUnlock,   setDlgUnlock]   = useState(false)
+  const [trophyQueue, setTrophyQueue] = useState([])
   const pendingTrophies = useRef([])
 
   const hasChanges = editing && form && origForm &&
     JSON.stringify(form) !== JSON.stringify(origForm)
 
-  // ── Load ──
   useEffect(() => {
     if (!activeGame)  { navigate('/');      return }
     if (!activeClub)  { navigate('/clubs'); return }
@@ -246,25 +314,18 @@ const SeasonDetail = () => {
   }, [seasonId])
 
   const load = async () => {
-    setLoading(true)
-    setLoadErr(null)
+    setLoading(true); setLoadErr(null)
     try {
-      const [s, t] = await Promise.all([
-        getSeason(seasonId),
-        getTrophiesForSeason(seasonId),
-      ])
+      const [s, t] = await Promise.all([getSeason(seasonId), getTrophiesForSeason(seasonId)])
       if (!s) { setLoadErr('Season not found.'); return }
-      setSeason(s)
-      setTrophies(t)
+      setSeason(s); setTrophies(t)
     } catch (e) {
-      console.error(e)
-      setLoadErr('Failed to load season.')
+      console.error(e); setLoadErr('Failed to load season.')
     } finally {
       setLoading(false)
     }
   }
 
-  // beforeunload guard
   useEffect(() => {
     if (!hasChanges) return
     const h = e => { e.preventDefault(); e.returnValue = '' }
@@ -272,19 +333,14 @@ const SeasonDetail = () => {
     return () => window.removeEventListener('beforeunload', h)
   }, [hasChanges])
 
-  // ── Edit mode ──
   const enterEdit = () => {
     const f = seasonToForm(season)
     setForm(f); setOrigForm(f); setSaveErr(null); setEditing(true)
   }
-
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
-
-  // ── Cancel ──
   const handleCancel = () => { hasChanges ? setDlgDiscard(true) : doDiscard() }
   const doDiscard = () => { setEditing(false); setForm(null); setDlgDiscard(false) }
 
-  // ── Save ──
   const handleSave = async () => {
     setSaving(true); setSaveErr(null)
     const existingComps = trophies.map(t => t.competition)
@@ -295,12 +351,8 @@ const SeasonDetail = () => {
       prompts.push({ competition: 'FA Cup' })
     if (form.carabaoCupResult === 'Winner' && !existingComps.includes('Carabao Cup'))
       prompts.push({ competition: 'Carabao Cup' })
-
     if (prompts.length > 0) {
-      setSaving(false)
-      pendingTrophies.current = []
-      setTrophyQueue(prompts)
-      return
+      setSaving(false); pendingTrophies.current = []; setTrophyQueue(prompts); return
     }
     await doSave([])
   }
@@ -309,78 +361,60 @@ const SeasonDetail = () => {
     const queue = [...trophyQueue]
     const current = queue.shift()
     if (accepted) pendingTrophies.current = [...pendingTrophies.current, current]
-
-    if (queue.length > 0) {
-      setTrophyQueue(queue)
-    } else {
-      setTrophyQueue([])
-      await doSave([...pendingTrophies.current])
-      pendingTrophies.current = []
-    }
+    if (queue.length > 0) { setTrophyQueue(queue) }
+    else { setTrophyQueue([]); await doSave([...pendingTrophies.current]); pendingTrophies.current = [] }
   }
 
   const doSave = async (trophiesToAdd) => {
     setSaving(true)
     try {
       await updateSeason(seasonId, formToDoc(form))
-      for (const t of trophiesToAdd) {
-        await addTrophy({ clubId: season.clubId, seasonId, competition: t.competition })
-      }
+      for (const t of trophiesToAdd) await addTrophy({ clubId: season.clubId, seasonId, competition: t.competition })
       await load()
       setEditing(false); setForm(null)
     } catch (e) {
-      console.error(e)
-      setSaveErr('Couldn\'t save. Try again.')
+      console.error(e); setSaveErr('Couldn\'t save. Try again.')
     } finally {
       setSaving(false)
     }
   }
 
-  // ── Complete / Unlock ──
   const doComplete = async () => {
     try { await updateSeason(seasonId, { isComplete: true }); await load() }
-    catch (e) { console.error(e) }
-    finally { setDlgComplete(false) }
+    catch (e) { console.error(e) } finally { setDlgComplete(false) }
   }
 
   const doUnlock = async () => {
     try { await updateSeason(seasonId, { isComplete: false }); await load() }
-    catch (e) { console.error(e) }
-    finally { setDlgUnlock(false) }
+    catch (e) { console.error(e) } finally { setDlgUnlock(false) }
   }
 
-  // ── Key moments ──
   const addMoment    = () => form.keyMoments.length < 10 && set('keyMoments', [...form.keyMoments, ''])
   const updateMoment = (i, v) => { const a=[...form.keyMoments]; a[i]=v; set('keyMoments', a) }
   const removeMoment = (i) => { const a=form.keyMoments.filter((_,j)=>j!==i); set('keyMoments', a.length ? a : ['']) }
 
-  // ── Render ──
-
-  if (loading) return (
-    <div className={styles.loadWrap}><div className={styles.spinner} /></div>
-  )
-
+  if (loading) return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
   if (loadErr) return (
     <div className={styles.errorWrap}>
       <p className={styles.errorText}>{loadErr}</p>
-      <button className={styles.backBtn} onClick={() => navigate('/seasons')}>← Back to Seasons</button>
+      <button className={styles.backBtn} onClick={() => navigate('/seasons')}>← Back</button>
     </div>
   )
 
   const s = season
   const f = form
 
-  // Derived live values
-  const lGD  = editing ? gd(f.leagueGF, f.leagueGA)   : gd(s.leagueGF, s.leagueGA)
-  const lGPG = editing ? gpg(f.leagueGF, f.leagueP)   : gpg(s.leagueGF, s.leagueP)
-  const uGD  = editing ? gd(f.uclLPGF, f.uclLPGA)     : gd(s.uclLPGF, s.uclLPGA)
+  const lGD   = editing ? gd(f.leagueGF, f.leagueGA) : gd(s.leagueGF, s.leagueGA)
+  const uGD   = editing ? gd(f.uclLPGF, f.uclLPGA)   : gd(s.uclLPGF, s.uclLPGA)
   const lWarn = editing ? leagueWarnings(f) : []
   const uWarn = editing ? uclWarnings(f)    : []
 
-  // Dynasty display
-  const dynastyDisplay = s.dynastyScore != null
-    ? String(s.dynastyScore)
-    : null
+  // ── Hero content ──
+  const headline = s.seasonHeadline ||
+    (s.leaguePosition === 1 ? `${s.leagueCompetition || 'League'} champions — ${s.label}` : s.label)
+
+  const hasTrophies = s.leaguePosition === 1 || s.uclResult === 'Champions' ||
+    s.uclResult === 'Runners-Up' || s.faCupResult === 'Winner' || s.carabaoCupResult === 'Winner'
 
   return (
     <div className={styles.page}>
@@ -396,13 +430,11 @@ const SeasonDetail = () => {
               <path d="M11 4L5 9l6 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-
-          <div className={styles.topBarCenter}>
+          <div className={styles.topCenter}>
             <span className={styles.topLabel}>{s.label}</span>
-            <span className={styles.topYear}>{s.year}</span>
+            {s.year && <span className={styles.topYear}>{s.year}</span>}
           </div>
-
-          <div className={styles.topBarRight}>
+          <div className={styles.topRight}>
             {s.isComplete
               ? <span className={styles.badgeComplete}>Complete</span>
               : <span className={styles.badgeLive}>Live</span>
@@ -413,18 +445,11 @@ const SeasonDetail = () => {
         {/* ── Edit bar ── */}
         {editing && (
           <div className={styles.editBar}>
-            <span className={styles.editIndicator}>
-              <span className={styles.editDot} /> Editing
-            </span>
+            <span className={styles.editIndicator}><span className={styles.editDot} /> Editing</span>
             <div className={styles.editActions}>
-              <button className={styles.cancelEditBtn} onClick={handleCancel} disabled={saving}>
-                Cancel
-              </button>
+              <button className={styles.cancelEditBtn} onClick={handleCancel} disabled={saving}>Cancel</button>
               <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
-                {saving
-                  ? <><span className={styles.spinnerSm} /> Saving…</>
-                  : 'Save Changes'
-                }
+                {saving ? <><span className={styles.spinnerSm} /> Saving…</> : 'Save'}
               </button>
             </div>
           </div>
@@ -434,376 +459,413 @@ const SeasonDetail = () => {
         {s.isComplete && !editing && (
           <div className={styles.lockedBar}>
             <span className={styles.lockedText}>
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
                 <rect x="1.5" y="5.5" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
                 <path d="M3.5 5.5V4a3 3 0 0 1 6 0v1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
               </svg>
-              Season locked
+              Locked
             </span>
-            <button className={styles.unlockBtn} onClick={() => setDlgUnlock(true)}>Unlock</button>
+            <button className={styles.unlockBtn} onClick={() => setDlgUnlock(true)}>Unlock to edit</button>
           </div>
         )}
 
-        {/* ── Action toolbar (read-only, not locked) ── */}
+        {/* ── Action toolbar ── */}
         {!s.isComplete && !editing && (
           <div className={styles.toolbar}>
             <button className={styles.editBtn} onClick={enterEdit}>
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
                 <path d="M8.5 2.5l2 2-6 6H2.5v-2l6-6z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Edit Season
+              Edit season
             </button>
-            <button className={styles.completeBtn} onClick={() => setDlgComplete(true)}>
-              Mark Complete
-            </button>
+            <button className={styles.completeBtn} onClick={() => setDlgComplete(true)}>Mark complete</button>
           </div>
         )}
 
         {saveErr && <div className={styles.saveErr}>{saveErr}</div>}
 
-        {/* ══ SECTIONS ══════════════════════════════════════════════ */}
-        <div className={styles.sections}>
+        {/* ════════════════════════════════════════════════════════════
+            READ-ONLY STORY VIEW
+        ════════════════════════════════════════════════════════════ */}
+        {!editing && (
+          <>
+            {/* ── HERO ── */}
+            <div className={styles.hero}>
+              <p className={styles.heroEyebrow}>{s.label}{s.year ? ` · ${s.year}` : ''} · {s.leagueCompetition || 'Season'}</p>
+              <h1 className={styles.heroHeadline}>{headline}</h1>
+              {s.narrativeText && (
+                <p className={styles.heroLede}>{s.narrativeText.split('\n')[0]}</p>
+              )}
+              {hasTrophies && <TrophyTiles s={s} />}
+            </div>
 
-          {/* ── Identity ── */}
-          <Section title="Identity" defaultOpen>
-            {editing ? (
-              <div className={styles.fields}>
-                <div className={styles.row2}>
-                  <FieldGroup label="Label">
-                    <TextInput value={f.label} onChange={e => set('label', e.target.value.toUpperCase())} maxLength={4} placeholder="S1" />
-                  </FieldGroup>
-                  <FieldGroup label="Year">
-                    <TextInput value={f.year} onChange={e => set('year', e.target.value)} maxLength={7} placeholder="2026/27" />
-                  </FieldGroup>
+            {/* ── THE STORY ── */}
+            {s.narrativeText && (
+              <>
+                <SectionRule label="The story" />
+                <div className={styles.storyBody}>
+                  {s.narrativeText.split('\n').filter(Boolean).map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
                 </div>
-                <FieldGroup label="League Competition">
-                  <SelectInput value={f.leagueCompetition} onChange={e => set('leagueCompetition', e.target.value)}>
-                    {LEAGUE_OPTIONS.map(l => <option key={l} value={l}>{l}</option>)}
-                  </SelectInput>
-                </FieldGroup>
-                <div className={styles.dynastyReadOnly}>
-                  <span className={styles.dynastyROLabel}>Dynasty Rating</span>
-                  <span className={styles.dynastyROValue}>
-                    {dynastyDisplay ?? <em>Pending</em>}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className={styles.stats}>
-                <StatRow label="Label" value={<span className={styles.mono}>{s.label}</span>} />
-                <StatRow label="Year" value={s.year} />
-                <StatRow label="Competition" value={s.leagueCompetition} />
-                <div className={styles.dynastyRow}>
-                  <span className={styles.statLabel}>Dynasty Rating</span>
-                  {dynastyDisplay
-                    ? <span className={styles.dynastyScore}>{dynastyDisplay}</span>
-                    : <span className={styles.dynastyPending}>Rating Pending</span>
-                  }
-                </div>
-              </div>
+              </>
             )}
-          </Section>
 
-          {/* ── League ── */}
-          <Section
-            title="League Summary"
-            badge={s.leaguePosition ? `${s.leaguePosition}${ordinal(s.leaguePosition)}` : null}
-          >
-            {editing ? (
-              <div className={styles.fields}>
-                <div className={styles.row2}>
-                  <FieldGroup label="Position">
-                    <NumInput value={f.leaguePosition} onChange={e => set('leaguePosition', e.target.value)} placeholder="1" />
-                  </FieldGroup>
-                  <FieldGroup label="Points">
-                    <NumInput value={f.leaguePts} onChange={e => set('leaguePts', e.target.value)} placeholder="85" />
-                  </FieldGroup>
-                </div>
-                <div className={styles.row4}>
-                  <FieldGroup label="P"><NumInput value={f.leagueP}   onChange={e => set('leagueP',  e.target.value)} placeholder="38" /></FieldGroup>
-                  <FieldGroup label="W"><NumInput value={f.leagueW}   onChange={e => set('leagueW',  e.target.value)} /></FieldGroup>
-                  <FieldGroup label="D"><NumInput value={f.leagueD}   onChange={e => set('leagueD',  e.target.value)} /></FieldGroup>
-                  <FieldGroup label="L"><NumInput value={f.leagueL}   onChange={e => set('leagueL',  e.target.value)} /></FieldGroup>
-                </div>
-                <div className={styles.row3}>
-                  <FieldGroup label="GF"><NumInput value={f.leagueGF} onChange={e => set('leagueGF', e.target.value)} /></FieldGroup>
-                  <FieldGroup label="GA"><NumInput value={f.leagueGA} onChange={e => set('leagueGA', e.target.value)} /></FieldGroup>
-                  <FieldGroup label="GD"><DerivedField value={fmtGD(lGD)} /></FieldGroup>
-                </div>
-                {lGPG && (
-                  <div className={styles.derivedRow}>
-                    <span className={styles.derivedLabel}>Goals / Game</span>
-                    <span className={styles.derivedValue}>{lGPG}</span>
-                  </div>
-                )}
-                {lWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
-              </div>
-            ) : (
-              <div className={styles.stats}>
-                {s.leagueP != null ? (
-                  <RecordBar>
-                    <span>{s.leagueW}W {s.leagueD}D {s.leagueL}L</span>
-                    <span className={styles.barDot}>·</span>
-                    <span>{s.leagueGF}–{s.leagueGA} ({fmtGD(gd(s.leagueGF, s.leagueGA))})</span>
-                    <span className={styles.barDot}>·</span>
-                    <span className={styles.barBold}>{s.leaguePts} pts</span>
-                  </RecordBar>
-                ) : null}
-                {lGPG && <StatRow label="Goals / Game" value={lGPG} />}
-                {s.leaguePosition && <StatRow label="Final Position" value={`${s.leaguePosition}${ordinal(s.leaguePosition)}`} />}
-              </div>
-            )}
-          </Section>
-
-          {/* ── UCL ── */}
-          <Section
-            title="UCL"
-            badge={s.uclResult || null}
-          >
-            {editing ? (
-              <div className={styles.fields}>
-                <label className={styles.toggleRow}>
-                  <span className={styles.fieldLabel}>Entered UCL</span>
-                  <button
-                    type="button"
-                    className={`${styles.toggle} ${f.uclEntered ? styles.toggleOn : ''}`}
-                    onClick={() => set('uclEntered', !f.uclEntered)}
-                    aria-pressed={f.uclEntered}
-                  >
-                    <span className={styles.toggleThumb} />
-                  </button>
-                </label>
-
-                {f.uclEntered && (
-                  <>
-                    <div className={styles.row2}>
-                      <FieldGroup label="Result">
-                        <SelectInput value={f.uclResult} onChange={e => set('uclResult', e.target.value)}>
-                          <option value="">— Select —</option>
-                          {UCL_RESULTS.map(r => <option key={r} value={r}>{r}</option>)}
-                        </SelectInput>
-                      </FieldGroup>
-                      <FieldGroup label="Tournament Winner">
-                        <TextInput value={f.uclTournamentWinner} onChange={e => set('uclTournamentWinner', e.target.value)} placeholder="Real Madrid" />
-                      </FieldGroup>
-                    </div>
-
-                    <p className={styles.subHeading}>League Phase</p>
-                    <div className={styles.row2}>
-                      <FieldGroup label="Finish">
-                        <NumInput value={f.uclLeaguePhasePosition} onChange={e => set('uclLeaguePhasePosition', e.target.value)} placeholder="6" min="1" max="36" />
-                      </FieldGroup>
-                      <FieldGroup label="Pts">
-                        <NumInput value={f.uclLPPts} onChange={e => set('uclLPPts', e.target.value)} placeholder="16" />
-                      </FieldGroup>
-                    </div>
-                    <div className={styles.row4}>
-                      <FieldGroup label="P"><NumInput value={f.uclLPP} onChange={e => set('uclLPP', e.target.value)} placeholder="8" /></FieldGroup>
-                      <FieldGroup label="W"><NumInput value={f.uclLPW} onChange={e => set('uclLPW', e.target.value)} /></FieldGroup>
-                      <FieldGroup label="D"><NumInput value={f.uclLPD} onChange={e => set('uclLPD', e.target.value)} /></FieldGroup>
-                      <FieldGroup label="L"><NumInput value={f.uclLPL} onChange={e => set('uclLPL', e.target.value)} /></FieldGroup>
-                    </div>
-                    <div className={styles.row3}>
-                      <FieldGroup label="GF"><NumInput value={f.uclLPGF} onChange={e => set('uclLPGF', e.target.value)} /></FieldGroup>
-                      <FieldGroup label="GA"><NumInput value={f.uclLPGA} onChange={e => set('uclLPGA', e.target.value)} /></FieldGroup>
-                      <FieldGroup label="GD"><DerivedField value={fmtGD(uGD)} /></FieldGroup>
-                    </div>
-                    {uWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className={styles.stats}>
-                {!s.uclEntered ? (
-                  <span className={styles.dimText}>Did not enter UCL</span>
-                ) : (
-                  <>
-                    {s.uclResult && (
-                      <div className={styles.uclResultRow}>
-                        <span className={`${styles.uclBadge} ${s.uclResult === 'Champions' ? styles.uclChampions : s.uclResult === 'Runners-Up' ? styles.uclRunnerUp : styles.uclDefault}`}>
-                          {s.uclResult === 'Champions' ? '★ ' : ''}{s.uclResult}
-                        </span>
-                        {s.uclTournamentWinner && s.uclResult !== 'Champions' && (
-                          <span className={styles.dimText}>Won by {s.uclTournamentWinner}</span>
-                        )}
-                      </div>
-                    )}
-                    {s.uclLeaguePhasePosition && (
-                      <StatRow label="LP Finish" value={`${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)}`} />
-                    )}
-                    {s.uclLPP != null && (
-                      <RecordBar>
-                        <span>{s.uclLPW}W {s.uclLPD}D {s.uclLPL}L</span>
-                        <span className={styles.barDot}>·</span>
-                        <span>{s.uclLPGF}–{s.uclLPGA}</span>
-                        <span className={styles.barDot}>·</span>
-                        <span className={styles.barBold}>{s.uclLPPts} pts</span>
-                      </RecordBar>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </Section>
-
-          {/* ── Cups ── */}
-          <Section title="Cup Results">
-            {editing ? (
-              <div className={styles.fields}>
-                <p className={styles.subHeading}>FA Cup</p>
-                <div className={styles.row2}>
-                  <FieldGroup label="Result">
-                    <SelectInput value={f.faCupResult} onChange={e => set('faCupResult', e.target.value)}>
-                      <option value="">— Select —</option>
-                      {CUP_ROUNDS.map(r => <option key={r} value={r}>{r}</option>)}
-                    </SelectInput>
-                  </FieldGroup>
-                  {(f.faCupResult === 'Winner' || f.faCupResult === 'Final') && (
-                    <FieldGroup label="Final Opponent">
-                      <TextInput value={f.faCupFinalOpponent} onChange={e => set('faCupFinalOpponent', e.target.value)} placeholder="Arsenal" />
-                    </FieldGroup>
-                  )}
-                </div>
-                {f.faCupResult && f.faCupResult !== 'Winner' && f.faCupResult !== 'Did Not Enter' && (
-                  <FieldGroup label="Tournament Winner">
-                    <TextInput value={f.faCupWinner} onChange={e => set('faCupWinner', e.target.value)} placeholder="Arsenal" />
-                  </FieldGroup>
-                )}
-
-                <p className={styles.subHeading} style={{ marginTop: 4 }}>Carabao Cup</p>
-                <div className={styles.row2}>
-                  <FieldGroup label="Result">
-                    <SelectInput value={f.carabaoCupResult} onChange={e => set('carabaoCupResult', e.target.value)}>
-                      <option value="">— Select —</option>
-                      {CUP_ROUNDS.map(r => <option key={r} value={r}>{r}</option>)}
-                    </SelectInput>
-                  </FieldGroup>
-                  {(f.carabaoCupResult === 'Winner' || f.carabaoCupResult === 'Final') && (
-                    <FieldGroup label="Final Opponent">
-                      <TextInput value={f.carabaoCupFinalOpponent} onChange={e => set('carabaoCupFinalOpponent', e.target.value)} placeholder="Tottenham" />
-                    </FieldGroup>
-                  )}
-                </div>
-                {f.carabaoCupResult && f.carabaoCupResult !== 'Winner' && f.carabaoCupResult !== 'Did Not Enter' && (
-                  <FieldGroup label="Tournament Winner">
-                    <TextInput value={f.carabaoCupWinner} onChange={e => set('carabaoCupWinner', e.target.value)} placeholder="Liverpool" />
-                  </FieldGroup>
-                )}
-              </div>
-            ) : (
-              <div className={styles.stats}>
-                <CupRow label="FA Cup" result={s.faCupResult} opponent={s.faCupFinalOpponent} winner={s.faCupWinner} />
-                <CupRow label="Carabao Cup" result={s.carabaoCupResult} opponent={s.carabaoCupFinalOpponent} winner={s.carabaoCupWinner} />
-              </div>
-            )}
-          </Section>
-
-          {/* ── Narrative ── */}
-          <Section title="Narrative & Key Moments">
-            {editing ? (
-              <div className={styles.fields}>
-                <FieldGroup label="Season Narrative">
-                  <textarea
-                    className={styles.textarea}
-                    value={f.narrativeText}
-                    onChange={e => set('narrativeText', e.target.value)}
-                    placeholder="Write your season story…"
-                    rows={5}
-                  />
-                </FieldGroup>
-
-                <div className={styles.momentsHeader}>
-                  <p className={styles.subHeading}>Key Moments</p>
-                  <span className={styles.momentsCount}>{f.keyMoments.filter(Boolean).length}/10</span>
-                </div>
-                <div className={styles.momentsList}>
-                  {f.keyMoments.map((m, i) => (
-                    <div key={i} className={styles.momentRow}>
-                      <span className={styles.momentNum}>{i + 1}</span>
-                      <input
-                        className={styles.input}
-                        value={m}
-                        onChange={e => updateMoment(i, e.target.value)}
-                        placeholder="e.g. Rangers shock exit — 1–5 QF first leg"
-                      />
-                      <button
-                        type="button"
-                        className={styles.momentRemove}
-                        onClick={() => removeMoment(i)}
-                        aria-label="Remove"
-                      >
-                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                          <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                        </svg>
-                      </button>
+            {/* ── KEY MOMENTS ── */}
+            {s.keyMoments?.length > 0 && (
+              <>
+                <SectionRule label="Key moments" />
+                <div className={styles.moments}>
+                  {s.keyMoments.map((m, i) => (
+                    <div key={i} className={styles.moment}>
+                      <div className={styles.momentGem}>◆</div>
+                      <div className={styles.momentText}>{m}</div>
                     </div>
                   ))}
-                  {f.keyMoments.length < 10 && (
-                    <button type="button" className={styles.addMoment} onClick={addMoment}>
-                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                        <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                </div>
+              </>
+            )}
+
+            {/* ── THE LEAGUE ── */}
+            {s.leaguePosition != null && (
+              <>
+                <SectionRule label="The league" />
+                <div className={styles.leagueStatement}>
+                  {s.leaguePosition === 1
+                    ? `${s.leagueCompetition || 'League'} champions.`
+                    : `Finished ${s.leaguePosition}${ordinal(s.leaguePosition)} in the ${s.leagueCompetition || 'league'}.`
+                  }
+                  {s.leaguePts ? ` ${s.leaguePts} points.` : ''}
+                </div>
+                <button
+                  className={styles.toggleBtn}
+                  onClick={() => setShowLeagueRecord(v => !v)}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                    style={{ transform: showLeagueRecord ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {showLeagueRecord ? 'Hide' : 'Full season record'}
+                </button>
+                {showLeagueRecord && s.leagueP != null && (
+                  <div className={styles.recordGrid}>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueP}</div><div className={styles.rcLbl}>P</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueW}</div><div className={styles.rcLbl}>W</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueD}</div><div className={styles.rcLbl}>D</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueL}</div><div className={styles.rcLbl}>L</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueGF}</div><div className={styles.rcLbl}>GF</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leagueGA}</div><div className={styles.rcLbl}>GA</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{fmtGD(lGD)}</div><div className={styles.rcLbl}>GD</div></div>
+                    <div className={styles.recordCell}><div className={styles.rcVal}>{s.leaguePts}</div><div className={styles.rcLbl}>Pts</div></div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ── UCL JOURNEY ── */}
+            {s.uclEntered && (
+              <>
+                <SectionRule label="UCL journey" />
+                {s.uclResult && (
+                  <p className={styles.uclOpener}>
+                    {s.uclResult === 'Champions'
+                      ? `Champions of Europe.${s.uclFinalOpponent ? ` ${s.uclFinalOpponent} defeated in the final.` : ''}`
+                      : s.uclResult === 'Runners-Up'
+                        ? `Reached the final — beaten${s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''}${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
+                        : `Exited at the ${s.uclResult} stage.`
+                    }
+                  </p>
+                )}
+                <UclPath s={s} />
+                {s.uclLPP != null && (
+                  <>
+                    <button className={styles.toggleBtn} onClick={() => setShowMDGrid(v => !v)}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                        style={{ transform: showMDGrid ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                        <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Add moment
+                      {showMDGrid ? 'Hide group stage' : 'Group stage record'}
                     </button>
+                    {showMDGrid && (
+                      <div className={styles.recordGrid}>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPP}</div><div className={styles.rcLbl}>P</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPW}</div><div className={styles.rcLbl}>W</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPD}</div><div className={styles.rcLbl}>D</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPL}</div><div className={styles.rcLbl}>L</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPGF}</div><div className={styles.rcLbl}>GF</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPGA}</div><div className={styles.rcLbl}>GA</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{fmtGD(uGD)}</div><div className={styles.rcLbl}>GD</div></div>
+                        <div className={styles.recordCell}><div className={styles.rcVal}>{s.uclLPPts}</div><div className={styles.rcLbl}>Pts</div></div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {/* ── CUP RESULTS ── */}
+            {(s.faCupResult || s.carabaoCupResult) && (
+              <>
+                <SectionRule label="Cups" />
+                <div className={styles.cupRows}>
+                  {s.faCupResult && s.faCupResult !== 'Did Not Enter' && (
+                    <CupRow label="FA Cup" result={s.faCupResult} opponent={s.faCupFinalOpponent} winner={s.faCupWinner} />
+                  )}
+                  {s.carabaoCupResult && s.carabaoCupResult !== 'Did Not Enter' && (
+                    <CupRow label="Carabao Cup" result={s.carabaoCupResult} opponent={s.carabaoCupFinalOpponent} winner={s.carabaoCupWinner} />
                   )}
                 </div>
+              </>
+            )}
+
+            {/* ── DYNASTY VERDICT ── */}
+            {(s.dynastyScore != null || s.dynastyVerdict) && (
+              <>
+                <SectionRule label="Dynasty verdict" />
+                {s.dynastyVerdict && (
+                  <div className={styles.dynastyVerdict}>"{s.dynastyVerdict}"</div>
+                )}
+                {s.dynastyScore != null && (
+                  <div className={styles.dynastyScoreLine}>
+                    <span className={styles.dynastyNum}>{s.dynastyScore}</span>
+                    <span className={styles.dynastyOf}>/ 100</span>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════
+            EDIT FORM
+        ════════════════════════════════════════════════════════════ */}
+        {editing && f && (
+          <div className={styles.editForm}>
+
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>Identity</p>
+              <div className={styles.row2}>
+                <FieldGroup label="Label">
+                  <TxtInput value={f.label} onChange={e => set('label', e.target.value.toUpperCase())} maxLength={4} placeholder="S1" />
+                </FieldGroup>
+                <FieldGroup label="Year">
+                  <TxtInput value={f.year} onChange={e => set('year', e.target.value)} maxLength={7} placeholder="2026/27" />
+                </FieldGroup>
               </div>
-            ) : (
-              <div className={styles.stats}>
-                {s.narrativeText
-                  ? <p className={styles.narrativeText}>{s.narrativeText}</p>
-                  : <span className={styles.dimText}>No narrative yet</span>
-                }
-                {s.keyMoments?.length > 0 && (
-                  <ul className={styles.momentReadList}>
-                    {s.keyMoments.map((m, i) => (
-                      <li key={i} className={styles.momentReadItem}>
-                        <span className={styles.momentBullet}>·</span>{m}
-                      </li>
-                    ))}
-                  </ul>
+              <FieldGroup label="League">
+                <SelInput value={f.leagueCompetition} onChange={e => set('leagueCompetition', e.target.value)}>
+                  {LEAGUE_OPTIONS.map(l => <option key={l} value={l}>{l}</option>)}
+                </SelInput>
+              </FieldGroup>
+              <FieldGroup label="Season headline" hint="One-line summary shown on the Seasons list">
+                <TxtInput value={f.seasonHeadline} onChange={e => set('seasonHeadline', e.target.value)} placeholder="The founding year — title won, final lost 1–5" />
+              </FieldGroup>
+            </div>
+
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>League record</p>
+              <div className={styles.row2}>
+                <FieldGroup label="Position"><NumInput value={f.leaguePosition} onChange={e => set('leaguePosition', e.target.value)} placeholder="1" /></FieldGroup>
+                <FieldGroup label="Points"><NumInput value={f.leaguePts} onChange={e => set('leaguePts', e.target.value)} placeholder="85" /></FieldGroup>
+              </div>
+              <div className={styles.row4}>
+                <FieldGroup label="P"><NumInput value={f.leagueP}  onChange={e => set('leagueP',  e.target.value)} placeholder="38" /></FieldGroup>
+                <FieldGroup label="W"><NumInput value={f.leagueW}  onChange={e => set('leagueW',  e.target.value)} /></FieldGroup>
+                <FieldGroup label="D"><NumInput value={f.leagueD}  onChange={e => set('leagueD',  e.target.value)} /></FieldGroup>
+                <FieldGroup label="L"><NumInput value={f.leagueL}  onChange={e => set('leagueL',  e.target.value)} /></FieldGroup>
+              </div>
+              <div className={styles.row3}>
+                <FieldGroup label="GF"><NumInput value={f.leagueGF} onChange={e => set('leagueGF', e.target.value)} /></FieldGroup>
+                <FieldGroup label="GA"><NumInput value={f.leagueGA} onChange={e => set('leagueGA', e.target.value)} /></FieldGroup>
+                <FieldGroup label="GD"><DerivedFld value={fmtGD(lGD)} /></FieldGroup>
+              </div>
+              {lWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
+            </div>
+
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>UCL</p>
+              <label className={styles.toggleRow}>
+                <span className={styles.fieldLabel}>Entered UCL</span>
+                <button
+                  type="button"
+                  className={`${styles.toggle} ${f.uclEntered ? styles.toggleOn : ''}`}
+                  onClick={() => set('uclEntered', !f.uclEntered)}
+                  aria-pressed={f.uclEntered}
+                ><span className={styles.toggleThumb} /></button>
+              </label>
+              {f.uclEntered && (
+                <>
+                  <div className={styles.row2}>
+                    <FieldGroup label="Result">
+                      <SelInput value={f.uclResult} onChange={e => set('uclResult', e.target.value)}>
+                        <option value="">— Select —</option>
+                        {UCL_RESULTS.map(r => <option key={r} value={r}>{r}</option>)}
+                      </SelInput>
+                    </FieldGroup>
+                    <FieldGroup label="Tournament winner">
+                      <TxtInput value={f.uclTournamentWinner} onChange={e => set('uclTournamentWinner', e.target.value)} placeholder="Real Madrid" />
+                    </FieldGroup>
+                  </div>
+                  {(f.uclResult === 'Champions' || f.uclResult === 'Runners-Up') && (
+                    <div className={styles.row2}>
+                      <FieldGroup label="Final opponent">
+                        <TxtInput value={f.uclFinalOpponent} onChange={e => set('uclFinalOpponent', e.target.value)} placeholder="Inter Milan" />
+                      </FieldGroup>
+                      <FieldGroup label="Final score">
+                        <TxtInput value={f.uclFinalScore} onChange={e => set('uclFinalScore', e.target.value)} placeholder="2–1" />
+                      </FieldGroup>
+                    </div>
+                  )}
+                  <p className={styles.subHeading}>Knockout opponents</p>
+                  <div className={styles.row2}>
+                    <FieldGroup label="R16 opponent"><TxtInput value={f.uclR16Opponent} onChange={e => set('uclR16Opponent', e.target.value)} placeholder="Bayern Munich" /></FieldGroup>
+                    <FieldGroup label="R16 agg score"><TxtInput value={f.uclR16Score} onChange={e => set('uclR16Score', e.target.value)} placeholder="3–1" /></FieldGroup>
+                  </div>
+                  <div className={styles.row2}>
+                    <FieldGroup label="QF opponent"><TxtInput value={f.uclQFOpponent} onChange={e => set('uclQFOpponent', e.target.value)} placeholder="Dortmund" /></FieldGroup>
+                    <FieldGroup label="QF agg score"><TxtInput value={f.uclQFScore} onChange={e => set('uclQFScore', e.target.value)} placeholder="4–2" /></FieldGroup>
+                  </div>
+                  <div className={styles.row2}>
+                    <FieldGroup label="SF opponent"><TxtInput value={f.uclSFOpponent} onChange={e => set('uclSFOpponent', e.target.value)} placeholder="Inter Milan" /></FieldGroup>
+                    <FieldGroup label="SF agg score"><TxtInput value={f.uclSFScore} onChange={e => set('uclSFScore', e.target.value)} placeholder="3–2" /></FieldGroup>
+                  </div>
+                  <p className={styles.subHeading}>League phase</p>
+                  <div className={styles.row2}>
+                    <FieldGroup label="LP finish"><NumInput value={f.uclLeaguePhasePosition} onChange={e => set('uclLeaguePhasePosition', e.target.value)} placeholder="6" min="1" max="36" /></FieldGroup>
+                    <FieldGroup label="LP pts"><NumInput value={f.uclLPPts} onChange={e => set('uclLPPts', e.target.value)} placeholder="16" /></FieldGroup>
+                  </div>
+                  <div className={styles.row4}>
+                    <FieldGroup label="P"><NumInput value={f.uclLPP} onChange={e => set('uclLPP', e.target.value)} placeholder="8" /></FieldGroup>
+                    <FieldGroup label="W"><NumInput value={f.uclLPW} onChange={e => set('uclLPW', e.target.value)} /></FieldGroup>
+                    <FieldGroup label="D"><NumInput value={f.uclLPD} onChange={e => set('uclLPD', e.target.value)} /></FieldGroup>
+                    <FieldGroup label="L"><NumInput value={f.uclLPL} onChange={e => set('uclLPL', e.target.value)} /></FieldGroup>
+                  </div>
+                  <div className={styles.row3}>
+                    <FieldGroup label="GF"><NumInput value={f.uclLPGF} onChange={e => set('uclLPGF', e.target.value)} /></FieldGroup>
+                    <FieldGroup label="GA"><NumInput value={f.uclLPGA} onChange={e => set('uclLPGA', e.target.value)} /></FieldGroup>
+                    <FieldGroup label="GD"><DerivedFld value={fmtGD(uGD)} /></FieldGroup>
+                  </div>
+                  {uWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
+                </>
+              )}
+            </div>
+
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>Cup results</p>
+              <p className={styles.subHeading}>FA Cup</p>
+              <div className={styles.row2}>
+                <FieldGroup label="Result">
+                  <SelInput value={f.faCupResult} onChange={e => set('faCupResult', e.target.value)}>
+                    <option value="">— Select —</option>
+                    {CUP_ROUNDS.map(r => <option key={r} value={r}>{r}</option>)}
+                  </SelInput>
+                </FieldGroup>
+                {(f.faCupResult === 'Winner' || f.faCupResult === 'Final') && (
+                  <FieldGroup label="Final opponent">
+                    <TxtInput value={f.faCupFinalOpponent} onChange={e => set('faCupFinalOpponent', e.target.value)} placeholder="Arsenal" />
+                  </FieldGroup>
                 )}
               </div>
-            )}
-          </Section>
+              {f.faCupResult && f.faCupResult !== 'Winner' && f.faCupResult !== 'Did Not Enter' && (
+                <FieldGroup label="Tournament winner">
+                  <TxtInput value={f.faCupWinner} onChange={e => set('faCupWinner', e.target.value)} placeholder="Arsenal" />
+                </FieldGroup>
+              )}
+              <p className={styles.subHeading} style={{ marginTop: 4 }}>Carabao Cup</p>
+              <div className={styles.row2}>
+                <FieldGroup label="Result">
+                  <SelInput value={f.carabaoCupResult} onChange={e => set('carabaoCupResult', e.target.value)}>
+                    <option value="">— Select —</option>
+                    {CUP_ROUNDS.map(r => <option key={r} value={r}>{r}</option>)}
+                  </SelInput>
+                </FieldGroup>
+                {(f.carabaoCupResult === 'Winner' || f.carabaoCupResult === 'Final') && (
+                  <FieldGroup label="Final opponent">
+                    <TxtInput value={f.carabaoCupFinalOpponent} onChange={e => set('carabaoCupFinalOpponent', e.target.value)} placeholder="Tottenham" />
+                  </FieldGroup>
+                )}
+              </div>
+              {f.carabaoCupResult && f.carabaoCupResult !== 'Winner' && f.carabaoCupResult !== 'Did Not Enter' && (
+                <FieldGroup label="Tournament winner">
+                  <TxtInput value={f.carabaoCupWinner} onChange={e => set('carabaoCupWinner', e.target.value)} placeholder="Liverpool" />
+                </FieldGroup>
+              )}
+            </div>
 
-        </div>{/* end sections */}
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>Story & moments</p>
+              <FieldGroup label="Season narrative" hint="Prose shown at the top of the season page">
+                <textarea
+                  className={styles.textarea}
+                  value={f.narrativeText}
+                  onChange={e => set('narrativeText', e.target.value)}
+                  placeholder="Write the season story…"
+                  rows={6}
+                />
+              </FieldGroup>
+              <div className={styles.momentsHeader}>
+                <p className={styles.subHeading}>Key moments</p>
+                <span className={styles.momentsCount}>{f.keyMoments.filter(Boolean).length}/10</span>
+              </div>
+              <div className={styles.momentsList}>
+                {f.keyMoments.map((m, i) => (
+                  <div key={i} className={styles.momentRow}>
+                    <span className={styles.momentNum}>{i + 1}</span>
+                    <input
+                      className={styles.input}
+                      value={m}
+                      onChange={e => updateMoment(i, e.target.value)}
+                      placeholder="e.g. Álvarez hat-trick, UCL MD6 vs Celtic"
+                    />
+                    <button type="button" className={styles.momentRemove} onClick={() => removeMoment(i)} aria-label="Remove">
+                      <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                {f.keyMoments.length < 10 && (
+                  <button type="button" className={styles.addMoment} onClick={addMoment}>
+                    <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+                      <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                    </svg>
+                    Add moment
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>Dynasty verdict</p>
+              <FieldGroup label="Verdict" hint="Closing statement for the season — written as history">
+                <textarea
+                  className={styles.textarea}
+                  value={f.dynastyVerdict}
+                  onChange={e => set('dynastyVerdict', e.target.value)}
+                  placeholder="The season that made everything inevitable…"
+                  rows={3}
+                />
+              </FieldGroup>
+              <FieldGroup label="Dynasty score (0–100)">
+                <NumInput value={f.dynastyScore} onChange={e => set('dynastyScore', e.target.value)} min="0" max="100" placeholder="78" />
+              </FieldGroup>
+            </div>
+
+          </div>
+        )}
 
         {/* ── Dialogs ── */}
         {dlgDiscard && (
-          <Dialog
-            title="Discard changes?"
-            body="Any unsaved edits will be lost."
-            confirmLabel="Discard"
-            confirmDanger
-            onConfirm={doDiscard}
-            onCancel={() => setDlgDiscard(false)}
-          />
+          <Dialog title="Discard changes?" body="Unsaved edits will be lost." confirmLabel="Discard" confirmDanger onConfirm={doDiscard} onCancel={() => setDlgDiscard(false)} />
         )}
         {dlgComplete && (
-          <Dialog
-            title={`Mark ${s.label} as complete?`}
-            body="Completed seasons are locked for editing. You can unlock at any time."
-            confirmLabel="Mark Complete"
-            onConfirm={doComplete}
-            onCancel={() => setDlgComplete(false)}
-          />
+          <Dialog title={`Mark ${s.label} as complete?`} body="Completed seasons are locked. You can unlock at any time." confirmLabel="Mark complete" onConfirm={doComplete} onCancel={() => setDlgComplete(false)} />
         )}
         {dlgUnlock && (
-          <Dialog
-            title={`Unlock ${s.label} for editing?`}
-            body="This will allow changes to a completed season."
-            confirmLabel="Unlock"
-            onConfirm={doUnlock}
-            onCancel={() => setDlgUnlock(false)}
-          />
+          <Dialog title={`Unlock ${s.label}?`} body="This will allow editing a completed season." confirmLabel="Unlock" onConfirm={doUnlock} onCancel={() => setDlgUnlock(false)} />
         )}
         {trophyQueue.length > 0 && (
-          <TrophyPrompt
-            competition={trophyQueue[0].competition}
-            onConfirm={() => resolveTrophy(true)}
-            onSkip={() => resolveTrophy(false)}
-          />
+          <TrophyPrompt competition={trophyQueue[0].competition} onConfirm={() => resolveTrophy(true)} onSkip={() => resolveTrophy(false)} />
         )}
 
       </div>
@@ -813,7 +875,7 @@ const SeasonDetail = () => {
 
 export default SeasonDetail
 
-// ─── CupRow read-only helper ─────────────────────────────────────────────────
+// ─── CupRow ─────────────────────────────────────────────────────────────────
 function CupRow({ label, result, opponent, winner }) {
   return (
     <div className={styles.cupRow}>

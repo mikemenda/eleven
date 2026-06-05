@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 8
+// Current: 9
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -9,4 +9,5 @@
 //   6 — Home screen redesign: European Nights visual system (V4.1)
 //   7 — Hero typography: Direction C (Inter 800, modern club website identity)
 //   8 — Connect real Firebase project (eleven-c44a0) + S1 data seeded
-const SW_VERSION = 8;
+//   9 — Fix GitHub Pages BrowserRouter basename; Seasons + SeasonDetail storytelling redesign
+const SW_VERSION = 9;

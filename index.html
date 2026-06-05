@@ -12,10 +12,13 @@
     <title>Eleven — FC Career Mode Companion</title>
     <script>
       // Handle redirect from 404.html
+      // 404.html stores the path already stripped of /eleven prefix
       const redirect = sessionStorage.getItem('redirect')
       if (redirect) {
         sessionStorage.removeItem('redirect')
-        window.history.replaceState(null, '', '/eleven' + redirect)
+        // Reconstruct full URL: /eleven + path (basename handles the rest)
+        const full = '/eleven' + (redirect.startsWith('/') ? redirect : '/' + redirect)
+        window.history.replaceState(null, '', full)
       }
     </script>
   </head>
