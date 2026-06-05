@@ -231,8 +231,8 @@ const Loading = () => (
 const ClubHero = ({ club, seasonCount, trophyCount }) => (
   <div className={styles.hero}>
     <div className={styles.heroEyebrow}>Current save</div>
-    <div className={styles.heroClubPre}>FC</div>
     <h1 className={styles.heroClubName}>{club.name}</h1>
+    <div className={styles.heroIdentityRule} />
     <div className={styles.heroMeta}>
       {[
         seasonCount > 0 && `${seasonCount} Season${seasonCount !== 1 ? 's' : ''}`,

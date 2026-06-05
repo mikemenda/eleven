@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 6
+// Current: 7
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -7,4 +7,5 @@
 //   4 — Mobile responsiveness audit: logo overflow, header safe-area, 100dvh
 //   5 — Seasons list + Season Detail + CreateSeasonModal (Phase 3)
 //   6 — Home screen redesign: European Nights visual system (V4.1)
-const SW_VERSION = 6;
+//   7 — Hero typography: Direction C (Inter 800, modern club website identity)
+const SW_VERSION = 7;
