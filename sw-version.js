@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 13
+// Current: 14
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -14,4 +14,4 @@
 //   11 — Phase 4+5: Players, PlayerProfile, Transfers, Records, Rivals, Museum, SportingDirector
 //   12 — (prior)
 //   13 — Players + PlayerProfile: use playerFaceUrl from Firestore; silhouette fallback
-const SW_VERSION = 13;
+const SW_VERSION = 14;

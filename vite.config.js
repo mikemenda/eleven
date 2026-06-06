@@ -24,21 +24,21 @@ export default defineConfig({
         ]
       },
       workbox: {
-        cacheId: 'eleven-v13',
+        cacheId: 'eleven-v14',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.sofifa\.net\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'sofifa-images-v13',
+              cacheName: 'sofifa-images-v14',
               expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 }
             }
           },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'google-fonts-v13' }
+            options: { cacheName: 'google-fonts-v14' }
           }
         ]
       }
@@ -60,4 +60,4 @@ export default defineConfig({
 //   9 — Fix GitHub Pages BrowserRouter basename
 //   10 — European Nights migration: Seasons list + Season Detail
 //   11 — Phase 4+5: Players, PlayerProfile, Transfers, Records, Rivals, Museum, SportingDirector
-const SW_VERSION = 13;
+const SW_VERSION = 14;

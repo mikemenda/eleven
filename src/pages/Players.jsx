@@ -32,13 +32,12 @@ function Silhouette() {
   )
 }
 
-function SofifaImg({ playerFaceUrl, sofifaId, name, position }) {
+function SofifaImg({ sofifaId, name }) {
   const [err, setErr] = useState(false)
-  const src = playerFaceUrl || (sofifaId ? `https://fifa-img.michaelmenda92.workers.dev/${sofifaId}` : null)
-  if (!src || err) return <Silhouette />
+  if (!sofifaId || err) return <Silhouette />
   return (
     <img
-      src={src}
+      src={`https://fifa-img.michaelmenda92.workers.dev/${sofifaId}`}
       alt={name}
       className={styles.playerImg}
       onError={() => setErr(true)}
@@ -140,7 +139,7 @@ export default function Players() {
             {filtered.map(p => (
               <button key={p.id} className={styles.playerRow} onClick={() => navigate(`/players/${p.id}`)}>
                 <div className={styles.playerThumb}>
-                  <SofifaImg playerFaceUrl={p.playerFaceUrl} sofifaId={p.sofifaId} name={p.name} position={p.position} />
+                  <SofifaImg sofifaId={p.sofifaId} name={p.name} />
                 </div>
                 <div className={styles.playerInfo}>
                   <div className={styles.playerName}>{p.name}</div>

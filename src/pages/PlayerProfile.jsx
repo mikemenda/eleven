@@ -21,13 +21,12 @@ function Silhouette() {
   )
 }
 
-function SofifaImg({ playerFaceUrl, sofifaId, name, position }) {
+function SofifaImg({ sofifaId, name }) {
   const [err, setErr] = useState(false)
-  const src = playerFaceUrl || (sofifaId ? `https://fifa-img.michaelmenda92.workers.dev/${sofifaId}` : null)
-  if (!src || err) return <Silhouette />
+  if (!sofifaId || err) return <Silhouette />
   return (
     <img
-      src={src}
+      src={`https://fifa-img.michaelmenda92.workers.dev/${sofifaId}`}
       alt={name}
       className={styles.heroImg}
       onError={() => setErr(true)}
@@ -98,7 +97,7 @@ export default function PlayerProfile() {
       {/* ── HERO ── */}
       <div className={styles.hero}>
         <div className={styles.heroImgWrap}>
-          <SofifaImg playerFaceUrl={player.playerFaceUrl} sofifaId={player.sofifaId} name={player.name} position={player.position} />
+          <SofifaImg sofifaId={player.sofifaId} name={player.name} />
         </div>
         <div className={styles.heroInfo}>
           <div className={styles.heroMeta}>
