@@ -143,8 +143,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 1 — HERO  (importance: 10)
-   Front page. The edition people kept.
+   SECTION 1 — HERO
 ═══════════════════════════════════════════════════════════════════ */
 .hero {
   padding: 32px 20px 28px;
@@ -183,8 +182,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 2 — TROPHY CABINET  (importance: 9)
-   Stadium museum cabinet.
+   SECTION 2 — TROPHY CABINET (won trophies only)
 ═══════════════════════════════════════════════════════════════════ */
 .trophyShelf {
   padding: 28px 20px 0;
@@ -210,30 +208,10 @@
   align-items: center;
   gap: 7px;
 }
-.trophyItemRu {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  opacity: 0.45;
-}
 .trophySvgWon {
   width: 44px; height: 58px;
   color: var(--en-gold);
   flex-shrink: 0;
-}
-.trophySvgRu {
-  width: 44px; height: 58px;
-  color: var(--en-text-5);
-  flex-shrink: 0;
-}
-.trophyCount {
-  font-family: var(--font-playfair);
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--en-text-1);
-  line-height: 1;
 }
 .trophyName {
   font-family: var(--font-plex);
@@ -244,35 +222,6 @@
   text-align: center;
   max-width: 56px;
   line-height: 1.3;
-}
-.trophyRuLabel {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  text-align: center;
-  max-width: 56px;
-  line-height: 1.3;
-  font-style: italic;
-}
-.trophyRuSub {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.04em;
-  color: var(--en-text-4);
-  text-align: center;
-  max-width: 72px;
-  line-height: 1.4;
-}
-.trophyShelfLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  margin-bottom: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -293,8 +242,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 3 — THE STORY  (importance: 8)
-   Match programme essay. Unhurried, long-form, serif.
+   SECTION 3 — THE STORY
 ═══════════════════════════════════════════════════════════════════ */
 .storyBody {
   font-family: var(--font-inter);
@@ -309,14 +257,14 @@
 .storyBody p { margin: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 4 — KEY MOMENTS  (importance: 7)
-   Pull quotes. Chiselled, not explained.
+   SECTION 4 — KEY MOMENTS
 ═══════════════════════════════════════════════════════════════════ */
 .momentsList {
   display: flex;
   flex-direction: column;
   border-top: 0.5px solid var(--en-rule);
 }
+/* Each moment has a bottom border except the last */
 .moment {
   display: flex;
   gap: 14px;
@@ -344,8 +292,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 5 — THE LEAGUE  (importance: 5)
-   Club archive. The official record.
+   SECTION 5 — THE LEAGUE (record visible by default, no toggle)
 ═══════════════════════════════════════════════════════════════════ */
 .leagueStatement {
   font-family: var(--font-playfair);
@@ -354,33 +301,15 @@
   color: var(--en-text-2);
   line-height: 1.4;
   letter-spacing: -0.2px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
-.toggleBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 14px;
-  transition: color 0.15s;
-}
-.toggleBtn:hover { color: var(--en-text-2); }
 
-/* League / UCL record grid — ruled, no card fill */
+/* Record grid — shared by league + UCL league phase */
 .recordGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border-top: 0.5px solid var(--en-rule);
   border-bottom: 0.5px solid var(--en-rule);
-  margin-bottom: 4px;
 }
 .recordCell {
   padding: 14px 8px;
@@ -406,8 +335,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 6 — UCL JOURNEY  (importance: 8)
-   The chapter where things go wrong — or glorious.
+   SECTION 6 — UCL JOURNEY (major section)
 ═══════════════════════════════════════════════════════════════════ */
 .uclOpener {
   font-family: var(--font-inter);
@@ -490,10 +418,39 @@
   margin: 24px 2px 0;
   flex-shrink: 0;
 }
+/* Runners-up note — below the path, not in trophy shelf */
+.uclRunnerUpNote {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--en-text-4);
+  margin-top: 4px;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+/* League Phase block */
+.uclLPBlock {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 0.5px solid var(--en-rule-faint);
+}
+.uclLPLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  margin-bottom: 10px;
+}
+.uclLPPosition {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+  margin-bottom: 12px;
+}
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 7 — CUPS  (importance: 4)
-   Scouting report addendum. Flat, compact, matter-of-fact.
+   SECTION 7 — CUPS
 ═══════════════════════════════════════════════════════════════════ */
 .cupRows { display: flex; flex-direction: column; }
 .cupRow {
@@ -524,12 +481,13 @@
 .dimText    { font-family: var(--font-inter); font-size: 12px; color: var(--en-text-4); }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 8 — DYNASTY VERDICT  (importance: 9)
-   Closing paragraph of the chapter. The verdict on a verdict.
+   SECTION 8 — DYNASTY VERDICT
+   Quote styling via CSS pseudo-elements (no hardcoded chars in JSX)
 ═══════════════════════════════════════════════════════════════════ */
 .dynastyVerdictBlock {
   padding: 28px 20px 32px;
 }
+/* sectionLabel is shared; reused in dynastyVerdictBlock */
 .dynastyVerdictText {
   font-family: var(--font-playfair);
   font-weight: 400;
@@ -540,11 +498,16 @@
   padding-left: 14px;
   border-left: 1px solid var(--en-blue);
   margin-bottom: 20px;
+  /* Quote marks via CSS */
+  quotes: "\201C" "\201D";
 }
+.dynastyVerdictText::before { content: open-quote; }
+.dynastyVerdictText::after  { content: close-quote; }
 .dynastyScoreRow {
   display: flex;
   align-items: baseline;
   gap: 8px;
+  margin-bottom: 14px;
 }
 .dynastyNum {
   font-family: var(--font-playfair);
@@ -560,6 +523,20 @@
   letter-spacing: 0.1em;
   color: var(--en-text-4);
   text-transform: uppercase;
+}
+/* Score progress bar */
+.scoreBarTrack {
+  width: 100%;
+  height: 3px;
+  background: var(--en-surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.scoreBarFill {
+  height: 100%;
+  background: var(--en-gold);
+  border-radius: 2px;
+  transition: width 0.4s ease;
 }
 
 /* ─── EDIT FORM ──────────────────────────────────────────────────── */

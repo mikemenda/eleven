@@ -46,6 +46,20 @@ function getRunnerUp(season) {
   return null
 }
 
+// Detect any UCL activity — checks all relevant fields, not just uclEntered/uclResult
+function hasUclActivity(season) {
+  return !!(
+    season.uclEntered ||
+    season.uclResult ||
+    season.uclR16Opponent ||
+    season.uclQFOpponent ||
+    season.uclSFOpponent ||
+    season.uclFinalOpponent ||
+    season.uclLPP != null ||
+    season.uclLeaguePhasePosition != null
+  )
+}
+
 function scoreClass(season) {
   const d = season.dynastyScore
   if (d == null) return styles.arcScore_none
@@ -135,7 +149,7 @@ function SeasonRow({ season, onClick }) {
             ))}
             {runnerUp && (
               <span className={styles.hwRu}>
-                {runnerUp.opponent ? `${runnerUp.opponent} · UCL R-U` : 'UCL R-U'}
+                UCL R-U{runnerUp.opponent ? ` · ${runnerUp.opponent}` : ''}
               </span>
             )}
           </div>
@@ -189,11 +203,9 @@ const Seasons = () => {
     (b.label || '').localeCompare(a.label || '')
   )
 
-  const filtered = filter === 'ucl'
-    ? sorted.filter(s => s.uclEntered || s.uclResult)
-    : filter === 'trophies'
-      ? sorted.filter(s => getHardware(s).trophies.length + getHardware(s).ucl.length > 0)
-      : sorted
+  const uclSeasons = sorted.filter(s => hasUclActivity(s))
+
+  const filtered = filter === 'ucl' ? uclSeasons : sorted
 
   const plTitles = seasons.filter(s => s.leaguePosition === 1).length
   const uclTitles = seasons.filter(s => s.uclResult === 'Champions').length
@@ -202,6 +214,11 @@ const Seasons = () => {
   if (seasons.length) identityParts.push(`${seasons.length} season${seasons.length !== 1 ? 's' : ''}`)
   if (plTitles) identityParts.push(`${plTitles} league title${plTitles !== 1 ? 's' : ''}`)
   if (uclTitles) identityParts.push(`${uclTitles} UCL title${uclTitles !== 1 ? 's' : ''}`)
+
+  const filterTabs = [
+    { key: 'all',   label: `All Seasons (${sorted.length})` },
+    { key: 'ucl',   label: `UCL Seasons (${uclSeasons.length})` },
+  ]
 
   return (
     <div className={styles.page}>
@@ -215,12 +232,6 @@ const Seasons = () => {
           {identityParts.length > 0 && (
             <p className={styles.identityMeta}>{identityParts.join(' · ')}</p>
           )}
-          <button className={styles.headAddBtn} onClick={() => setShowCreate(true)}>
-            <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            New season
-          </button>
         </div>
 
         {/* ── DYNASTY ARC ── */}
@@ -230,11 +241,7 @@ const Seasons = () => {
 
         {/* ── FILTERS ── */}
         <div className={styles.filterRow}>
-          {[
-            { key: 'all', label: 'All seasons' },
-            { key: 'ucl', label: 'UCL only' },
-            { key: 'trophies', label: 'Trophy seasons' },
-          ].map(f => (
+          {filterTabs.map(f => (
             <button
               key={f.key}
               className={`${styles.filterTab} ${filter === f.key ? styles.filterTabActive : ''}`}
@@ -252,10 +259,7 @@ const Seasons = () => {
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>{seasons.length === 0 ? 'No seasons yet' : 'No seasons match this filter'}</p>
             {seasons.length === 0 && (
-              <>
-                <p className={styles.emptyText}>Create your first season to start building your dynasty record.</p>
-                <button className={styles.emptyBtn} onClick={() => setShowCreate(true)}>Create season</button>
-              </>
+              <p className={styles.emptyText}>Import season data to start building your dynasty record.</p>
             )}
           </div>
         ) : (
@@ -267,10 +271,6 @@ const Seasons = () => {
                 onClick={() => navigate(`/seasons/${s.id}`)}
               />
             ))}
-            <button className={styles.addRow} onClick={() => setShowCreate(true)}>
-              <span className={styles.addRowIcon}>+</span>
-              <span className={styles.addRowText}>Log next season</span>
-            </button>
           </div>
         )}
 

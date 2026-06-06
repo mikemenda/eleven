@@ -82,12 +82,14 @@
   align-items: flex-end;
   min-width: max-content;
 }
+/* Improved touch targets — min 44px height, full-column padding */
 .arcGroup {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 0 14px 10px;
+  padding: 10px 14px 12px;
+  min-height: 44px;
   cursor: pointer;
   border-right: 0.5px solid var(--en-rule-faint);
   flex-shrink: 0;
@@ -262,27 +264,38 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
+/* UCL / cup trophies — gold */
 .hwTrophy {
   font-family: var(--font-plex);
   font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-gold);
+  flex-shrink: 0;
 }
+/* League titles — green */
 .hwLeague {
   font-family: var(--font-plex);
   font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-green);
+  flex-shrink: 0;
 }
+/* UCL R-U — muted, truncated */
 .hwRu {
   font-family: var(--font-plex);
   font-size: 9px;
   letter-spacing: 0.06em;
   color: var(--en-text-4);
   font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
 }
 
 .rowScore {
@@ -295,60 +308,6 @@
   flex-shrink: 0;
 }
 .rowScorePeak { color: var(--en-text-1); }
-
-/* ─── ADD ROW ────────────────────────────────────────────────────── */
-.addRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 20px;
-  border-bottom: 0.5px solid var(--en-rule-faint);
-  cursor: pointer;
-  background: transparent;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  width: 100%;
-  text-align: left;
-  transition: background 0.12s;
-}
-.addRow:hover { background: rgba(30, 42, 58, 0.4); }
-.addRowIcon {
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  border: 0.5px solid var(--en-blue);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--en-blue);
-  font-size: 12px;
-  flex-shrink: 0;
-}
-.addRowText {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-blue);
-}
-
-/* ─── HEADER ADD BTN ─────────────────────────────────────────────── */
-.headAddBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 14px;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--en-blue);
-  background: transparent;
-  border: 0.5px solid var(--en-blue);
-  border-radius: 2px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.headAddBtn:hover { background: var(--en-blue-dim); }
 
 /* ─── LOADING / EMPTY ────────────────────────────────────────────── */
 .loadWrap {
@@ -385,17 +344,4 @@
   color: var(--en-text-3);
   max-width: 280px;
   line-height: 1.6;
-}
-.emptyBtn {
-  margin-top: 8px;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--en-blue);
-  background: var(--en-blue-dim);
-  border: 0.5px solid var(--en-blue);
-  border-radius: 2px;
-  padding: 8px 16px;
-  cursor: pointer;
 }

@@ -34,6 +34,21 @@ function abbrev(name) {
   return words.map(w => w[0]).join('').slice(0,3).toUpperCase()
 }
 
+// Detect any UCL activity so read-only + edit behave correctly
+// even when uclEntered is false/null but data exists
+function detectUclActivity(s) {
+  return !!(
+    s.uclEntered ||
+    s.uclResult ||
+    s.uclR16Opponent ||
+    s.uclQFOpponent ||
+    s.uclSFOpponent ||
+    s.uclFinalOpponent ||
+    s.uclLPP != null ||
+    s.uclLeaguePhasePosition != null
+  )
+}
+
 function leagueWarnings(f) {
   const w = []
   const p = num(f.leagueP), ww = num(f.leagueW), d = num(f.leagueD), l = num(f.leagueL), pts = num(f.leaguePts)
@@ -64,7 +79,8 @@ function seasonToForm(s) {
     leagueD:   disp(s.leagueD),   leagueL: disp(s.leagueL),
     leagueGF:  disp(s.leagueGF),  leagueGA: disp(s.leagueGA),
     leaguePts: disp(s.leaguePts),
-    uclEntered:             s.uclEntered  ?? false,
+    // Auto-enable uclEntered if any UCL data exists
+    uclEntered:             detectUclActivity(s),
     uclResult:              s.uclResult   ?? '',
     uclTournamentWinner:    s.uclTournamentWinner ?? '',
     uclFinalOpponent:       s.uclFinalOpponent ?? '',
@@ -173,7 +189,7 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
   </div>
 )
 
-// ─── TROPHY SVG (museum object, not emoji) ────────────────────────────────────
+// ─── TROPHY SVG ───────────────────────────────────────────────────────────────
 
 const TrophySvg = ({ className }) => (
   <svg className={className} viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -186,26 +202,19 @@ const TrophySvg = ({ className }) => (
   </svg>
 )
 
-// ─── TROPHY SHELF (read-only) ─────────────────────────────────────────────────
+// ─── TROPHY SHELF — won trophies only ─────────────────────────────────────────
 
 function TrophyShelf({ s }) {
   const items = []
 
   if (s.leaguePosition === 1 && s.leagueCompetition)
-    items.push({ key: 'lg', label: s.leagueCompetition, won: true })
+    items.push({ key: 'lg', label: s.leagueCompetition })
   if (s.uclResult === 'Champions')
-    items.push({ key: 'ucl', label: 'UEFA Champions League', won: true })
+    items.push({ key: 'ucl', label: 'UEFA Champions League' })
   if (s.faCupResult === 'Winner')
-    items.push({ key: 'fa', label: 'FA Cup', won: true })
+    items.push({ key: 'fa', label: 'FA Cup' })
   if (s.carabaoCupResult === 'Winner')
-    items.push({ key: 'cc', label: 'Carabao Cup', won: true })
-  if (s.uclResult === 'Runners-Up') {
-    const opp = s.uclFinalOpponent || s.uclTournamentWinner || ''
-    items.push({
-      key: 'ucl-ru', label: 'UCL Final', won: false,
-      sub: opp ? `Lost to ${opp}${s.uclFinalScore ? ` · ${s.uclFinalScore}` : ''}` : s.uclFinalScore || null
-    })
-  }
+    items.push({ key: 'cc', label: 'Carabao Cup' })
 
   if (!items.length) return null
 
@@ -213,10 +222,9 @@ function TrophyShelf({ s }) {
     <div className={styles.trophyShelf}>
       <div className={styles.trophyShelfItems}>
         {items.map(t => (
-          <div key={t.key} className={t.won ? styles.trophyItem : styles.trophyItemRu}>
-            <TrophySvg className={t.won ? styles.trophySvgWon : styles.trophySvgRu} />
-            <span className={t.won ? styles.trophyName : styles.trophyRuLabel}>{t.label}</span>
-            {t.sub && <span className={styles.trophyRuSub}>{t.sub}</span>}
+          <div key={t.key} className={styles.trophyItem}>
+            <TrophySvg className={styles.trophySvgWon} />
+            <span className={styles.trophyName}>{t.label}</span>
           </div>
         ))}
       </div>
@@ -224,19 +232,34 @@ function TrophyShelf({ s }) {
   )
 }
 
-// ─── UCL PATH (read-only) ─────────────────────────────────────────────────────
+// ─── UCL JOURNEY SECTION (major section) ─────────────────────────────────────
 
-function UclPath({ s }) {
+function UclSection({ s }) {
   const isChampion = s.uclResult === 'Champions'
   const isRunnerUp = s.uclResult === 'Runners-Up'
   const reachedFinal = isChampion || isRunnerUp
 
+  // Build opener sentence
+  let opener = null
+  if (s.uclResult === 'Champions') {
+    opener = `Champions of Europe.${s.uclFinalOpponent
+      ? ` ${s.uclFinalOpponent} defeated in the final${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
+      : ''}`
+  } else if (s.uclResult === 'Runners-Up') {
+    opener = `Reached the final — beaten${s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''}${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
+  } else if (s.uclResult) {
+    opener = `Exited at the ${s.uclResult} stage.`
+  }
+
+  // Build knockout path nodes
+  // LP node: use "LP" label only — no "Group" terminology
   const rounds = []
   if (s.uclLeaguePhasePosition != null) {
     rounds.push({
-      stage: 'Group',
-      abbr: 'LP',
-      score: `${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)}`,
+      stage: 'LP',
+      abbr: `${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)}`,
+      score: null,   // position shown in abbr, not as a score pill
+      isPosition: true,
       isLoss: false,
     })
   }
@@ -248,36 +271,100 @@ function UclPath({ s }) {
     rounds.push({
       stage: 'Final',
       abbr: abbrev(opp),
-      score: s.uclFinalScore || '—',
+      // Suppress score in path node — opener already states it
+      score: null,
       opponent: opp,
       isLoss: isRunnerUp,
       isWin: isChampion,
     })
   }
 
-  if (!rounds.length) return (
-    <p className={styles.dimText}>
-      {s.uclResult ? `Exited at ${s.uclResult}` : 'No UCL data recorded'}
-    </p>
-  )
+  // Has League Phase record data
+  const hasLPRecord = s.uclLPP != null
+
+  // League Phase record grid — expanded by default (no toggle)
+  const uGD = gd(s.uclLPGF, s.uclLPGA)
 
   return (
-    <div className={styles.uclPath}>
-      {rounds.map((r, i) => (
-        <div key={i} className={styles.uclNodeWrap}>
-          <div className={styles.uclNode}>
-            <div className={styles.uclStage}>{r.stage}</div>
-            <div className={`${styles.uclCrest} ${r.isLoss ? styles.uclCrestLoss : r.isWin ? styles.uclCrestWin : ''}`}>
-              {r.abbr}
+    <div className={styles.section}>
+      <p className={styles.sectionLabel}>UCL journey</p>
+
+      {/* Opener */}
+      {opener && (
+        <p className={styles.uclOpener}>{opener}</p>
+      )}
+
+      {/* Knockout path */}
+      {rounds.length > 0 && (
+        <div className={styles.uclPath}>
+          {rounds.map((r, i) => (
+            <div key={i} className={styles.uclNodeWrap}>
+              <div className={styles.uclNode}>
+                <div className={styles.uclStage}>{r.stage}</div>
+                <div className={`${styles.uclCrest} ${r.isLoss ? styles.uclCrestLoss : r.isWin ? styles.uclCrestWin : ''}`}>
+                  {r.abbr}
+                </div>
+                {r.score != null && (
+                  <div className={`${styles.uclScore} ${r.isLoss ? styles.uclScoreLoss : styles.uclScorePass}`}>
+                    {r.score}
+                  </div>
+                )}
+                {r.opponent && !r.isPosition && (
+                  <div className={styles.uclOppName}>{r.opponent}</div>
+                )}
+              </div>
+              {i < rounds.length - 1 && <div className={styles.uclArrow}>›</div>}
             </div>
-            <div className={`${styles.uclScore} ${r.isLoss ? styles.uclScoreLoss : styles.uclScorePass}`}>
-              {r.score}
-            </div>
-            {r.opponent && <div className={styles.uclOppName}>{r.opponent}</div>}
-          </div>
-          {i < rounds.length - 1 && <div className={styles.uclArrow}>›</div>}
+          ))}
         </div>
-      ))}
+      )}
+
+      {/* No path data fallback */}
+      {rounds.length === 0 && !opener && (
+        <p className={styles.dimText}>No UCL data recorded.</p>
+      )}
+
+      {/* UCL Runners-Up note (not a trophy — shown here only) */}
+      {isRunnerUp && s.uclFinalOpponent && (
+        <p className={styles.uclRunnerUpNote}>
+          Final · Lost to {s.uclFinalOpponent}{s.uclFinalScore ? ` · ${s.uclFinalScore}` : ''}
+        </p>
+      )}
+
+      {/* League Phase record — always expanded, correct terminology */}
+      {hasLPRecord && (
+        <div className={styles.uclLPBlock}>
+          <p className={styles.uclLPLabel}>League Phase record</p>
+          {s.uclLeaguePhasePosition != null && (
+            <p className={styles.uclLPPosition}>
+              Finished {s.uclLeaguePhasePosition}{ordinal(s.uclLeaguePhasePosition)} in the League Phase
+            </p>
+          )}
+          <div className={styles.recordGrid}>
+            {[
+              [s.uclLPP, 'P'], [s.uclLPW, 'W'], [s.uclLPD, 'D'], [s.uclLPL, 'L'],
+              [s.uclLPGF, 'GF'], [s.uclLPGA, 'GA'], [fmtGD(uGD), 'GD'], [s.uclLPPts, 'Pts']
+            ].map(([val, lbl]) => (
+              <div key={lbl} className={styles.recordCell}>
+                <div className={styles.rcVal}>{val ?? '—'}</div>
+                <div className={styles.rcLbl}>{lbl}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── DYNASTY SCORE METER ──────────────────────────────────────────────────────
+
+function DynastyScoreMeter({ score }) {
+  if (score == null) return null
+  const pct = Math.min(100, Math.max(0, score))
+  return (
+    <div className={styles.scoreBarTrack}>
+      <div className={styles.scoreBarFill} style={{ width: `${pct}%` }} />
     </div>
   )
 }
@@ -299,9 +386,6 @@ const SeasonDetail = () => {
   const [origForm, setOrigForm] = useState(null)
   const [saving,   setSaving]   = useState(false)
   const [saveErr,  setSaveErr]  = useState(null)
-
-  const [showLeagueRecord, setShowLeagueRecord] = useState(false)
-  const [showMDGrid,       setShowMDGrid]       = useState(false)
 
   const [dlgDiscard,  setDlgDiscard]  = useState(false)
   const [dlgComplete, setDlgComplete] = useState(false)
@@ -414,14 +498,23 @@ const SeasonDetail = () => {
   const lWarn = editing ? leagueWarnings(f) : []
   const uWarn = editing ? uclWarnings(f)    : []
 
+  // Dynasty score validation
+  const dynastyScoreNum = editing ? num(f?.dynastyScore) : null
+  const dynastyScoreOutOfRange = dynastyScoreNum != null && (dynastyScoreNum < 0 || dynastyScoreNum > 100)
+
   const headline = s.seasonHeadline ||
     (s.leaguePosition === 1 ? `${s.leagueCompetition || 'League'} champions — ${s.label}` : s.label)
 
   const hasTrophyData = s.leaguePosition === 1 || s.uclResult === 'Champions' ||
-    s.uclResult === 'Runners-Up' || s.faCupResult === 'Winner' || s.carabaoCupResult === 'Winner'
+    s.faCupResult === 'Winner' || s.carabaoCupResult === 'Winner'
 
-  const hasCups = (s.faCupResult && s.faCupResult !== 'Did Not Enter') ||
-    (s.carabaoCupResult && s.carabaoCupResult !== 'Did Not Enter')
+  // Show cups section only when a cup has real data (not empty, not "Did Not Enter")
+  const showFaCup = s.faCupResult && s.faCupResult !== 'Did Not Enter'
+  const showCarabao = s.carabaoCupResult && s.carabaoCupResult !== 'Did Not Enter'
+  const hasCups = showFaCup || showCarabao
+
+  // UCL activity
+  const uclActive = detectUclActivity(s)
 
   return (
     <div className={styles.page}>
@@ -493,10 +586,12 @@ const SeasonDetail = () => {
 
         {/* ════════════════════════════════════════════════════════════
             READ-ONLY STORY VIEW
+            Order: Hero → Trophy shelf → Story → Key moments →
+                   League → UCL journey → Cups → Dynasty verdict
         ════════════════════════════════════════════════════════════ */}
         {!editing && (
           <>
-            {/* ── SECTION 1: HERO (10/10) ── */}
+            {/* ── SECTION 1: HERO ── */}
             <div className={styles.hero}>
               <p className={styles.heroEyebrow}>
                 {s.label}{s.year ? ` · ${s.year}` : ''}{s.leagueCompetition ? ` · ${s.leagueCompetition}` : ''}
@@ -510,10 +605,10 @@ const SeasonDetail = () => {
               )}
             </div>
 
-            {/* ── SECTION 2: TROPHY CABINET (9/10) ── */}
+            {/* ── SECTION 2: TROPHY CABINET — won trophies only ── */}
             {hasTrophyData && <TrophyShelf s={s} />}
 
-            {/* ── SECTION 3: THE STORY (8/10) ── */}
+            {/* ── SECTION 3: THE STORY ── */}
             {s.narrativeText && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>The story</p>
@@ -525,7 +620,7 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* ── SECTION 4: KEY MOMENTS (7/10) ── */}
+            {/* ── SECTION 4: KEY MOMENTS ── */}
             {s.keyMoments?.length > 0 && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>Key moments</p>
@@ -540,7 +635,7 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* ── SECTION 5: THE LEAGUE (5/10) ── */}
+            {/* ── SECTION 5: THE LEAGUE — record visible by default ── */}
             {s.leaguePosition != null && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>The league</p>
@@ -551,17 +646,7 @@ const SeasonDetail = () => {
                   }
                   {s.leaguePts ? ` ${s.leaguePts} points.` : ''}
                 </p>
-                <button
-                  className={styles.toggleBtn}
-                  onClick={() => setShowLeagueRecord(v => !v)}
-                >
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none"
-                    style={{ transform: showLeagueRecord ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                    <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {showLeagueRecord ? 'Hide record' : 'Full season record'}
-                </button>
-                {showLeagueRecord && s.leagueP != null && (
+                {s.leagueP != null && (
                   <div className={styles.recordGrid}>
                     {[
                       [s.leagueP, 'P'], [s.leagueW, 'W'], [s.leagueD, 'D'], [s.leagueL, 'L'],
@@ -577,75 +662,39 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* ── SECTION 6: UCL JOURNEY (8/10) ── */}
-            {(s.uclEntered || s.uclResult) && (
-              <div className={styles.section}>
-                <p className={styles.sectionLabel}>UCL journey</p>
-                {s.uclResult && (
-                  <p className={styles.uclOpener}>
-                    {s.uclResult === 'Champions'
-                      ? `Champions of Europe.${s.uclFinalOpponent ? ` ${s.uclFinalOpponent} defeated in the final${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.` : ''}`
-                      : s.uclResult === 'Runners-Up'
-                        ? `Reached the final — beaten${s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''}${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
-                        : `Exited at the ${s.uclResult} stage.`
-                    }
-                  </p>
-                )}
-                <UclPath s={s} />
-                {s.uclLPP != null && (
-                  <>
-                    <button className={styles.toggleBtn} onClick={() => setShowMDGrid(v => !v)}>
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"
-                        style={{ transform: showMDGrid ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                        <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {showMDGrid ? 'Hide group stage' : 'Group stage record'}
-                    </button>
-                    {showMDGrid && (
-                      <div className={styles.recordGrid}>
-                        {[
-                          [s.uclLPP, 'P'], [s.uclLPW, 'W'], [s.uclLPD, 'D'], [s.uclLPL, 'L'],
-                          [s.uclLPGF, 'GF'], [s.uclLPGA, 'GA'], [fmtGD(uGD), 'GD'], [s.uclLPPts, 'Pts']
-                        ].map(([val, lbl]) => (
-                          <div key={lbl} className={styles.recordCell}>
-                            <div className={styles.rcVal}>{val ?? '—'}</div>
-                            <div className={styles.rcLbl}>{lbl}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+            {/* ── SECTION 6: UCL JOURNEY — major section ── */}
+            {uclActive && <UclSection s={s} />}
 
-            {/* ── SECTION 7: CUPS (4/10) ── */}
+            {/* ── SECTION 7: CUPS ── */}
             {hasCups && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>Cups</p>
                 <div className={styles.cupRows}>
-                  {s.faCupResult && s.faCupResult !== 'Did Not Enter' && (
+                  {showFaCup && (
                     <CupRow label="FA Cup" result={s.faCupResult} opponent={s.faCupFinalOpponent} winner={s.faCupWinner} />
                   )}
-                  {s.carabaoCupResult && s.carabaoCupResult !== 'Did Not Enter' && (
+                  {showCarabao && (
                     <CupRow label="Carabao Cup" result={s.carabaoCupResult} opponent={s.carabaoCupFinalOpponent} winner={s.carabaoCupWinner} />
                   )}
                 </div>
               </div>
             )}
 
-            {/* ── SECTION 8: DYNASTY VERDICT (9/10) ── */}
+            {/* ── SECTION 8: DYNASTY VERDICT ── */}
             {(s.dynastyScore != null || s.dynastyVerdict) && (
               <div className={styles.dynastyVerdictBlock}>
                 <p className={styles.sectionLabel}>Dynasty verdict</p>
                 {s.dynastyVerdict && (
-                  <p className={styles.dynastyVerdictText}>"{s.dynastyVerdict}"</p>
+                  <p className={styles.dynastyVerdictText}>{s.dynastyVerdict}</p>
                 )}
                 {s.dynastyScore != null && (
-                  <div className={styles.dynastyScoreRow}>
-                    <span className={styles.dynastyNum}>{s.dynastyScore}</span>
-                    <span className={styles.dynastyOf}>/ 100</span>
-                  </div>
+                  <>
+                    <div className={styles.dynastyScoreRow}>
+                      <span className={styles.dynastyNum}>{s.dynastyScore}</span>
+                      <span className={styles.dynastyOf}>/ 100</span>
+                    </div>
+                    <DynastyScoreMeter score={s.dynastyScore} />
+                  </>
                 )}
               </div>
             )}
@@ -653,11 +702,14 @@ const SeasonDetail = () => {
         )}
 
         {/* ════════════════════════════════════════════════════════════
-            EDIT FORM — logic unchanged
+            EDIT FORM
+            Order (aligned with read-only): Identity → Story & moments →
+            League record → UCL → Cup results → Dynasty verdict
         ════════════════════════════════════════════════════════════ */}
         {editing && f && (
           <div className={styles.editForm}>
 
+            {/* 1. Identity */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>Identity</p>
               <div className={styles.row2}>
@@ -678,6 +730,51 @@ const SeasonDetail = () => {
               </FieldGroup>
             </div>
 
+            {/* 2. Story & moments — moved up to match read-only order */}
+            <div className={styles.editSection}>
+              <p className={styles.editSectionHead}>Story & moments</p>
+              <FieldGroup label="Season narrative" hint="Prose shown at the top of the season page">
+                <textarea
+                  className={styles.textarea}
+                  value={f.narrativeText}
+                  onChange={e => set('narrativeText', e.target.value)}
+                  placeholder="Write the season story…"
+                  rows={6}
+                />
+              </FieldGroup>
+              <div className={styles.momentsHeader}>
+                <p className={styles.subHeading}>Key moments</p>
+                <span className={styles.momentsCount}>{f.keyMoments.filter(Boolean).length}/10</span>
+              </div>
+              <div className={styles.momentsList_edit}>
+                {f.keyMoments.map((m, i) => (
+                  <div key={i} className={styles.momentRow}>
+                    <span className={styles.momentNum}>{i + 1}</span>
+                    <input
+                      className={styles.input}
+                      value={m}
+                      onChange={e => updateMoment(i, e.target.value)}
+                      placeholder="e.g. Álvarez hat-trick, UCL MD6 vs Celtic"
+                    />
+                    <button type="button" className={styles.momentRemove} onClick={() => removeMoment(i)} aria-label="Remove">
+                      <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                {f.keyMoments.length < 10 && (
+                  <button type="button" className={styles.addMoment} onClick={addMoment}>
+                    <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                      <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                    </svg>
+                    Add moment
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 3. League record */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>League record</p>
               <div className={styles.row2}>
@@ -698,6 +795,7 @@ const SeasonDetail = () => {
               {lWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
             </div>
 
+            {/* 4. UCL */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>UCL</p>
               <label className={styles.toggleRow}>
@@ -745,7 +843,7 @@ const SeasonDetail = () => {
                     <FieldGroup label="SF opponent"><TxtInput value={f.uclSFOpponent} onChange={e => set('uclSFOpponent', e.target.value)} placeholder="Inter Milan" /></FieldGroup>
                     <FieldGroup label="SF agg score"><TxtInput value={f.uclSFScore} onChange={e => set('uclSFScore', e.target.value)} placeholder="3–2" /></FieldGroup>
                   </div>
-                  <p className={styles.subHeading}>League phase</p>
+                  <p className={styles.subHeading}>League Phase</p>
                   <div className={styles.row2}>
                     <FieldGroup label="LP finish"><NumInput value={f.uclLeaguePhasePosition} onChange={e => set('uclLeaguePhasePosition', e.target.value)} placeholder="6" min="1" max="36" /></FieldGroup>
                     <FieldGroup label="LP pts"><NumInput value={f.uclLPPts} onChange={e => set('uclLPPts', e.target.value)} placeholder="16" /></FieldGroup>
@@ -766,6 +864,7 @@ const SeasonDetail = () => {
               )}
             </div>
 
+            {/* 5. Cup results */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>Cup results</p>
               <p className={styles.subHeading}>FA Cup</p>
@@ -808,49 +907,7 @@ const SeasonDetail = () => {
               )}
             </div>
 
-            <div className={styles.editSection}>
-              <p className={styles.editSectionHead}>Story & moments</p>
-              <FieldGroup label="Season narrative" hint="Prose shown at the top of the season page">
-                <textarea
-                  className={styles.textarea}
-                  value={f.narrativeText}
-                  onChange={e => set('narrativeText', e.target.value)}
-                  placeholder="Write the season story…"
-                  rows={6}
-                />
-              </FieldGroup>
-              <div className={styles.momentsHeader}>
-                <p className={styles.subHeading}>Key moments</p>
-                <span className={styles.momentsCount}>{f.keyMoments.filter(Boolean).length}/10</span>
-              </div>
-              <div className={styles.momentsList_edit}>
-                {f.keyMoments.map((m, i) => (
-                  <div key={i} className={styles.momentRow}>
-                    <span className={styles.momentNum}>{i + 1}</span>
-                    <input
-                      className={styles.input}
-                      value={m}
-                      onChange={e => updateMoment(i, e.target.value)}
-                      placeholder="e.g. Álvarez hat-trick, UCL MD6 vs Celtic"
-                    />
-                    <button type="button" className={styles.momentRemove} onClick={() => removeMoment(i)} aria-label="Remove">
-                      <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-                {f.keyMoments.length < 10 && (
-                  <button type="button" className={styles.addMoment} onClick={addMoment}>
-                    <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                      <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-                    </svg>
-                    Add moment
-                  </button>
-                )}
-              </div>
-            </div>
-
+            {/* 6. Dynasty verdict */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>Dynasty verdict</p>
               <FieldGroup label="Verdict" hint="Closing statement for the season — written as history">
@@ -863,7 +920,16 @@ const SeasonDetail = () => {
                 />
               </FieldGroup>
               <FieldGroup label="Dynasty score (0–100)">
-                <NumInput value={f.dynastyScore} onChange={e => set('dynastyScore', e.target.value)} min="0" max="100" placeholder="78" />
+                <NumInput
+                  value={f.dynastyScore}
+                  onChange={e => set('dynastyScore', e.target.value)}
+                  min="0"
+                  max="100"
+                  placeholder="78"
+                />
+                {dynastyScoreOutOfRange && (
+                  <Warning>Score must be between 0 and 100.</Warning>
+                )}
               </FieldGroup>
             </div>
 
@@ -893,21 +959,17 @@ export default SeasonDetail
 
 // ─── CupRow ──────────────────────────────────────────────────────────────────
 function CupRow({ label, result, opponent, winner }) {
+  // Guard: don't render if result is empty
+  if (!result) return null
   return (
     <div className={styles.cupRow}>
       <span className={styles.cupLabel}>{label}</span>
       <div className={styles.cupRight}>
-        {result ? (
-          <>
-            <span className={`${styles.cupBadge} ${result === 'Winner' ? styles.cupWon : result === 'Final' ? styles.cupFinal : styles.cupDefault}`}>
-              {result}
-            </span>
-            {opponent && <span className={styles.dimText}>vs {opponent}</span>}
-            {winner && result !== 'Winner' && <span className={styles.dimText}>Won by {winner}</span>}
-          </>
-        ) : (
-          <span className={styles.dimText}>Not set</span>
-        )}
+        <span className={`${styles.cupBadge} ${result === 'Winner' ? styles.cupWon : result === 'Final' ? styles.cupFinal : styles.cupDefault}`}>
+          {result}
+        </span>
+        {opponent && <span className={styles.dimText}>vs {opponent}</span>}
+        {winner && result !== 'Winner' && <span className={styles.dimText}>Won by {winner}</span>}
       </div>
     </div>
   )
