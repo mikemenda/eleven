@@ -178,7 +178,7 @@ function SeasonRecords({ r }) {
             highlight
           />
         ) : (
-          <RecordCard label="No match data yet" holder="—" value="—" />
+          <RecordCard label="No match-level data imported yet" holder="—" value="—" />
         )}
       </Section>
     </div>
@@ -191,7 +191,7 @@ function TransferRecords({ r }) {
       <Section title="Highest Fee Paid">
         <RecordCard
           label={r.highestIn ? `${r.highestIn.player} from ${r.highestIn.from_club}` : 'No data'}
-          holder={r.highestIn?.season}
+          holder={r.highestIn?._seasonLabel}
           value={r.highestIn ? `${fmt(r.highestIn.fee_eur)}` : '—'}
           highlight
         />
@@ -199,7 +199,7 @@ function TransferRecords({ r }) {
       <Section title="Highest Fee Received">
         <RecordCard
           label={r.highestOut ? `${r.highestOut.player} to ${r.highestOut.to_club}` : 'No data'}
-          holder={r.highestOut?.season}
+          holder={r.highestOut?._seasonLabel}
           value={r.highestOut ? `${fmt(r.highestOut.fee_eur)}` : '—'}
           highlight
         />
@@ -208,7 +208,8 @@ function TransferRecords({ r }) {
         <RecordCard
           label={r.biggestSpend ? r.biggestSpend.season : 'No data'}
           holder={r.biggestSpend ? `In: ${fmt(r.biggestSpend.in)} / Out: ${fmt(r.biggestSpend.out)}` : '—'}
-          value={r.biggestSpend ? fmt(Math.abs(r.biggestSpend.net)) : '—'}
+          value={r.biggestSpend ? (r.biggestSpend.net >= 0 ? `-${fmt(r.biggestSpend.net)}` : `+${fmt(Math.abs(r.biggestSpend.net))}`) : '—'}
+          sub={r.biggestSpend ? (r.biggestSpend.net >= 0 ? 'Net spend' : 'Net profit') : null}
         />
       </Section>
     </div>

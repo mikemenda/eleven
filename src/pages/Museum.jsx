@@ -3,6 +3,33 @@ import { useApp } from '../context/AppContext'
 import { getTrophies, getSeasons } from '../firebase/services'
 import styles from './Museum.module.css'
 
+// Trophy SVG imports — Vite resolves these to correct hashed paths at build time
+import uclSvg        from '../assets/trophies/ucl.svg'
+import plSvg         from '../assets/trophies/premier-league.svg'
+import faCupSvg      from '../assets/trophies/fa-cup.svg'
+import carabaoSvg    from '../assets/trophies/carabao.svg'
+import champshipSvg  from '../assets/trophies/championship.svg'
+import laLigaSvg     from '../assets/trophies/la-liga.svg'
+import copaDelReySvg from '../assets/trophies/copa-del-rey.svg'
+import bundesligaSvg from '../assets/trophies/bundesliga.svg'
+import dfbPokalSvg   from '../assets/trophies/dfb-pokal.svg'
+import uelSvg        from '../assets/trophies/uel.svg'
+import ueclSvg       from '../assets/trophies/uecl.svg'
+
+const TROPHY_SVG_SRCS = {
+  'UEFA Champions League':  uclSvg,
+  'Premier League':         plSvg,
+  'FA Cup':                 faCupSvg,
+  'Carabao Cup':            carabaoSvg,
+  'English Championship':   champshipSvg,
+  'La Liga':                laLigaSvg,
+  'Copa del Rey':           copaDelReySvg,
+  'Bundesliga':             bundesligaSvg,
+  'DFB-Pokal':              dfbPokalSvg,
+  'UEFA Europa League':     uelSvg,
+  'UEFA Conference League': ueclSvg,
+}
+
 // ─── TROPHY CONFIG ────────────────────────────────────────────────────────────
 const TROPHIES = [
   { key: 'UEFA Champions League',   icon: '🏆', tier: 'elite',    region: 'Europe' },
@@ -21,19 +48,7 @@ const TROPHIES = [
 const TIER_ORDER = ['elite', 'league', 'european', 'cup']
 
 function TrophySVG({ competition, won }) {
-  const src = {
-    'UEFA Champions League': '/assets/trophies/ucl.svg',
-    'Premier League':        '/assets/trophies/premier-league.svg',
-    'FA Cup':                '/assets/trophies/fa-cup.svg',
-    'Carabao Cup':           '/assets/trophies/carabao.svg',
-    'English Championship':  '/assets/trophies/championship.svg',
-    'La Liga':               '/assets/trophies/la-liga.svg',
-    'Copa del Rey':          '/assets/trophies/copa-del-rey.svg',
-    'Bundesliga':            '/assets/trophies/bundesliga.svg',
-    'DFB-Pokal':             '/assets/trophies/dfb-pokal.svg',
-    'UEFA Europa League':    '/assets/trophies/uel.svg',
-    'UEFA Conference League':'/assets/trophies/uecl.svg',
-  }[competition]
+  const src = TROPHY_SVG_SRCS[competition]
 
   if (src) return (
     <img src={src} alt={competition} className={`${styles.trophyImg} ${won ? styles.trophyWon : styles.trophyUnearned}`} />

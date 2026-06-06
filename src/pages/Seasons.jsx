@@ -190,7 +190,7 @@ const Seasons = () => {
   )
 
   const filtered = filter === 'ucl'
-    ? sorted.filter(s => s.uclEntered)
+    ? sorted.filter(s => s.uclEntered || s.uclResult)
     : filter === 'trophies'
       ? sorted.filter(s => getHardware(s).trophies.length + getHardware(s).ucl.length > 0)
       : sorted

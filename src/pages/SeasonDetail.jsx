@@ -578,7 +578,7 @@ const SeasonDetail = () => {
             )}
 
             {/* ── SECTION 6: UCL JOURNEY (8/10) ── */}
-            {s.uclEntered && (
+            {(s.uclEntered || s.uclResult) && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>UCL journey</p>
                 {s.uclResult && (

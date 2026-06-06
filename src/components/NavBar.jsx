@@ -33,6 +33,16 @@ const NAV_ITEMS = [
     ),
   },
   {
+    path: '/transfers',
+    label: 'Transfers',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M4 6h12M4 6l3-3M4 6l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M16 14H4M16 14l-3-3M16 14l-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
     path: '/rivals',
     label: 'Rivals',
     icon: (

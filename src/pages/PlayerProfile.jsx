@@ -211,7 +211,7 @@ export default function PlayerProfile() {
         {tab === 'history' && (
           <div className={styles.section}>
             {transfers.length === 0 ? (
-              <p className={styles.noData}>No transfer records</p>
+              <p className={styles.noData}>No transfer activity at this club.</p>
             ) : (
               <div className={styles.transferList}>
                 {transfers.map((t, i) => (

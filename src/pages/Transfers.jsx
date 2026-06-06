@@ -52,10 +52,15 @@ export default function Transfers() {
   const netSpend = totalIn - totalOut
 
   // Group by season + window
+  // Build season label lookup for window group headers
+  const seasonLabelById = Object.fromEntries(seasons.map(s => [s.id, s.label]))
+
   const grouped = {}
   for (const t of filtered) {
-    const key = `${t.season || '?'}__${t.window || '?'}`
-    if (!grouped[key]) grouped[key] = { season: t.season, window: t.window, ins: [], outs: [] }
+    // Resolve display label: prefer snapshot, fall back to seasons lookup
+    const displayLabel = t.season || (t.seasonId && seasonLabelById[t.seasonId]) || '?'
+    const key = `${displayLabel}__${t.window || '?'}`
+    if (!grouped[key]) grouped[key] = { season: displayLabel, window: t.window, ins: [], outs: [] }
     if (t.direction === 'IN')  grouped[key].ins.push(t)
     if (t.direction === 'OUT') grouped[key].outs.push(t)
   }
@@ -77,7 +82,6 @@ export default function Transfers() {
     }
     return opts.sort((a, b) => a.label.localeCompare(b.label))
   })()
-    .sort((a, b) => a.localeCompare(b))
 
   return (
     <div className={styles.page}>
@@ -107,10 +111,10 @@ export default function Transfers() {
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.summaryVal}
-            style={{ color: netSpend > 0 ? 'var(--danger)' : 'var(--en-green)' }}>
-            {netSpend > 0 ? `-${fmt(netSpend)}` : `+${fmt(Math.abs(netSpend))}`}
+            style={{ color: netSpend > 0 ? 'var(--danger)' : netSpend < 0 ? 'var(--en-green)' : 'var(--en-text-3)' }}>
+            {netSpend > 0 ? `-${fmt(netSpend)}` : netSpend < 0 ? `+${fmt(Math.abs(netSpend))}` : '—'}
           </span>
-          <span className={styles.summaryKey}>Net</span>
+          <span className={styles.summaryKey}>{netSpend > 0 ? 'Net spend' : netSpend < 0 ? 'Net profit' : 'Net'}</span>
         </div>
       </div>
 
@@ -144,8 +148,9 @@ export default function Transfers() {
                     const i = g.ins.reduce((s, t) => s + (t.fee_eur || 0), 0)
                     const o = g.outs.reduce((s, t) => s + (t.fee_eur || 0), 0)
                     const n = i - o
+                    if (n === 0) return <span style={{ color: 'var(--en-text-3)' }}>— net</span>
                     return <span style={{ color: n > 0 ? 'var(--danger)' : 'var(--en-green)' }}>
-                      {n >= 0 ? `-${fmt(n)}` : `+${fmt(Math.abs(n))}`} net
+                      {n > 0 ? `-${fmt(n)}` : `+${fmt(Math.abs(n))}`} net
                     </span>
                   })()}
                 </div>

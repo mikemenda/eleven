@@ -7,7 +7,7 @@ export default function Rivals() {
   const { activeClub } = useApp()
   const [rivals, setRivals] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null) // opponent name
+  const [selected, setSelected] = useState(null) // opponentKey (normalized)
   const [filter, setFilter] = useState('all') // all | frequent | finals
 
   useEffect(() => {
@@ -20,10 +20,10 @@ export default function Rivals() {
   }, [activeClub])
 
   const filtered = rivals
-    .filter(r => filter === 'all' || (filter === 'frequent' && r.played >= 2) || (filter === 'finals' && r.matches.some(m => m.round === 'Final')))
+    .filter(r => filter === 'all' || (filter === 'frequent' && r.played >= 2) || (filter === 'finals' && r.matches.some(m => m.round === 'Final' || m.round === 'UCL_Final')))
 
   if (selected) {
-    const rival = rivals.find(r => r.opponent === selected)
+    const rival = rivals.find(r => r.opponentKey === selected)
     return <RivalDetail rival={rival} onBack={() => setSelected(null)} />
   }
 
@@ -68,10 +68,10 @@ export default function Rivals() {
               <span className={styles.thStat}>GD</span>
             </div>
             {filtered.map(r => (
-              <button key={r.opponent} className={styles.rivalRow} onClick={() => setSelected(r.opponent)}>
+              <button key={r.opponentKey} className={styles.rivalRow} onClick={() => setSelected(r.opponentKey)}>
                 <div className={styles.rivalOpp}>
                   <span className={styles.rivalName}>{r.opponent}</span>
-                  {r.played >= 5 && (
+                  {r.played >= 3 && (
                     <span className={styles.rivalBadge} style={{ color: 'var(--en-gold)' }}>Rival</span>
                   )}
                 </div>

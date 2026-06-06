@@ -462,14 +462,14 @@ const LogMatchAction = ({ seasons }) => {
   const current = seasons[0]
   return (
     <div className={styles.logSection}>
-      <Link to="/log-match" className={styles.logBtn}>
+      <Link to="/seasons" className={styles.logBtn}>
         <div className={styles.logBtnLeft}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5"/>
             <path d="M10 6.5V10.5L12.5 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <div>
-            <div className={styles.logBtnText}>Log a match</div>
+            <div className={styles.logBtnText}>View seasons</div>
             {current && (
               <div className={styles.logBtnSub}>{current.label} · Active</div>
             )}

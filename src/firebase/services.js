@@ -176,7 +176,8 @@ export const getRivalStats = (matches) => {
     const groupKey = m.opponentKey || String(displayName).trim().toLowerCase()
     if (!map[groupKey]) {
       map[groupKey] = {
-        opponent: displayName, // display name from first occurrence
+        opponentKey: groupKey,     // stable normalized key for selection/lookup
+        opponent: displayName,     // display name from first occurrence
         matches: [],
         narrative: m.rivalryNarrative || ''
       }
@@ -237,8 +238,12 @@ export const computeRecords = ({ players, seasons, matches, goals, transfers }) 
   // Transfer records
   const ins  = transfers.filter(t => t.direction === 'IN')
   const outs = transfers.filter(t => t.direction === 'OUT')
-  const highestIn   = [...ins].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
-  const highestOut  = [...outs].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+  // Resolve season label: prefer the snapshot on the doc, fall back to seasons array lookup
+  const resolveLabel = (t) => t.season || seasons.find(s => s.id === t.seasonId)?.label || '?'
+  const highestIn  = [...ins].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+  const highestOut = [...outs].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+  if (highestIn)  highestIn._seasonLabel  = resolveLabel(highestIn)
+  if (highestOut) highestOut._seasonLabel = resolveLabel(highestOut)
 
   // Net spend per season
   const netByseason = {}
