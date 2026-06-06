@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Eleven — FC Career Mode Companion',
         short_name: 'Eleven',
         description: 'FC Career Mode Companion',
-        theme_color: '#080B12',
-        background_color: '#080B12',
+        theme_color: '#080d1a',
+        background_color: '#080d1a',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/eleven/',
@@ -24,21 +24,21 @@ export default defineConfig({
         ]
       },
       workbox: {
-        cacheId: 'eleven-v12',
+        cacheId: 'eleven-v10',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.sofifa\.net\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'sofifa-images-v12',
+              cacheName: 'sofifa-images-v10',
               expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 }
             }
           },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'google-fonts-v12' }
+            options: { cacheName: 'google-fonts-v10' }
           }
         ]
       }
@@ -47,7 +47,7 @@ export default defineConfig({
   base: '/eleven/'
 })
 // Cache version — bump this number on every deployment.
-// Current: 12
+// Current: 10
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -59,5 +59,4 @@ export default defineConfig({
 //   8 — Connect real Firebase project + S1 data seeded
 //   9 — Fix GitHub Pages BrowserRouter basename
 //   10 — European Nights migration: Seasons list + Season Detail
-//   11 — Phase 4+5: Players, PlayerProfile, Transfers, Records, Rivals, Museum, SportingDirector
-const SW_VERSION = 12;
+const SW_VERSION = 10;
