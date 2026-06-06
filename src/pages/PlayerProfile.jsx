@@ -55,6 +55,10 @@ export default function PlayerProfile() {
     ]).then(([p, s, t]) => {
       setPlayer(p)
       setSeasons(s)
+      // Canonical link is playerId. The name fallback supports legacy transfer docs
+      // that were seeded without a playerId reference.
+      // TODO: backfill `playerId` on all legacy transfer docs before Season 4 import,
+      // then remove the `tr.player === p?.name` fallback.
       setTransfers(t.filter(tr => tr.playerId === id || tr.player === p?.name))
       setLoading(false)
     })

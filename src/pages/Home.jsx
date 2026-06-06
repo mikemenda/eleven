@@ -297,10 +297,11 @@ const TrophyCabinet = ({ trophies }) => {
 const ClubLegacy = ({ seasons, trophies }) => {
   if (seasons.length === 0) return null
 
-  const matches = seasons.flatMap(s => [])
-  const wins = seasons.reduce((a, s) => a + (s.wins || 0), 0)
-  const draws = seasons.reduce((a, s) => a + (s.draws || 0), 0)
-  const losses = seasons.reduce((a, s) => a + (s.losses || 0), 0)
+  // Fields use the canonical leagueW/leagueD/leagueL/leagueGF/leagueGA schema.
+  // Do NOT use wins/draws/losses/goalsFor/goalsAgainst — those fields do not exist.
+  const wins = seasons.reduce((a, s) => a + (s.leagueW || 0), 0)
+  const draws = seasons.reduce((a, s) => a + (s.leagueD || 0), 0)
+  const losses = seasons.reduce((a, s) => a + (s.leagueL || 0), 0)
   const played = wins + draws + losses
   const winRate = played > 0 ? Math.round((wins / played) * 100) : null
 
@@ -312,8 +313,8 @@ const ClubLegacy = ({ seasons, trophies }) => {
     s.uclResult && (s.uclResult.toLowerCase().includes('winner') || s.uclResult.toLowerCase().includes('runner') || s.uclResult.toLowerCase().includes('final'))
   ).length
 
-  const goalsFor = seasons.reduce((a, s) => a + (s.goalsFor || 0), 0)
-  const goalsAgainst = seasons.reduce((a, s) => a + (s.goalsAgainst || 0), 0)
+  const goalsFor = seasons.reduce((a, s) => a + (s.leagueGF || 0), 0)
+  const goalsAgainst = seasons.reduce((a, s) => a + (s.leagueGA || 0), 0)
 
   const stats = [
     winRate !== null   ? { val: `${winRate}%`, label: 'Win rate',      featured: true }  : null,

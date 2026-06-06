@@ -80,6 +80,9 @@ export const CreateSeasonModal = ({ clubId, onClose, onCreated }) => {
         carabaoCupResult:         null,
         carabaoCupFinalOpponent:  null,
         carabaoCupWinner:         null,
+        // Europa League and Conference League results — required for Museum trophy derivation
+        uclELResult:              null,
+        uclECLResult:             null,
       })
       onCreated(ref.id)
     } catch (err) {

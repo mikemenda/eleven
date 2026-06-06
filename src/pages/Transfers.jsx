@@ -38,7 +38,11 @@ export default function Transfers() {
   }, [activeClub])
 
   const filtered = transfers
-    .filter(t => selectedSeason === 'all' || t.season === selectedSeason)
+    // Canonical filter key is `seasonId`. The `season` label is a legacy fallback
+    // for transfer docs that pre-date the seasonId field being written on import.
+    // TODO: backfill `seasonId` on all legacy transfer docs before Season 4 import,
+    // then remove the `t.season === selectedSeason` fallback.
+    .filter(t => selectedSeason === 'all' || t.seasonId === selectedSeason || t.season === selectedSeason)
     .filter(t => dir === 'all' || t.direction === dir)
 
   const ins  = filtered.filter(t => t.direction === 'IN')
@@ -56,7 +60,23 @@ export default function Transfers() {
     if (t.direction === 'OUT') grouped[key].outs.push(t)
   }
 
-  const seasonLabels = [...new Set(transfers.map(t => t.season).filter(Boolean))]
+  // Build season options. Canonical value is seasonId; display is the season label.
+  // Legacy transfer docs with only `season` (no `seasonId`) are included via their label.
+  const seasonOptions = (() => {
+    const seen = new Set()
+    const opts = []
+    for (const t of transfers) {
+      if (t.seasonId && !seen.has(t.seasonId)) {
+        seen.add(t.seasonId)
+        opts.push({ value: t.seasonId, label: t.season || t.seasonId })
+      } else if (!t.seasonId && t.season && !seen.has(t.season)) {
+        // Legacy: only a label string, no ID — use the label as both value and display
+        seen.add(t.season)
+        opts.push({ value: t.season, label: t.season })
+      }
+    }
+    return opts.sort((a, b) => a.label.localeCompare(b.label))
+  })()
     .sort((a, b) => a.localeCompare(b))
 
   return (
@@ -67,7 +87,7 @@ export default function Transfers() {
         <select className={styles.seasonPicker} value={selectedSeason}
           onChange={e => setSelectedSeason(e.target.value)}>
           <option value="all">All Seasons</option>
-          {seasonLabels.map(s => <option key={s} value={s}>{s}</option>)}
+          {seasonOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
       </div>
 

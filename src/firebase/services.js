@@ -167,11 +167,22 @@ export const addGoal = async (data) => {
 export const getRivalStats = (matches) => {
   const map = {}
   for (const m of matches) {
-    const opp = m.opponent
-    if (!opp) continue
-    if (!map[opp]) map[opp] = { opponent: opp, matches: [], narrative: m.rivalryNarrative || '' }
-    map[opp].matches.push(m)
-    if (m.rivalryNarrative) map[opp].narrative = m.rivalryNarrative
+    const displayName = m.opponent
+    if (!displayName) continue
+    // Canonical grouping key: prefer an explicit opponentKey field (for future backfill),
+    // otherwise normalize the display name to guard against "Real Madrid" vs "R. Madrid"
+    // variants that would otherwise create separate rival entries.
+    // TODO: backfill `opponentKey` on all match docs before Season 4 import for clean grouping.
+    const groupKey = m.opponentKey || String(displayName).trim().toLowerCase()
+    if (!map[groupKey]) {
+      map[groupKey] = {
+        opponent: displayName, // display name from first occurrence
+        matches: [],
+        narrative: m.rivalryNarrative || ''
+      }
+    }
+    map[groupKey].matches.push(m)
+    if (m.rivalryNarrative) map[groupKey].narrative = m.rivalryNarrative
   }
   return Object.values(map).map(r => {
     const w = r.matches.filter(m => m.score_for > m.score_against).length
@@ -189,7 +200,7 @@ export const computeRecords = ({ players, seasons, matches, goals, transfers }) 
   // Individual records — from player career stats stored on player docs
   const active = players.filter(p => p.apps > 0 || p.goals > 0)
 
-  const topScorer     = active.sort((a, b) => (b.goals || 0) - (a.goals || 0))[0] || null
+  const topScorer     = [...active].sort((a, b) => (b.goals || 0) - (a.goals || 0))[0] || null
   const topAssists    = [...active].sort((a, b) => (b.assists || 0) - (a.assists || 0))[0] || null
   const mostApps      = [...active].sort((a, b) => (b.apps || 0) - (a.apps || 0))[0] || null
   const bestGpg       = active.filter(p => (p.apps || 0) >= 30)
@@ -205,7 +216,7 @@ export const computeRecords = ({ players, seasons, matches, goals, transfers }) 
 
   // Biggest win — from matches
   const wins = matches.filter(m => m.score_for > m.score_against)
-  const biggestWin = wins.sort((a, b) =>
+  const biggestWin = [...wins].sort((a, b) =>
     (b.score_for - b.score_against) - (a.score_for - a.score_against)
   )[0] || null
 
@@ -226,8 +237,8 @@ export const computeRecords = ({ players, seasons, matches, goals, transfers }) 
   // Transfer records
   const ins  = transfers.filter(t => t.direction === 'IN')
   const outs = transfers.filter(t => t.direction === 'OUT')
-  const highestIn   = ins.sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
-  const highestOut  = outs.sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+  const highestIn   = [...ins].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
+  const highestOut  = [...outs].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
 
   // Net spend per season
   const netByseason = {}
@@ -242,7 +253,7 @@ export const computeRecords = ({ players, seasons, matches, goals, transfers }) 
     net: n.in - n.out,
     season: seasons.find(s => s.id === n.seasonId)?.label || '?'
   }))
-  const biggestSpend = netSpends.sort((a, b) => b.net - a.net)[0] || null
+  const biggestSpend = [...netSpends].sort((a, b) => b.net - a.net)[0] || null
 
   return {
     individual: { topScorer, topAssists, mostApps, bestGpg },
