@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Data files
+data/
+
+# Firebase service account — never commit this
+serviceAccountKey.json
+
+# Mac junk
+.DS_Store
+.DS_Store?
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local

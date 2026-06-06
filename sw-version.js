@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 12
+// Current: 13
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -12,4 +12,6 @@
 //   9 — Fix GitHub Pages BrowserRouter basename; Seasons + SeasonDetail storytelling redesign
 //   10 — European Nights migration: Seasons list + Season Detail
 //   11 — Phase 4+5: Players, PlayerProfile, Transfers, Records, Rivals, Museum, SportingDirector
-const SW_VERSION = 12;
+//   12 — (prior)
+//   13 — Players + PlayerProfile: use playerFaceUrl from Firestore; silhouette fallback
+const SW_VERSION = 13;

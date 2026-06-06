@@ -10,26 +10,28 @@ const POS_GROUP = {
   LW: 'ATT', RW: 'ATT', CF: 'ATT', ST: 'ATT'
 }
 
-function SofifaImg({ sofifaId, name, position }) {
+function Silhouette() {
+  return (
+    <div className={styles.silhouette}>
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+        <circle cx="40" cy="26" r="14" fill="currentColor" opacity="0.35"/>
+        <path d="M8 76c0-17.673 14.327-32 32-32s32 14.327 32 32" fill="currentColor" opacity="0.25"/>
+      </svg>
+    </div>
+  )
+}
+
+function SofifaImg({ playerFaceUrl, sofifaId, name, position }) {
   const [err, setErr] = useState(false)
-  if (!sofifaId || err) return <PosAvatar position={position} />
+  const src = playerFaceUrl || (sofifaId ? `https://fifa-img.michaelmenda92.workers.dev/${sofifaId}` : null)
+  if (!src || err) return <Silhouette />
   return (
     <img
-      src={`https://fifa-img.michaelmenda92.workers.dev/${sofifaId}`}
+      src={src}
       alt={name}
       className={styles.heroImg}
       onError={() => setErr(true)}
     />
-  )
-}
-
-function PosAvatar({ position }) {
-  const group = POS_GROUP[position] || 'MID'
-  const colors = { GK: '#f59e0b', DEF: '#3b82f6', MID: '#8b5cf6', ATT: 'var(--en-green)' }
-  return (
-    <div className={styles.posAvatar} style={{ background: `${colors[group]}22`, color: colors[group] }}>
-      <span className={styles.posAvatarText}>{position || '?'}</span>
-    </div>
   )
 }
 
@@ -96,7 +98,7 @@ export default function PlayerProfile() {
       {/* ── HERO ── */}
       <div className={styles.hero}>
         <div className={styles.heroImgWrap}>
-          <SofifaImg sofifaId={player.sofifaId} name={player.name} position={player.position} />
+          <SofifaImg playerFaceUrl={player.playerFaceUrl} sofifaId={player.sofifaId} name={player.name} position={player.position} />
         </div>
         <div className={styles.heroInfo}>
           <div className={styles.heroMeta}>

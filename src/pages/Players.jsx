@@ -21,26 +21,28 @@ const posSort = p => {
   return i === -1 ? 99 : i
 }
 
-function SofifaImg({ sofifaId, name, position }) {
+function Silhouette() {
+  return (
+    <div className={styles.silhouette}>
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+        <circle cx="22" cy="15" r="7" fill="currentColor" opacity="0.35"/>
+        <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity="0.25"/>
+      </svg>
+    </div>
+  )
+}
+
+function SofifaImg({ playerFaceUrl, sofifaId, name, position }) {
   const [err, setErr] = useState(false)
-  if (!sofifaId || err) return <PositionAvatar position={position} name={name} />
+  const src = playerFaceUrl || (sofifaId ? `https://fifa-img.michaelmenda92.workers.dev/${sofifaId}` : null)
+  if (!src || err) return <Silhouette />
   return (
     <img
-      src={`https://fifa-img.michaelmenda92.workers.dev/${sofifaId}`}
+      src={src}
       alt={name}
       className={styles.playerImg}
       onError={() => setErr(true)}
     />
-  )
-}
-
-function PositionAvatar({ position, name }) {
-  const group = POS_GROUP[position] || 'MID'
-  const colors = { GK: '#f59e0b', DEF: '#3b82f6', MID: '#8b5cf6', ATT: 'var(--en-green)' }
-  return (
-    <div className={styles.posAvatar} style={{ background: `${colors[group]}22`, color: colors[group] }}>
-      <span className={styles.posAvatarPos}>{position || '?'}</span>
-    </div>
   )
 }
 
@@ -138,7 +140,7 @@ export default function Players() {
             {filtered.map(p => (
               <button key={p.id} className={styles.playerRow} onClick={() => navigate(`/players/${p.id}`)}>
                 <div className={styles.playerThumb}>
-                  <SofifaImg sofifaId={p.sofifaId} name={p.name} position={p.position} />
+                  <SofifaImg playerFaceUrl={p.playerFaceUrl} sofifaId={p.sofifaId} name={p.name} position={p.position} />
                 </div>
                 <div className={styles.playerInfo}>
                   <div className={styles.playerName}>{p.name}</div>
