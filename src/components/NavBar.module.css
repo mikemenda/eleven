@@ -1,3 +1,4 @@
+/* ── Primary Nav Bar ───────────────────────────────────────── */
 .nav {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -10,14 +11,10 @@
   border-top: 0.5px solid var(--en-rule);
   height: 60px;
   padding-bottom: env(safe-area-inset-bottom, 0);
-  overflow-x: auto;
-  scrollbar-width: none;
 }
-.nav::-webkit-scrollbar { display: none; }
 
 .item {
   flex: 1;
-  min-width: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,4 +49,103 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1;
+}
+
+/* Hamburger button — same visual style as nav items, no browser defaults */
+.hamburgerBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  /* no label, so center icon only */
+}
+
+/* ── Backdrop ──────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Bottom Sheet ──────────────────────────────────────────── */
+.sheet {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 0;
+  z-index: 110;
+  background: var(--en-surface, #0e1829);
+  border-top: 0.5px solid var(--en-rule);
+  border-radius: 16px 16px 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+
+  /* sheet sits below the fold by default */
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+}
+
+.sheetOpen {
+  transform: translateY(0);
+}
+
+.sheetHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--en-rule);
+  margin: 12px auto 4px;
+}
+
+.sheetNav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 16px;
+}
+
+.sheetItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  color: var(--en-text-2, #c8d8c8);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.sheetItem:hover,
+.sheetItem:active {
+  background: rgba(74, 222, 128, 0.06);
+  color: var(--en-text-1, #e2f5e2);
+}
+
+.sheetItemActive {
+  color: var(--en-green, #4ade80);
+}
+
+.sheetItemActive .sheetItemIcon svg {
+  filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.4));
+}
+
+.sheetItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sheetItemLabel {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }

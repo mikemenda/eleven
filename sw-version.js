@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 18
+// Current: 20
 // History:
 //   1 — initial build (Phase 1 scaffold)
 //   2 — Phase 2 Home screen + NavBar
@@ -19,4 +19,6 @@
 //   16 — Add backfill scripts: backfillTransferSeasonIds, backfillTransferPlayerIds, backfillOpponentKeys
 //   17 — Add patchMaatsenTransfer one-time patch script
 //   18 — App correctness audit P1–P3: Transfers NavBar, Log Match link, seasonOptions crash, Museum trophy paths, Rivals finals filter, opponent key selection, Seasons UCL filter, Records transfer labels, PlayerProfile empty state, net spend sign, rival badge threshold, season label fallback, SeasonDetail UCL gate
-const SW_VERSION = 18;
+//   19 — Add backfillPlayerTotals script to fix career stat totals seeded from single season only
+//   20 — Nav cleanup: 5 primary items + hamburger; bottom sheet for Rivals, Museum, Sporting Director
+const SW_VERSION = 20;

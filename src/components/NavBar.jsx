@@ -1,7 +1,8 @@
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import styles from './NavBar.module.css'
 
-const NAV_ITEMS = [
+const PRIMARY_NAV = [
   {
     path: '/home',
     label: 'Home',
@@ -43,15 +44,6 @@ const NAV_ITEMS = [
     ),
   },
   {
-    path: '/rivals',
-    label: 'Rivals',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M10 3L11.8 7.4L16.5 7.6L13 10.6L14.1 15.2L10 12.7L5.9 15.2L7 10.6L3.5 7.6L8.2 7.4L10 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
     path: '/records',
     label: 'Records',
     icon: (
@@ -60,11 +52,23 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+]
+
+const SHEET_NAV = [
+  {
+    path: '/rivals',
+    label: 'Rivals',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+        <path d="M10 3L11.8 7.4L16.5 7.6L13 10.6L14.1 15.2L10 12.7L5.9 15.2L7 10.6L3.5 7.6L8.2 7.4L10 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
   {
     path: '/museum',
     label: 'Museum',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
         <path d="M3 18H17M4 10H16V18H4V10ZM10 2L16 10H4L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
         <path d="M8 14V18M12 14V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
@@ -72,9 +76,9 @@ const NAV_ITEMS = [
   },
   {
     path: '/sporting-director',
-    label: 'Director',
+    label: 'Sporting Director',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
         <circle cx="7" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
         <circle cx="13" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
         <path d="M2 17C2 14.5 4 13 7 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -85,21 +89,85 @@ const NAV_ITEMS = [
   },
 ]
 
-const NavBar = () => (
-  <nav className={styles.nav} aria-label="Main navigation">
-    {NAV_ITEMS.map(({ path, label, icon }) => (
-      <NavLink
-        key={path}
-        to={path}
-        className={({ isActive }) =>
-          `${styles.item} ${isActive ? styles.active : ''}`
-        }
-      >
-        <span className={styles.icon}>{icon}</span>
-        <span className={styles.label}>{label}</span>
-      </NavLink>
-    ))}
-  </nav>
+const SHEET_PATHS = SHEET_NAV.map(item => item.path)
+
+const HamburgerIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
 )
+
+const NavBar = () => {
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const location = useLocation()
+  const isSheetRouteActive = SHEET_PATHS.includes(location.pathname)
+
+  const closeSheet = () => setSheetOpen(false)
+  const toggleSheet = () => setSheetOpen(prev => !prev)
+
+  return (
+    <>
+      {/* Backdrop */}
+      {sheetOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={closeSheet}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Bottom Sheet */}
+      <div
+        className={`${styles.sheet} ${sheetOpen ? styles.sheetOpen : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="More navigation options"
+      >
+        <div className={styles.sheetHandle} />
+        <nav className={styles.sheetNav}>
+          {SHEET_NAV.map(({ path, label, icon }) => (
+            <NavLink
+              key={path}
+              to={path}
+              className={({ isActive }) =>
+                `${styles.sheetItem} ${isActive ? styles.sheetItemActive : ''}`
+              }
+              onClick={closeSheet}
+            >
+              <span className={styles.sheetItemIcon}>{icon}</span>
+              <span className={styles.sheetItemLabel}>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+
+      {/* Primary NavBar */}
+      <nav className={styles.nav} aria-label="Main navigation">
+        {PRIMARY_NAV.map(({ path, label, icon }) => (
+          <NavLink
+            key={path}
+            to={path}
+            className={({ isActive }) =>
+              `${styles.item} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.icon}>{icon}</span>
+            <span className={styles.label}>{label}</span>
+          </NavLink>
+        ))}
+
+        {/* Hamburger */}
+        <button
+          className={`${styles.item} ${styles.hamburgerBtn} ${isSheetRouteActive || sheetOpen ? styles.active : ''}`}
+          onClick={toggleSheet}
+          aria-label="More pages"
+          aria-expanded={sheetOpen}
+        >
+          <span className={styles.icon}><HamburgerIcon /></span>
+        </button>
+      </nav>
+    </>
+  )
+}
 
 export default NavBar
