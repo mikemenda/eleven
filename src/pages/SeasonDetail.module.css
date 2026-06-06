@@ -30,8 +30,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 28px; height: 28px;
   background: transparent;
   border: none;
   color: var(--en-text-3);
@@ -41,12 +40,7 @@
   transition: color 0.15s;
 }
 .backBtn:hover { color: var(--en-text-1); }
-.topCenter {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.topCenter { flex: 1; display: flex; align-items: center; gap: 8px; }
 .topLabel {
   font-family: var(--font-plex);
   font-size: 9px;
@@ -97,53 +91,74 @@
 .lockedBar { background: transparent; }
 .toolbar   { background: transparent; }
 
-.editIndicator { display: flex; align-items: center; gap: 7px; color: var(--en-text-2); font-family: var(--font-inter); font-size: 12px; }
-.editDot { width: 5px; height: 5px; border-radius: 50%; background: var(--en-blue); animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+.editIndicator {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--en-text-2);
+  font-family: var(--font-inter); font-size: 12px;
+}
+.editDot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--en-blue);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .editActions { display: flex; gap: 8px; }
 .cancelEditBtn {
-  font-family: var(--font-inter); font-size: 12px; padding: 5px 12px; border-radius: 2px;
-  border: 0.5px solid var(--en-rule); background: transparent; color: var(--en-text-3); cursor: pointer;
+  font-family: var(--font-inter); font-size: 12px;
+  padding: 5px 12px; border-radius: 2px;
+  border: 0.5px solid var(--en-rule);
+  background: transparent; color: var(--en-text-3); cursor: pointer;
 }
 .saveBtn {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-inter); font-size: 12px; padding: 5px 14px; border-radius: 2px;
-  border: 0.5px solid var(--en-blue); background: var(--en-blue-dim); color: var(--en-text-2); cursor: pointer;
+  font-family: var(--font-inter); font-size: 12px;
+  padding: 5px 14px; border-radius: 2px;
+  border: 0.5px solid var(--en-blue);
+  background: var(--en-blue-dim); color: var(--en-text-2); cursor: pointer;
 }
 .saveBtn:disabled { opacity: 0.5; }
 .spinnerSm {
   width: 11px; height: 11px;
-  border: 1.5px solid var(--en-rule); border-top-color: var(--en-blue);
-  border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
+  border: 1.5px solid var(--en-rule);
+  border-top-color: var(--en-blue);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .lockedText {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--en-text-4);
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-text-4);
 }
-.unlockBtn  {
-  font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--en-blue); background: transparent; border: none; cursor: pointer;
+.unlockBtn {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-blue); background: transparent; border: none; cursor: pointer;
 }
 .editBtn {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--en-text-3); background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-text-3); background: transparent; border: none; cursor: pointer;
   transition: color 0.15s;
 }
 .editBtn:hover { color: var(--en-text-1); }
 .completeBtn {
-  font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--en-blue); background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-blue); background: transparent; border: none; cursor: pointer;
 }
 .saveErr {
   font-family: var(--font-inter); font-size: 12px; color: var(--danger);
-  padding: 10px 20px; border-bottom: 0.5px solid rgba(248,113,113,0.2);
+  padding: 10px 20px;
+  border-bottom: 0.5px solid rgba(248,113,113,0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 1 — HERO
+   HERO
 ═══════════════════════════════════════════════════════════════════ */
 .hero {
   padding: 32px 20px 28px;
@@ -182,25 +197,22 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 2 — TROPHY CABINET (won trophies only)
+   TROPHY CABINET
 ═══════════════════════════════════════════════════════════════════ */
 .trophyShelf {
-  padding: 28px 20px 0;
+  padding: 0 20px;
   border-bottom: 0.5px solid var(--en-rule);
-  padding-bottom: 0;
 }
 .trophyShelfItems {
   display: flex;
   gap: 24px;
   overflow-x: auto;
-  padding-bottom: 20px;
+  padding: 20px 0;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   border-top: 0.5px solid var(--en-rule);
-  padding-top: 20px;
 }
 .trophyShelfItems::-webkit-scrollbar { display: none; }
-
 .trophyItem {
   flex-shrink: 0;
   display: flex;
@@ -242,7 +254,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 3 — THE STORY
+   THE STORY
 ═══════════════════════════════════════════════════════════════════ */
 .storyBody {
   font-family: var(--font-inter);
@@ -257,14 +269,13 @@
 .storyBody p { margin: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 4 — KEY MOMENTS
+   KEY MOMENTS
 ═══════════════════════════════════════════════════════════════════ */
 .momentsList {
   display: flex;
   flex-direction: column;
   border-top: 0.5px solid var(--en-rule);
 }
-/* Each moment has a bottom border except the last */
 .moment {
   display: flex;
   gap: 14px;
@@ -292,7 +303,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 5 — THE LEAGUE (record visible by default, no toggle)
+   THE LEAGUE
 ═══════════════════════════════════════════════════════════════════ */
 .leagueStatement {
   font-family: var(--font-playfair);
@@ -304,7 +315,7 @@
   margin-bottom: 18px;
 }
 
-/* Record grid — shared by league + UCL league phase */
+/* Shared record grid */
 .recordGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -335,112 +346,34 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 6 — UCL JOURNEY (major section)
+   UCL JOURNEY — major section
 ═══════════════════════════════════════════════════════════════════ */
 .uclOpener {
   font-family: var(--font-inter);
   font-size: 14px;
   line-height: 1.75;
   color: var(--en-text-2);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   padding-left: 14px;
   border-left: 1px solid var(--en-blue);
 }
-.uclPath {
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  margin-bottom: 14px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+
+/* Sub-block within UCL section (League Phase / Knockout) */
+.uclBlock {
+  margin-bottom: 24px;
 }
-.uclPath::-webkit-scrollbar { display: none; }
-.uclNodeWrap {
-  display: flex;
-  align-items: flex-start;
-  flex-shrink: 0;
-}
-.uclNode {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 64px;
-  max-width: 76px;
-  padding: 0 6px;
-}
-.uclStage {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--en-text-4);
-  margin-bottom: 7px;
-}
-.uclCrest {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 0.5px solid var(--en-rule);
-  background: var(--en-surface-2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-plex);
-  font-size: 8px;
-  font-weight: 500;
-  color: var(--en-text-3);
-  letter-spacing: 0.02em;
-  margin-bottom: 6px;
-}
-.uclCrestLoss { border-color: rgba(248,113,113,0.4); background: rgba(30,10,10,0.8); color: #f87171; }
-.uclCrestWin  { border-color: var(--en-gold); background: var(--en-gold-dim); color: var(--en-gold); }
-.uclScore {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 7px;
-  border-radius: 2px;
-  margin-bottom: 5px;
-}
-.uclScorePass { background: var(--en-surface-2); color: var(--en-text-2); border: 0.5px solid var(--en-rule); }
-.uclScoreLoss { background: rgba(30,10,10,0.8); color: #f87171; border: 0.5px solid rgba(248,113,113,0.3); }
-.uclOppName {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  color: var(--en-text-4);
-  text-align: center;
-  margin-top: 2px;
-  line-height: 1.3;
-  max-width: 60px;
-}
-.uclArrow {
-  font-size: 14px;
-  color: var(--en-text-5);
-  margin: 24px 2px 0;
-  flex-shrink: 0;
-}
-/* Runners-up note — below the path, not in trophy shelf */
-.uclRunnerUpNote {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--en-text-4);
-  margin-top: 4px;
-  margin-bottom: 16px;
-  font-style: italic;
-}
-/* League Phase block */
-.uclLPBlock {
-  margin-top: 20px;
+.uclBlock:last-child { margin-bottom: 0; }
+.uclBlock + .uclBlock {
   padding-top: 20px;
   border-top: 0.5px solid var(--en-rule-faint);
 }
-.uclLPLabel {
+.uclBlockLabel {
   font-family: var(--font-plex);
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--en-text-4);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .uclLPPosition {
   font-family: var(--font-inter);
@@ -449,8 +382,182 @@
   margin-bottom: 12px;
 }
 
+/* ── Match table (LP matchdays) ── */
+.matchTable {
+  width: 100%;
+  border-top: 0.5px solid var(--en-rule);
+  border-bottom: 0.5px solid var(--en-rule);
+  margin-bottom: 0;
+}
+.matchTableHead {
+  display: grid;
+  grid-template-columns: 28px 1fr 32px 52px 24px;
+  gap: 0;
+  padding: 6px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.matchTableHead span {
+  font-family: var(--font-plex);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-5);
+}
+.matchRow {
+  display: grid;
+  grid-template-columns: 28px 1fr 32px 52px 24px;
+  gap: 0;
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  align-items: center;
+}
+.matchRow:last-child { border-bottom: none; }
+.mtColRound {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+  letter-spacing: 0.04em;
+}
+.mtColOpponent {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+}
+.mtColVenue {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.mtColScore {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--en-text-2);
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.mtColResult {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* Result colours — shared by LP table and KO legs */
+.resW { color: var(--en-green); }
+.resD { color: var(--en-text-3); }
+.resL { color: #f87171; }
+
+/* ── Knockout rounds ── */
+.koRounds {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.koRound {
+  padding: 14px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.koRound:first-child { border-top: 0.5px solid var(--en-rule-faint); }
+.koRound:last-child  { border-bottom: none; }
+
+.koRoundHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+.koRoundLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  flex-shrink: 0;
+  min-width: 40px;
+}
+.koOpponent {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-2);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Aggregate score badge */
+.koAgg {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.koAggWon     { background: rgba(74,222,128,0.1); color: var(--en-green); border: 0.5px solid rgba(74,222,128,0.25); }
+.koAggLost    { background: rgba(248,113,113,0.08); color: #f87171; border: 0.5px solid rgba(248,113,113,0.25); }
+.koAggNeutral { background: var(--en-surface-2); color: var(--en-text-2); border: 0.5px solid var(--en-rule); }
+
+/* Per-leg detail rows */
+.koLegs {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 40px;
+}
+.koLeg {
+  display: grid;
+  grid-template-columns: 48px 32px 52px 24px;
+  gap: 0;
+  padding: 6px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  align-items: center;
+}
+.koLeg:last-child { border-bottom: none; }
+.koLegNum {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+  letter-spacing: 0.04em;
+}
+.koLegVenue {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.koLegScore {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--en-text-2);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.koLegResult {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.dimText {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-4);
+}
+
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 7 — CUPS
+   CUPS
 ═══════════════════════════════════════════════════════════════════ */
 .cupRows { display: flex; flex-direction: column; }
 .cupRow {
@@ -461,11 +568,7 @@
   border-bottom: 0.5px solid var(--en-rule-faint);
 }
 .cupRow:last-child { border-bottom: none; }
-.cupLabel {
-  font-family: var(--font-inter);
-  font-size: 13px;
-  color: var(--en-text-2);
-}
+.cupLabel { font-family: var(--font-inter); font-size: 13px; color: var(--en-text-2); }
 .cupRight { display: flex; align-items: center; gap: 10px; }
 .cupBadge {
   font-family: var(--font-plex);
@@ -478,16 +581,11 @@
 .cupWon     { background: var(--en-gold-dim); color: var(--en-gold); border: 0.5px solid rgba(212,175,55,0.3); }
 .cupFinal   { background: var(--en-blue-dim); color: var(--en-text-3); border: 0.5px solid var(--en-rule); }
 .cupDefault { background: transparent; color: var(--en-text-4); border: 0.5px solid var(--en-rule); }
-.dimText    { font-family: var(--font-inter); font-size: 12px; color: var(--en-text-4); }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SECTION 8 — DYNASTY VERDICT
-   Quote styling via CSS pseudo-elements (no hardcoded chars in JSX)
+   DYNASTY VERDICT
 ═══════════════════════════════════════════════════════════════════ */
-.dynastyVerdictBlock {
-  padding: 28px 20px 32px;
-}
-/* sectionLabel is shared; reused in dynastyVerdictBlock */
+.dynastyVerdictBlock { padding: 28px 20px 32px; }
 .dynastyVerdictText {
   font-family: var(--font-playfair);
   font-weight: 400;
@@ -498,7 +596,6 @@
   padding-left: 14px;
   border-left: 1px solid var(--en-blue);
   margin-bottom: 20px;
-  /* Quote marks via CSS */
   quotes: "\201C" "\201D";
 }
 .dynastyVerdictText::before { content: open-quote; }
@@ -524,7 +621,6 @@
   color: var(--en-text-4);
   text-transform: uppercase;
 }
-/* Score progress bar */
 .scoreBarTrack {
   width: 100%;
   height: 3px;
@@ -536,7 +632,6 @@
   height: 100%;
   background: var(--en-gold);
   border-radius: 2px;
-  transition: width 0.4s ease;
 }
 
 /* ─── EDIT FORM ──────────────────────────────────────────────────── */
@@ -555,10 +650,10 @@
   color: var(--en-text-4);
   margin-bottom: 16px;
 }
-.fieldGroup { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-.fieldLabel { font-family: var(--font-inter); font-size: 12px; font-weight: 400; color: var(--en-text-3); }
-.fieldHint  { font-family: var(--font-inter); font-size: 11px; color: var(--en-text-4); }
-.fieldError { font-family: var(--font-inter); font-size: 11px; color: var(--danger); }
+.fieldGroup  { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.fieldLabel  { font-family: var(--font-inter); font-size: 12px; font-weight: 400; color: var(--en-text-3); }
+.fieldHint   { font-family: var(--font-inter); font-size: 11px; color: var(--en-text-4); }
+.fieldError  { font-family: var(--font-inter); font-size: 11px; color: var(--danger); }
 .input {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
@@ -686,27 +781,14 @@
 .dialog {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
-  border-radius: 0;
   padding: 28px 20px;
   width: 100%;
   max-width: 480px;
   text-align: center;
 }
 .trophyIcon   { font-size: 32px; margin-bottom: 12px; }
-.dialogTitle  {
-  font-family: var(--font-playfair);
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--en-text-1);
-  margin-bottom: 8px;
-}
-.dialogBody   {
-  font-family: var(--font-inter);
-  font-size: 13px;
-  color: var(--en-text-3);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
+.dialogTitle  { font-family: var(--font-playfair); font-weight: 700; font-size: 16px; color: var(--en-text-1); margin-bottom: 8px; }
+.dialogBody   { font-family: var(--font-inter); font-size: 13px; color: var(--en-text-3); line-height: 1.6; margin-bottom: 20px; }
 .dialogActions{ display: flex; gap: 10px; }
 .dialogCancel {
   flex: 1; padding: 11px; border-radius: 2px;
@@ -738,7 +820,8 @@
 .errorWrap {
   min-height: calc(100dvh - 56px);
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px; padding: 20px;
+  align-items: center; justify-content: center;
+  gap: 12px; padding: 20px;
 }
 .errorText {
   font-family: var(--font-inter);

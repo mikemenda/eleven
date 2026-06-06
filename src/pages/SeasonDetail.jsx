@@ -6,36 +6,34 @@ import {
   updateSeason,
   getTrophiesForSeason,
   addTrophy,
+  getMatches,
 } from '../firebase/services'
 import styles from './SeasonDetail.module.css'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-const UCL_RESULTS  = ['Champions', 'Runners-Up', 'SF', 'QF', 'R16', 'Playoff', 'LP Only']
-const CUP_ROUNDS   = ['Did Not Enter', 'R32', 'R16', 'QF', 'SF', 'Final', 'Winner']
+const UCL_RESULTS   = ['Champions', 'Runners-Up', 'SF', 'QF', 'R16', 'Playoff', 'LP Only']
+const CUP_ROUNDS    = ['Did Not Enter', 'R32', 'R16', 'QF', 'SF', 'Final', 'Winner']
 const LEAGUE_OPTIONS = [
   'Premier League', 'English Championship', 'La Liga',
   'Bundesliga', 'Serie A', 'Ligue 1',
 ]
 
+// LP matchday sort order
+const MD_ORDER = ['MD1','MD2','MD3','MD4','MD5','MD6','MD7','MD8']
+
+// Knockout competition codes as stored in match docs
+const KO_COMPS = ['UCL_R16', 'UCL_QF', 'UCL_SF', 'UCL_Final']
+
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-const num    = v => (v === '' || v == null) ? null : (isNaN(Number(v)) ? null : Number(v))
-const disp   = v => (v == null) ? '' : String(v)
-const gd     = (gf, ga) => { const a = num(gf), b = num(ga); return (a != null && b != null) ? a - b : null }
-const fmtGD  = n => n == null ? '—' : (n > 0 ? `+${n}` : String(n))
-const ordinal = n => { if (!n) return ''; const s=['th','st','nd','rd'], v=n%100; return s[(v-20)%10]||s[v]||s[0] }
+const num     = v => (v === '' || v == null) ? null : (isNaN(Number(v)) ? null : Number(v))
+const disp    = v => (v == null) ? '' : String(v)
+const gd      = (gf, ga) => { const a = num(gf), b = num(ga); return (a != null && b != null) ? a - b : null }
+const fmtGD   = n => n == null ? '—' : (n > 0 ? `+${n}` : String(n))
+const ordinal  = n => { if (!n) return ''; const s=['th','st','nd','rd'], v=n%100; return s[(v-20)%10]||s[v]||s[0] }
+const fmtScore = (sf, sa) => (sf != null && sa != null) ? `${sf}–${sa}` : null
 
-function abbrev(name) {
-  if (!name) return '?'
-  const words = name.trim().split(/\s+/)
-  if (words.length === 1) return name.slice(0, 3).toUpperCase()
-  if (words.length === 2) return (words[0][0] + words[1].slice(0,2)).toUpperCase()
-  return words.map(w => w[0]).join('').slice(0,3).toUpperCase()
-}
-
-// Detect any UCL activity so read-only + edit behave correctly
-// even when uclEntered is false/null but data exists
 function detectUclActivity(s) {
   return !!(
     s.uclEntered ||
@@ -51,50 +49,52 @@ function detectUclActivity(s) {
 
 function leagueWarnings(f) {
   const w = []
-  const p = num(f.leagueP), ww = num(f.leagueW), d = num(f.leagueD), l = num(f.leagueL), pts = num(f.leaguePts)
+  const p = num(f.leagueP), ww = num(f.leagueW), d = num(f.leagueD),
+        l = num(f.leagueL), pts = num(f.leaguePts)
   if (p != null && ww != null && d != null && l != null && ww + d + l !== p)
-    w.push('W + D + L doesn\'t add up to P.')
+    w.push("W + D + L doesn't add up to P.")
   if (ww != null && d != null && pts != null && (ww * 3 + d) !== pts)
-    w.push('Points don\'t match W/D/L.')
+    w.push("Points don't match W/D/L.")
   return w
 }
 
 function uclWarnings(f) {
   const w = []
-  const p = num(f.uclLPP), ww = num(f.uclLPW), d = num(f.uclLPD), l = num(f.uclLPL), pts = num(f.uclLPPts)
+  const p = num(f.uclLPP), ww = num(f.uclLPW), d = num(f.uclLPD),
+        l = num(f.uclLPL), pts = num(f.uclLPPts)
   if (p != null && ww != null && d != null && l != null && ww + d + l !== p)
-    w.push('W + D + L doesn\'t add up to P.')
+    w.push("W + D + L doesn't add up to P.")
   if (ww != null && d != null && pts != null && (ww * 3 + d) !== pts)
-    w.push('Points don\'t match W/D/L.')
+    w.push("Points don't match W/D/L.")
   return w
 }
 
 function seasonToForm(s) {
   return {
-    label:            s.label ?? '',
-    year:             s.year ?? '',
-    leagueCompetition: s.leagueCompetition ?? 'Premier League',
-    leaguePosition:   disp(s.leaguePosition),
-    leagueP:   disp(s.leagueP),   leagueW: disp(s.leagueW),
-    leagueD:   disp(s.leagueD),   leagueL: disp(s.leagueL),
-    leagueGF:  disp(s.leagueGF),  leagueGA: disp(s.leagueGA),
-    leaguePts: disp(s.leaguePts),
-    // Auto-enable uclEntered if any UCL data exists
+    label:              s.label ?? '',
+    year:               s.year ?? '',
+    leagueCompetition:  s.leagueCompetition ?? 'Premier League',
+    leaguePosition:     disp(s.leaguePosition),
+    leagueP:    disp(s.leagueP),   leagueW:  disp(s.leagueW),
+    leagueD:    disp(s.leagueD),   leagueL:  disp(s.leagueL),
+    leagueGF:   disp(s.leagueGF),  leagueGA: disp(s.leagueGA),
+    leaguePts:  disp(s.leaguePts),
     uclEntered:             detectUclActivity(s),
-    uclResult:              s.uclResult   ?? '',
+    uclResult:              s.uclResult ?? '',
     uclTournamentWinner:    s.uclTournamentWinner ?? '',
     uclFinalOpponent:       s.uclFinalOpponent ?? '',
     uclFinalScore:          s.uclFinalScore ?? '',
     uclLeaguePhasePosition: disp(s.uclLeaguePhasePosition),
-    uclLPP: disp(s.uclLPP), uclLPW: disp(s.uclLPW), uclLPD: disp(s.uclLPD),
-    uclLPL: disp(s.uclLPL), uclLPGF: disp(s.uclLPGF), uclLPGA: disp(s.uclLPGA),
+    uclLPP:   disp(s.uclLPP),   uclLPW:  disp(s.uclLPW),
+    uclLPD:   disp(s.uclLPD),   uclLPL:  disp(s.uclLPL),
+    uclLPGF:  disp(s.uclLPGF),  uclLPGA: disp(s.uclLPGA),
     uclLPPts: disp(s.uclLPPts),
     uclR16Opponent: s.uclR16Opponent ?? '', uclR16Score: s.uclR16Score ?? '',
     uclQFOpponent:  s.uclQFOpponent  ?? '', uclQFScore:  s.uclQFScore  ?? '',
     uclSFOpponent:  s.uclSFOpponent  ?? '', uclSFScore:  s.uclSFScore  ?? '',
-    faCupResult:         s.faCupResult ?? '',
-    faCupFinalOpponent:  s.faCupFinalOpponent ?? '',
-    faCupWinner:         s.faCupWinner ?? '',
+    faCupResult:          s.faCupResult ?? '',
+    faCupFinalOpponent:   s.faCupFinalOpponent ?? '',
+    faCupWinner:          s.faCupWinner ?? '',
     carabaoCupResult:         s.carabaoCupResult ?? '',
     carabaoCupFinalOpponent:  s.carabaoCupFinalOpponent ?? '',
     carabaoCupWinner:         s.carabaoCupWinner ?? '',
@@ -108,32 +108,36 @@ function seasonToForm(s) {
 
 function formToDoc(f) {
   return {
-    label:            f.label.trim().toUpperCase(),
-    year:             f.year.trim(),
-    leagueCompetition: f.leagueCompetition,
-    leaguePosition:   num(f.leaguePosition),
-    leagueP:   num(f.leagueP),   leagueW: num(f.leagueW),
-    leagueD:   num(f.leagueD),   leagueL: num(f.leagueL),
-    leagueGF:  num(f.leagueGF),  leagueGA: num(f.leagueGA),
-    leaguePts: num(f.leaguePts),
+    label:              f.label.trim().toUpperCase(),
+    year:               f.year.trim(),
+    leagueCompetition:  f.leagueCompetition,
+    leaguePosition:     num(f.leaguePosition),
+    leagueP:    num(f.leagueP),   leagueW:  num(f.leagueW),
+    leagueD:    num(f.leagueD),   leagueL:  num(f.leagueL),
+    leagueGF:   num(f.leagueGF),  leagueGA: num(f.leagueGA),
+    leaguePts:  num(f.leaguePts),
     uclEntered:             f.uclEntered,
     uclResult:              f.uclResult || null,
     uclTournamentWinner:    f.uclTournamentWinner.trim() || null,
     uclFinalOpponent:       f.uclFinalOpponent.trim() || null,
     uclFinalScore:          f.uclFinalScore.trim() || null,
     uclLeaguePhasePosition: num(f.uclLeaguePhasePosition),
-    uclLPP: num(f.uclLPP), uclLPW: num(f.uclLPW), uclLPD: num(f.uclLPD),
-    uclLPL: num(f.uclLPL), uclLPGF: num(f.uclLPGF), uclLPGA: num(f.uclLPGA),
+    uclLPP:   num(f.uclLPP),   uclLPW:  num(f.uclLPW),
+    uclLPD:   num(f.uclLPD),   uclLPL:  num(f.uclLPL),
+    uclLPGF:  num(f.uclLPGF),  uclLPGA: num(f.uclLPGA),
     uclLPPts: num(f.uclLPPts),
-    uclR16Opponent: f.uclR16Opponent.trim() || null, uclR16Score: f.uclR16Score.trim() || null,
-    uclQFOpponent:  f.uclQFOpponent.trim()  || null, uclQFScore:  f.uclQFScore.trim()  || null,
-    uclSFOpponent:  f.uclSFOpponent.trim()  || null, uclSFScore:  f.uclSFScore.trim()  || null,
-    faCupResult:         f.faCupResult || null,
-    faCupFinalOpponent:  f.faCupFinalOpponent.trim() || null,
-    faCupWinner:         f.faCupWinner.trim() || null,
-    carabaoCupResult:        f.carabaoCupResult || null,
-    carabaoCupFinalOpponent: f.carabaoCupFinalOpponent.trim() || null,
-    carabaoCupWinner:        f.carabaoCupWinner.trim() || null,
+    uclR16Opponent: f.uclR16Opponent.trim() || null,
+    uclR16Score:    f.uclR16Score.trim() || null,
+    uclQFOpponent:  f.uclQFOpponent.trim()  || null,
+    uclQFScore:     f.uclQFScore.trim()  || null,
+    uclSFOpponent:  f.uclSFOpponent.trim()  || null,
+    uclSFScore:     f.uclSFScore.trim()  || null,
+    faCupResult:          f.faCupResult || null,
+    faCupFinalOpponent:   f.faCupFinalOpponent.trim() || null,
+    faCupWinner:          f.faCupWinner.trim() || null,
+    carabaoCupResult:         f.carabaoCupResult || null,
+    carabaoCupFinalOpponent:  f.carabaoCupFinalOpponent.trim() || null,
+    carabaoCupWinner:         f.carabaoCupWinner.trim() || null,
     seasonHeadline: f.seasonHeadline.trim() || null,
     narrativeText:  f.narrativeText.trim() || null,
     keyMoments:     f.keyMoments.map(k => k.trim()).filter(Boolean),
@@ -154,13 +158,14 @@ const FieldGroup = ({ label, hint, error, children }) => (
 )
 
 const TxtInput   = ({ className = '', ...p }) => <input className={`${styles.input} ${className}`} {...p} />
-const NumInput   = (p) => <input type="number" min="0" className={styles.input} {...p} />
+const NumInput   = p => <input type="number" min="0" className={styles.input} {...p} />
 const SelInput   = ({ children, ...p }) => <select className={styles.select} {...p}>{children}</select>
 const DerivedFld = ({ value }) => <div className={styles.derivedField}>{value ?? '—'}</div>
 const Warning    = ({ children }) => <div className={styles.warning}>{children}</div>
 
 const Dialog = ({ title, body, confirmLabel, confirmDanger, onConfirm, onCancel }) => (
-  <div className={styles.dialogBackdrop} onClick={e => { if (e.target === e.currentTarget) onCancel() }}>
+  <div className={styles.dialogBackdrop}
+       onClick={e => { if (e.target === e.currentTarget) onCancel() }}>
     <div className={styles.dialog} role="dialog" aria-modal="true">
       <h3 className={styles.dialogTitle}>{title}</h3>
       {body && <p className={styles.dialogBody}>{body}</p>}
@@ -180,7 +185,9 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
     <div className={styles.dialog} role="dialog" aria-modal="true">
       <div className={styles.trophyIcon}>🏆</div>
       <h3 className={styles.dialogTitle}>Add to Trophy Cabinet?</h3>
-      <p className={styles.dialogBody}>Add <strong>{competition}</strong> to your trophy cabinet for this season?</p>
+      <p className={styles.dialogBody}>
+        Add <strong>{competition}</strong> to your trophy cabinet for this season?
+      </p>
       <div className={styles.dialogActions}>
         <button className={styles.dialogCancel} onClick={onSkip}>Skip</button>
         <button className={styles.dialogConfirm} onClick={onConfirm}>Add Trophy</button>
@@ -193,8 +200,10 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
 
 const TrophySvg = ({ className }) => (
   <svg className={className} viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 38c-8 0-14-7-14-16V8h28v14c0 9-6 16-14 16z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-    <path d="M8 12H4a3 3 0 0 0 0 6h4M36 12h4a3 3 0 0 1 0 6h-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M22 38c-8 0-14-7-14-16V8h28v14c0 9-6 16-14 16z"
+          stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <path d="M8 12H4a3 3 0 0 0 0 6h4M36 12h4a3 3 0 0 1 0 6h-4"
+          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     <path d="M22 38v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     <path d="M14 46h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     <path d="M12 50h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -206,18 +215,15 @@ const TrophySvg = ({ className }) => (
 
 function TrophyShelf({ s }) {
   const items = []
-
   if (s.leaguePosition === 1 && s.leagueCompetition)
-    items.push({ key: 'lg', label: s.leagueCompetition })
+    items.push({ key: 'lg',  label: s.leagueCompetition })
   if (s.uclResult === 'Champions')
     items.push({ key: 'ucl', label: 'UEFA Champions League' })
   if (s.faCupResult === 'Winner')
-    items.push({ key: 'fa', label: 'FA Cup' })
+    items.push({ key: 'fa',  label: 'FA Cup' })
   if (s.carabaoCupResult === 'Winner')
-    items.push({ key: 'cc', label: 'Carabao Cup' })
-
+    items.push({ key: 'cc',  label: 'Carabao Cup' })
   if (!items.length) return null
-
   return (
     <div className={styles.trophyShelf}>
       <div className={styles.trophyShelfItems}>
@@ -232,126 +238,263 @@ function TrophyShelf({ s }) {
   )
 }
 
-// ─── UCL JOURNEY SECTION (major section) ─────────────────────────────────────
+// ─── UCL SECTION — major section, match-doc-powered ──────────────────────────
 
-function UclSection({ s }) {
+// Derive result letter from scores
+function matchResult(sf, sa) {
+  if (sf == null || sa == null) return null
+  if (sf > sa) return 'W'
+  if (sf < sa) return 'L'
+  return 'D'
+}
+
+// Build League Phase rows from match documents (MD1–MD8)
+// Falls back gracefully if no LP match docs exist
+function buildLPRows(matches) {
+  const lpMatches = matches.filter(m => m.competition === 'UCL_LP')
+  if (!lpMatches.length) return []
+  // Sort by round label (MD1, MD2, …)
+  return [...lpMatches].sort((a, b) => {
+    const ai = MD_ORDER.indexOf(a.round)
+    const bi = MD_ORDER.indexOf(b.round)
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+  })
+}
+
+// Build per-leg knockout rows from match documents for a given competition code
+// Returns array of leg objects { leg, opponent, score_for, score_against, home_away }
+function buildKOLegs(matches, compCode) {
+  const legs = matches
+    .filter(m => m.competition === compCode)
+    .sort((a, b) => (a.leg ?? 0) - (b.leg ?? 0))
+  return legs
+}
+
+// Compute aggregate from two leg documents
+function legAggregate(legs) {
+  if (!legs.length) return null
+  const totalFor     = legs.reduce((s, m) => s + (m.score_for     ?? 0), 0)
+  const totalAgainst = legs.reduce((s, m) => s + (m.score_against ?? 0), 0)
+  return { totalFor, totalAgainst }
+}
+
+function UclSection({ s, matches }) {
   const isChampion = s.uclResult === 'Champions'
   const isRunnerUp = s.uclResult === 'Runners-Up'
-  const reachedFinal = isChampion || isRunnerUp
 
-  // Build opener sentence
+  // Opener sentence
   let opener = null
-  if (s.uclResult === 'Champions') {
-    opener = `Champions of Europe.${s.uclFinalOpponent
-      ? ` ${s.uclFinalOpponent} defeated in the final${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
-      : ''}`
-  } else if (s.uclResult === 'Runners-Up') {
-    opener = `Reached the final — beaten${s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''}${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
+  if (isChampion) {
+    opener = `Champions of Europe.${
+      s.uclFinalOpponent
+        ? ` ${s.uclFinalOpponent} defeated in the final${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
+        : ''
+    }`
+  } else if (isRunnerUp) {
+    opener = `Reached the final — beaten${
+      s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''
+    }${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
   } else if (s.uclResult) {
     opener = `Exited at the ${s.uclResult} stage.`
   }
 
-  // Build knockout path nodes
-  // LP node: use "LP" label only — no "Group" terminology
-  const rounds = []
-  if (s.uclLeaguePhasePosition != null) {
-    rounds.push({
-      stage: 'LP',
-      abbr: `${s.uclLeaguePhasePosition}${ordinal(s.uclLeaguePhasePosition)}`,
-      score: null,   // position shown in abbr, not as a score pill
-      isPosition: true,
-      isLoss: false,
-    })
-  }
-  if (s.uclR16Opponent) rounds.push({ stage: 'R16', abbr: abbrev(s.uclR16Opponent), score: s.uclR16Score || '—', opponent: s.uclR16Opponent, isLoss: false })
-  if (s.uclQFOpponent)  rounds.push({ stage: 'QF',  abbr: abbrev(s.uclQFOpponent),  score: s.uclQFScore  || '—', opponent: s.uclQFOpponent,  isLoss: false })
-  if (s.uclSFOpponent)  rounds.push({ stage: 'SF',  abbr: abbrev(s.uclSFOpponent),  score: s.uclSFScore  || '—', opponent: s.uclSFOpponent,  isLoss: false })
-  if (reachedFinal) {
-    const opp = s.uclFinalOpponent || s.uclTournamentWinner || ''
-    rounds.push({
-      stage: 'Final',
-      abbr: abbrev(opp),
-      // Suppress score in path node — opener already states it
-      score: null,
-      opponent: opp,
-      isLoss: isRunnerUp,
-      isWin: isChampion,
-    })
-  }
-
-  // Has League Phase record data
+  // ── League Phase rows from match docs ──
+  const lpRows = buildLPRows(matches)
+  const hasLPMatchDocs = lpRows.length > 0
+  // LP summary record from season doc
   const hasLPRecord = s.uclLPP != null
+  const lpGD = gd(s.uclLPGF, s.uclLPGA)
 
-  // League Phase record grid — expanded by default (no toggle)
-  const uGD = gd(s.uclLPGF, s.uclLPGA)
+  // ── Knockout rounds ──
+  // For each round: prefer match docs (leg detail), fall back to season-doc aggregate
+  const rounds = [
+    { label: 'R16',   comp: 'UCL_R16',   opp: s.uclR16Opponent, aggDoc: s.uclR16Score },
+    { label: 'QF',    comp: 'UCL_QF',    opp: s.uclQFOpponent,  aggDoc: s.uclQFScore  },
+    { label: 'SF',    comp: 'UCL_SF',    opp: s.uclSFOpponent,  aggDoc: s.uclSFScore  },
+    { label: 'Final', comp: 'UCL_Final', opp: s.uclFinalOpponent || s.uclTournamentWinner, aggDoc: s.uclFinalScore },
+  ]
+
+  const koRounds = rounds
+    .map(r => {
+      const legs = buildKOLegs(matches, r.comp)
+      const hasLegs = legs.length > 0
+      const agg = hasLegs ? legAggregate(legs) : null
+      // Derive overall result from aggregate
+      let roundResult = null
+      if (agg) {
+        if (agg.totalFor > agg.totalAgainst) roundResult = 'W'
+        else if (agg.totalFor < agg.totalAgainst) roundResult = 'L'
+        else roundResult = 'D' // would be penalties in practice
+      }
+      return {
+        label: r.label,
+        comp: r.comp,
+        opponent: hasLegs ? (legs[0]?.opponent ?? r.opp) : r.opp,
+        legs: hasLegs ? legs : null,
+        // Aggregate string: compute from legs if available, else fall back to season doc field
+        aggStr: agg ? `${agg.totalFor}–${agg.totalAgainst}` : (r.aggDoc || null),
+        roundResult,
+      }
+    })
+    .filter(r => r.opponent || r.legs)
 
   return (
     <div className={styles.section}>
       <p className={styles.sectionLabel}>UCL journey</p>
 
       {/* Opener */}
-      {opener && (
-        <p className={styles.uclOpener}>{opener}</p>
-      )}
+      {opener && <p className={styles.uclOpener}>{opener}</p>}
 
-      {/* Knockout path */}
-      {rounds.length > 0 && (
-        <div className={styles.uclPath}>
-          {rounds.map((r, i) => (
-            <div key={i} className={styles.uclNodeWrap}>
-              <div className={styles.uclNode}>
-                <div className={styles.uclStage}>{r.stage}</div>
-                <div className={`${styles.uclCrest} ${r.isLoss ? styles.uclCrestLoss : r.isWin ? styles.uclCrestWin : ''}`}>
-                  {r.abbr}
-                </div>
-                {r.score != null && (
-                  <div className={`${styles.uclScore} ${r.isLoss ? styles.uclScoreLoss : styles.uclScorePass}`}>
-                    {r.score}
-                  </div>
-                )}
-                {r.opponent && !r.isPosition && (
-                  <div className={styles.uclOppName}>{r.opponent}</div>
-                )}
-              </div>
-              {i < rounds.length - 1 && <div className={styles.uclArrow}>›</div>}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ── League Phase ── */}
+      {(hasLPMatchDocs || hasLPRecord) && (
+        <div className={styles.uclBlock}>
+          <p className={styles.uclBlockLabel}>League Phase</p>
 
-      {/* No path data fallback */}
-      {rounds.length === 0 && !opener && (
-        <p className={styles.dimText}>No UCL data recorded.</p>
-      )}
-
-      {/* UCL Runners-Up note (not a trophy — shown here only) */}
-      {isRunnerUp && s.uclFinalOpponent && (
-        <p className={styles.uclRunnerUpNote}>
-          Final · Lost to {s.uclFinalOpponent}{s.uclFinalScore ? ` · ${s.uclFinalScore}` : ''}
-        </p>
-      )}
-
-      {/* League Phase record — always expanded, correct terminology */}
-      {hasLPRecord && (
-        <div className={styles.uclLPBlock}>
-          <p className={styles.uclLPLabel}>League Phase record</p>
+          {/* LP finish position from season doc */}
           {s.uclLeaguePhasePosition != null && (
             <p className={styles.uclLPPosition}>
-              Finished {s.uclLeaguePhasePosition}{ordinal(s.uclLeaguePhasePosition)} in the League Phase
+              Finished {s.uclLeaguePhasePosition}
+              {ordinal(s.uclLeaguePhasePosition)} in the League Phase
             </p>
           )}
-          <div className={styles.recordGrid}>
-            {[
-              [s.uclLPP, 'P'], [s.uclLPW, 'W'], [s.uclLPD, 'D'], [s.uclLPL, 'L'],
-              [s.uclLPGF, 'GF'], [s.uclLPGA, 'GA'], [fmtGD(uGD), 'GD'], [s.uclLPPts, 'Pts']
-            ].map(([val, lbl]) => (
-              <div key={lbl} className={styles.recordCell}>
-                <div className={styles.rcVal}>{val ?? '—'}</div>
-                <div className={styles.rcLbl}>{lbl}</div>
+
+          {/* Individual matchday rows from match docs */}
+          {hasLPMatchDocs && (
+            <div className={styles.matchTable}>
+              <div className={styles.matchTableHead}>
+                <span className={styles.mtColRound}>MD</span>
+                <span className={styles.mtColOpponent}>Opponent</span>
+                <span className={styles.mtColVenue}>H/A</span>
+                <span className={styles.mtColScore}>Score</span>
+                <span className={styles.mtColResult}>—</span>
               </div>
-            ))}
+              {lpRows.map((m, i) => {
+                const res = matchResult(m.score_for, m.score_against)
+                return (
+                  <div key={m.id ?? i} className={styles.matchRow}>
+                    <span className={styles.mtColRound}>
+                      {m.round ? m.round.replace('MD', '') : '—'}
+                    </span>
+                    <span className={styles.mtColOpponent}>{m.opponent || '—'}</span>
+                    <span
+                      className={styles.mtColVenue}
+                      style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}
+                    >
+                      {m.home_away || '—'}
+                    </span>
+                    <span className={styles.mtColScore}>
+                      {fmtScore(m.score_for, m.score_against) ?? '—'}
+                    </span>
+                    <span
+                      className={`${styles.mtColResult} ${
+                        res === 'W' ? styles.resW :
+                        res === 'L' ? styles.resL :
+                        res === 'D' ? styles.resD : ''
+                      }`}
+                    >
+                      {res ?? '—'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* LP record grid from season doc */}
+          {hasLPRecord && (
+            <div className={styles.recordGrid} style={{ marginTop: hasLPMatchDocs ? 16 : 0 }}>
+              {[
+                [s.uclLPP, 'P'], [s.uclLPW, 'W'], [s.uclLPD, 'D'], [s.uclLPL, 'L'],
+                [s.uclLPGF, 'GF'], [s.uclLPGA, 'GA'], [fmtGD(lpGD), 'GD'], [s.uclLPPts, 'Pts'],
+              ].map(([val, lbl]) => (
+                <div key={lbl} className={styles.recordCell}>
+                  <div className={styles.rcVal}>{val ?? '—'}</div>
+                  <div className={styles.rcLbl}>{lbl}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Knockout rounds ── */}
+      {koRounds.length > 0 && (
+        <div className={styles.uclBlock}>
+          <p className={styles.uclBlockLabel}>Knockout stage</p>
+          <div className={styles.koRounds}>
+            {koRounds.map(r => {
+              const isFinalWon  = r.label === 'Final' && isChampion
+              const isFinalLost = r.label === 'Final' && isRunnerUp
+              return (
+                <div key={r.label} className={styles.koRound}>
+                  {/* Round header */}
+                  <div className={styles.koRoundHeader}>
+                    <span className={styles.koRoundLabel}>{r.label}</span>
+                    {r.opponent && (
+                      <span className={styles.koOpponent}>vs {r.opponent}</span>
+                    )}
+                    {/* Aggregate badge */}
+                    {r.aggStr && (
+                      <span
+                        className={`${styles.koAgg} ${
+                          isFinalWon  ? styles.koAggWon  :
+                          isFinalLost ? styles.koAggLost :
+                          r.roundResult === 'W' ? styles.koAggWon :
+                          r.roundResult === 'L' ? styles.koAggLost : styles.koAggNeutral
+                        }`}
+                      >
+                        {r.aggStr}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Per-leg breakdown from match docs */}
+                  {r.legs && r.legs.length > 0 && (
+                    <div className={styles.koLegs}>
+                      {r.legs.map((leg, li) => {
+                        const res = matchResult(leg.score_for, leg.score_against)
+                        return (
+                          <div key={leg.id ?? li} className={styles.koLeg}>
+                            <span className={styles.koLegNum}>
+                              Leg {leg.leg ?? li + 1}
+                            </span>
+                            <span
+                              className={styles.koLegVenue}
+                              style={{
+                                color: leg.home_away === 'H'
+                                  ? 'var(--en-blue)'
+                                  : 'var(--en-text-4)',
+                              }}
+                            >
+                              {leg.home_away || '—'}
+                            </span>
+                            <span className={styles.koLegScore}>
+                              {fmtScore(leg.score_for, leg.score_against) ?? '—'}
+                            </span>
+                            <span
+                              className={`${styles.koLegResult} ${
+                                res === 'W' ? styles.resW :
+                                res === 'L' ? styles.resL :
+                                res === 'D' ? styles.resD : ''
+                              }`}
+                            >
+                              {res ?? '—'}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
+      )}
+
+      {/* No UCL data at all */}
+      {!opener && !hasLPMatchDocs && !hasLPRecord && koRounds.length === 0 && (
+        <p className={styles.dimText}>No UCL data recorded.</p>
       )}
     </div>
   )
@@ -373,11 +516,12 @@ function DynastyScoreMeter({ score }) {
 
 const SeasonDetail = () => {
   const { id: seasonId } = useParams()
-  const navigate  = useNavigate()
+  const navigate = useNavigate()
   const { activeGame, activeClub } = useApp()
 
   const [season,   setSeason]   = useState(null)
   const [trophies, setTrophies] = useState([])
+  const [matches,  setMatches]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [loadErr,  setLoadErr]  = useState(null)
 
@@ -405,9 +549,15 @@ const SeasonDetail = () => {
   const load = async () => {
     setLoading(true); setLoadErr(null)
     try {
-      const [s, t] = await Promise.all([getSeason(seasonId), getTrophiesForSeason(seasonId)])
+      const [s, t, m] = await Promise.all([
+        getSeason(seasonId),
+        getTrophiesForSeason(seasonId),
+        getMatches(seasonId),
+      ])
       if (!s) { setLoadErr('Season not found.'); return }
-      setSeason(s); setTrophies(t)
+      setSeason(s)
+      setTrophies(t)
+      setMatches(m)
     } catch (e) {
       console.error(e); setLoadErr('Failed to load season.')
     } finally {
@@ -451,18 +601,23 @@ const SeasonDetail = () => {
     const current = queue.shift()
     if (accepted) pendingTrophies.current = [...pendingTrophies.current, current]
     if (queue.length > 0) { setTrophyQueue(queue) }
-    else { setTrophyQueue([]); await doSave([...pendingTrophies.current]); pendingTrophies.current = [] }
+    else {
+      setTrophyQueue([])
+      await doSave([...pendingTrophies.current])
+      pendingTrophies.current = []
+    }
   }
 
   const doSave = async (trophiesToAdd) => {
     setSaving(true)
     try {
       await updateSeason(seasonId, formToDoc(form))
-      for (const t of trophiesToAdd) await addTrophy({ clubId: season.clubId, seasonId, competition: t.competition })
+      for (const t of trophiesToAdd)
+        await addTrophy({ clubId: season.clubId, seasonId, competition: t.competition })
       await load()
       setEditing(false); setForm(null)
     } catch (e) {
-      console.error(e); setSaveErr('Couldn\'t save. Try again.')
+      console.error(e); setSaveErr("Couldn't save. Try again.")
     } finally {
       setSaving(false)
     }
@@ -470,17 +625,25 @@ const SeasonDetail = () => {
 
   const doComplete = async () => {
     try { await updateSeason(seasonId, { isComplete: true }); await load() }
-    catch (e) { console.error(e) } finally { setDlgComplete(false) }
+    catch (e) { console.error(e) }
+    finally { setDlgComplete(false) }
   }
 
   const doUnlock = async () => {
     try { await updateSeason(seasonId, { isComplete: false }); await load() }
-    catch (e) { console.error(e) } finally { setDlgUnlock(false) }
+    catch (e) { console.error(e) }
+    finally { setDlgUnlock(false) }
   }
 
-  const addMoment    = () => form.keyMoments.length < 10 && set('keyMoments', [...form.keyMoments, ''])
-  const updateMoment = (i, v) => { const a=[...form.keyMoments]; a[i]=v; set('keyMoments', a) }
-  const removeMoment = (i) => { const a=form.keyMoments.filter((_,j)=>j!==i); set('keyMoments', a.length ? a : ['']) }
+  const addMoment    = () =>
+    form.keyMoments.length < 10 && set('keyMoments', [...form.keyMoments, ''])
+  const updateMoment = (i, v) => {
+    const a = [...form.keyMoments]; a[i] = v; set('keyMoments', a)
+  }
+  const removeMoment = (i) => {
+    const a = form.keyMoments.filter((_, j) => j !== i)
+    set('keyMoments', a.length ? a : [''])
+  }
 
   if (loading) return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
   if (loadErr) return (
@@ -493,28 +656,30 @@ const SeasonDetail = () => {
   const s = season
   const f = form
 
-  const lGD   = editing ? gd(f.leagueGF, f.leagueGA) : gd(s.leagueGF, s.leagueGA)
-  const uGD   = editing ? gd(f.uclLPGF, f.uclLPGA)   : gd(s.uclLPGF, s.uclLPGA)
+  const lGD  = editing ? gd(f.leagueGF, f.leagueGA) : gd(s.leagueGF, s.leagueGA)
+  const uGD  = editing ? gd(f.uclLPGF,  f.uclLPGA)  : gd(s.uclLPGF,  s.uclLPGA)
   const lWarn = editing ? leagueWarnings(f) : []
   const uWarn = editing ? uclWarnings(f)    : []
 
-  // Dynasty score validation
   const dynastyScoreNum = editing ? num(f?.dynastyScore) : null
-  const dynastyScoreOutOfRange = dynastyScoreNum != null && (dynastyScoreNum < 0 || dynastyScoreNum > 100)
+  const dynastyScoreOutOfRange =
+    dynastyScoreNum != null && (dynastyScoreNum < 0 || dynastyScoreNum > 100)
 
   const headline = s.seasonHeadline ||
-    (s.leaguePosition === 1 ? `${s.leagueCompetition || 'League'} champions — ${s.label}` : s.label)
+    (s.leaguePosition === 1
+      ? `${s.leagueCompetition || 'League'} champions — ${s.label}`
+      : s.label)
 
-  const hasTrophyData = s.leaguePosition === 1 || s.uclResult === 'Champions' ||
+  const hasTrophyData =
+    s.leaguePosition === 1 || s.uclResult === 'Champions' ||
     s.faCupResult === 'Winner' || s.carabaoCupResult === 'Winner'
 
-  // Show cups section only when a cup has real data (not empty, not "Did Not Enter")
-  const showFaCup = s.faCupResult && s.faCupResult !== 'Did Not Enter'
+  const showFaCup  = s.faCupResult    && s.faCupResult    !== 'Did Not Enter'
   const showCarabao = s.carabaoCupResult && s.carabaoCupResult !== 'Did Not Enter'
-  const hasCups = showFaCup || showCarabao
+  const hasCups    = showFaCup || showCarabao
 
-  // UCL activity
-  const uclActive = detectUclActivity(s)
+  const uclActive = detectUclActivity(s) ||
+    matches.some(m => m.competition === 'UCL_LP' || KO_COMPS.includes(m.competition))
 
   return (
     <div className={styles.page}>
@@ -527,7 +692,8 @@ const SeasonDetail = () => {
             navigate('/seasons')
           }}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M12 5L7 10l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 5L7 10l5 5" stroke="currentColor"
+                    strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
           <div className={styles.topCenter}>
@@ -545,10 +711,14 @@ const SeasonDetail = () => {
         {/* ── EDIT BAR ── */}
         {editing && (
           <div className={styles.editBar}>
-            <span className={styles.editIndicator}><span className={styles.editDot} /> Editing</span>
+            <span className={styles.editIndicator}>
+              <span className={styles.editDot} /> Editing
+            </span>
             <div className={styles.editActions}>
-              <button className={styles.cancelEditBtn} onClick={handleCancel} disabled={saving}>Cancel</button>
-              <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+              <button className={styles.cancelEditBtn}
+                      onClick={handleCancel} disabled={saving}>Cancel</button>
+              <button className={styles.saveBtn}
+                      onClick={handleSave} disabled={saving}>
                 {saving ? <><span className={styles.spinnerSm} /> Saving…</> : 'Save'}
               </button>
             </div>
@@ -560,12 +730,15 @@ const SeasonDetail = () => {
           <div className={styles.lockedBar}>
             <span className={styles.lockedText}>
               <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                <rect x="1.5" y="5.5" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-                <path d="M3.5 5.5V4a3 3 0 0 1 6 0v1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                <rect x="1.5" y="5.5" width="10" height="7" rx="1"
+                      stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M3.5 5.5V4a3 3 0 0 1 6 0v1.5"
+                      stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
               </svg>
               Locked
             </span>
-            <button className={styles.unlockBtn} onClick={() => setDlgUnlock(true)}>Unlock to edit</button>
+            <button className={styles.unlockBtn}
+                    onClick={() => setDlgUnlock(true)}>Unlock to edit</button>
           </div>
         )}
 
@@ -574,11 +747,13 @@ const SeasonDetail = () => {
           <div className={styles.toolbar}>
             <button className={styles.editBtn} onClick={enterEdit}>
               <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                <path d="M8.5 2.5l2 2-6 6H2.5v-2l6-6z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M8.5 2.5l2 2-6 6H2.5v-2l6-6z" stroke="currentColor"
+                      strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Edit season
             </button>
-            <button className={styles.completeBtn} onClick={() => setDlgComplete(true)}>Mark complete</button>
+            <button className={styles.completeBtn}
+                    onClick={() => setDlgComplete(true)}>Mark complete</button>
           </div>
         )}
 
@@ -586,15 +761,17 @@ const SeasonDetail = () => {
 
         {/* ════════════════════════════════════════════════════════════
             READ-ONLY STORY VIEW
-            Order: Hero → Trophy shelf → Story → Key moments →
-                   League → UCL journey → Cups → Dynasty verdict
+            Hero → Trophy shelf → Story → Key moments →
+            League → UCL journey → Cups → Dynasty verdict
         ════════════════════════════════════════════════════════════ */}
         {!editing && (
           <>
-            {/* ── SECTION 1: HERO ── */}
+            {/* 1. HERO */}
             <div className={styles.hero}>
               <p className={styles.heroEyebrow}>
-                {s.label}{s.year ? ` · ${s.year}` : ''}{s.leagueCompetition ? ` · ${s.leagueCompetition}` : ''}
+                {s.label}
+                {s.year ? ` · ${s.year}` : ''}
+                {s.leagueCompetition ? ` · ${s.leagueCompetition}` : ''}
               </p>
               <h1 className={styles.heroHeadline}>{headline}</h1>
               <div className={styles.heroIdentityRule} />
@@ -605,10 +782,10 @@ const SeasonDetail = () => {
               )}
             </div>
 
-            {/* ── SECTION 2: TROPHY CABINET — won trophies only ── */}
+            {/* 2. TROPHY CABINET */}
             {hasTrophyData && <TrophyShelf s={s} />}
 
-            {/* ── SECTION 3: THE STORY ── */}
+            {/* 3. THE STORY */}
             {s.narrativeText && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>The story</p>
@@ -620,7 +797,7 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* ── SECTION 4: KEY MOMENTS ── */}
+            {/* 4. KEY MOMENTS */}
             {s.keyMoments?.length > 0 && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>Key moments</p>
@@ -635,7 +812,7 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* ── SECTION 5: THE LEAGUE — record visible by default ── */}
+            {/* 5. THE LEAGUE — record always visible */}
             {s.leaguePosition != null && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>The league</p>
@@ -650,7 +827,7 @@ const SeasonDetail = () => {
                   <div className={styles.recordGrid}>
                     {[
                       [s.leagueP, 'P'], [s.leagueW, 'W'], [s.leagueD, 'D'], [s.leagueL, 'L'],
-                      [s.leagueGF, 'GF'], [s.leagueGA, 'GA'], [fmtGD(lGD), 'GD'], [s.leaguePts, 'Pts']
+                      [s.leagueGF, 'GF'], [s.leagueGA, 'GA'], [fmtGD(lGD), 'GD'], [s.leaguePts, 'Pts'],
                     ].map(([val, lbl]) => (
                       <div key={lbl} className={styles.recordCell}>
                         <div className={styles.rcVal}>{val ?? '—'}</div>
@@ -662,25 +839,27 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* ── SECTION 6: UCL JOURNEY — major section ── */}
-            {uclActive && <UclSection s={s} />}
+            {/* 6. UCL JOURNEY — major section, match-doc-powered */}
+            {uclActive && <UclSection s={s} matches={matches} />}
 
-            {/* ── SECTION 7: CUPS ── */}
+            {/* 7. CUPS */}
             {hasCups && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>Cups</p>
                 <div className={styles.cupRows}>
                   {showFaCup && (
-                    <CupRow label="FA Cup" result={s.faCupResult} opponent={s.faCupFinalOpponent} winner={s.faCupWinner} />
+                    <CupRow label="FA Cup" result={s.faCupResult}
+                            opponent={s.faCupFinalOpponent} winner={s.faCupWinner} />
                   )}
                   {showCarabao && (
-                    <CupRow label="Carabao Cup" result={s.carabaoCupResult} opponent={s.carabaoCupFinalOpponent} winner={s.carabaoCupWinner} />
+                    <CupRow label="Carabao Cup" result={s.carabaoCupResult}
+                            opponent={s.carabaoCupFinalOpponent} winner={s.carabaoCupWinner} />
                   )}
                 </div>
               </div>
             )}
 
-            {/* ── SECTION 8: DYNASTY VERDICT ── */}
+            {/* 8. DYNASTY VERDICT */}
             {(s.dynastyScore != null || s.dynastyVerdict) && (
               <div className={styles.dynastyVerdictBlock}>
                 <p className={styles.sectionLabel}>Dynasty verdict</p>
@@ -703,8 +882,8 @@ const SeasonDetail = () => {
 
         {/* ════════════════════════════════════════════════════════════
             EDIT FORM
-            Order (aligned with read-only): Identity → Story & moments →
-            League record → UCL → Cup results → Dynasty verdict
+            Identity → Story & moments → League record →
+            UCL → Cup results → Dynasty verdict
         ════════════════════════════════════════════════════════════ */}
         {editing && f && (
           <div className={styles.editForm}>
@@ -714,26 +893,35 @@ const SeasonDetail = () => {
               <p className={styles.editSectionHead}>Identity</p>
               <div className={styles.row2}>
                 <FieldGroup label="Label">
-                  <TxtInput value={f.label} onChange={e => set('label', e.target.value.toUpperCase())} maxLength={4} placeholder="S1" />
+                  <TxtInput value={f.label}
+                            onChange={e => set('label', e.target.value.toUpperCase())}
+                            maxLength={4} placeholder="S1" />
                 </FieldGroup>
                 <FieldGroup label="Year">
-                  <TxtInput value={f.year} onChange={e => set('year', e.target.value)} maxLength={7} placeholder="2026/27" />
+                  <TxtInput value={f.year}
+                            onChange={e => set('year', e.target.value)}
+                            maxLength={7} placeholder="2026/27" />
                 </FieldGroup>
               </div>
               <FieldGroup label="League">
-                <SelInput value={f.leagueCompetition} onChange={e => set('leagueCompetition', e.target.value)}>
+                <SelInput value={f.leagueCompetition}
+                          onChange={e => set('leagueCompetition', e.target.value)}>
                   {LEAGUE_OPTIONS.map(l => <option key={l} value={l}>{l}</option>)}
                 </SelInput>
               </FieldGroup>
-              <FieldGroup label="Season headline" hint="One-line summary shown on the Seasons list">
-                <TxtInput value={f.seasonHeadline} onChange={e => set('seasonHeadline', e.target.value)} placeholder="The founding year — title won, final lost 1–5" />
+              <FieldGroup label="Season headline"
+                          hint="One-line summary shown on the Seasons list">
+                <TxtInput value={f.seasonHeadline}
+                          onChange={e => set('seasonHeadline', e.target.value)}
+                          placeholder="The founding year — title won, final lost 1–5" />
               </FieldGroup>
             </div>
 
-            {/* 2. Story & moments — moved up to match read-only order */}
+            {/* 2. Story & moments */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>Story & moments</p>
-              <FieldGroup label="Season narrative" hint="Prose shown at the top of the season page">
+              <FieldGroup label="Season narrative"
+                          hint="Prose shown at the top of the season page">
                 <textarea
                   className={styles.textarea}
                   value={f.narrativeText}
@@ -744,7 +932,9 @@ const SeasonDetail = () => {
               </FieldGroup>
               <div className={styles.momentsHeader}>
                 <p className={styles.subHeading}>Key moments</p>
-                <span className={styles.momentsCount}>{f.keyMoments.filter(Boolean).length}/10</span>
+                <span className={styles.momentsCount}>
+                  {f.keyMoments.filter(Boolean).length}/10
+                </span>
               </div>
               <div className={styles.momentsList_edit}>
                 {f.keyMoments.map((m, i) => (
@@ -756,9 +946,11 @@ const SeasonDetail = () => {
                       onChange={e => updateMoment(i, e.target.value)}
                       placeholder="e.g. Álvarez hat-trick, UCL MD6 vs Celtic"
                     />
-                    <button type="button" className={styles.momentRemove} onClick={() => removeMoment(i)} aria-label="Remove">
+                    <button type="button" className={styles.momentRemove}
+                            onClick={() => removeMoment(i)} aria-label="Remove">
                       <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor"
+                              strokeWidth="1.5" strokeLinecap="round"/>
                       </svg>
                     </button>
                   </div>
@@ -766,7 +958,8 @@ const SeasonDetail = () => {
                 {f.keyMoments.length < 10 && (
                   <button type="button" className={styles.addMoment} onClick={addMoment}>
                     <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                      <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                      <path d="M6.5 1v11M1 6.5h11" stroke="currentColor"
+                            strokeWidth="1.8" strokeLinecap="round"/>
                     </svg>
                     Add moment
                   </button>
@@ -778,18 +971,39 @@ const SeasonDetail = () => {
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>League record</p>
               <div className={styles.row2}>
-                <FieldGroup label="Position"><NumInput value={f.leaguePosition} onChange={e => set('leaguePosition', e.target.value)} placeholder="1" /></FieldGroup>
-                <FieldGroup label="Points"><NumInput value={f.leaguePts} onChange={e => set('leaguePts', e.target.value)} placeholder="85" /></FieldGroup>
+                <FieldGroup label="Position">
+                  <NumInput value={f.leaguePosition}
+                            onChange={e => set('leaguePosition', e.target.value)}
+                            placeholder="1" />
+                </FieldGroup>
+                <FieldGroup label="Points">
+                  <NumInput value={f.leaguePts}
+                            onChange={e => set('leaguePts', e.target.value)}
+                            placeholder="85" />
+                </FieldGroup>
               </div>
               <div className={styles.row4}>
-                <FieldGroup label="P"><NumInput value={f.leagueP}  onChange={e => set('leagueP',  e.target.value)} placeholder="38" /></FieldGroup>
-                <FieldGroup label="W"><NumInput value={f.leagueW}  onChange={e => set('leagueW',  e.target.value)} /></FieldGroup>
-                <FieldGroup label="D"><NumInput value={f.leagueD}  onChange={e => set('leagueD',  e.target.value)} /></FieldGroup>
-                <FieldGroup label="L"><NumInput value={f.leagueL}  onChange={e => set('leagueL',  e.target.value)} /></FieldGroup>
+                <FieldGroup label="P">
+                  <NumInput value={f.leagueP}
+                            onChange={e => set('leagueP', e.target.value)} placeholder="38" />
+                </FieldGroup>
+                <FieldGroup label="W">
+                  <NumInput value={f.leagueW} onChange={e => set('leagueW', e.target.value)} />
+                </FieldGroup>
+                <FieldGroup label="D">
+                  <NumInput value={f.leagueD} onChange={e => set('leagueD', e.target.value)} />
+                </FieldGroup>
+                <FieldGroup label="L">
+                  <NumInput value={f.leagueL} onChange={e => set('leagueL', e.target.value)} />
+                </FieldGroup>
               </div>
               <div className={styles.row3}>
-                <FieldGroup label="GF"><NumInput value={f.leagueGF} onChange={e => set('leagueGF', e.target.value)} /></FieldGroup>
-                <FieldGroup label="GA"><NumInput value={f.leagueGA} onChange={e => set('leagueGA', e.target.value)} /></FieldGroup>
+                <FieldGroup label="GF">
+                  <NumInput value={f.leagueGF} onChange={e => set('leagueGF', e.target.value)} />
+                </FieldGroup>
+                <FieldGroup label="GA">
+                  <NumInput value={f.leagueGA} onChange={e => set('leagueGA', e.target.value)} />
+                </FieldGroup>
                 <FieldGroup label="GD"><DerivedFld value={fmtGD(lGD)} /></FieldGroup>
               </div>
               {lWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
@@ -811,52 +1025,104 @@ const SeasonDetail = () => {
                 <>
                   <div className={styles.row2}>
                     <FieldGroup label="Result">
-                      <SelInput value={f.uclResult} onChange={e => set('uclResult', e.target.value)}>
+                      <SelInput value={f.uclResult}
+                                onChange={e => set('uclResult', e.target.value)}>
                         <option value="">— Select —</option>
                         {UCL_RESULTS.map(r => <option key={r} value={r}>{r}</option>)}
                       </SelInput>
                     </FieldGroup>
                     <FieldGroup label="Tournament winner">
-                      <TxtInput value={f.uclTournamentWinner} onChange={e => set('uclTournamentWinner', e.target.value)} placeholder="Real Madrid" />
+                      <TxtInput value={f.uclTournamentWinner}
+                                onChange={e => set('uclTournamentWinner', e.target.value)}
+                                placeholder="Real Madrid" />
                     </FieldGroup>
                   </div>
                   {(f.uclResult === 'Champions' || f.uclResult === 'Runners-Up') && (
                     <div className={styles.row2}>
                       <FieldGroup label="Final opponent">
-                        <TxtInput value={f.uclFinalOpponent} onChange={e => set('uclFinalOpponent', e.target.value)} placeholder="Inter Milan" />
+                        <TxtInput value={f.uclFinalOpponent}
+                                  onChange={e => set('uclFinalOpponent', e.target.value)}
+                                  placeholder="Inter Milan" />
                       </FieldGroup>
                       <FieldGroup label="Final score">
-                        <TxtInput value={f.uclFinalScore} onChange={e => set('uclFinalScore', e.target.value)} placeholder="2–1" />
+                        <TxtInput value={f.uclFinalScore}
+                                  onChange={e => set('uclFinalScore', e.target.value)}
+                                  placeholder="2–1" />
                       </FieldGroup>
                     </div>
                   )}
                   <p className={styles.subHeading}>Knockout opponents</p>
                   <div className={styles.row2}>
-                    <FieldGroup label="R16 opponent"><TxtInput value={f.uclR16Opponent} onChange={e => set('uclR16Opponent', e.target.value)} placeholder="Bayern Munich" /></FieldGroup>
-                    <FieldGroup label="R16 agg score"><TxtInput value={f.uclR16Score} onChange={e => set('uclR16Score', e.target.value)} placeholder="3–1" /></FieldGroup>
+                    <FieldGroup label="R16 opponent">
+                      <TxtInput value={f.uclR16Opponent}
+                                onChange={e => set('uclR16Opponent', e.target.value)}
+                                placeholder="Bayern Munich" />
+                    </FieldGroup>
+                    <FieldGroup label="R16 agg score">
+                      <TxtInput value={f.uclR16Score}
+                                onChange={e => set('uclR16Score', e.target.value)}
+                                placeholder="3–1" />
+                    </FieldGroup>
                   </div>
                   <div className={styles.row2}>
-                    <FieldGroup label="QF opponent"><TxtInput value={f.uclQFOpponent} onChange={e => set('uclQFOpponent', e.target.value)} placeholder="Dortmund" /></FieldGroup>
-                    <FieldGroup label="QF agg score"><TxtInput value={f.uclQFScore} onChange={e => set('uclQFScore', e.target.value)} placeholder="4–2" /></FieldGroup>
+                    <FieldGroup label="QF opponent">
+                      <TxtInput value={f.uclQFOpponent}
+                                onChange={e => set('uclQFOpponent', e.target.value)}
+                                placeholder="Dortmund" />
+                    </FieldGroup>
+                    <FieldGroup label="QF agg score">
+                      <TxtInput value={f.uclQFScore}
+                                onChange={e => set('uclQFScore', e.target.value)}
+                                placeholder="4–2" />
+                    </FieldGroup>
                   </div>
                   <div className={styles.row2}>
-                    <FieldGroup label="SF opponent"><TxtInput value={f.uclSFOpponent} onChange={e => set('uclSFOpponent', e.target.value)} placeholder="Inter Milan" /></FieldGroup>
-                    <FieldGroup label="SF agg score"><TxtInput value={f.uclSFScore} onChange={e => set('uclSFScore', e.target.value)} placeholder="3–2" /></FieldGroup>
+                    <FieldGroup label="SF opponent">
+                      <TxtInput value={f.uclSFOpponent}
+                                onChange={e => set('uclSFOpponent', e.target.value)}
+                                placeholder="Inter Milan" />
+                    </FieldGroup>
+                    <FieldGroup label="SF agg score">
+                      <TxtInput value={f.uclSFScore}
+                                onChange={e => set('uclSFScore', e.target.value)}
+                                placeholder="3–2" />
+                    </FieldGroup>
                   </div>
                   <p className={styles.subHeading}>League Phase</p>
                   <div className={styles.row2}>
-                    <FieldGroup label="LP finish"><NumInput value={f.uclLeaguePhasePosition} onChange={e => set('uclLeaguePhasePosition', e.target.value)} placeholder="6" min="1" max="36" /></FieldGroup>
-                    <FieldGroup label="LP pts"><NumInput value={f.uclLPPts} onChange={e => set('uclLPPts', e.target.value)} placeholder="16" /></FieldGroup>
+                    <FieldGroup label="LP finish">
+                      <NumInput value={f.uclLeaguePhasePosition}
+                                onChange={e => set('uclLeaguePhasePosition', e.target.value)}
+                                placeholder="6" min="1" max="36" />
+                    </FieldGroup>
+                    <FieldGroup label="LP pts">
+                      <NumInput value={f.uclLPPts}
+                                onChange={e => set('uclLPPts', e.target.value)}
+                                placeholder="16" />
+                    </FieldGroup>
                   </div>
                   <div className={styles.row4}>
-                    <FieldGroup label="P"><NumInput value={f.uclLPP} onChange={e => set('uclLPP', e.target.value)} placeholder="8" /></FieldGroup>
-                    <FieldGroup label="W"><NumInput value={f.uclLPW} onChange={e => set('uclLPW', e.target.value)} /></FieldGroup>
-                    <FieldGroup label="D"><NumInput value={f.uclLPD} onChange={e => set('uclLPD', e.target.value)} /></FieldGroup>
-                    <FieldGroup label="L"><NumInput value={f.uclLPL} onChange={e => set('uclLPL', e.target.value)} /></FieldGroup>
+                    <FieldGroup label="P">
+                      <NumInput value={f.uclLPP}
+                                onChange={e => set('uclLPP', e.target.value)} placeholder="8" />
+                    </FieldGroup>
+                    <FieldGroup label="W">
+                      <NumInput value={f.uclLPW} onChange={e => set('uclLPW', e.target.value)} />
+                    </FieldGroup>
+                    <FieldGroup label="D">
+                      <NumInput value={f.uclLPD} onChange={e => set('uclLPD', e.target.value)} />
+                    </FieldGroup>
+                    <FieldGroup label="L">
+                      <NumInput value={f.uclLPL} onChange={e => set('uclLPL', e.target.value)} />
+                    </FieldGroup>
                   </div>
                   <div className={styles.row3}>
-                    <FieldGroup label="GF"><NumInput value={f.uclLPGF} onChange={e => set('uclLPGF', e.target.value)} /></FieldGroup>
-                    <FieldGroup label="GA"><NumInput value={f.uclLPGA} onChange={e => set('uclLPGA', e.target.value)} /></FieldGroup>
+                    <FieldGroup label="GF">
+                      <NumInput value={f.uclLPGF} onChange={e => set('uclLPGF', e.target.value)} />
+                    </FieldGroup>
+                    <FieldGroup label="GA">
+                      <NumInput value={f.uclLPGA} onChange={e => set('uclLPGA', e.target.value)} />
+                    </FieldGroup>
                     <FieldGroup label="GD"><DerivedFld value={fmtGD(uGD)} /></FieldGroup>
                   </div>
                   {uWarn.map((w, i) => <Warning key={i}>{w}</Warning>)}
@@ -870,39 +1136,53 @@ const SeasonDetail = () => {
               <p className={styles.subHeading}>FA Cup</p>
               <div className={styles.row2}>
                 <FieldGroup label="Result">
-                  <SelInput value={f.faCupResult} onChange={e => set('faCupResult', e.target.value)}>
+                  <SelInput value={f.faCupResult}
+                            onChange={e => set('faCupResult', e.target.value)}>
                     <option value="">— Select —</option>
                     {CUP_ROUNDS.map(r => <option key={r} value={r}>{r}</option>)}
                   </SelInput>
                 </FieldGroup>
                 {(f.faCupResult === 'Winner' || f.faCupResult === 'Final') && (
                   <FieldGroup label="Final opponent">
-                    <TxtInput value={f.faCupFinalOpponent} onChange={e => set('faCupFinalOpponent', e.target.value)} placeholder="Arsenal" />
+                    <TxtInput value={f.faCupFinalOpponent}
+                              onChange={e => set('faCupFinalOpponent', e.target.value)}
+                              placeholder="Arsenal" />
                   </FieldGroup>
                 )}
               </div>
-              {f.faCupResult && f.faCupResult !== 'Winner' && f.faCupResult !== 'Did Not Enter' && (
+              {f.faCupResult &&
+               f.faCupResult !== 'Winner' &&
+               f.faCupResult !== 'Did Not Enter' && (
                 <FieldGroup label="Tournament winner">
-                  <TxtInput value={f.faCupWinner} onChange={e => set('faCupWinner', e.target.value)} placeholder="Arsenal" />
+                  <TxtInput value={f.faCupWinner}
+                            onChange={e => set('faCupWinner', e.target.value)}
+                            placeholder="Arsenal" />
                 </FieldGroup>
               )}
               <p className={styles.subHeading} style={{ marginTop: 4 }}>Carabao Cup</p>
               <div className={styles.row2}>
                 <FieldGroup label="Result">
-                  <SelInput value={f.carabaoCupResult} onChange={e => set('carabaoCupResult', e.target.value)}>
+                  <SelInput value={f.carabaoCupResult}
+                            onChange={e => set('carabaoCupResult', e.target.value)}>
                     <option value="">— Select —</option>
                     {CUP_ROUNDS.map(r => <option key={r} value={r}>{r}</option>)}
                   </SelInput>
                 </FieldGroup>
                 {(f.carabaoCupResult === 'Winner' || f.carabaoCupResult === 'Final') && (
                   <FieldGroup label="Final opponent">
-                    <TxtInput value={f.carabaoCupFinalOpponent} onChange={e => set('carabaoCupFinalOpponent', e.target.value)} placeholder="Tottenham" />
+                    <TxtInput value={f.carabaoCupFinalOpponent}
+                              onChange={e => set('carabaoCupFinalOpponent', e.target.value)}
+                              placeholder="Tottenham" />
                   </FieldGroup>
                 )}
               </div>
-              {f.carabaoCupResult && f.carabaoCupResult !== 'Winner' && f.carabaoCupResult !== 'Did Not Enter' && (
+              {f.carabaoCupResult &&
+               f.carabaoCupResult !== 'Winner' &&
+               f.carabaoCupResult !== 'Did Not Enter' && (
                 <FieldGroup label="Tournament winner">
-                  <TxtInput value={f.carabaoCupWinner} onChange={e => set('carabaoCupWinner', e.target.value)} placeholder="Liverpool" />
+                  <TxtInput value={f.carabaoCupWinner}
+                            onChange={e => set('carabaoCupWinner', e.target.value)}
+                            placeholder="Liverpool" />
                 </FieldGroup>
               )}
             </div>
@@ -910,7 +1190,8 @@ const SeasonDetail = () => {
             {/* 6. Dynasty verdict */}
             <div className={styles.editSection}>
               <p className={styles.editSectionHead}>Dynasty verdict</p>
-              <FieldGroup label="Verdict" hint="Closing statement for the season — written as history">
+              <FieldGroup label="Verdict"
+                          hint="Closing statement for the season — written as history">
                 <textarea
                   className={styles.textarea}
                   value={f.dynastyVerdict}
@@ -938,16 +1219,28 @@ const SeasonDetail = () => {
 
         {/* ── DIALOGS ── */}
         {dlgDiscard && (
-          <Dialog title="Discard changes?" body="Unsaved edits will be lost." confirmLabel="Discard" confirmDanger onConfirm={doDiscard} onCancel={() => setDlgDiscard(false)} />
+          <Dialog title="Discard changes?" body="Unsaved edits will be lost."
+                  confirmLabel="Discard" confirmDanger
+                  onConfirm={doDiscard} onCancel={() => setDlgDiscard(false)} />
         )}
         {dlgComplete && (
-          <Dialog title={`Mark ${s.label} as complete?`} body="Completed seasons are locked. You can unlock at any time." confirmLabel="Mark complete" onConfirm={doComplete} onCancel={() => setDlgComplete(false)} />
+          <Dialog title={`Mark ${s.label} as complete?`}
+                  body="Completed seasons are locked. You can unlock at any time."
+                  confirmLabel="Mark complete"
+                  onConfirm={doComplete} onCancel={() => setDlgComplete(false)} />
         )}
         {dlgUnlock && (
-          <Dialog title={`Unlock ${s.label}?`} body="This will allow editing a completed season." confirmLabel="Unlock" onConfirm={doUnlock} onCancel={() => setDlgUnlock(false)} />
+          <Dialog title={`Unlock ${s.label}?`}
+                  body="This will allow editing a completed season."
+                  confirmLabel="Unlock"
+                  onConfirm={doUnlock} onCancel={() => setDlgUnlock(false)} />
         )}
         {trophyQueue.length > 0 && (
-          <TrophyPrompt competition={trophyQueue[0].competition} onConfirm={() => resolveTrophy(true)} onSkip={() => resolveTrophy(false)} />
+          <TrophyPrompt
+            competition={trophyQueue[0].competition}
+            onConfirm={() => resolveTrophy(true)}
+            onSkip={() => resolveTrophy(false)}
+          />
         )}
 
       </div>
@@ -958,18 +1251,23 @@ const SeasonDetail = () => {
 export default SeasonDetail
 
 // ─── CupRow ──────────────────────────────────────────────────────────────────
+
 function CupRow({ label, result, opponent, winner }) {
-  // Guard: don't render if result is empty
   if (!result) return null
   return (
     <div className={styles.cupRow}>
       <span className={styles.cupLabel}>{label}</span>
       <div className={styles.cupRight}>
-        <span className={`${styles.cupBadge} ${result === 'Winner' ? styles.cupWon : result === 'Final' ? styles.cupFinal : styles.cupDefault}`}>
+        <span className={`${styles.cupBadge} ${
+          result === 'Winner' ? styles.cupWon :
+          result === 'Final'  ? styles.cupFinal : styles.cupDefault
+        }`}>
           {result}
         </span>
         {opponent && <span className={styles.dimText}>vs {opponent}</span>}
-        {winner && result !== 'Winner' && <span className={styles.dimText}>Won by {winner}</span>}
+        {winner && result !== 'Winner' && (
+          <span className={styles.dimText}>Won by {winner}</span>
+        )}
       </div>
     </div>
   )

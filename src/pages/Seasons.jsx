@@ -14,13 +14,15 @@ function buildHeadline(season) {
     parts.push(`${season.leagueCompetition} champions`)
   if (season.uclResult === 'Champions') parts.push('UCL winners')
   if (season.uclResult === 'Runners-Up') parts.push('UCL finalists')
-  if (!parts.length && season.label) return `${season.label}${season.year ? ` — ${season.year}` : ''}`
+  if (!parts.length && season.label)
+    return `${season.label}${season.year ? ` — ${season.year}` : ''}`
   return parts.join(' · ') || season.label
 }
 
 function buildDeck(season) {
   if (season.seasonDeck) return season.seasonDeck
-  if (season.narrativeText) return season.narrativeText.slice(0, 110) + (season.narrativeText.length > 110 ? '…' : '')
+  if (season.narrativeText)
+    return season.narrativeText.slice(0, 110) + (season.narrativeText.length > 110 ? '…' : '')
   return null
 }
 
@@ -41,23 +43,9 @@ function getHardware(season) {
 function getRunnerUp(season) {
   if (season.uclResult === 'Runners-Up') {
     const opp = season.uclFinalOpponent || season.uclTournamentWinner || ''
-    return { label: 'UCL R-U', opponent: opp }
+    return { opponent: opp }
   }
   return null
-}
-
-// Detect any UCL activity — checks all relevant fields, not just uclEntered/uclResult
-function hasUclActivity(season) {
-  return !!(
-    season.uclEntered ||
-    season.uclResult ||
-    season.uclR16Opponent ||
-    season.uclQFOpponent ||
-    season.uclSFOpponent ||
-    season.uclFinalOpponent ||
-    season.uclLPP != null ||
-    season.uclLeaguePhasePosition != null
-  )
 }
 
 function scoreClass(season) {
@@ -70,15 +58,19 @@ function scoreClass(season) {
 }
 
 function isPeak(season) {
-  return (season.dynastyScore != null && season.dynastyScore >= 85) || season.uclResult === 'Champions'
+  return (
+    (season.dynastyScore != null && season.dynastyScore >= 85) ||
+    season.uclResult === 'Champions'
+  )
 }
 
 // ─── DYNASTY ARC ─────────────────────────────────────────────────────────────
 
 function DynastyArc({ seasons, onNavigate }) {
   if (!seasons.length) return null
-  const sorted = [...seasons].sort((a, b) => (a.label || '').localeCompare(b.label || ''))
-
+  const sorted = [...seasons].sort((a, b) =>
+    (a.label || '').localeCompare(b.label || '')
+  )
   return (
     <div className={styles.arc}>
       <p className={styles.arcLabel}>Dynasty arc</p>
@@ -86,7 +78,6 @@ function DynastyArc({ seasons, onNavigate }) {
         <div className={styles.arcRow}>
           {sorted.map(s => {
             const { trophies, ucl } = getHardware(s)
-            const hasPeak = isPeak(s)
             return (
               <div
                 key={s.id}
@@ -122,18 +113,23 @@ function SeasonRow({ season, onClick }) {
   const runnerUp = getRunnerUp(season)
   const peak = isPeak(season)
   const dip = season.dynastyScore != null && season.dynastyScore < 60 && !peak
-
   const allTrophies = [...ucl, ...trophies]
 
   return (
     <button className={styles.seasonRow} onClick={onClick}>
-      <div className={`${styles.seasonRowAccent} ${peak ? styles.seasonRowAccentPeak : ''}`} />
+      <div
+        className={`${styles.seasonRowAccent} ${peak ? styles.seasonRowAccentPeak : ''}`}
+      />
       <div className={styles.seasonRowBody}>
         <div className={styles.rowMeta}>
           <span className={styles.rowLabel}>{season.label}</span>
           {season.year && <span className={styles.rowYear}>{season.year}</span>}
         </div>
-        <div className={`${styles.rowHeadline} ${peak ? styles.rowHeadlinePeak : dip ? styles.rowHeadlineDip : ''}`}>
+        <div
+          className={`${styles.rowHeadline} ${
+            peak ? styles.rowHeadlinePeak : dip ? styles.rowHeadlineDip : ''
+          }`}
+        >
           {headline}
         </div>
         {deck && <div className={styles.rowDeck}>{deck}</div>}
@@ -142,7 +138,9 @@ function SeasonRow({ season, onClick }) {
             {allTrophies.map(t => (
               <span
                 key={t.key}
-                className={t.type === 'ucl' ? styles.hwTrophy : t.type === 'league' ? styles.hwLeague : styles.hwTrophy}
+                className={
+                  t.type === 'league' ? styles.hwLeague : styles.hwTrophy
+                }
               >
                 {t.label}
               </span>
@@ -154,7 +152,9 @@ function SeasonRow({ season, onClick }) {
             )}
           </div>
           {season.dynastyScore != null && (
-            <span className={`${styles.rowScore} ${peak ? styles.rowScorePeak : ''}`}>
+            <span
+              className={`${styles.rowScore} ${peak ? styles.rowScorePeak : ''}`}
+            >
               {season.dynastyScore}
             </span>
           )}
@@ -171,7 +171,6 @@ const Seasons = () => {
   const navigate = useNavigate()
   const [seasons, setSeasons] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
   const [showCreate, setShowCreate] = useState(false)
 
   useEffect(() => {
@@ -203,22 +202,16 @@ const Seasons = () => {
     (b.label || '').localeCompare(a.label || '')
   )
 
-  const uclSeasons = sorted.filter(s => hasUclActivity(s))
-
-  const filtered = filter === 'ucl' ? uclSeasons : sorted
-
-  const plTitles = seasons.filter(s => s.leaguePosition === 1).length
+  const plTitles  = seasons.filter(s => s.leaguePosition === 1).length
   const uclTitles = seasons.filter(s => s.uclResult === 'Champions').length
 
   const identityParts = []
-  if (seasons.length) identityParts.push(`${seasons.length} season${seasons.length !== 1 ? 's' : ''}`)
-  if (plTitles) identityParts.push(`${plTitles} league title${plTitles !== 1 ? 's' : ''}`)
-  if (uclTitles) identityParts.push(`${uclTitles} UCL title${uclTitles !== 1 ? 's' : ''}`)
-
-  const filterTabs = [
-    { key: 'all',   label: `All Seasons (${sorted.length})` },
-    { key: 'ucl',   label: `UCL Seasons (${uclSeasons.length})` },
-  ]
+  if (seasons.length)
+    identityParts.push(`${seasons.length} season${seasons.length !== 1 ? 's' : ''}`)
+  if (plTitles)
+    identityParts.push(`${plTitles} league title${plTitles !== 1 ? 's' : ''}`)
+  if (uclTitles)
+    identityParts.push(`${uclTitles} UCL title${uclTitles !== 1 ? 's' : ''}`)
 
   return (
     <div className={styles.page}>
@@ -226,7 +219,9 @@ const Seasons = () => {
 
         {/* ── PAGE HEADER ── */}
         <div className={styles.pageHead}>
-          <p className={styles.eyebrow}>{activeClub.name} · {activeGame?.title}</p>
+          <p className={styles.eyebrow}>
+            {activeClub.name} · {activeGame?.title}
+          </p>
           <h1 className={styles.pageTitle}>The {activeClub.name} story</h1>
           <div className={styles.heroIdentityRule} />
           {identityParts.length > 0 && (
@@ -236,35 +231,27 @@ const Seasons = () => {
 
         {/* ── DYNASTY ARC ── */}
         {seasons.length >= 2 && (
-          <DynastyArc seasons={seasons} onNavigate={id => navigate(`/seasons/${id}`)} />
+          <DynastyArc
+            seasons={seasons}
+            onNavigate={id => navigate(`/seasons/${id}`)}
+          />
         )}
-
-        {/* ── FILTERS ── */}
-        <div className={styles.filterRow}>
-          {filterTabs.map(f => (
-            <button
-              key={f.key}
-              className={`${styles.filterTab} ${filter === f.key ? styles.filterTabActive : ''}`}
-              onClick={() => setFilter(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
 
         {/* ── SEASON LIST ── */}
         {loading ? (
-          <div className={styles.loadWrap}><div className={styles.spinner} /></div>
-        ) : filtered.length === 0 ? (
+          <div className={styles.loadWrap}>
+            <div className={styles.spinner} />
+          </div>
+        ) : sorted.length === 0 ? (
           <div className={styles.empty}>
-            <p className={styles.emptyTitle}>{seasons.length === 0 ? 'No seasons yet' : 'No seasons match this filter'}</p>
-            {seasons.length === 0 && (
-              <p className={styles.emptyText}>Import season data to start building your dynasty record.</p>
-            )}
+            <p className={styles.emptyTitle}>No seasons yet</p>
+            <p className={styles.emptyText}>
+              Import season data to start building your dynasty record.
+            </p>
           </div>
         ) : (
           <div className={styles.seasonList}>
-            {filtered.map(s => (
+            {sorted.map(s => (
               <SeasonRow
                 key={s.id}
                 season={s}
