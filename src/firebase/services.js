@@ -142,6 +142,24 @@ export const addTrophy = async (data) => {
   return addDoc(collection(db, 'trophies'), { ...data, createdAt: serverTimestamp() })
 }
 
+// ─── OPPONENTS ───────────────────────────────────────────────────────────────
+// Returns all opponent documents as a Map<opponentKey, opponentDoc>
+// for O(1) lookup. Call once per page and pass down; do not call per row.
+
+export const getOpponents = async () => {
+  const snap = await getDocs(collection(db, 'opponents'))
+  const map = new Map()
+  snap.docs.forEach(d => map.set(d.id, { id: d.id, ...d.data() }))
+  return map
+}
+
+export const getOpponent = async (opponentKey) => {
+  if (!opponentKey) return null
+  const snap = await getDoc(doc(db, 'opponents', opponentKey))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() }
+}
+
 // ─── GOALS ───────────────────────────────────────────────────────────────────
 
 export const getGoals = async (matchId) => {

@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 22
+// Current: 23
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -22,5 +22,6 @@
 //   19 — Add backfillPlayerTotals script to fix career stat totals seeded from single season only
 //   20 — Nav cleanup: 5 primary items + hamburger; bottom sheet for Rivals, Museum, Sporting Director
 //   21 — Seasons + SeasonDetail audit: 2-filter (All/UCL), UCL detection fix, uclEntered reliability, trophy shelf won-only, UCL major section (LP terminology), league record default-open, dynasty verdict meter, edit form reorder, key moments separators, arc touch targets, creation CTAs hidden, score clamp
-//   22 — Seasons filters removed (clean timeline); SeasonDetail UCL section powered by match docs: LP matchday rows (MD1-MD8) with opponent/score/H-A/result, KO leg detail (R16/QF/SF/Final) from match docs with season-doc aggregate fallback
-const SW_VERSION = 22;
+//   22 — Seasons filters removed (clean timeline); SeasonDetail UCL powered by match docs: LP matchday table MD1-MD8, KO leg detail with season-doc fallback
+//   23 — Opponent identity + logo layer: opponents collection, opponentMatcher, opponentSeed, backfillOpponents scripts; SeasonDetail UCL canonical names + crests; Rivals canonical names + crests; getOpponents/getOpponent services
+const SW_VERSION = 23;

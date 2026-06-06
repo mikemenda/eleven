@@ -1,30 +1,49 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
-import { getMatchesByClub, getRivalStats } from '../firebase/services'
+import { getMatchesByClub, getRivalStats, getOpponents } from '../firebase/services'
 import styles from './Rivals.module.css'
 
 export default function Rivals() {
   const { activeClub } = useApp()
-  const [rivals, setRivals] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null) // opponentKey (normalized)
-  const [filter, setFilter] = useState('all') // all | frequent | finals
+  const [rivals,    setRivals]    = useState([])
+  const [opponents, setOpponents] = useState(new Map())
+  const [loading,   setLoading]   = useState(true)
+  const [selected,  setSelected]  = useState(null)
+  const [filter,    setFilter]    = useState('all')
 
   useEffect(() => {
     if (!activeClub) return
     setLoading(true)
-    getMatchesByClub(activeClub.id).then(matches => {
+    Promise.all([
+      getMatchesByClub(activeClub.id),
+      getOpponents(),
+    ]).then(([matches, oppMap]) => {
       setRivals(getRivalStats(matches))
+      setOpponents(oppMap)
       setLoading(false)
     })
   }, [activeClub])
 
+  // Enrich rival with canonical displayName and crestUrl from opponents map
+  function enrichRival(r) {
+    if (!r) return r
+    const key = r.opponentKey
+    if (key && opponents.has(key)) {
+      const rec = opponents.get(key)
+      return { ...r, displayName: rec.displayName || r.opponent, crestUrl: rec.crestUrl || null }
+    }
+    return { ...r, displayName: r.opponent, crestUrl: null }
+  }
+
   const filtered = rivals
-    .filter(r => filter === 'all' || (filter === 'frequent' && r.played >= 2) || (filter === 'finals' && r.matches.some(m => m.round === 'Final' || m.round === 'UCL_Final')))
+    .filter(r => filter === 'all'
+      || (filter === 'frequent' && r.played >= 2)
+      || (filter === 'finals'   && r.matches.some(m => m.round === 'Final' || m.round === 'UCL_Final')))
+    .map(enrichRival)
 
   if (selected) {
     const rival = rivals.find(r => r.opponentKey === selected)
-    return <RivalDetail rival={rival} onBack={() => setSelected(null)} />
+    return <RivalDetail rival={enrichRival(rival)} onBack={() => setSelected(null)} />
   }
 
   return (
@@ -36,11 +55,12 @@ export default function Rivals() {
 
       <div className={styles.filterBar}>
         {[
-          { key: 'all', label: 'All' },
+          { key: 'all',      label: 'All' },
           { key: 'frequent', label: '2+ Meetings' },
-          { key: 'finals', label: 'Finals' },
+          { key: 'finals',   label: 'Finals' },
         ].map(f => (
-          <button key={f.key} className={`${styles.filterBtn} ${filter === f.key ? styles.filterActive : ''}`}
+          <button key={f.key}
+            className={`${styles.filterBtn} ${filter === f.key ? styles.filterActive : ''}`}
             onClick={() => setFilter(f.key)}>
             {f.label}
           </button>
@@ -58,7 +78,6 @@ export default function Rivals() {
           </div>
         ) : (
           <>
-            {/* ── TABLE HEADER ── */}
             <div className={styles.tableHeader}>
               <span className={styles.thOpp}>Opponent</span>
               <span className={styles.thStat}>P</span>
@@ -68,9 +87,14 @@ export default function Rivals() {
               <span className={styles.thStat}>GD</span>
             </div>
             {filtered.map(r => (
-              <button key={r.opponentKey} className={styles.rivalRow} onClick={() => setSelected(r.opponentKey)}>
+              <button key={r.opponentKey} className={styles.rivalRow}
+                onClick={() => setSelected(r.opponentKey)}>
                 <div className={styles.rivalOpp}>
-                  <span className={styles.rivalName}>{r.opponent}</span>
+                  {r.crestUrl && (
+                    <img src={r.crestUrl} alt="" className={styles.rivalCrest}
+                      onError={e => { e.currentTarget.style.display = 'none' }} />
+                  )}
+                  <span className={styles.rivalName}>{r.displayName}</span>
                   {r.played >= 3 && (
                     <span className={styles.rivalBadge} style={{ color: 'var(--en-gold)' }}>Rival</span>
                   )}
@@ -113,10 +137,13 @@ function RivalDetail({ rival, onBack }) {
             <path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </button>
-        <span className={styles.topLabel}>{rival.opponent}</span>
+        {rival.crestUrl && (
+          <img src={rival.crestUrl} alt="" className={styles.detailCrest}
+            onError={e => { e.currentTarget.style.display = 'none' }} />
+        )}
+        <span className={styles.topLabel}>{rival.displayName}</span>
       </div>
 
-      {/* H2H Summary */}
       <div className={styles.h2hBar}>
         <div className={styles.h2hItem}>
           <span className={styles.h2hVal} style={{ color: 'var(--en-green)' }}>{rival.w}</span>
@@ -136,25 +163,24 @@ function RivalDetail({ rival, onBack }) {
         </div>
       </div>
 
-      {/* Match Log */}
       <div className={styles.inner}>
         {finals.length > 0 && (
           <div className={styles.finalsNote}>
-            ⚡ {finals.length} final{finals.length > 1 ? 's' : ''} against {rival.opponent}
+            ⚡ {finals.length} final{finals.length > 1 ? 's' : ''} against {rival.displayName}
           </div>
         )}
         <div className={styles.matchLog}>
           {rival.matches.map((m, i) => {
-            const win = m.score_for > m.score_against
-            const draw = m.score_for === m.score_against
-            const result = win ? 'W' : draw ? 'D' : 'L'
-            const resultColor = win ? 'var(--en-green)' : draw ? 'var(--en-text-3)' : 'var(--danger)'
+            const win   = m.score_for > m.score_against
+            const draw  = m.score_for === m.score_against
+            const res   = win ? 'W' : draw ? 'D' : 'L'
+            const color = win ? 'var(--en-green)' : draw ? 'var(--en-text-3)' : 'var(--danger)'
             return (
               <div key={i} className={styles.matchRow}>
-                <span className={styles.matchResult} style={{ color: resultColor }}>{result}</span>
+                <span className={styles.matchResult} style={{ color }}>{res}</span>
                 <div className={styles.matchInfo}>
                   <span className={styles.matchComp}>{COMP_LABEL[m.competition] || m.competition}</span>
-                  {m.round && <span className={styles.matchRound}>{m.round}</span>}
+                  {m.round      && <span className={styles.matchRound}>{m.round}</span>}
                   {m.seasonLabel && <span className={styles.matchSeason}>{m.seasonLabel}</span>}
                 </div>
                 <span className={styles.matchScore}>{m.score_for}–{m.score_against}</span>

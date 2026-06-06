@@ -426,6 +426,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   padding-right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Club crest in LP matchday table */
+.mtCrest {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 .mtColVenue {
   font-family: var(--font-plex);
@@ -482,6 +492,15 @@
   flex-shrink: 0;
   min-width: 40px;
 }
+/* Club crest in KO round header */
+.koCrest {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-right: 4px;
+}
 .koOpponent {
   font-family: var(--font-inter);
   font-size: 13px;
@@ -490,6 +509,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 /* Aggregate score badge */
 .koAgg {

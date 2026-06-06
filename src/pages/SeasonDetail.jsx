@@ -7,6 +7,7 @@ import {
   getTrophiesForSeason,
   addTrophy,
   getMatches,
+  getOpponents,
 } from '../firebase/services'
 import styles from './SeasonDetail.module.css'
 
@@ -278,7 +279,35 @@ function legAggregate(legs) {
   return { totalFor, totalAgainst }
 }
 
-function UclSection({ s, matches }) {
+// ─── Opponent lookup helpers ──────────────────────────────────────────────────
+// oppName: returns the best display name for a raw opponent string,
+//   preferring the canonical displayName from the opponents map when a
+//   match doc carries an opponentKey.
+function oppDisplay(matchDoc, opponents) {
+  if (!matchDoc) return null
+  const key = matchDoc.opponentKey
+  if (key && opponents && opponents.has(key)) {
+    return opponents.get(key).displayName || matchDoc.opponent || null
+  }
+  return matchDoc.opponent || null
+}
+
+// oppCrest: returns crestUrl from the opponents map for a given opponentKey
+function oppCrest(opponentKey, opponents) {
+  if (!opponentKey || !opponents) return null
+  const rec = opponents.get(opponentKey)
+  return rec?.crestUrl || null
+}
+
+// oppAbbr: returns abbreviation from opponents map, falls back to abbrev()
+function oppAbbr(opponentKey, rawName, opponents) {
+  if (opponentKey && opponents && opponents.has(opponentKey)) {
+    return opponents.get(opponentKey).abbreviation || abbrev(rawName)
+  }
+  return abbrev(rawName)
+}
+
+function UclSection({ s, matches, opponents }) {
   const isChampion = s.uclResult === 'Champions'
   const isRunnerUp = s.uclResult === 'Runners-Up'
 
@@ -316,22 +345,32 @@ function UclSection({ s, matches }) {
 
   const koRounds = rounds
     .map(r => {
-      const legs = buildKOLegs(matches, r.comp)
+      const legs    = buildKOLegs(matches, r.comp)
       const hasLegs = legs.length > 0
-      const agg = hasLegs ? legAggregate(legs) : null
-      // Derive overall result from aggregate
+      const agg     = hasLegs ? legAggregate(legs) : null
       let roundResult = null
       if (agg) {
         if (agg.totalFor > agg.totalAgainst) roundResult = 'W'
         else if (agg.totalFor < agg.totalAgainst) roundResult = 'L'
-        else roundResult = 'D' // would be penalties in practice
+        else roundResult = 'D'
       }
+      // Resolve opponent name: prefer canonical from opponents map via leg docs, then season doc
+      const legKey    = hasLegs ? (legs[0]?.opponentKey || null) : null
+      const rawOppName= hasLegs ? (legs[0]?.opponent ?? r.opp) : r.opp
+      const oppKey    = legKey || null
+      const canonName = oppKey && opponents.has(oppKey)
+        ? opponents.get(oppKey).displayName
+        : rawOppName
+      const crest     = oppKey ? oppCrest(oppKey, opponents) : null
+
       return {
-        label: r.label,
-        comp: r.comp,
-        opponent: hasLegs ? (legs[0]?.opponent ?? r.opp) : r.opp,
-        legs: hasLegs ? legs : null,
-        // Aggregate string: compute from legs if available, else fall back to season doc field
+        label:  r.label,
+        comp:   r.comp,
+        opponent:     canonName,
+        opponentRaw:  rawOppName,
+        opponentKey:  oppKey,
+        crest,
+        legs:   hasLegs ? legs : null,
         aggStr: agg ? `${agg.totalFor}–${agg.totalAgainst}` : (r.aggDoc || null),
         roundResult,
       }
@@ -369,13 +408,25 @@ function UclSection({ s, matches }) {
                 <span className={styles.mtColResult}>—</span>
               </div>
               {lpRows.map((m, i) => {
-                const res = matchResult(m.score_for, m.score_against)
+                const res      = matchResult(m.score_for, m.score_against)
+                const dispName = oppDisplay(m, opponents) || '—'
+                const crest    = oppCrest(m.opponentKey, opponents)
                 return (
                   <div key={m.id ?? i} className={styles.matchRow}>
                     <span className={styles.mtColRound}>
                       {m.round ? m.round.replace('MD', '') : '—'}
                     </span>
-                    <span className={styles.mtColOpponent}>{m.opponent || '—'}</span>
+                    <span className={styles.mtColOpponent}>
+                      {crest && (
+                        <img
+                          src={crest}
+                          alt=""
+                          className={styles.mtCrest}
+                          onError={e => { e.currentTarget.style.display = 'none' }}
+                        />
+                      )}
+                      {dispName}
+                    </span>
                     <span
                       className={styles.mtColVenue}
                       style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}
@@ -431,7 +482,17 @@ function UclSection({ s, matches }) {
                   <div className={styles.koRoundHeader}>
                     <span className={styles.koRoundLabel}>{r.label}</span>
                     {r.opponent && (
-                      <span className={styles.koOpponent}>vs {r.opponent}</span>
+                      <span className={styles.koOpponent}>
+                        {r.crest && (
+                          <img
+                            src={r.crest}
+                            alt=""
+                            className={styles.koCrest}
+                            onError={e => { e.currentTarget.style.display = 'none' }}
+                          />
+                        )}
+                        vs {r.opponent}
+                      </span>
                     )}
                     {/* Aggregate badge */}
                     {r.aggStr && (
@@ -522,6 +583,7 @@ const SeasonDetail = () => {
   const [season,   setSeason]   = useState(null)
   const [trophies, setTrophies] = useState([])
   const [matches,  setMatches]  = useState([])
+  const [opponents,setOpponents]= useState(new Map())
   const [loading,  setLoading]  = useState(true)
   const [loadErr,  setLoadErr]  = useState(null)
 
@@ -549,15 +611,17 @@ const SeasonDetail = () => {
   const load = async () => {
     setLoading(true); setLoadErr(null)
     try {
-      const [s, t, m] = await Promise.all([
+      const [s, t, m, opp] = await Promise.all([
         getSeason(seasonId),
         getTrophiesForSeason(seasonId),
         getMatches(seasonId),
+        getOpponents(),
       ])
       if (!s) { setLoadErr('Season not found.'); return }
       setSeason(s)
       setTrophies(t)
       setMatches(m)
+      setOpponents(opp)
     } catch (e) {
       console.error(e); setLoadErr('Failed to load season.')
     } finally {
@@ -840,7 +904,7 @@ const SeasonDetail = () => {
             )}
 
             {/* 6. UCL JOURNEY — major section, match-doc-powered */}
-            {uclActive && <UclSection s={s} matches={matches} />}
+            {uclActive && <UclSection s={s} matches={matches} opponents={opponents} />}
 
             {/* 7. CUPS */}
             {hasCups && (
