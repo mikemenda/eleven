@@ -281,7 +281,7 @@ export default function PlayerProfile() {
     Promise.all([
       getPlayer(id),
       getSeasons(activeClub.id),          // needed for label join
-      getSeasonStatsByPlayer(id, activeClub.id),
+      getSeasonStatsByPlayer(id),
       getTransfers(activeClub.id),
     ]).then(([p, seasons, statDocs, t]) => {
       setPlayer(p)

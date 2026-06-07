@@ -113,20 +113,29 @@ export const updatePlayer = async (playerId, data) => {
 }
 
 // Returns all seasonStats documents for a given player across all seasons and scopes.
-// Queries by playerId only — a compound playerId+clubId query would silently exclude
-// docs where clubId was written inconsistently during early seeding (S2/S3 corruption era).
-// Client-side: keep docs where clubId matches OR where clubId is absent (legacy tolerance).
-// Callers must join to seasons by seasonId to get the season label ("S1", "S2", etc.) —
-// seasonStats docs do NOT have a label field.
-export const getSeasonStatsByPlayer = async (playerId, clubId) => {
+// Queries by playerId only. No clubId filter — either in Firestore or client-side.
+//
+// Why playerId-only is safe here:
+// playerId is a Firestore document ID pointing to a specific player record that is
+// already scoped to one club save. Two players at two different clubs are two separate
+// Firestore documents with different playerIds. So filtering by playerId is already
+// club-specific — there is no cross-club contamination risk.
+//
+// Why the previous clubId filter was wrong:
+// S2/S3 seasonStats docs were written during a seeding era where clubId values were
+// corrupted (letter O vs digit 0 mismatch). The repair script that later fixed other
+// collections did not include seasonStats, so those docs still carry wrong clubId values.
+// Any filter on clubId — whether in Firestore or client-side — will silently exclude
+// those docs. Only removing the filter entirely makes all seasons visible.
+//
+// NOTE: docs do NOT have a label field. Join to seasons by seasonId to get "S1" etc.
+export const getSeasonStatsByPlayer = async (playerId) => {
   const q = query(
     collection(db, 'seasonStats'),
     where('playerId', '==', playerId)
   )
   const snap = await getDocs(q)
-  return snap.docs
-    .map(d => ({ id: d.id, ...d.data() }))
-    .filter(d => !d.clubId || d.clubId === clubId)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
 // ─── TRANSFERS ───────────────────────────────────────────────────────────────

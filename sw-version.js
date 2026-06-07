@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 28
+// Current: 29
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -28,5 +28,6 @@
 //   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline), PlayerProfile outfield 2x4 stat grid, GK 1x4 stat grid
 //   26 — Players Phase 2: add getSeasonStatsByPlayer service; PlayerProfile reads seasonStats collection by scope; UCL per-season table; removed player.seasonStats embedded-array assumption
 //   27 — PlayerProfile debug fix: label join from seasons collection, tabs before grid, tab-gated stat grids
-//   28 — Fix getSeasonStatsByPlayer: query playerId-only (compound clubId filter excluded S2/S3 docs with inconsistent clubId from seeding era); client-side clubId filter tolerates absent clubId
-const SW_VERSION = 28;
+//   28 — Fix getSeasonStatsByPlayer: query playerId-only; client-side clubId filter tolerates absent clubId
+//   29 — Fix getSeasonStatsByPlayer: remove clubId filter entirely (corrupted S2/S3 docs have wrong clubId not absent; playerId alone is club-scoped)
+const SW_VERSION = 29;
