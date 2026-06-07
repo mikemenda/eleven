@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 36
+// Current: 37
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -37,4 +37,5 @@
 //   34 — Transfers: S1 schema migration script (migrateS1Transfers.mjs); dropdown label fix; deterministic window group sort; context-aware summary bar; stable getTransfers orderBy createdAt
 //   35 — Transfers completion: patchTransferCleanup.mjs (Generated Player rename + legacy removal, Mercado CM, Newerton LW); TransferRow tap-through to PlayerProfile when playerId present; non-playerId rows silent non-tappable
 //   36 — Fix Transfers stuck loading: remove orderBy from getTransfers (no composite index needed); client-side sort unchanged; catch/finally prevents infinite spinner
-const SW_VERSION = 36;
+//   37 — Transfers identity layer: player face thumbnails (36×36) + club crests (36×36) in transfer rows; layout: arrow→face→name/meta→crest→fee; data/transfer-clubs.json (21 clubs, sofifaTeamIds verified); historical stubs hidden from Players list via isHistoricalStub filter
+const SW_VERSION = 37;

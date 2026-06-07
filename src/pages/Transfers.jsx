@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getTransfers, getSeasons } from '../firebase/services'
+import { getTransfers, getSeasons, getPlayers } from '../firebase/services'
+import TRANSFER_CLUBS from '../../data/transfer-clubs.json'
 import styles from './Transfers.module.css'
 
 function fmt(n) {
@@ -29,21 +30,101 @@ function compareSeasonLabels(a, b) {
 // Window sort: Summer before January within a season
 const WINDOW_ORDER = { Summer: 0, January: 1 }
 
+// Resolve the sofifaTeamId for a club name using the static transfer-clubs map.
+// Keys in the JSON are lowercase+trimmed. Returns null if not found.
+function resolveClubTeamId(clubName) {
+  if (!clubName) return null
+  const key = clubName.trim().toLowerCase()
+  return TRANSFER_CLUBS[key]?.sofifaTeamId ?? null
+}
+
+const WORKER_BASE = 'https://fifa-img.michaelmenda92.workers.dev'
+
+// ─── Inline face components (36×36, mirrors Players.jsx pattern) ──────────────
+
+function Silhouette({ size = 36 }) {
+  return (
+    <div className={styles.thumb} style={{ width: size, height: size }}>
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
+        <circle cx="22" cy="15" r="7" fill="currentColor" opacity="0.35"/>
+        <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity="0.25"/>
+      </svg>
+    </div>
+  )
+}
+
+function PlayerFace({ sofifaId, name, size = 36 }) {
+  const [err, setErr] = useState(false)
+  if (!sofifaId || err) return <Silhouette size={size} />
+  return (
+    <img
+      src={`${WORKER_BASE}/${sofifaId}`}
+      alt={name}
+      className={styles.playerFace}
+      style={{ width: size, height: size }}
+      onError={() => setErr(true)}
+    />
+  )
+}
+
+// ─── Club crest component ─────────────────────────────────────────────────────
+
+function ShieldFallback({ size = 36 }) {
+  return (
+    <div className={styles.crestWrap} style={{ width: size, height: size }}>
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
+        <path
+          d="M18 3L5 8v10c0 8 5.8 13.8 13 15 7.2-1.2 13-7 13-15V8L18 3z"
+          fill="currentColor" opacity="0.12"
+          stroke="currentColor" strokeWidth="1" strokeOpacity="0.25"
+        />
+      </svg>
+    </div>
+  )
+}
+
+function ClubCrest({ clubName, size = 36 }) {
+  const [err, setErr] = useState(false)
+  const teamId = resolveClubTeamId(clubName)
+
+  if (!teamId || err) return <ShieldFallback size={size} />
+  return (
+    <img
+      src={`${WORKER_BASE}/team/${teamId}`}
+      alt={clubName}
+      className={styles.crestImg}
+      style={{ width: size, height: size }}
+      onError={() => setErr(true)}
+    />
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function Transfers() {
   const { activeClub } = useApp()
   const [transfers, setTransfers] = useState([])
-  const [seasons, setSeasons]     = useState([])
-  const [loading, setLoading]     = useState(true)
+  const [seasons,   setSeasons]   = useState([])
+  const [playerMap, setPlayerMap] = useState(new Map()) // playerId → player doc
+  const [loading,   setLoading]   = useState(true)
   const [selectedSeason, setSelectedSeason] = useState('all')
   const [dir, setDir] = useState('all') // all | IN | OUT
 
   useEffect(() => {
     if (!activeClub) return
     setLoading(true)
-    Promise.all([getTransfers(activeClub.id), getSeasons(activeClub.id)])
-      .then(([t, s]) => {
+    Promise.all([
+      getTransfers(activeClub.id),
+      getSeasons(activeClub.id),
+      getPlayers(activeClub.id),
+    ])
+      .then(([t, s, p]) => {
         setTransfers(t)
         setSeasons(s)
+        // Build playerId → player map for O(1) face lookup per row
+        const map = new Map()
+        p.forEach(player => map.set(player.id, player))
+        setPlayerMap(map)
       })
       .catch(err => console.error('[Transfers] load error:', err))
       .finally(() => setLoading(false))
@@ -202,8 +283,8 @@ export default function Transfers() {
                   })()}
                 </div>
               </div>
-              {(dir === 'all' || dir === 'IN')  && g.ins.map((t, i)  => <TransferRow key={`in-${i}`}  t={t} />)}
-              {(dir === 'all' || dir === 'OUT') && g.outs.map((t, i) => <TransferRow key={`out-${i}`} t={t} />)}
+              {(dir === 'all' || dir === 'IN')  && g.ins.map((t, i)  => <TransferRow key={`in-${i}`}  t={t} playerMap={playerMap} />)}
+              {(dir === 'all' || dir === 'OUT') && g.outs.map((t, i) => <TransferRow key={`out-${i}`} t={t} playerMap={playerMap} />)}
             </div>
           ))
         )}
@@ -212,10 +293,19 @@ export default function Transfers() {
   )
 }
 
-function TransferRow({ t }) {
-  const navigate = useNavigate()
+// ─── Transfer row ─────────────────────────────────────────────────────────────
+
+function TransferRow({ t, playerMap }) {
+  const navigate   = useNavigate()
   const isIn       = t.direction === 'IN'
   const isLinkable = !!t.playerId
+
+  // Resolve player doc for face thumbnail (null if no playerId or not in map)
+  const player    = t.playerId ? (playerMap.get(t.playerId) ?? null) : null
+  const sofifaId  = player?.sofifaId ?? null
+
+  // Crest: for arrivals show from_club; for departures show to_club
+  const crestClub = isIn ? t.from_club : t.to_club
 
   const handleClick = () => {
     if (isLinkable) navigate(`/players/${t.playerId}`)
@@ -227,18 +317,26 @@ function TransferRow({ t }) {
       onClick={isLinkable ? handleClick : undefined}
       style={{ cursor: isLinkable ? 'pointer' : 'default' }}
     >
+      {/* Direction arrow */}
       <div
         className={styles.transferArrow}
         style={{ color: isIn ? 'var(--en-green)' : 'var(--danger)' }}
       >
         {isIn ? '▼' : '▲'}
       </div>
+
+      {/* Player face */}
+      <div className={styles.faceWrap}>
+        <PlayerFace sofifaId={sofifaId} name={t.player} size={36} />
+      </div>
+
+      {/* Player name + metadata */}
       <div className={styles.transferInfo}>
         <div className={styles.transferName}>{t.player}</div>
         <div className={styles.transferMeta}>
           {t.position && <span className={styles.transferPos}>{t.position}</span>}
-          {(isIn ? t.from_club : t.to_club) && (
-            <span className={styles.transferClubs}>{isIn ? t.from_club : t.to_club}</span>
+          {crestClub && (
+            <span className={styles.transferClubs}>{crestClub}</span>
           )}
           {t.rule && (
             <span
@@ -250,6 +348,13 @@ function TransferRow({ t }) {
           )}
         </div>
       </div>
+
+      {/* Club crest */}
+      <div className={styles.crestCol}>
+        <ClubCrest clubName={crestClub} size={36} />
+      </div>
+
+      {/* Fee */}
       <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
     </div>
   )

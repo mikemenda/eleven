@@ -4,11 +4,12 @@ node_modules/
 # Build output
 dist/
 
-# Data files
-data/
+# Temporary data exports
+transfer-audit*.json
 
 # Firebase service account — never commit this
 serviceAccountKey.json
+scripts/serviceAccountKey.json
 
 # Mac junk
 .DS_Store

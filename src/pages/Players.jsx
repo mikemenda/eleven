@@ -328,6 +328,7 @@ export default function Players() {
 
   // ── Derived/filtered/sorted list ──────────────────────────────────────────
   const filtered = players
+    .filter(p => !p.isHistoricalStub)  // hide transfer-only historical stubs (still linkable from Transfers)
     .filter(p => statusFilter === 'All' || p.status === statusFilter)
     .filter(p => playerMatchesFilter(p, posFilter))
     .filter(p => !search || p.name?.toLowerCase().includes(search.toLowerCase()))
