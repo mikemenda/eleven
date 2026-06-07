@@ -332,17 +332,7 @@ export default function Players() {
                         </div>
                         <div className={styles.identityInfo}>
                           <span className={styles.playerName}>{player.name}</span>
-                          <div className={styles.playerMeta}>
-                            <span className={styles.playerPos}>{player.position || '—'}</span>
-                            {player.status && player.status !== 'Active' && (
-                              <span
-                                className={styles.statusBadge}
-                                style={{ color: STATUS_META[player.status]?.color }}
-                              >
-                                {STATUS_META[player.status]?.label}
-                              </span>
-                            )}
-                          </div>
+                          <span className={styles.playerPos}>{player.position || '—'}</span>
                         </div>
                       </div>
                     </td>

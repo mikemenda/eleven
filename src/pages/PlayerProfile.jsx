@@ -53,42 +53,50 @@ function isGK(player) {
   return player?.position === 'GK'
 }
 
-// ─── Career totals config ─────────────────────────────────────────────────────
-// Returns array of { key, label, value } for the totals strip.
-// GKs: Apps / CS / CS/G / Avg Rating (no goals/assists/G+A/G/G/A/G/C/G)
-// Outfielders: Apps / G / A / G+A / G/G / A/G / C/G / Avg Rating
+// ─── Career totals grid ───────────────────────────────────────────────────────
+// Outfielders: 2×4 grid
+//   Row 1: Apps | G+A  | Goals   | Assists
+//   Row 2: Avg  | C/G  | G/G     | A/G
+// GKs: 1×4 grid
+//   Row 1: Apps | CS   | CS/G    | Avg
 
-function buildTotals(player) {
-  const apps      = player.apps    || 0
-  const goals     = player.goals   || 0
-  const assists   = player.assists || 0
-  const cs        = player.cleanSheets
-  const rating    = player.averageRating
+function buildTotalsGrid(player) {
+  const apps    = player.apps    || 0
+  const goals   = player.goals   || 0
+  const assists = player.assists || 0
+  const cs      = player.cleanSheets
+  const rating  = player.averageRating
 
-  const contrib   = goals + assists
-  const gpg       = apps > 0 ? goals / apps : null
-  const apg       = apps > 0 ? assists / apps : null
-  const cpg       = apps > 0 ? contrib / apps : null
-  const cspg      = apps > 0 && cs != null ? cs / apps : null
+  const contrib = goals + assists
+  const gpg     = apps > 0 ? (goals / apps)   : null
+  const apg     = apps > 0 ? (assists / apps) : null
+  const cpg     = apps > 0 ? (contrib / apps) : null
+  const cspg    = apps > 0 && cs != null ? cs / apps : null
 
   if (isGK(player)) {
-    return [
-      { key: 'apps',    label: 'Apps',   value: apps },
-      { key: 'cs',      label: 'CS',     value: cs != null ? cs : '—' },
-      { key: 'cspg',    label: 'CS/G',   value: fmtRate(cspg) },
-      { key: 'rating',  label: 'Avg Rtg',value: fmtOpt(rating, 1) },
-    ]
+    // Single row, 4 boxes
+    return [[
+      { key: 'apps',  label: 'Apps', value: apps },
+      { key: 'cs',    label: 'CS',   value: cs != null ? cs : '—' },
+      { key: 'cspg',  label: 'CS/G', value: fmtRate(cspg) },
+      { key: 'avg',   label: 'Avg',  value: fmtOpt(rating, 1) },
+    ]]
   }
 
+  // Outfielder: two rows of 4
   return [
-    { key: 'apps',    label: 'Apps',   value: apps },
-    { key: 'goals',   label: 'Goals',  value: goals },
-    { key: 'assists', label: 'Assists',value: assists },
-    { key: 'contrib', label: 'G+A',    value: contrib },
-    { key: 'gpg',     label: 'G/G',    value: fmtRate(gpg) },
-    { key: 'apg',     label: 'A/G',    value: fmtRate(apg) },
-    { key: 'cpg',     label: 'C/G',    value: fmtRate(cpg) },
-    { key: 'rating',  label: 'Avg Rtg',value: fmtOpt(rating, 1) },
+    [
+      { key: 'apps',    label: 'Apps',    value: apps },
+      { key: 'contrib', label: 'G+A',     value: contrib },
+      { key: 'goals',   label: 'Goals',   value: goals },
+      { key: 'assists', label: 'Assists', value: assists },
+    ],
+    [
+      { key: 'avg',  label: 'Avg',  value: fmtOpt(rating, 1) },
+      { key: 'cpg',  label: 'C/G',  value: fmtRate(cpg) },
+      { key: 'gpg',  label: 'G/G',  value: fmtRate(gpg) },
+      { key: 'apg',  label: 'A/G',  value: fmtRate(apg) },
+    ],
   ]
 }
 
@@ -190,7 +198,7 @@ export default function PlayerProfile() {
 
   const seasonStats  = sortSeasons(player.seasonStats || [])
   const seasonsCount = seasonStats.length
-  const totals       = buildTotals(player)
+  const totalsGrid   = buildTotalsGrid(player)
   const seasonCols   = buildSeasonCols(player)
 
   // UCL career totals (Phase 1 — aggregate only, no per-season breakdown yet)
@@ -229,16 +237,18 @@ export default function PlayerProfile() {
         </div>
       </div>
 
-      {/* ── CAREER TOTALS ── */}
-      <div className={styles.totalsScroll}>
-        <div className={styles.totalsRow}>
-          {totals.map(t => (
-            <div key={t.key} className={styles.totalCard}>
-              <span className={styles.totalVal}>{t.value}</span>
-              <span className={styles.totalKey}>{t.label}</span>
-            </div>
-          ))}
-        </div>
+      {/* ── CAREER TOTALS GRID ── */}
+      <div className={styles.totalsGrid}>
+        {totalsGrid.map((row, ri) => (
+          <div key={ri} className={styles.totalsRow}>
+            {row.map(cell => (
+              <div key={cell.key} className={styles.totalCard}>
+                <span className={styles.totalVal}>{cell.value}</span>
+                <span className={styles.totalKey}>{cell.label}</span>
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
 
       {/* ── TABS ── */}

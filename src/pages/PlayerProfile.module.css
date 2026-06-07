@@ -75,34 +75,48 @@
   color: var(--en-text-4);
 }
 
-/* ── CAREER TOTALS ── */
-.totalsScroll {
-  max-width: 640px; margin: 0 auto;
-  overflow-x: auto;
-  scrollbar-width: none;
+/* ── CAREER TOTALS GRID ── */
+.totalsGrid {
+  max-width: 640px;
+  margin: 0 auto;
   border-bottom: 0.5px solid var(--en-rule);
 }
-.totalsScroll::-webkit-scrollbar { display: none; }
+/* Each row is a flex row of 4 equal boxes */
 .totalsRow {
-  display: flex;
-  /* Don't wrap — allow horizontal scroll on narrow screens */
-  min-width: max-content;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+/* Last row has no bottom border (grid handles it, outer border-bottom on .totalsGrid covers bottom) */
+.totalsRow:last-child {
+  border-bottom: none;
 }
 .totalCard {
-  min-width: 64px;
-  flex: 1;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
   border-right: 0.5px solid var(--en-rule);
 }
 .totalCard:last-child { border-right: none; }
 .totalVal {
-  font-family: var(--font-plex); font-size: 20px; font-weight: 500;
-  color: var(--en-text-1); line-height: 1;
+  font-family: var(--font-plex);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  line-height: 1;
+}
+/* Second-row rate stats slightly smaller — they're supporting numbers */
+.totalsRow:nth-child(2) .totalVal {
+  font-size: 16px;
 }
 .totalKey {
-  font-family: var(--font-plex); font-size: 8px;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-plex);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
   white-space: nowrap;
 }
 
@@ -147,8 +161,15 @@
 .table td:first-child { text-align: left; }
 .seasonLabel { color: var(--en-text-1) !important; font-weight: 500; }
 
-/* ── UCL TOTALS ── */
-.uclTotals { display: flex; gap: 0; margin-bottom: 16px; }
+/* ── UCL TOTALS (career aggregate, Phase 1) ── */
+.uclTotals {
+  display: flex;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  margin-bottom: 16px;
+}
+.uclTotals .totalCard {
+  flex: 1;
+}
 .uclNote {
   font-family: var(--font-plex); font-size: 10px;
   color: var(--en-text-4); letter-spacing: 0.04em;

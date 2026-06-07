@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 24
+// Current: 25
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -24,5 +24,6 @@
 //   21 — Seasons + SeasonDetail audit: 2-filter (All/UCL), UCL detection fix, uclEntered reliability, trophy shelf won-only, UCL major section (LP terminology), league record default-open, dynasty verdict meter, edit form reorder, key moments separators, arc touch targets, creation CTAs hidden, score clamp
 //   22 — Seasons filters removed (clean timeline); SeasonDetail UCL powered by match docs: LP matchday table MD1-MD8, KO leg detail with season-doc fallback
 //   23 — Opponent identity + logo layer: opponents collection, opponentMatcher, opponentSeed, backfillOpponents scripts; SeasonDetail UCL canonical names + crests; Rivals canonical names + crests; getOpponents/getOpponent services
-//   24 — Players Phase 1: sticky identity column + scrollable stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, seasonStats sorted newest-first, empty states, sessionStorage list state preservation
-const SW_VERSION = 24;
+//   24 — Players Phase 1: sticky stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, seasonStats sorted newest-first, empty states, sessionStorage list state preservation
+//   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline, no stacked meta), PlayerProfile outfield 2x4 stat grid (Apps/G+A/Goals/Assists | Avg/C/G/G/G/A/G), GK 1x4 stat grid (Apps/CS/CS/G/Avg)
+const SW_VERSION = 25;

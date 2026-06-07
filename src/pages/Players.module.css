@@ -58,7 +58,8 @@
   border-radius: 6px;
   padding: 7px 10px 7px 30px;
   font-family: var(--font-inter);
-  font-size: 13px;
+  /* 16px minimum prevents iOS Safari from auto-zooming on focus */
+  font-size: 16px;
   color: var(--en-text-1);
   outline: none;
   transition: border-color 0.15s;
@@ -281,7 +282,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px 8px 16px;
+  padding: 7px 12px 7px 16px;
 }
 .thumb {
   width: 32px;
@@ -310,8 +311,8 @@
 
 .identityInfo {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
 }
 .playerName {
@@ -322,25 +323,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
-}
-.playerMeta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  max-width: 110px;
 }
 .playerPos {
   font-family: var(--font-plex);
   font-size: 9px;
   letter-spacing: 0.06em;
-  color: var(--en-text-3);
+  color: var(--en-text-4);
   text-transform: uppercase;
-}
-.statusBadge {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 /* Stat cells */
@@ -349,9 +340,11 @@
   font-size: 12px;
   color: var(--en-text-2);
   text-align: center;
-  padding: 10px 6px;
+  padding: 0 6px;
+  height: 46px; /* matches thumb 32px + 7px top/bottom padding */
   transition: background 0.1s;
   white-space: nowrap;
+  vertical-align: middle;
 }
 /* Subtle highlight on the active sort column */
 .tdSortActive {
