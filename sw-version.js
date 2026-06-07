@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 34
+// Current: 35
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -34,5 +34,6 @@
 //   31 — Player Comparison: compare mode in Players list (select 2, sticky CTA); PlayerCompare page at /players/compare with All Comps + UCL tabs, totals with winner highlight, season-by-season table
 //   32 — PlayerCompare improvements: Compare button on PlayerProfile; single-slot mode with picker sheet; remove/replace player slots; no winner highlight with one player; season table hidden until both present; simplified season cols (Apps/C/G/G/G/A/G)
 //   33 — Players season filter: multi-select season pills (OR logic), per-season stat display, summed multi-season stats, scope label bar, career totals when no filter active
-//   34 — Transfers: S1 schema migration script (migrateS1Transfers.mjs); dropdown label fix (no raw Firestore ID); deterministic window group sort (newest-first, Summer before January); context-aware summary bar (All/Arrivals/Departures); stable getTransfers orderBy createdAt
-const SW_VERSION = 34;
+//   34 — Transfers: S1 schema migration script (migrateS1Transfers.mjs); dropdown label fix; deterministic window group sort; context-aware summary bar; stable getTransfers orderBy createdAt
+//   35 — Transfers completion: patchTransferCleanup.mjs (Generated Player rename + legacy removal, Mercado CM, Newerton LW); TransferRow tap-through to PlayerProfile when playerId present; non-playerId rows silent non-tappable
+const SW_VERSION = 35;

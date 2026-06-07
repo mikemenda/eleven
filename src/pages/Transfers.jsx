@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getTransfers, getSeasons } from '../firebase/services'
 import styles from './Transfers.module.css'
@@ -20,12 +21,8 @@ const RULE_COLOR = {
 }
 
 // Sort season labels newest-first: S7 > S6 > ... > S1
-// Falls back to lexicographic for any non-standard labels.
 function compareSeasonLabels(a, b) {
-  const num = s => {
-    const m = s.match(/^S(\d+)$/)
-    return m ? parseInt(m[1], 10) : 0
-  }
+  const num = s => { const m = s.match(/^S(\d+)$/); return m ? parseInt(m[1], 10) : 0 }
   return num(b) - num(a)
 }
 
@@ -61,8 +58,7 @@ export default function Transfers() {
     t.seasonId ||
     '?'
 
-  // Filter — canonical key is seasonId; season label is fallback for legacy docs
-  // that pre-date the seasonId field.
+  // Filter — canonical key is seasonId; season label fallback for legacy docs
   const filtered = transfers
     .filter(t =>
       selectedSeason === 'all' ||
@@ -94,9 +90,7 @@ export default function Transfers() {
     return (WINDOW_ORDER[a.window] ?? 99) - (WINDOW_ORDER[b.window] ?? 99)
   })
 
-  // Build season filter options.
-  // Canonical value is seasonId; display label resolves via snapshot then seasons lookup.
-  // Never falls back to raw ID in the dropdown — shows "S?" if label is truly unknown.
+  // Build season filter options — never shows raw Firestore IDs
   const seasonOptions = (() => {
     const seen = new Set()
     const opts = []
@@ -106,20 +100,18 @@ export default function Transfers() {
         const label = t.season || seasonLabelById[t.seasonId] || 'S?'
         opts.push({ value: t.seasonId, label })
       } else if (!t.seasonId && t.season && !seen.has(t.season)) {
-        // Legacy doc with only a label string and no seasonId
         seen.add(t.season)
         opts.push({ value: t.season, label: t.season })
       }
     }
-    // Sort newest-first in dropdown
     return opts.sort((a, b) => compareSeasonLabels(a.label, b.label))
   })()
 
-  // Summary bar: labels and coloring change based on active direction tab
+  // Summary bar: labels and values change based on active direction tab
   const summaryConfig = {
     all: [
-      { val: fmt(totalIn),              color: 'var(--danger)',   key: 'Spent' },
-      { val: fmt(totalOut),             color: 'var(--en-green)', key: 'Received' },
+      { val: fmt(totalIn),  color: 'var(--danger)',    key: 'Spent' },
+      { val: fmt(totalOut), color: 'var(--en-green)',  key: 'Received' },
       {
         val: netSpend > 0 ? `-${fmt(netSpend)}` : netSpend < 0 ? `+${fmt(Math.abs(netSpend))}` : '—',
         color: netSpend > 0 ? 'var(--danger)' : netSpend < 0 ? 'var(--en-green)' : 'var(--en-text-3)',
@@ -127,14 +119,14 @@ export default function Transfers() {
       },
     ],
     IN: [
-      { val: fmt(totalIn),              color: 'var(--danger)',   key: 'Spent' },
-      { val: String(ins.length),        color: 'var(--en-text-1)', key: 'Arrivals' },
-      { val: ins.length ? fmt(totalIn / ins.length) : '—', color: 'var(--en-gold)', key: 'Avg fee' },
+      { val: fmt(totalIn),                                              color: 'var(--danger)',    key: 'Spent' },
+      { val: String(ins.length),                                        color: 'var(--en-text-1)', key: 'Arrivals' },
+      { val: ins.length ? fmt(Math.round(totalIn / ins.length)) : '—', color: 'var(--en-gold)',   key: 'Avg fee' },
     ],
     OUT: [
-      { val: fmt(totalOut),             color: 'var(--en-green)', key: 'Received' },
-      { val: String(outs.length),       color: 'var(--en-text-1)', key: 'Departures' },
-      { val: outs.length ? fmt(totalOut / outs.length) : '—', color: 'var(--en-gold)', key: 'Avg fee' },
+      { val: fmt(totalOut),                                               color: 'var(--en-green)',  key: 'Received' },
+      { val: String(outs.length),                                         color: 'var(--en-text-1)', key: 'Departures' },
+      { val: outs.length ? fmt(Math.round(totalOut / outs.length)) : '—', color: 'var(--en-gold)',   key: 'Avg fee' },
     ],
   }
   const summaryItems = summaryConfig[dir]
@@ -160,9 +152,7 @@ export default function Transfers() {
       <div className={styles.summaryBar}>
         {summaryItems.map((item, i) => (
           <div key={i} className={styles.summaryItem}>
-            <span className={styles.summaryVal} style={{ color: item.color }}>
-              {item.val}
-            </span>
+            <span className={styles.summaryVal} style={{ color: item.color }}>{item.val}</span>
             <span className={styles.summaryKey}>{item.key}</span>
           </div>
         ))}
@@ -221,19 +211,33 @@ export default function Transfers() {
 }
 
 function TransferRow({ t }) {
-  const isIn = t.direction === 'IN'
-  const counterparty = isIn ? t.from_club : t.to_club
+  const navigate = useNavigate()
+  const isIn       = t.direction === 'IN'
+  const isLinkable = !!t.playerId
+
+  const handleClick = () => {
+    if (isLinkable) navigate(`/players/${t.playerId}`)
+  }
+
   return (
-    <div className={styles.transferRow}>
-      <div className={styles.transferArrow}
-        style={{ color: isIn ? 'var(--en-green)' : 'var(--danger)' }}>
+    <div
+      className={styles.transferRow}
+      onClick={isLinkable ? handleClick : undefined}
+      style={{ cursor: isLinkable ? 'pointer' : 'default' }}
+    >
+      <div
+        className={styles.transferArrow}
+        style={{ color: isIn ? 'var(--en-green)' : 'var(--danger)' }}
+      >
         {isIn ? '▼' : '▲'}
       </div>
       <div className={styles.transferInfo}>
         <div className={styles.transferName}>{t.player}</div>
         <div className={styles.transferMeta}>
           {t.position && <span className={styles.transferPos}>{t.position}</span>}
-          {counterparty && <span className={styles.transferClubs}>{counterparty}</span>}
+          {(isIn ? t.from_club : t.to_club) && (
+            <span className={styles.transferClubs}>{isIn ? t.from_club : t.to_club}</span>
+          )}
           {t.rule && (
             <span
               className={styles.transferRule}
