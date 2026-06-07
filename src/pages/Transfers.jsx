@@ -19,11 +19,24 @@ const RULE_COLOR = {
   'Swap':             '#60a5fa',
 }
 
+// Sort season labels newest-first: S7 > S6 > ... > S1
+// Falls back to lexicographic for any non-standard labels.
+function compareSeasonLabels(a, b) {
+  const num = s => {
+    const m = s.match(/^S(\d+)$/)
+    return m ? parseInt(m[1], 10) : 0
+  }
+  return num(b) - num(a)
+}
+
+// Window sort: Summer before January within a season
+const WINDOW_ORDER = { Summer: 0, January: 1 }
+
 export default function Transfers() {
   const { activeClub } = useApp()
   const [transfers, setTransfers] = useState([])
-  const [seasons, setSeasons] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [seasons, setSeasons]     = useState([])
+  const [loading, setLoading]     = useState(true)
   const [selectedSeason, setSelectedSeason] = useState('all')
   const [dir, setDir] = useState('all') // all | IN | OUT
 
@@ -37,92 +50,132 @@ export default function Transfers() {
     })
   }, [activeClub])
 
+  // Build seasonId → label lookup from seasons collection
+  const seasonLabelById = Object.fromEntries(seasons.map(s => [s.id, s.label]))
+
+  // Resolve the display label for a transfer doc.
+  // Priority: snapshot on doc → seasons collection lookup → raw ID (last resort)
+  const resolveLabel = t =>
+    t.season ||
+    (t.seasonId && seasonLabelById[t.seasonId]) ||
+    t.seasonId ||
+    '?'
+
+  // Filter — canonical key is seasonId; season label is fallback for legacy docs
+  // that pre-date the seasonId field.
   const filtered = transfers
-    // Canonical filter key is `seasonId`. The `season` label is a legacy fallback
-    // for transfer docs that pre-date the seasonId field being written on import.
-    // TODO: backfill `seasonId` on all legacy transfer docs before Season 4 import,
-    // then remove the `t.season === selectedSeason` fallback.
-    .filter(t => selectedSeason === 'all' || t.seasonId === selectedSeason || t.season === selectedSeason)
+    .filter(t =>
+      selectedSeason === 'all' ||
+      t.seasonId === selectedSeason ||
+      t.season === selectedSeason
+    )
     .filter(t => dir === 'all' || t.direction === dir)
 
-  const ins  = filtered.filter(t => t.direction === 'IN')
-  const outs = filtered.filter(t => t.direction === 'OUT')
-  const totalIn  = ins.reduce((s, t) => s + (t.fee_eur || 0), 0)
+  const ins      = filtered.filter(t => t.direction === 'IN')
+  const outs     = filtered.filter(t => t.direction === 'OUT')
+  const totalIn  = ins.reduce((s, t)  => s + (t.fee_eur || 0), 0)
   const totalOut = outs.reduce((s, t) => s + (t.fee_eur || 0), 0)
   const netSpend = totalIn - totalOut
 
   // Group by season + window
-  // Build season label lookup for window group headers
-  const seasonLabelById = Object.fromEntries(seasons.map(s => [s.id, s.label]))
-
   const grouped = {}
   for (const t of filtered) {
-    // Resolve display label: prefer snapshot, fall back to seasons lookup
-    const displayLabel = t.season || (t.seasonId && seasonLabelById[t.seasonId]) || '?'
+    const displayLabel = resolveLabel(t)
     const key = `${displayLabel}__${t.window || '?'}`
-    if (!grouped[key]) grouped[key] = { season: displayLabel, window: t.window, ins: [], outs: [] }
+    if (!grouped[key]) grouped[key] = { season: displayLabel, window: t.window || '?', ins: [], outs: [] }
     if (t.direction === 'IN')  grouped[key].ins.push(t)
     if (t.direction === 'OUT') grouped[key].outs.push(t)
   }
 
-  // Build season options. Canonical value is seasonId; display is the season label.
-  // Legacy transfer docs with only `season` (no `seasonId`) are included via their label.
+  // Sort groups: newest season first, Summer before January within each season
+  const sortedGroups = Object.values(grouped).sort((a, b) => {
+    const seasonDiff = compareSeasonLabels(a.season, b.season)
+    if (seasonDiff !== 0) return seasonDiff
+    return (WINDOW_ORDER[a.window] ?? 99) - (WINDOW_ORDER[b.window] ?? 99)
+  })
+
+  // Build season filter options.
+  // Canonical value is seasonId; display label resolves via snapshot then seasons lookup.
+  // Never falls back to raw ID in the dropdown — shows "S?" if label is truly unknown.
   const seasonOptions = (() => {
     const seen = new Set()
     const opts = []
     for (const t of transfers) {
       if (t.seasonId && !seen.has(t.seasonId)) {
         seen.add(t.seasonId)
-        opts.push({ value: t.seasonId, label: t.season || t.seasonId })
+        const label = t.season || seasonLabelById[t.seasonId] || 'S?'
+        opts.push({ value: t.seasonId, label })
       } else if (!t.seasonId && t.season && !seen.has(t.season)) {
-        // Legacy: only a label string, no ID — use the label as both value and display
+        // Legacy doc with only a label string and no seasonId
         seen.add(t.season)
         opts.push({ value: t.season, label: t.season })
       }
     }
-    return opts.sort((a, b) => a.label.localeCompare(b.label))
+    // Sort newest-first in dropdown
+    return opts.sort((a, b) => compareSeasonLabels(a.label, b.label))
   })()
+
+  // Summary bar: labels and coloring change based on active direction tab
+  const summaryConfig = {
+    all: [
+      { val: fmt(totalIn),              color: 'var(--danger)',   key: 'Spent' },
+      { val: fmt(totalOut),             color: 'var(--en-green)', key: 'Received' },
+      {
+        val: netSpend > 0 ? `-${fmt(netSpend)}` : netSpend < 0 ? `+${fmt(Math.abs(netSpend))}` : '—',
+        color: netSpend > 0 ? 'var(--danger)' : netSpend < 0 ? 'var(--en-green)' : 'var(--en-text-3)',
+        key: netSpend > 0 ? 'Net spend' : netSpend < 0 ? 'Net profit' : 'Net',
+      },
+    ],
+    IN: [
+      { val: fmt(totalIn),              color: 'var(--danger)',   key: 'Spent' },
+      { val: String(ins.length),        color: 'var(--en-text-1)', key: 'Arrivals' },
+      { val: ins.length ? fmt(totalIn / ins.length) : '—', color: 'var(--en-gold)', key: 'Avg fee' },
+    ],
+    OUT: [
+      { val: fmt(totalOut),             color: 'var(--en-green)', key: 'Received' },
+      { val: String(outs.length),       color: 'var(--en-text-1)', key: 'Departures' },
+      { val: outs.length ? fmt(totalOut / outs.length) : '—', color: 'var(--en-gold)', key: 'Avg fee' },
+    ],
+  }
+  const summaryItems = summaryConfig[dir]
 
   return (
     <div className={styles.page}>
       {/* ── TOP BAR ── */}
       <div className={styles.topBar}>
         <span className={styles.topLabel}>Transfer Record</span>
-        <select className={styles.seasonPicker} value={selectedSeason}
-          onChange={e => setSelectedSeason(e.target.value)}>
+        <select
+          className={styles.seasonPicker}
+          value={selectedSeason}
+          onChange={e => setSelectedSeason(e.target.value)}
+        >
           <option value="all">All Seasons</option>
-          {seasonOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          {seasonOptions.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
         </select>
       </div>
 
-      {/* ── NET SPEND SUMMARY ── */}
+      {/* ── SUMMARY BAR ── */}
       <div className={styles.summaryBar}>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryVal} style={{ color: 'var(--danger)' }}>
-            {fmt(totalIn)}
-          </span>
-          <span className={styles.summaryKey}>Spent</span>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryVal} style={{ color: 'var(--en-green)' }}>
-            {fmt(totalOut)}
-          </span>
-          <span className={styles.summaryKey}>Received</span>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryVal}
-            style={{ color: netSpend > 0 ? 'var(--danger)' : netSpend < 0 ? 'var(--en-green)' : 'var(--en-text-3)' }}>
-            {netSpend > 0 ? `-${fmt(netSpend)}` : netSpend < 0 ? `+${fmt(Math.abs(netSpend))}` : '—'}
-          </span>
-          <span className={styles.summaryKey}>{netSpend > 0 ? 'Net spend' : netSpend < 0 ? 'Net profit' : 'Net'}</span>
-        </div>
+        {summaryItems.map((item, i) => (
+          <div key={i} className={styles.summaryItem}>
+            <span className={styles.summaryVal} style={{ color: item.color }}>
+              {item.val}
+            </span>
+            <span className={styles.summaryKey}>{item.key}</span>
+          </div>
+        ))}
       </div>
 
       {/* ── DIRECTION TABS ── */}
       <div className={styles.dirTabs}>
         {['all', 'IN', 'OUT'].map(d => (
-          <button key={d} className={`${styles.dirTab} ${dir === d ? styles.dirActive : ''}`}
-            onClick={() => setDir(d)}>
+          <button
+            key={d}
+            className={`${styles.dirTab} ${dir === d ? styles.dirActive : ''}`}
+            onClick={() => setDir(d)}
+          >
             {d === 'all' ? 'All' : d === 'IN' ? '▼ Arrivals' : '▲ Departures'}
           </button>
         ))}
@@ -138,29 +191,27 @@ export default function Transfers() {
             <p className={styles.emptyText}>No transfers found</p>
           </div>
         ) : (
-          Object.values(grouped).map((g, gi) => (
+          sortedGroups.map((g, gi) => (
             <div key={gi} className={styles.windowGroup}>
               <div className={styles.windowHeader}>
                 <span className={styles.windowSeason}>{g.season}</span>
                 <span className={styles.windowName}>{g.window} Window</span>
                 <div className={styles.windowNet}>
                   {(() => {
-                    const i = g.ins.reduce((s, t) => s + (t.fee_eur || 0), 0)
+                    const i = g.ins.reduce((s, t)  => s + (t.fee_eur || 0), 0)
                     const o = g.outs.reduce((s, t) => s + (t.fee_eur || 0), 0)
                     const n = i - o
                     if (n === 0) return <span style={{ color: 'var(--en-text-3)' }}>— net</span>
-                    return <span style={{ color: n > 0 ? 'var(--danger)' : 'var(--en-green)' }}>
-                      {n > 0 ? `-${fmt(n)}` : `+${fmt(Math.abs(n))}`} net
-                    </span>
+                    return (
+                      <span style={{ color: n > 0 ? 'var(--danger)' : 'var(--en-green)' }}>
+                        {n > 0 ? `-${fmt(n)}` : `+${fmt(Math.abs(n))}`} net
+                      </span>
+                    )
                   })()}
                 </div>
               </div>
-              {(dir === 'all' || dir === 'IN') && g.ins.map((t, i) => (
-                <TransferRow key={`in-${i}`} t={t} />
-              ))}
-              {(dir === 'all' || dir === 'OUT') && g.outs.map((t, i) => (
-                <TransferRow key={`out-${i}`} t={t} />
-              ))}
+              {(dir === 'all' || dir === 'IN')  && g.ins.map((t, i)  => <TransferRow key={`in-${i}`}  t={t} />)}
+              {(dir === 'all' || dir === 'OUT') && g.outs.map((t, i) => <TransferRow key={`out-${i}`} t={t} />)}
             </div>
           ))
         )}
@@ -171,6 +222,7 @@ export default function Transfers() {
 
 function TransferRow({ t }) {
   const isIn = t.direction === 'IN'
+  const counterparty = isIn ? t.from_club : t.to_club
   return (
     <div className={styles.transferRow}>
       <div className={styles.transferArrow}
@@ -180,13 +232,13 @@ function TransferRow({ t }) {
       <div className={styles.transferInfo}>
         <div className={styles.transferName}>{t.player}</div>
         <div className={styles.transferMeta}>
-          <span className={styles.transferPos}>{t.position}</span>
-          <span className={styles.transferClubs}>
-            {isIn ? t.from_club : t.to_club}
-          </span>
+          {t.position && <span className={styles.transferPos}>{t.position}</span>}
+          {counterparty && <span className={styles.transferClubs}>{counterparty}</span>}
           {t.rule && (
-            <span className={styles.transferRule}
-              style={{ color: RULE_COLOR[t.rule] || 'var(--en-text-3)' }}>
+            <span
+              className={styles.transferRule}
+              style={{ color: RULE_COLOR[t.rule] || 'var(--en-text-3)' }}
+            >
               {t.rule}
             </span>
           )}

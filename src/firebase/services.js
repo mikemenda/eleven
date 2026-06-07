@@ -141,7 +141,13 @@ export const getSeasonStatsByPlayer = async (playerId) => {
 // ─── TRANSFERS ───────────────────────────────────────────────────────────────
 
 export const getTransfers = async (clubId) => {
-  const q = query(collection(db, 'transfers'), where('clubId', '==', clubId))
+  // orderBy createdAt gives stable insertion-order results regardless of
+  // Firestore's internal doc ordering. The client sorts by season+window after fetch.
+  const q = query(
+    collection(db, 'transfers'),
+    where('clubId', '==', clubId),
+    orderBy('createdAt')
+  )
   const snap = await getDocs(q)
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
