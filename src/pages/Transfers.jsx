@@ -40,11 +40,13 @@ export default function Transfers() {
   useEffect(() => {
     if (!activeClub) return
     setLoading(true)
-    Promise.all([getTransfers(activeClub.id), getSeasons(activeClub.id)]).then(([t, s]) => {
-      setTransfers(t)
-      setSeasons(s)
-      setLoading(false)
-    })
+    Promise.all([getTransfers(activeClub.id), getSeasons(activeClub.id)])
+      .then(([t, s]) => {
+        setTransfers(t)
+        setSeasons(s)
+      })
+      .catch(err => console.error('[Transfers] load error:', err))
+      .finally(() => setLoading(false))
   }, [activeClub])
 
   // Build seasonId → label lookup from seasons collection

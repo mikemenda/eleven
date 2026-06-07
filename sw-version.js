@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 35
+// Current: 36
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -36,4 +36,5 @@
 //   33 — Players season filter: multi-select season pills (OR logic), per-season stat display, summed multi-season stats, scope label bar, career totals when no filter active
 //   34 — Transfers: S1 schema migration script (migrateS1Transfers.mjs); dropdown label fix; deterministic window group sort; context-aware summary bar; stable getTransfers orderBy createdAt
 //   35 — Transfers completion: patchTransferCleanup.mjs (Generated Player rename + legacy removal, Mercado CM, Newerton LW); TransferRow tap-through to PlayerProfile when playerId present; non-playerId rows silent non-tappable
-const SW_VERSION = 35;
+//   36 — Fix Transfers stuck loading: remove orderBy from getTransfers (no composite index needed); client-side sort unchanged; catch/finally prevents infinite spinner
+const SW_VERSION = 36;
