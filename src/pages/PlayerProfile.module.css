@@ -1,3 +1,4 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────── */
 .page {
   background: var(--en-bg);
   min-height: calc(100dvh - 56px);
@@ -57,7 +58,7 @@
   overflow: hidden;
 }
 .heroInfo { flex: 1; }
-.heroMeta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.heroMeta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
 .heroPos {
   font-family: var(--font-plex); font-size: 10px;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--en-text-3);
@@ -66,22 +67,32 @@
 .heroStatus { font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
 .heroName {
   font-family: var(--font-playfair); font-size: 24px; font-weight: 700;
-  color: var(--en-text-1); line-height: 1.1; margin: 0;
+  color: var(--en-text-1); line-height: 1.1; margin: 0 0 4px;
 }
-.heroId { font-family: var(--font-plex); font-size: 10px; color: var(--en-text-4); }
+.heroSeasons {
+  font-family: var(--font-plex); font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-text-4);
+}
 
 /* ── CAREER TOTALS ── */
-.totalsRow {
+.totalsScroll {
   max-width: 640px; margin: 0 auto;
-  display: flex; gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
   border-bottom: 0.5px solid var(--en-rule);
-  overflow-x: auto; scrollbar-width: none;
 }
-.totalsRow::-webkit-scrollbar { display: none; }
+.totalsScroll::-webkit-scrollbar { display: none; }
+.totalsRow {
+  display: flex;
+  /* Don't wrap — allow horizontal scroll on narrow screens */
+  min-width: max-content;
+}
 .totalCard {
-  flex: 1; min-width: 60px;
+  min-width: 64px;
+  flex: 1;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 16px 8px;
+  padding: 14px 10px;
   border-right: 0.5px solid var(--en-rule);
 }
 .totalCard:last-child { border-right: none; }
@@ -92,8 +103,8 @@
 .totalKey {
   font-family: var(--font-plex); font-size: 8px;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--en-text-3);
+  white-space: nowrap;
 }
-.uclTotals { display: flex; gap: 0; }
 
 /* ── TABS ── */
 .tabs {
@@ -112,9 +123,12 @@
 
 /* ── SECTION ── */
 .section { padding: 20px; }
-.noData { font-family: var(--font-inter); font-size: 13px; color: var(--en-text-3); text-align: center; padding: 40px 0; }
+.noData {
+  font-family: var(--font-inter); font-size: 13px;
+  color: var(--en-text-3); text-align: center; padding: 40px 0;
+}
 
-/* ── TABLE ── */
+/* ── SEASON TABLE ── */
 .table { width: 100%; border-collapse: collapse; }
 .table th {
   font-family: var(--font-plex); font-size: 9px;
@@ -122,6 +136,7 @@
   color: var(--en-text-3); font-weight: 400;
   padding: 0 0 10px; text-align: center;
 }
+.table .thLeft,
 .table th:first-child { text-align: left; }
 .table td {
   font-family: var(--font-plex); font-size: 13px;
@@ -132,8 +147,16 @@
 .table td:first-child { text-align: left; }
 .seasonLabel { color: var(--en-text-1) !important; font-weight: 500; }
 
-/* ── TRANSFERS ── */
-.transferList { display: flex; flex-direction: column; gap: 1px; }
+/* ── UCL TOTALS ── */
+.uclTotals { display: flex; gap: 0; margin-bottom: 16px; }
+.uclNote {
+  font-family: var(--font-plex); font-size: 10px;
+  color: var(--en-text-4); letter-spacing: 0.04em;
+  text-align: center; padding: 8px 0;
+}
+
+/* ── TRANSFER HISTORY ── */
+.transferList { display: flex; flex-direction: column; }
 .transferItem {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 0;

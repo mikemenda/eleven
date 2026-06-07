@@ -4,11 +4,7 @@ import { useApp } from '../context/AppContext'
 import { getPlayer, getSeasons, getTransfers } from '../firebase/services'
 import styles from './PlayerProfile.module.css'
 
-const POS_GROUP = {
-  GK: 'GK', CB: 'DEF', LB: 'DEF', RB: 'DEF', LWB: 'DEF', RWB: 'DEF',
-  CDM: 'MID', CM: 'MID', CAM: 'MID', LM: 'MID', RM: 'MID',
-  LW: 'ATT', RW: 'ATT', CF: 'ATT', ST: 'ATT'
-}
+// ─── Image components ─────────────────────────────────────────────────────────
 
 function Silhouette() {
   return (
@@ -34,17 +30,130 @@ function SofifaImg({ sofifaId, name }) {
   )
 }
 
-function fmt(n) { if (!n) return '—'; return n >= 1e6 ? `€${(n/1e6).toFixed(1)}M` : `€${(n/1e3).toFixed(0)}K` }
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmt(n) {
+  if (!n) return '—'
+  return n >= 1e6 ? `€${(n / 1e6).toFixed(1)}M` : `€${(n / 1e3).toFixed(0)}K`
+}
+
+// Render a rate stat: null → "—", 0-denominator → "—", else 2dp
+function fmtRate(val) {
+  if (val === null || val === undefined) return '—'
+  return val.toFixed(2)
+}
+
+// Render an optional field: null/undefined → "—"
+function fmtOpt(val, dp = 1) {
+  if (val === null || val === undefined) return '—'
+  return typeof val === 'number' ? val.toFixed(dp) : val
+}
+
+function isGK(player) {
+  return player?.position === 'GK'
+}
+
+// ─── Career totals config ─────────────────────────────────────────────────────
+// Returns array of { key, label, value } for the totals strip.
+// GKs: Apps / CS / CS/G / Avg Rating (no goals/assists/G+A/G/G/A/G/C/G)
+// Outfielders: Apps / G / A / G+A / G/G / A/G / C/G / Avg Rating
+
+function buildTotals(player) {
+  const apps      = player.apps    || 0
+  const goals     = player.goals   || 0
+  const assists   = player.assists || 0
+  const cs        = player.cleanSheets
+  const rating    = player.averageRating
+
+  const contrib   = goals + assists
+  const gpg       = apps > 0 ? goals / apps : null
+  const apg       = apps > 0 ? assists / apps : null
+  const cpg       = apps > 0 ? contrib / apps : null
+  const cspg      = apps > 0 && cs != null ? cs / apps : null
+
+  if (isGK(player)) {
+    return [
+      { key: 'apps',    label: 'Apps',   value: apps },
+      { key: 'cs',      label: 'CS',     value: cs != null ? cs : '—' },
+      { key: 'cspg',    label: 'CS/G',   value: fmtRate(cspg) },
+      { key: 'rating',  label: 'Avg Rtg',value: fmtOpt(rating, 1) },
+    ]
+  }
+
+  return [
+    { key: 'apps',    label: 'Apps',   value: apps },
+    { key: 'goals',   label: 'Goals',  value: goals },
+    { key: 'assists', label: 'Assists',value: assists },
+    { key: 'contrib', label: 'G+A',    value: contrib },
+    { key: 'gpg',     label: 'G/G',    value: fmtRate(gpg) },
+    { key: 'apg',     label: 'A/G',    value: fmtRate(apg) },
+    { key: 'cpg',     label: 'C/G',    value: fmtRate(cpg) },
+    { key: 'rating',  label: 'Avg Rtg',value: fmtOpt(rating, 1) },
+  ]
+}
+
+// Season-by-season table columns (All Comps tab)
+// GKs show CS column; outfielders show G+A column. Avg Rating for both when present.
+function buildSeasonCols(player) {
+  if (isGK(player)) {
+    return [
+      { key: 'label',        header: 'Season' },
+      { key: 'apps',         header: 'Apps' },
+      { key: 'cleanSheets',  header: 'CS' },
+      { key: 'cspg',         header: 'CS/G',  rate: true },
+      { key: 'averageRating',header: 'Rtg' },
+    ]
+  }
+  return [
+    { key: 'label',        header: 'Season' },
+    { key: 'apps',         header: 'Apps' },
+    { key: 'goals',        header: 'G' },
+    { key: 'assists',      header: 'A' },
+    { key: 'contrib',      header: 'G+A',  derived: true },
+    { key: 'averageRating',header: 'Rtg' },
+  ]
+}
+
+function getSeasonCellValue(ss, colKey) {
+  if (colKey === 'contrib') {
+    return (ss.goals || 0) + (ss.assists || 0)
+  }
+  if (colKey === 'cspg') {
+    const apps = ss.apps || 0
+    const cs   = ss.cleanSheets
+    return apps > 0 && cs != null ? (cs / apps).toFixed(2) : '—'
+  }
+  if (colKey === 'averageRating') {
+    const v = ss.averageRating
+    return v != null ? v.toFixed(1) : '—'
+  }
+  const v = ss[colKey]
+  if (v === null || v === undefined) return '—'
+  return v
+}
+
+// Sort seasonStats newest-first by label (S7 > S6 > ... > S1)
+// Label format: "S1", "S2", etc.
+function sortSeasons(statsArr) {
+  return [...statsArr].sort((a, b) => {
+    const na = parseInt((a.label || '').replace(/\D/g, ''), 10) || 0
+    const nb = parseInt((b.label || '').replace(/\D/g, ''), 10) || 0
+    return nb - na
+  })
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function PlayerProfile() {
   const { id } = useParams()
   const { activeClub } = useApp()
   const navigate = useNavigate()
-  const [player, setPlayer] = useState(null)
-  const [seasons, setSeasons] = useState([])
+
+  const [player,    setPlayer]    = useState(null)
+  const [seasons,   setSeasons]   = useState([])
   const [transfers, setTransfers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState('career') // career | ucl | history
+  const [loading,   setLoading]   = useState(true)
+  const [tab,       setTab]       = useState('career') // career | ucl | history
 
   useEffect(() => {
     if (!activeClub) return
@@ -55,11 +164,9 @@ export default function PlayerProfile() {
     ]).then(([p, s, t]) => {
       setPlayer(p)
       setSeasons(s)
-      // Canonical link is playerId. The name fallback supports legacy transfer docs
-      // that were seeded without a playerId reference.
-      // TODO: backfill `playerId` on all legacy transfer docs before Season 4 import,
-      // then remove the `tr.player === p?.name` fallback.
-      setTransfers(t.filter(tr => tr.playerId === id || tr.player === p?.name))
+      setTransfers(
+        t.filter(tr => tr.playerId === id || tr.player === p?.name)
+      )
       setLoading(false)
     })
   }, [id, activeClub])
@@ -69,6 +176,7 @@ export default function PlayerProfile() {
       <div className={styles.loadWrap}><div className={styles.spinner} /></div>
     </div>
   )
+
   if (!player) return (
     <div className={styles.page}>
       <div className={styles.loadWrap}>
@@ -77,17 +185,20 @@ export default function PlayerProfile() {
     </div>
   )
 
-  const gpg = player.apps > 0 ? (player.goals / player.apps).toFixed(2) : '—'
-  const apg = player.apps > 0 ? (player.assists / player.apps).toFixed(2) : '—'
-
-  // Season breakdown from player.seasonStats (array of {seasonId, label, apps, goals, assists, ...})
-  const seasonStats = player.seasonStats || []
-
-  const status = player.status || 'Active'
+  const status       = player.status || 'Active'
   const statusColors = { Active: 'var(--en-green)', Sold: 'var(--en-text-3)', Loaned: 'var(--en-gold)' }
+
+  const seasonStats  = sortSeasons(player.seasonStats || [])
+  const seasonsCount = seasonStats.length
+  const totals       = buildTotals(player)
+  const seasonCols   = buildSeasonCols(player)
+
+  // UCL career totals (Phase 1 — aggregate only, no per-season breakdown yet)
+  const hasUcl       = player.uclApps != null && player.uclApps > 0
 
   return (
     <div className={styles.page}>
+
       {/* ── TOP BAR ── */}
       <div className={styles.topBar}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
@@ -110,73 +221,78 @@ export default function PlayerProfile() {
             <span className={styles.heroStatus} style={{ color: statusColors[status] }}>{status}</span>
           </div>
           <h1 className={styles.heroName}>{player.name}</h1>
-          {player.sofifaId && (
-            <span className={styles.heroId}>ID #{player.sofifaId}</span>
-          )}
+          <span className={styles.heroSeasons}>
+            {seasonsCount > 0
+              ? `${seasonsCount} Season${seasonsCount !== 1 ? 's' : ''}`
+              : 'No season data'}
+          </span>
         </div>
       </div>
 
       {/* ── CAREER TOTALS ── */}
-      <div className={styles.totalsRow}>
-        <div className={styles.totalCard}>
-          <span className={styles.totalVal}>{player.apps || 0}</span>
-          <span className={styles.totalKey}>Apps</span>
+      <div className={styles.totalsScroll}>
+        <div className={styles.totalsRow}>
+          {totals.map(t => (
+            <div key={t.key} className={styles.totalCard}>
+              <span className={styles.totalVal}>{t.value}</span>
+              <span className={styles.totalKey}>{t.label}</span>
+            </div>
+          ))}
         </div>
-        <div className={styles.totalCard}>
-          <span className={styles.totalVal}>{player.goals || 0}</span>
-          <span className={styles.totalKey}>Goals</span>
-        </div>
-        <div className={styles.totalCard}>
-          <span className={styles.totalVal}>{player.assists || 0}</span>
-          <span className={styles.totalKey}>Assists</span>
-        </div>
-        <div className={styles.totalCard}>
-          <span className={styles.totalVal}>{gpg}</span>
-          <span className={styles.totalKey}>G/Game</span>
-        </div>
-        {player.position === 'GK' && (
-          <div className={styles.totalCard}>
-            <span className={styles.totalVal}>{player.cleanSheets || 0}</span>
-            <span className={styles.totalKey}>CS</span>
-          </div>
-        )}
       </div>
 
       {/* ── TABS ── */}
       <div className={styles.tabs}>
-        {['career', 'ucl', 'history'].map(t => (
-          <button key={t} className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
-            onClick={() => setTab(t)}>
-            {t === 'career' ? 'Season Log' : t === 'ucl' ? 'UCL' : 'Transfers'}
-          </button>
-        ))}
+        <button
+          className={`${styles.tab} ${tab === 'career' ? styles.tabActive : ''}`}
+          onClick={() => setTab('career')}
+        >
+          All Comps
+        </button>
+        <button
+          className={`${styles.tab} ${tab === 'ucl' ? styles.tabActive : ''}`}
+          onClick={() => setTab('ucl')}
+        >
+          UCL
+        </button>
+        <button
+          className={`${styles.tab} ${tab === 'history' ? styles.tabActive : ''}`}
+          onClick={() => setTab('history')}
+        >
+          Transfer History
+        </button>
       </div>
 
       {/* ── TAB CONTENT ── */}
       <div className={styles.inner}>
+
+        {/* ALL COMPS */}
         {tab === 'career' && (
           <div className={styles.section}>
             {seasonStats.length === 0 ? (
-              <p className={styles.noData}>No season breakdown data available</p>
+              <p className={styles.noData}>No season data imported yet.</p>
             ) : (
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Season</th>
-                    <th>Apps</th>
-                    <th>G</th>
-                    <th>A</th>
-                    {player.position === 'GK' && <th>CS</th>}
+                    {seasonCols.map(col => (
+                      <th key={col.key} className={col.key === 'label' ? styles.thLeft : undefined}>
+                        {col.header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {seasonStats.map((ss, i) => (
                     <tr key={i}>
-                      <td className={styles.seasonLabel}>{ss.label || '—'}</td>
-                      <td>{ss.apps || 0}</td>
-                      <td>{ss.goals || 0}</td>
-                      <td>{ss.assists || 0}</td>
-                      {player.position === 'GK' && <td>{ss.cleanSheets || 0}</td>}
+                      {seasonCols.map(col => (
+                        <td
+                          key={col.key}
+                          className={col.key === 'label' ? styles.seasonLabel : undefined}
+                        >
+                          {getSeasonCellValue(ss, col.key)}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -185,29 +301,44 @@ export default function PlayerProfile() {
           </div>
         )}
 
+        {/* UCL — Phase 1: career totals only */}
         {tab === 'ucl' && (
           <div className={styles.section}>
-            {!player.uclApps ? (
-              <p className={styles.noData}>No UCL data recorded</p>
+            {!hasUcl ? (
+              <p className={styles.noData}>No UCL appearances recorded.</p>
             ) : (
-              <div className={styles.uclTotals}>
-                <div className={styles.totalCard}>
-                  <span className={styles.totalVal}>{player.uclApps || 0}</span>
-                  <span className={styles.totalKey}>Apps</span>
+              <>
+                <div className={styles.uclTotals}>
+                  <div className={styles.totalCard}>
+                    <span className={styles.totalVal}>{player.uclApps || 0}</span>
+                    <span className={styles.totalKey}>Apps</span>
+                  </div>
+                  <div className={styles.totalCard}>
+                    <span className={styles.totalVal}>{player.uclGoals || 0}</span>
+                    <span className={styles.totalKey}>Goals</span>
+                  </div>
+                  <div className={styles.totalCard}>
+                    <span className={styles.totalVal}>{player.uclAssists || 0}</span>
+                    <span className={styles.totalKey}>Assists</span>
+                  </div>
+                  {isGK(player) && (
+                    <div className={styles.totalCard}>
+                      <span className={styles.totalVal}>
+                        {player.uclCleanSheets != null ? player.uclCleanSheets : '—'}
+                      </span>
+                      <span className={styles.totalKey}>CS</span>
+                    </div>
+                  )}
                 </div>
-                <div className={styles.totalCard}>
-                  <span className={styles.totalVal}>{player.uclGoals || 0}</span>
-                  <span className={styles.totalKey}>Goals</span>
-                </div>
-                <div className={styles.totalCard}>
-                  <span className={styles.totalVal}>{player.uclAssists || 0}</span>
-                  <span className={styles.totalKey}>Assists</span>
-                </div>
-              </div>
+                <p className={styles.uclNote}>
+                  Season-by-season UCL breakdown available after S4 import.
+                </p>
+              </>
             )}
           </div>
         )}
 
+        {/* TRANSFER HISTORY */}
         {tab === 'history' && (
           <div className={styles.section}>
             {transfers.length === 0 ? (
@@ -216,8 +347,10 @@ export default function PlayerProfile() {
               <div className={styles.transferList}>
                 {transfers.map((t, i) => (
                   <div key={i} className={styles.transferItem}>
-                    <div className={styles.transferDir}
-                      style={{ color: t.direction === 'IN' ? 'var(--en-green)' : 'var(--danger)' }}>
+                    <div
+                      className={styles.transferDir}
+                      style={{ color: t.direction === 'IN' ? 'var(--en-green)' : 'var(--danger, #ef4444)' }}
+                    >
                       {t.direction === 'IN' ? '▼ IN' : '▲ OUT'}
                     </div>
                     <div className={styles.transferDetails}>

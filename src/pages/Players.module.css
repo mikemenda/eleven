@@ -2,32 +2,24 @@
 .page {
   background: var(--en-bg);
   min-height: calc(100dvh - 56px);
+  display: flex;
+  flex-direction: column;
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
-}
-.inner {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 0 16px;
-  animation: fadeUp 0.35s ease both;
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── TOP BAR ────────────────────────────────────────────────────── */
 .topBar {
-  max-width: 640px;
-  margin: 0 auto;
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
+  padding: 12px 16px;
   position: sticky;
   top: 56px;
   background: var(--en-bg);
-  z-index: 10;
+  z-index: 30;
   border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
 }
 .topTitle {
   display: flex;
@@ -74,23 +66,23 @@
 .search::placeholder { color: var(--en-text-3); }
 .search:focus { border-color: var(--en-blue); }
 
-/* ─── FILTER BAR ─────────────────────────────────────────────────── */
+/* ─── STATUS FILTER ──────────────────────────────────────────────── */
 .filterBar {
-  max-width: 640px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 8px 20px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  padding: 6px 16px;
   border-bottom: 0.5px solid var(--en-rule-faint);
+  position: sticky;
+  top: calc(56px + 45px); /* below topBar */
+  background: var(--en-bg);
+  z-index: 29;
+  flex-shrink: 0;
 }
-.filterBar::-webkit-scrollbar { display: none; }
 .filterBtn {
   background: transparent;
   border: none;
-  padding: 5px 10px;
+  padding: 4px 10px;
   font-family: var(--font-plex);
   font-size: 10px;
   letter-spacing: 0.1em;
@@ -113,52 +105,188 @@
   font-size: 9px;
   opacity: 0.5;
 }
-.sortSep {
-  width: 1px;
-  height: 14px;
-  background: var(--en-rule);
-  margin: 0 6px;
+
+/* ─── POSITION FILTER ────────────────────────────────────────────── */
+.posBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 0.5px solid var(--en-rule);
+  position: sticky;
+  top: calc(56px + 45px + 35px); /* below filterBar */
+  background: var(--en-bg);
+  z-index: 28;
   flex-shrink: 0;
 }
-.sortBtn {
+.posBar::-webkit-scrollbar { display: none; }
+.posBtn {
   background: transparent;
-  border: none;
-  padding: 5px 8px;
+  border: 0.5px solid transparent;
+  padding: 3px 9px;
   font-family: var(--font-plex);
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 12px;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.posBtn:hover { color: var(--en-text-2); }
+.posActive {
+  color: var(--en-text-1);
+  background: var(--en-surface);
+  border-color: var(--en-rule);
+}
+/* Role groups get a slightly distinct visual to separate them from individual positions */
+.posGroup {
+  font-weight: 500;
+}
+.posGroup.posActive {
+  color: var(--en-green);
+  border-color: var(--en-green);
+  background: transparent;
+}
+
+/* ─── TABLE WRAPPER ──────────────────────────────────────────────── */
+.tableWrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  animation: fadeUp 0.3s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The inner scroll container — only this scrolls horizontally */
+.tableScroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: var(--en-rule) transparent;
+  -webkit-overflow-scrolling: touch;
+  min-width: 100%;
+}
+.tableScroll::-webkit-scrollbar { height: 3px; }
+.tableScroll::-webkit-scrollbar-track { background: transparent; }
+.tableScroll::-webkit-scrollbar-thumb { background: var(--en-rule); border-radius: 2px; }
+
+/* ─── TABLE ──────────────────────────────────────────────────────── */
+.table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Header row */
+.th {
+  padding: 0;
+  background: var(--en-bg);
+  border-bottom: 0.5px solid var(--en-rule);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* Frozen identity column */
+.thIdentity {
+  left: 0;
+  z-index: 21; /* above scrolling stat headers */
+  min-width: 160px;
+  max-width: 200px;
+}
+.tdIdentity {
+  position: sticky;
+  left: 0;
+  background: var(--en-bg);
+  z-index: 10;
+  min-width: 160px;
+  max-width: 200px;
+}
+/* Hairline right border to visually separate frozen column from scrolling content */
+.thIdentity,
+.tdIdentity {
+  border-right: 0.5px solid var(--en-rule);
+}
+
+.thStat {
+  min-width: 52px;
+  text-align: center;
+}
+
+/* Sort header buttons (inside <th>) */
+.sortHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  padding: 8px 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
   white-space: nowrap;
   transition: color 0.15s;
 }
-.sortActive { color: var(--en-green); }
+.sortHeader:hover { color: var(--en-text-2); }
+.sortActive { color: var(--en-green) !important; }
+/* Identity column sort header left-aligned */
+.thIdentity .sortHeader {
+  justify-content: flex-start;
+  padding-left: 16px;
+}
 
-/* ─── PLAYER LIST ────────────────────────────────────────────────── */
-.list { display: flex; flex-direction: column; }
+.sortArrow {
+  font-size: 8px;
+  opacity: 0.8;
+}
 
-.playerRow {
+/* ─── TABLE ROWS ─────────────────────────────────────────────────── */
+.tr {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.tr:hover .tdIdentity,
+.tr:hover .tdStat {
+  background: var(--en-surface);
+}
+.tr:hover .tdIdentity {
+  background: var(--en-surface);
+}
+.tr:active .tdIdentity,
+.tr:active .tdStat {
+  background: var(--en-surface-2, #1a2035);
+}
+
+.td {
+  padding: 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  vertical-align: middle;
+}
+
+/* Identity cell content */
+.identity {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
-  background: transparent;
-  border: none;
-  border-bottom: 0.5px solid var(--en-rule-faint);
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: background 0.12s;
+  gap: 10px;
+  padding: 8px 12px 8px 16px;
 }
-.playerRow:hover { background: var(--en-surface); }
-.playerRow:active { background: var(--en-surface-2); }
-
-.playerThumb {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
+.thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
   overflow: hidden;
   flex-shrink: 0;
   background: var(--en-surface);
@@ -168,86 +296,69 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
+  display: block;
 }
 .silhouette {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 5px;
   background: var(--en-surface-2, #1a2035);
   color: var(--en-text-4);
   overflow: hidden;
 }
 
-.playerInfo {
-  flex: 1;
+.identityInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 .playerName {
   font-family: var(--font-inter);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--en-text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 120px;
 }
 .playerMeta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  gap: 6px;
 }
 .playerPos {
   font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-3);
+  font-size: 9px;
   letter-spacing: 0.06em;
-}
-.playerNat {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
+  text-transform: uppercase;
 }
 .statusBadge {
   font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.playerStats {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.statPill {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  min-width: 28px;
-}
-.statVal {
-  font-family: var(--font-plex);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--en-text-1);
-  line-height: 1;
-}
-.statKey {
-  font-family: var(--font-plex);
   font-size: 8px;
   letter-spacing: 0.1em;
-  color: var(--en-text-3);
   text-transform: uppercase;
 }
 
-.chevron { color: var(--en-text-4); flex-shrink: 0; }
+/* Stat cells */
+.tdStat {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-2);
+  text-align: center;
+  padding: 10px 6px;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+/* Subtle highlight on the active sort column */
+.tdSortActive {
+  color: var(--en-text-1);
+}
 
-/* ─── EMPTY + LOADING ────────────────────────────────────────────── */
+/* ─── LOADING + EMPTY ─────────────────────────────────────────────── */
 .loadWrap {
   display: flex;
   align-items: center;

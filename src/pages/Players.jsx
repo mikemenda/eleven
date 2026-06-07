@@ -1,30 +1,114 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getPlayers } from '../firebase/services'
 import styles from './Players.module.css'
 
-const POS_ORDER = ['GK', 'CB', 'LB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'ST']
-const POS_GROUP = {
-  GK: 'GK', CB: 'DEF', LB: 'DEF', RB: 'DEF', LWB: 'DEF', RWB: 'DEF',
-  CDM: 'MID', CM: 'MID', CAM: 'MID', LM: 'MID', RM: 'MID',
-  LW: 'ATT', RW: 'ATT', CF: 'ATT', ST: 'ATT'
+// ─── Position constants ────────────────────────────────────────────────────────
+
+const POS_ORDER = ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','CF','ST']
+
+const ROLE_GROUPS = {
+  Attackers:  ['ST','RW','LW','LM','RM','CAM','CF'],
+  Midfielders:['CM','CDM'],
+  Defenders:  ['LB','RB','CB','LWB','RWB'],
 }
+
+const INDIVIDUAL_POS = POS_ORDER
+
+// Split a player's position string safely into an array of codes.
+// Handles: "CM", "CM, CAM", "CM,CAM", "CM / CAM"
+function splitPositions(posStr) {
+  if (!posStr) return []
+  return posStr.split(/[,\/]+/).map(p => p.trim()).filter(Boolean)
+}
+
+function playerMatchesFilter(player, filter) {
+  if (filter === 'All') return true
+  const positions = splitPositions(player.position)
+  if (ROLE_GROUPS[filter]) return positions.some(p => ROLE_GROUPS[filter].includes(p))
+  return positions.includes(filter)
+}
+
+// ─── Status config ─────────────────────────────────────────────────────────────
+
 const STATUS_META = {
   Active: { label: 'Active', color: 'var(--en-green)' },
   Sold:   { label: 'Sold',   color: 'var(--en-text-3)' },
-  Loaned: { label: 'Loan',   color: 'var(--en-gold)' },
 }
 
-const posSort = p => {
-  const i = POS_ORDER.indexOf(p.position)
-  return i === -1 ? 99 : i
+// ─── Stat column definitions ──────────────────────────────────────────────────
+
+const STAT_COLS = [
+  { key: 'apps',    label: 'Apps',  title: 'Appearances' },
+  { key: 'goals',   label: 'G',     title: 'Goals' },
+  { key: 'assists', label: 'A',     title: 'Assists' },
+  { key: 'contrib', label: 'G+A',   title: 'Contributions (Goals + Assists)', derived: true },
+  { key: 'gpg',     label: 'G/G',   title: 'Goals per Game', derived: true },
+  { key: 'apg',     label: 'A/G',   title: 'Assists per Game', derived: true },
+  { key: 'cpg',     label: 'C/G',   title: 'Contributions per Game', derived: true },
+  { key: 'cleanSheets', label: 'CS',  title: 'Clean Sheets' },
+  { key: 'cspg',    label: 'CS/G',  title: 'Clean Sheets per Game', derived: true },
+  { key: 'rating',  label: 'Rtg',   title: 'Average Rating' },
+]
+
+function getStatValue(player, key) {
+  const apps = player.apps || 0
+  switch (key) {
+    case 'apps':        return apps
+    case 'goals':       return player.goals || 0
+    case 'assists':     return player.assists || 0
+    case 'contrib':     return (player.goals || 0) + (player.assists || 0)
+    case 'gpg':         return apps > 0 ? (player.goals || 0) / apps : null
+    case 'apg':         return apps > 0 ? (player.assists || 0) / apps : null
+    case 'cpg':         return apps > 0 ? ((player.goals || 0) + (player.assists || 0)) / apps : null
+    case 'cleanSheets': return player.cleanSheets != null ? player.cleanSheets : null
+    case 'cspg':        return apps > 0 && player.cleanSheets != null ? player.cleanSheets / apps : null
+    case 'rating':      return player.averageRating != null ? player.averageRating : null
+    default:            return null
+  }
 }
 
-function Silhouette() {
+function fmtStat(val, key) {
+  if (val === null || val === undefined) return '—'
+  if (key === 'gpg' || key === 'apg' || key === 'cpg' || key === 'cspg') return val.toFixed(2)
+  if (key === 'rating') return typeof val === 'number' ? val.toFixed(1) : '—'
+  return val
+}
+
+// ─── Position sort for default ordering ───────────────────────────────────────
+
+function posSort(player) {
+  const positions = splitPositions(player.position)
+  if (positions.length === 0) return 99
+  const idx = positions.map(p => {
+    const i = POS_ORDER.indexOf(p)
+    return i === -1 ? 99 : i
+  })
+  return Math.min(...idx)
+}
+
+// ─── sessionStorage helpers ───────────────────────────────────────────────────
+
+const SS_KEY = 'players_list_state'
+
+function loadState() {
+  try {
+    const raw = sessionStorage.getItem(SS_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+function saveState(state) {
+  try { sessionStorage.setItem(SS_KEY, JSON.stringify(state)) } catch {}
+}
+
+// ─── Silhouette + image components ───────────────────────────────────────────
+
+function Silhouette({ size = 36 }) {
   return (
-    <div className={styles.silhouette}>
-      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+    <div className={styles.silhouette} style={{ width: size, height: size }}>
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
         <circle cx="22" cy="15" r="7" fill="currentColor" opacity="0.35"/>
         <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity="0.25"/>
       </svg>
@@ -32,34 +116,50 @@ function Silhouette() {
   )
 }
 
-function SofifaImg({ sofifaId, name }) {
+function SofifaImg({ sofifaId, name, size = 36 }) {
   const [err, setErr] = useState(false)
-  if (!sofifaId || err) return <Silhouette />
+  if (!sofifaId || err) return <Silhouette size={size} />
   return (
     <img
       src={`https://fifa-img.michaelmenda92.workers.dev/${sofifaId}`}
       alt={name}
       className={styles.playerImg}
+      style={{ width: size, height: size }}
       onError={() => setErr(true)}
     />
   )
 }
 
-const SORT_OPTIONS = [
-  { key: 'pos', label: 'Position' },
-  { key: 'apps', label: 'Apps' },
-  { key: 'goals', label: 'Goals' },
-  { key: 'assists', label: 'Assists' },
-]
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Players() {
   const { activeClub } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Restore state from sessionStorage on mount
+  const saved = loadState()
+
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('All') // All / Active / Sold / Loaned
-  const [sort, setSort] = useState('pos')
-  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState(saved?.statusFilter ?? 'All')
+  const [posFilter, setPosFilter] = useState(saved?.posFilter ?? 'All')
+  const [search, setSearch] = useState(saved?.search ?? '')
+  const [sortKey, setSortKey] = useState(saved?.sortKey ?? 'pos')
+  const [sortDir, setSortDir] = useState(saved?.sortDir ?? 'desc')
+  const scrollRef = useRef(null)
+
+  // Persist state whenever it changes
+  useEffect(() => {
+    saveState({ statusFilter, posFilter, search, sortKey, sortDir })
+  }, [statusFilter, posFilter, search, sortKey, sortDir])
+
+  // Restore scroll position after players load
+  useEffect(() => {
+    if (!loading && saved?.scrollY && scrollRef.current) {
+      scrollRef.current.scrollTop = saved.scrollY
+    }
+  }, [loading]) // eslint-disable-line
 
   useEffect(() => {
     if (!activeClub) return
@@ -67,26 +167,63 @@ export default function Players() {
     getPlayers(activeClub.id).then(p => { setPlayers(p); setLoading(false) })
   }, [activeClub])
 
+  // Save scroll position when navigating away
+  const handleRowClick = useCallback((playerId) => {
+    if (scrollRef.current) {
+      saveState({
+        statusFilter, posFilter, search, sortKey, sortDir,
+        scrollY: scrollRef.current.scrollTop
+      })
+    }
+    navigate(`/players/${playerId}`)
+  }, [navigate, statusFilter, posFilter, search, sortKey, sortDir])
+
+  // ── Sort handler ──────────────────────────────────────────────────────────
+  function handleSort(key) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    } else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
+  }
+
+  // ── Derived/filtered/sorted list ──────────────────────────────────────────
   const filtered = players
-    .filter(p => filter === 'All' || p.status === filter)
+    .filter(p => statusFilter === 'All' || p.status === statusFilter)
+    .filter(p => playerMatchesFilter(p, posFilter))
     .filter(p => !search || p.name?.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (sort === 'pos')     return posSort(a) - posSort(b)
-      if (sort === 'apps')    return (b.apps || 0) - (a.apps || 0)
-      if (sort === 'goals')   return (b.goals || 0) - (a.goals || 0)
-      if (sort === 'assists') return (b.assists || 0) - (a.assists || 0)
-      return 0
+      if (sortKey === 'pos') {
+        return posSort(a) - posSort(b)
+      }
+      const av = getStatValue(a, sortKey) ?? -Infinity
+      const bv = getStatValue(b, sortKey) ?? -Infinity
+      return sortDir === 'desc' ? bv - av : av - bv
     })
 
   const counts = {
     All:    players.length,
     Active: players.filter(p => p.status === 'Active').length,
     Sold:   players.filter(p => p.status === 'Sold').length,
-    Loaned: players.filter(p => p.status === 'Loaned').length,
   }
+
+  // ── Position filter pills ─────────────────────────────────────────────────
+  // Show only positions that exist in the current club's squad
+  const presentPositions = new Set(players.flatMap(p => splitPositions(p.position)))
+  const posFilterOptions = [
+    { key: 'All', label: 'All' },
+    ...Object.keys(ROLE_GROUPS)
+      .filter(g => ROLE_GROUPS[g].some(p => presentPositions.has(p)))
+      .map(g => ({ key: g, label: g })),
+    ...INDIVIDUAL_POS
+      .filter(p => presentPositions.has(p))
+      .map(p => ({ key: p, label: p })),
+  ]
 
   return (
     <div className={styles.page}>
+
       {/* ── TOP BAR ── */}
       <div className={styles.topBar}>
         <div className={styles.topTitle}>
@@ -107,72 +244,126 @@ export default function Players() {
         </div>
       </div>
 
-      {/* ── FILTER BAR ── */}
+      {/* ── STATUS FILTER ── */}
       <div className={styles.filterBar}>
-        {['All', 'Active', 'Sold', 'Loaned'].map(f => (
-          <button key={f} className={`${styles.filterBtn} ${filter === f ? styles.filterActive : ''}`}
-            onClick={() => setFilter(f)}>
+        {['All', 'Active', 'Sold'].map(f => (
+          <button
+            key={f}
+            className={`${styles.filterBtn} ${statusFilter === f ? styles.filterActive : ''}`}
+            onClick={() => setStatusFilter(f)}
+          >
             {f} <span className={styles.filterCount}>{counts[f]}</span>
-          </button>
-        ))}
-        <div className={styles.sortSep} />
-        {SORT_OPTIONS.map(s => (
-          <button key={s.key} className={`${styles.sortBtn} ${sort === s.key ? styles.sortActive : ''}`}
-            onClick={() => setSort(s.key)}>
-            {s.label}
           </button>
         ))}
       </div>
 
-      {/* ── CONTENT ── */}
-      <div className={styles.inner}>
+      {/* ── POSITION FILTER ── */}
+      <div className={styles.posBar}>
+        {posFilterOptions.map(({ key, label }) => (
+          <button
+            key={key}
+            className={`${styles.posBtn} ${posFilter === key ? styles.posActive : ''} ${ROLE_GROUPS[key] ? styles.posGroup : ''}`}
+            onClick={() => setPosFilter(key)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── TABLE ── */}
+      <div className={styles.tableWrap} ref={scrollRef}>
         {loading ? (
           <div className={styles.loadWrap}><div className={styles.spinner} /></div>
         ) : filtered.length === 0 ? (
           <div className={styles.empty}>
             <span className={styles.emptyIcon}>👤</span>
             <p className={styles.emptyText}>No players found</p>
-            <p className={styles.emptyHint}>Import via CSV or add players manually</p>
+            <p className={styles.emptyHint}>
+              {search ? 'Try a different name' : 'Import via CSV or add players manually'}
+            </p>
           </div>
         ) : (
-          <div className={styles.list}>
-            {filtered.map(p => (
-              <button key={p.id} className={styles.playerRow} onClick={() => navigate(`/players/${p.id}`)}>
-                <div className={styles.playerThumb}>
-                  <SofifaImg sofifaId={p.sofifaId} name={p.name} />
-                </div>
-                <div className={styles.playerInfo}>
-                  <div className={styles.playerName}>{p.name}</div>
-                  <div className={styles.playerMeta}>
-                    <span className={styles.playerPos}>{p.position}</span>
-                    {p.nationality && <span className={styles.playerNat}>{p.nationality}</span>}
-                    {p.status && p.status !== 'Active' && (
-                      <span className={styles.statusBadge}
-                        style={{ color: STATUS_META[p.status]?.color }}>
-                        {STATUS_META[p.status]?.label}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className={styles.playerStats}>
-                  <div className={styles.statPill}>
-                    <span className={styles.statVal}>{p.apps || 0}</span>
-                    <span className={styles.statKey}>Apps</span>
-                  </div>
-                  <div className={styles.statPill}>
-                    <span className={styles.statVal}>{p.goals || 0}</span>
-                    <span className={styles.statKey}>G</span>
-                  </div>
-                  <div className={styles.statPill}>
-                    <span className={styles.statVal}>{p.assists || 0}</span>
-                    <span className={styles.statKey}>A</span>
-                  </div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" className={styles.chevron}>
-                  <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </button>
-            ))}
+          <div className={styles.tableScroll}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  {/* Frozen identity header */}
+                  <th className={`${styles.th} ${styles.thIdentity}`}>
+                    <button
+                      className={`${styles.sortHeader} ${sortKey === 'pos' ? styles.sortActive : ''}`}
+                      onClick={() => handleSort('pos')}
+                      title="Sort by position"
+                    >
+                      Player
+                      {sortKey === 'pos' && (
+                        <span className={styles.sortArrow}>{sortDir === 'desc' ? '↑' : '↓'}</span>
+                      )}
+                    </button>
+                  </th>
+                  {/* Scrollable stat headers */}
+                  {STAT_COLS.map(col => (
+                    <th key={col.key} className={`${styles.th} ${styles.thStat}`}>
+                      <button
+                        className={`${styles.sortHeader} ${sortKey === col.key ? styles.sortActive : ''}`}
+                        onClick={() => handleSort(col.key)}
+                        title={`Sort by ${col.title}`}
+                      >
+                        {col.label}
+                        {sortKey === col.key && (
+                          <span className={styles.sortArrow}>{sortDir === 'desc' ? '↓' : '↑'}</span>
+                        )}
+                      </button>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(player => (
+                  <tr
+                    key={player.id}
+                    className={styles.tr}
+                    onClick={() => handleRowClick(player.id)}
+                  >
+                    {/* Frozen identity cell */}
+                    <td className={`${styles.td} ${styles.tdIdentity}`}>
+                      <div className={styles.identity}>
+                        <div className={styles.thumb}>
+                          <SofifaImg sofifaId={player.sofifaId} name={player.name} size={32} />
+                        </div>
+                        <div className={styles.identityInfo}>
+                          <span className={styles.playerName}>{player.name}</span>
+                          <div className={styles.playerMeta}>
+                            <span className={styles.playerPos}>{player.position || '—'}</span>
+                            {player.status && player.status !== 'Active' && (
+                              <span
+                                className={styles.statusBadge}
+                                style={{ color: STATUS_META[player.status]?.color }}
+                              >
+                                {STATUS_META[player.status]?.label}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    {/* Stat cells */}
+                    {STAT_COLS.map(col => {
+                      const raw = getStatValue(player, col.key)
+                      const display = fmtStat(raw, col.key)
+                      const isActive = sortKey === col.key
+                      return (
+                        <td
+                          key={col.key}
+                          className={`${styles.td} ${styles.tdStat} ${isActive ? styles.tdSortActive : ''}`}
+                        >
+                          {display}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
