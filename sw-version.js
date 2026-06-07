@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 27
+// Current: 28
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -27,5 +27,6 @@
 //   24 — Players Phase 1: sticky stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, seasonStats sorted newest-first, empty states, sessionStorage list state preservation
 //   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline), PlayerProfile outfield 2x4 stat grid, GK 1x4 stat grid
 //   26 — Players Phase 2: add getSeasonStatsByPlayer service; PlayerProfile reads seasonStats collection by scope; UCL per-season table; removed player.seasonStats embedded-array assumption
-//   27 — PlayerProfile debug fix: seasonStats docs have no label field — join to seasons collection by seasonId; query uses clubId filter; tabs moved before stat grid; stat grid is tab-gated (All Comps and UCL show their respective grids, Transfer History shows no grid); UCL career summary strip removed; layout order: hero → tabs → [grid + table per tab]
-const SW_VERSION = 27;
+//   27 — PlayerProfile debug fix: label join from seasons collection, tabs before grid, tab-gated stat grids
+//   28 — Fix getSeasonStatsByPlayer: query playerId-only (compound clubId filter excluded S2/S3 docs with inconsistent clubId from seeding era); client-side clubId filter tolerates absent clubId
+const SW_VERSION = 28;
