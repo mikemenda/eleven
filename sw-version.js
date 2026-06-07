@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 38
+// Current: 39
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -39,4 +39,5 @@
 //   36 — Fix Transfers stuck loading: remove orderBy from getTransfers (no composite index needed); client-side sort unchanged; catch/finally prevents infinite spinner
 //   37 — Transfers identity layer: player face thumbnails (36x36) + club crests (36x36) in transfer rows; layout arrow→face→name/meta→crest→fee; data/transfer-clubs.json (verified sofifaTeamIds); historical stubs hidden from Players list via isHistoricalStub filter
 //   38 — Fix transfer-clubs.json: Brighton corrected 45→1808, Juventus added as 45; row layout changed to arrow→face→name/meta→fee→crest; patchHistoricalStubSofifaIds.mjs adds sofifaId to 9 confirmed historical stubs
-const SW_VERSION = 38;
+//   39 — Fix transfer-clubs.json: Roma 42→52, Tottenham 6→18, Brentford added (1925), brentform typo alias; Transfers.jsx uses resolveClubIdentity for both displayName label and crest — single source of truth
+const SW_VERSION = 39;

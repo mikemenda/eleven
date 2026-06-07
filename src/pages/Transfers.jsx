@@ -30,12 +30,15 @@ function compareSeasonLabels(a, b) {
 // Window sort: Summer before January within a season
 const WINDOW_ORDER = { Summer: 0, January: 1 }
 
-// Resolve the sofifaTeamId for a club name using the static transfer-clubs map.
-// Keys in the JSON are lowercase+trimmed. Returns null if not found.
-function resolveClubTeamId(clubName) {
+// Resolve club identity from the static transfer-clubs map.
+// Returns { displayName, sofifaTeamId } if found, null otherwise.
+// Keys in the JSON are lowercase+trimmed — covers aliases and typos (e.g. "brentform").
+function resolveClubIdentity(clubName) {
   if (!clubName) return null
   const key = clubName.trim().toLowerCase()
-  return TRANSFER_CLUBS[key]?.sofifaTeamId ?? null
+  const entry = TRANSFER_CLUBS[key]
+  if (!entry) return null
+  return { displayName: entry.displayName, sofifaTeamId: entry.sofifaTeamId }
 }
 
 const WORKER_BASE = 'https://fifa-img.michaelmenda92.workers.dev'
@@ -83,9 +86,8 @@ function ShieldFallback({ size = 36 }) {
   )
 }
 
-function ClubCrest({ clubName, size = 36 }) {
+function ClubCrest({ teamId, clubName, size = 36 }) {
   const [err, setErr] = useState(false)
-  const teamId = resolveClubTeamId(clubName)
 
   if (!teamId || err) return <ShieldFallback size={size} />
   return (
@@ -304,8 +306,12 @@ function TransferRow({ t, playerMap }) {
   const player    = t.playerId ? (playerMap.get(t.playerId) ?? null) : null
   const sofifaId  = player?.sofifaId ?? null
 
-  // Crest: for arrivals show from_club; for departures show to_club
-  const crestClub = isIn ? t.from_club : t.to_club
+  // The "other club" for this transfer (the one we're dealing with, not FC Richport)
+  const rawClub    = isIn ? t.from_club : t.to_club
+  // Resolve against transfer-clubs.json for canonical displayName + sofifaTeamId
+  const clubIdent  = resolveClubIdentity(rawClub)
+  const clubLabel  = clubIdent?.displayName ?? rawClub   // resolved name, else raw fallback
+  const clubTeamId = clubIdent?.sofifaTeamId ?? null     // null → shield fallback in ClubCrest
 
   const handleClick = () => {
     if (isLinkable) navigate(`/players/${t.playerId}`)
@@ -335,8 +341,8 @@ function TransferRow({ t, playerMap }) {
         <div className={styles.transferName}>{t.player}</div>
         <div className={styles.transferMeta}>
           {t.position && <span className={styles.transferPos}>{t.position}</span>}
-          {crestClub && (
-            <span className={styles.transferClubs}>{crestClub}</span>
+          {clubLabel && (
+            <span className={styles.transferClubs}>{clubLabel}</span>
           )}
           {t.rule && (
             <span
@@ -352,9 +358,9 @@ function TransferRow({ t, playerMap }) {
       {/* Fee */}
       <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
 
-      {/* Club crest — far right */}
+      {/* Club crest — far right, uses resolved teamId */}
       <div className={styles.crestCol}>
-        <ClubCrest clubName={crestClub} size={36} />
+        <ClubCrest teamId={clubTeamId} clubName={clubLabel} size={36} />
       </div>
     </div>
   )
