@@ -1,0 +1,872 @@
+[
+  {
+    "opponentKey": "arsenal",
+    "displayName": "Arsenal",
+    "shortName": "Arsenal",
+    "abbreviation": "ARS",
+    "country": "England",
+    "sofifaTeamId": 1,
+    "aliases": [
+      "arsenal",
+      "the gunners",
+      "afc",
+      "arsenal fc"
+    ]
+  },
+  {
+    "opponentKey": "aston-villa",
+    "displayName": "Aston Villa",
+    "shortName": "Aston Villa",
+    "abbreviation": "AVL",
+    "country": "England",
+    "sofifaTeamId": 2,
+    "aliases": [
+      "aston villa",
+      "villa",
+      "avfc",
+      "aston villa fc"
+    ]
+  },
+  {
+    "opponentKey": "bournemouth",
+    "displayName": "AFC Bournemouth",
+    "shortName": "Bournemouth",
+    "abbreviation": "BOU",
+    "country": "England",
+    "sofifaTeamId": 1943,
+    "aliases": [
+      "bournemouth",
+      "afc bournemouth",
+      "the cherries"
+    ]
+  },
+  {
+    "opponentKey": "brentford",
+    "displayName": "Brentford",
+    "shortName": "Brentford",
+    "abbreviation": "BRE",
+    "country": "England",
+    "sofifaTeamId": 1925,
+    "aliases": [
+      "brentford",
+      "brentford fc",
+      "the bees"
+    ]
+  },
+  {
+    "opponentKey": "brighton",
+    "displayName": "Brighton & Hove Albion",
+    "shortName": "Brighton",
+    "abbreviation": "BHA",
+    "country": "England",
+    "sofifaTeamId": 1808,
+    "aliases": [
+      "brighton",
+      "brighton and hove albion",
+      "brighton hove albion",
+      "bha",
+      "the seagulls"
+    ]
+  },
+  {
+    "opponentKey": "burnley",
+    "displayName": "Burnley",
+    "shortName": "Burnley",
+    "abbreviation": "BUR",
+    "country": "England",
+    "sofifaTeamId": 1796,
+    "aliases": [
+      "burnley",
+      "burnley fc",
+      "the clarets"
+    ]
+  },
+  {
+    "opponentKey": "chelsea",
+    "displayName": "Chelsea",
+    "shortName": "Chelsea",
+    "abbreviation": "CHE",
+    "country": "England",
+    "sofifaTeamId": 5,
+    "aliases": [
+      "chelsea",
+      "chelsea fc",
+      "the blues",
+      "cfc"
+    ]
+  },
+  {
+    "opponentKey": "crystal-palace",
+    "displayName": "Crystal Palace",
+    "shortName": "Crystal Palace",
+    "abbreviation": "CRY",
+    "country": "England",
+    "sofifaTeamId": 1799,
+    "aliases": [
+      "crystal palace",
+      "palace",
+      "cpfc",
+      "the eagles"
+    ]
+  },
+  {
+    "opponentKey": "everton",
+    "displayName": "Everton",
+    "shortName": "Everton",
+    "abbreviation": "EVE",
+    "country": "England",
+    "sofifaTeamId": 7,
+    "aliases": [
+      "everton",
+      "everton fc",
+      "the toffees",
+      "efc"
+    ]
+  },
+  {
+    "opponentKey": "fulham",
+    "displayName": "Fulham",
+    "shortName": "Fulham",
+    "abbreviation": "FUL",
+    "country": "England",
+    "sofifaTeamId": 144,
+    "aliases": [
+      "fulham",
+      "fulham fc",
+      "the cottagers"
+    ]
+  },
+  {
+    "opponentKey": "liverpool",
+    "displayName": "Liverpool",
+    "shortName": "Liverpool",
+    "abbreviation": "LIV",
+    "country": "England",
+    "sofifaTeamId": 9,
+    "aliases": [
+      "liverpool",
+      "liverpool fc",
+      "lfc",
+      "the reds"
+    ]
+  },
+  {
+    "opponentKey": "manchester-city",
+    "displayName": "Manchester City",
+    "shortName": "Man City",
+    "abbreviation": "MCI",
+    "country": "England",
+    "sofifaTeamId": 10,
+    "aliases": [
+      "manchester city",
+      "man city",
+      "man. city",
+      "mci",
+      "mcfc",
+      "city",
+      "the citizens"
+    ]
+  },
+  {
+    "opponentKey": "manchester-united",
+    "displayName": "Manchester United",
+    "shortName": "Man United",
+    "abbreviation": "MUN",
+    "country": "England",
+    "sofifaTeamId": 11,
+    "aliases": [
+      "manchester united",
+      "man united",
+      "man utd",
+      "man. united",
+      "mun",
+      "mufc",
+      "united",
+      "the red devils"
+    ]
+  },
+  {
+    "opponentKey": "newcastle-united",
+    "displayName": "Newcastle United",
+    "shortName": "Newcastle",
+    "abbreviation": "NEW",
+    "country": "England",
+    "sofifaTeamId": 13,
+    "aliases": [
+      "newcastle united",
+      "newcastle",
+      "nufc",
+      "the magpies"
+    ]
+  },
+  {
+    "opponentKey": "nottingham-forest",
+    "displayName": "Nottingham Forest",
+    "shortName": "Nott'm Forest",
+    "abbreviation": "NFO",
+    "country": "England",
+    "sofifaTeamId": 14,
+    "aliases": [
+      "nottingham forest",
+      "nottm forest",
+      "nottm. forest",
+      "nott m forest",
+      "forest",
+      "nffc"
+    ]
+  },
+  {
+    "opponentKey": "queens-park-rangers",
+    "displayName": "Queens Park Rangers",
+    "shortName": "QPR",
+    "abbreviation": "QPR",
+    "country": "England",
+    "sofifaTeamId": 15,
+    "aliases": [
+      "queens park rangers",
+      "qpr",
+      "the rs"
+    ]
+  },
+  {
+    "opponentKey": "tottenham",
+    "displayName": "Tottenham Hotspur",
+    "shortName": "Tottenham",
+    "abbreviation": "TOT",
+    "country": "England",
+    "sofifaTeamId": 18,
+    "aliases": [
+      "tottenham hotspur",
+      "tottenham",
+      "spurs",
+      "thfc"
+    ]
+  },
+  {
+    "opponentKey": "west-ham",
+    "displayName": "West Ham United",
+    "shortName": "West Ham",
+    "abbreviation": "WHU",
+    "country": "England",
+    "sofifaTeamId": 19,
+    "aliases": [
+      "west ham united",
+      "west ham",
+      "whu",
+      "whufc",
+      "the hammers"
+    ]
+  },
+  {
+    "opponentKey": "wolves",
+    "displayName": "Wolverhampton Wanderers",
+    "shortName": "Wolves",
+    "abbreviation": "WOL",
+    "country": "England",
+    "sofifaTeamId": 110,
+    "aliases": [
+      "wolverhampton wanderers",
+      "wolves",
+      "wolverhampton",
+      "wwfc",
+      "wol"
+    ]
+  },
+  {
+    "opponentKey": "sunderland",
+    "displayName": "Sunderland",
+    "shortName": "Sunderland",
+    "abbreviation": "SUN",
+    "country": "England",
+    "sofifaTeamId": 106,
+    "aliases": [
+      "sunderland",
+      "sunderland afc",
+      "safc",
+      "the black cats"
+    ]
+  },
+  {
+    "opponentKey": "leeds-united",
+    "displayName": "Leeds United",
+    "shortName": "Leeds",
+    "abbreviation": "LEE",
+    "country": "England",
+    "sofifaTeamId": 8,
+    "aliases": [
+      "leeds united",
+      "leeds",
+      "lufc",
+      "the whites"
+    ]
+  },
+  {
+    "opponentKey": "sheffield-united",
+    "displayName": "Sheffield United",
+    "shortName": "Sheffield Utd",
+    "abbreviation": "SHU",
+    "country": "England",
+    "sofifaTeamId": 1794,
+    "aliases": [
+      "sheffield united",
+      "sheffield utd",
+      "sheff united",
+      "sufc",
+      "the blades"
+    ]
+  },
+  {
+    "opponentKey": "leicester-city",
+    "displayName": "Leicester City",
+    "shortName": "Leicester",
+    "abbreviation": "LEI",
+    "country": "England",
+    "sofifaTeamId": 95,
+    "aliases": [
+      "leicester city",
+      "leicester",
+      "lcfc",
+      "the foxes"
+    ]
+  },
+  {
+    "opponentKey": "real-madrid",
+    "displayName": "Real Madrid",
+    "shortName": "Real Madrid",
+    "abbreviation": "RMA",
+    "country": "Spain",
+    "sofifaTeamId": 243,
+    "aliases": [
+      "real madrid",
+      "real madrid cf",
+      "madrid",
+      "rma",
+      "los blancos"
+    ]
+  },
+  {
+    "opponentKey": "barcelona",
+    "displayName": "FC Barcelona",
+    "shortName": "Barcelona",
+    "abbreviation": "BAR",
+    "country": "Spain",
+    "sofifaTeamId": 241,
+    "aliases": [
+      "fc barcelona",
+      "barcelona",
+      "barca",
+      "blaugrana"
+    ]
+  },
+  {
+    "opponentKey": "atletico-madrid",
+    "displayName": "Atlético Madrid",
+    "shortName": "Atlético",
+    "abbreviation": "ATM",
+    "country": "Spain",
+    "sofifaTeamId": 240,
+    "aliases": [
+      "atletico madrid",
+      "atletico de madrid",
+      "atleti",
+      "atm",
+      "atletico"
+    ]
+  },
+  {
+    "opponentKey": "villarreal",
+    "displayName": "Villarreal CF",
+    "shortName": "Villarreal",
+    "abbreviation": "VIL",
+    "country": "Spain",
+    "sofifaTeamId": 483,
+    "aliases": [
+      "villarreal cf",
+      "villarreal",
+      "vil",
+      "el submarino amarillo"
+    ]
+  },
+  {
+    "opponentKey": "sevilla",
+    "displayName": "Sevilla FC",
+    "shortName": "Sevilla",
+    "abbreviation": "SEV",
+    "country": "Spain",
+    "sofifaTeamId": 481,
+    "aliases": [
+      "sevilla fc",
+      "sevilla",
+      "sfc"
+    ]
+  },
+  {
+    "opponentKey": "inter-milan",
+    "displayName": "Inter Milan",
+    "shortName": "Inter Milan",
+    "abbreviation": "INT",
+    "country": "Italy",
+    "sofifaTeamId": 44,
+    "aliases": [
+      "inter milan",
+      "inter",
+      "internazionale",
+      "int",
+      "nerazzurri"
+    ]
+  },
+  {
+    "opponentKey": "ac-milan",
+    "displayName": "AC Milan",
+    "shortName": "AC Milan",
+    "abbreviation": "ACM",
+    "country": "Italy",
+    "sofifaTeamId": 47,
+    "aliases": [
+      "ac milan",
+      "milan",
+      "acm",
+      "rossoneri"
+    ]
+  },
+  {
+    "opponentKey": "juventus",
+    "displayName": "Juventus",
+    "shortName": "Juventus",
+    "abbreviation": "JUV",
+    "country": "Italy",
+    "sofifaTeamId": 45,
+    "aliases": [
+      "juventus",
+      "juventus fc",
+      "juve",
+      "la vecchia signora"
+    ]
+  },
+  {
+    "opponentKey": "napoli",
+    "displayName": "Napoli",
+    "shortName": "Napoli",
+    "abbreviation": "NAP",
+    "country": "Italy",
+    "sofifaTeamId": 48,
+    "aliases": [
+      "napoli",
+      "ssc napoli",
+      "partenopei"
+    ]
+  },
+  {
+    "opponentKey": "lazio",
+    "displayName": "Lazio",
+    "shortName": "Lazio",
+    "abbreviation": "LAZ",
+    "country": "Italy",
+    "sofifaTeamId": 46,
+    "aliases": [
+      "lazio",
+      "ss lazio",
+      "biancocelesti"
+    ]
+  },
+  {
+    "opponentKey": "roma",
+    "displayName": "Roma",
+    "shortName": "Roma",
+    "abbreviation": "ROM",
+    "country": "Italy",
+    "sofifaTeamId": 52,
+    "aliases": [
+      "roma",
+      "as roma",
+      "giallorossi"
+    ]
+  },
+  {
+    "opponentKey": "fiorentina",
+    "displayName": "Fiorentina",
+    "shortName": "Fiorentina",
+    "abbreviation": "FIO",
+    "country": "Italy",
+    "sofifaTeamId": 110374,
+    "aliases": [
+      "fiorentina",
+      "acf fiorentina",
+      "la viola"
+    ]
+  },
+  {
+    "opponentKey": "borussia-dortmund",
+    "displayName": "Borussia Dortmund",
+    "shortName": "Dortmund",
+    "abbreviation": "DOR",
+    "country": "Germany",
+    "sofifaTeamId": 22,
+    "aliases": [
+      "borussia dortmund",
+      "dortmund",
+      "bvb",
+      "bvb 09"
+    ]
+  },
+  {
+    "opponentKey": "bayern-munich",
+    "displayName": "FC Bayern München",
+    "shortName": "Bayern",
+    "abbreviation": "BAY",
+    "country": "Germany",
+    "sofifaTeamId": 21,
+    "aliases": [
+      "fc bayern munchen",
+      "fc bayern münchen",
+      "bayern munich",
+      "bayern munchen",
+      "fc bayern",
+      "fcbayern",
+      "bayern"
+    ]
+  },
+  {
+    "opponentKey": "bayer-leverkusen",
+    "displayName": "Bayer 04 Leverkusen",
+    "shortName": "Leverkusen",
+    "abbreviation": "B04",
+    "country": "Germany",
+    "sofifaTeamId": 32,
+    "aliases": [
+      "bayer 04 leverkusen",
+      "bayer leverkusen",
+      "leverkusen",
+      "b04",
+      "die werkself"
+    ]
+  },
+  {
+    "opponentKey": "rb-leipzig",
+    "displayName": "RB Leipzig",
+    "shortName": "RB Leipzig",
+    "abbreviation": "RBL",
+    "country": "Germany",
+    "sofifaTeamId": 112172,
+    "aliases": [
+      "rb leipzig",
+      "rbl",
+      "rasenballsport leipzig",
+      "leipzig",
+      "red bull leipzig"
+    ]
+  },
+  {
+    "opponentKey": "paris-sg",
+    "displayName": "Paris Saint-Germain",
+    "shortName": "PSG",
+    "abbreviation": "PSG",
+    "country": "France",
+    "sofifaTeamId": 73,
+    "aliases": [
+      "paris saint-germain",
+      "paris saint germain",
+      "psg",
+      "paris sg",
+      "paris"
+    ]
+  },
+  {
+    "opponentKey": "marseille",
+    "displayName": "Olympique de Marseille",
+    "shortName": "Marseille",
+    "abbreviation": "MAR",
+    "country": "France",
+    "sofifaTeamId": 219,
+    "aliases": [
+      "olympique de marseille",
+      "marseille",
+      "om",
+      "l om"
+    ]
+  },
+  {
+    "opponentKey": "monaco",
+    "displayName": "AS Monaco",
+    "shortName": "Monaco",
+    "abbreviation": "MON",
+    "country": "France",
+    "sofifaTeamId": 69,
+    "aliases": [
+      "as monaco",
+      "monaco",
+      "asm"
+    ]
+  },
+  {
+    "opponentKey": "sporting-cp",
+    "displayName": "Sporting CP",
+    "shortName": "Sporting CP",
+    "abbreviation": "SCP",
+    "country": "Portugal",
+    "sofifaTeamId": 237,
+    "aliases": [
+      "sporting cp",
+      "sporting clube de portugal",
+      "sporting lisbon",
+      "scp",
+      "sporting"
+    ]
+  },
+  {
+    "opponentKey": "benfica",
+    "displayName": "SL Benfica",
+    "shortName": "Benfica",
+    "abbreviation": "BEN",
+    "country": "Portugal",
+    "sofifaTeamId": 234,
+    "aliases": [
+      "sl benfica",
+      "benfica",
+      "sport lisboa e benfica",
+      "slb"
+    ]
+  },
+  {
+    "opponentKey": "porto",
+    "displayName": "FC Porto",
+    "shortName": "Porto",
+    "abbreviation": "POR",
+    "country": "Portugal",
+    "sofifaTeamId": 236,
+    "aliases": [
+      "fc porto",
+      "porto",
+      "futebol clube do porto"
+    ]
+  },
+  {
+    "opponentKey": "braga",
+    "displayName": "Sporting Clube de Braga",
+    "shortName": "Braga",
+    "abbreviation": "SCB",
+    "country": "Portugal",
+    "sofifaTeamId": 1896,
+    "aliases": [
+      "sporting clube de braga",
+      "sc braga",
+      "braga",
+      "scb"
+    ]
+  },
+  {
+    "opponentKey": "psv",
+    "displayName": "PSV Eindhoven",
+    "shortName": "PSV",
+    "abbreviation": "PSV",
+    "country": "Netherlands",
+    "sofifaTeamId": 247,
+    "aliases": [
+      "psv eindhoven",
+      "psv",
+      "philips sport vereniging"
+    ]
+  },
+  {
+    "opponentKey": "ajax",
+    "displayName": "Ajax",
+    "shortName": "Ajax",
+    "abbreviation": "AJX",
+    "country": "Netherlands",
+    "sofifaTeamId": 245,
+    "aliases": [
+      "ajax",
+      "afc ajax",
+      "ajax amsterdam"
+    ]
+  },
+  {
+    "opponentKey": "feyenoord",
+    "displayName": "Feyenoord",
+    "shortName": "Feyenoord",
+    "abbreviation": "FEY",
+    "country": "Netherlands",
+    "sofifaTeamId": 246,
+    "aliases": [
+      "feyenoord",
+      "feyenoord rotterdam",
+      "fey"
+    ]
+  },
+  {
+    "opponentKey": "club-brugge",
+    "displayName": "Club Brugge KV",
+    "shortName": "Club Brugge",
+    "abbreviation": "BRU",
+    "country": "Belgium",
+    "sofifaTeamId": 231,
+    "aliases": [
+      "club brugge kv",
+      "club brugge",
+      "brugge"
+    ]
+  },
+  {
+    "opponentKey": "raal-la-louviere",
+    "displayName": "RAAL La Louvière",
+    "shortName": "La Louvière",
+    "abbreviation": "RAL",
+    "country": "Belgium",
+    "sofifaTeamId": 132231,
+    "aliases": [
+      "raal la louviere",
+      "la louviere",
+      "raal"
+    ]
+  },
+  {
+    "opponentKey": "celtic",
+    "displayName": "Celtic",
+    "shortName": "Celtic",
+    "abbreviation": "CEL",
+    "country": "Scotland",
+    "sofifaTeamId": 78,
+    "aliases": [
+      "celtic",
+      "celtic fc",
+      "the bhoys",
+      "hoops"
+    ]
+  },
+  {
+    "opponentKey": "rangers",
+    "displayName": "Rangers FC",
+    "shortName": "Rangers",
+    "abbreviation": "RAN",
+    "country": "Scotland",
+    "sofifaTeamId": 86,
+    "aliases": [
+      "rangers fc",
+      "rangers",
+      "rfc",
+      "the gers",
+      "glasgow rangers"
+    ]
+  },
+  {
+    "opponentKey": "galatasaray",
+    "displayName": "Galatasaray SK",
+    "shortName": "Galatasaray",
+    "abbreviation": "GAL",
+    "country": "Turkey",
+    "sofifaTeamId": 325,
+    "aliases": [
+      "galatasaray sk",
+      "galatasaray",
+      "gal"
+    ]
+  },
+  {
+    "opponentKey": "salzburg",
+    "displayName": "FC Red Bull Salzburg",
+    "shortName": "Salzburg",
+    "abbreviation": "SAL",
+    "country": "Austria",
+    "sofifaTeamId": 191,
+    "aliases": [
+      "fc red bull salzburg",
+      "red bull salzburg",
+      "salzburg",
+      "rb salzburg"
+    ]
+  },
+  {
+    "opponentKey": "young-boys",
+    "displayName": "BSC Young Boys",
+    "shortName": "Young Boys",
+    "abbreviation": "YOB",
+    "country": "Switzerland",
+    "sofifaTeamId": 900,
+    "aliases": [
+      "bsc young boys",
+      "young boys",
+      "yb",
+      "bsc yb"
+    ]
+  },
+  {
+    "opponentKey": "shakhtar",
+    "displayName": "Shakhtar Donetsk",
+    "shortName": "Shakhtar",
+    "abbreviation": "SHA",
+    "country": "Ukraine",
+    "sofifaTeamId": 101059,
+    "aliases": [
+      "shakhtar donetsk",
+      "shakhtar",
+      "fc shakhtar"
+    ]
+  },
+  {
+    "opponentKey": "dynamo-kyiv",
+    "displayName": "Dynamo Kyiv",
+    "shortName": "Dynamo Kyiv",
+    "abbreviation": "DYK",
+    "country": "Ukraine",
+    "sofifaTeamId": 101047,
+    "aliases": [
+      "dynamo kyiv",
+      "dynamo kiev",
+      "fk dynamo kyiv",
+      "dynamo"
+    ]
+  },
+  {
+    "opponentKey": "slavia-praha",
+    "displayName": "SK Slavia Praha",
+    "shortName": "Slavia Praha",
+    "abbreviation": "SLA",
+    "country": "Czech Republic",
+    "sofifaTeamId": 266,
+    "aliases": [
+      "sk slavia praha",
+      "slavia praha",
+      "slavia prague",
+      "slavia"
+    ]
+  },
+  {
+    "opponentKey": "copenhagen",
+    "displayName": "FC København",
+    "shortName": "Copenhagen",
+    "abbreviation": "FCK",
+    "country": "Denmark",
+    "sofifaTeamId": 819,
+    "aliases": [
+      "fc kobenhavn",
+      "fc københavn",
+      "copenhagen",
+      "fck"
+    ]
+  },
+  {
+    "opponentKey": "aek-athens",
+    "displayName": "AEK Athens",
+    "shortName": "AEK Athens",
+    "abbreviation": "AEK",
+    "country": "Greece",
+    "sofifaTeamId": 278,
+    "aliases": [
+      "aek athens",
+      "aek",
+      "athlitiki enosi konstantinoupoleos"
+    ]
+  },
+  {
+    "opponentKey": "qarabag",
+    "displayName": "Qarabağ FK",
+    "shortName": "Qarabağ",
+    "abbreviation": "QAR",
+    "country": "Azerbaijan",
+    "sofifaTeamId": 113888,
+    "aliases": [
+      "qarabag fk",
+      "qarabag"
+    ]
+  }
+]
