@@ -143,15 +143,6 @@
   letter-spacing: 0.08em; text-transform: uppercase;
 }
 
-/* Club crest column — fixed width, right of name area */
-.crestCol {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 /* Crest image */
 .crestImg {
   width: 36px;
@@ -167,13 +158,21 @@
   color: var(--en-text-4);
 }
 
-/* Fee — right edge */
+/* Fee — sits between name area and crest */
 .transferFee {
   font-family: var(--font-plex); font-size: 13px;
   color: var(--en-gold); font-weight: 500; flex-shrink: 0;
 }
 
-/* ── Loading + empty ──────────────────────────────────────────────────────── */
+/* Club crest — true right edge */
+.crestCol {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} ──────────────────────────────────────────────────────── */
 .loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
 .spinner {
   width: 24px; height: 24px;

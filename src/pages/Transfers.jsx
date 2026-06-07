@@ -349,13 +349,13 @@ function TransferRow({ t, playerMap }) {
         </div>
       </div>
 
-      {/* Club crest */}
+      {/* Fee */}
+      <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
+
+      {/* Club crest — far right */}
       <div className={styles.crestCol}>
         <ClubCrest clubName={crestClub} size={36} />
       </div>
-
-      {/* Fee */}
-      <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
     </div>
   )
 }

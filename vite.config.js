@@ -24,21 +24,21 @@ export default defineConfig({
         ]
       },
       workbox: {
-        cacheId: 'eleven-v37',
+        cacheId: 'eleven-v38',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/cdn\.sofifa\.net\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'sofifa-images-v37',
+              cacheName: 'sofifa-images-v38',
               expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 }
             }
           },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'google-fonts-v37' }
+            options: { cacheName: 'google-fonts-v38' }
           }
         ]
       }
