@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 29
+// Current: 30
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -29,5 +29,6 @@
 //   26 — Players Phase 2: add getSeasonStatsByPlayer service; PlayerProfile reads seasonStats collection by scope; UCL per-season table; removed player.seasonStats embedded-array assumption
 //   27 — PlayerProfile debug fix: label join from seasons collection, tabs before grid, tab-gated stat grids
 //   28 — Fix getSeasonStatsByPlayer: query playerId-only; client-side clubId filter tolerates absent clubId
-//   29 — Fix getSeasonStatsByPlayer: remove clubId filter entirely (corrupted S2/S3 docs have wrong clubId not absent; playerId alone is club-scoped)
-const SW_VERSION = 29;
+//   29 — Fix getSeasonStatsByPlayer: remove clubId filter entirely; playerId is club-scoped
+//   30 — Fix PlayerProfile All Comps: restore player.seasonStats embedded array as data source (original working path); UCL tab reads seasonStats collection scope=UCL with seasons label join; two data paths now independent and cannot interfere
+const SW_VERSION = 30;

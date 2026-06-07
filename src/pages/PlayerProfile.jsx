@@ -270,8 +270,8 @@ export default function PlayerProfile() {
   const navigate = useNavigate()
 
   const [player,    setPlayer]    = useState(null)
-  const [allStats,  setAllStats]  = useState([])  // scope=ALL, labeled, sorted newest-first
-  const [uclStats,  setUclStats]  = useState([])  // scope=UCL, labeled, sorted newest-first
+  const [allStats,  setAllStats]  = useState([])  // from player.seasonStats embedded array
+  const [uclStats,  setUclStats]  = useState([])  // from seasonStats collection, scope=UCL
   const [transfers, setTransfers] = useState([])
   const [loading,   setLoading]   = useState(true)
   const [tab,       setTab]       = useState('career')
@@ -280,19 +280,24 @@ export default function PlayerProfile() {
     if (!activeClub) return
     Promise.all([
       getPlayer(id),
-      getSeasons(activeClub.id),          // needed for label join
+      getSeasons(activeClub.id),
       getSeasonStatsByPlayer(id),
       getTransfers(activeClub.id),
     ]).then(([p, seasons, statDocs, t]) => {
       setPlayer(p)
 
-      // Build seasonId → label map from seasons collection
-      const seasonMap = new Map(seasons.map(s => [s.id, s.label]))
+      // ── ALL COMPS: read from player.seasonStats embedded array ──────────
+      // This is the original working data source. The embedded array items have:
+      // label (e.g. "S1"), apps, goals, assists, cleanSheets, gPerGame, aPerGame,
+      // cPerGame, csPerGame. No scope field needed — it's all-comps by definition.
+      const embeddedAll = p?.seasonStats || []
+      setAllStats(sortNewestFirst(embeddedAll))
 
-      // Attach labels, split by scope, sort newest-first
-      const labeled = attachLabels(statDocs, seasonMap)
-      setAllStats(sortNewestFirst(labeled.filter(d => d.scope === 'ALL')))
-      setUclStats(sortNewestFirst(labeled.filter(d => d.scope === 'UCL')))
+      // ── UCL: read from seasonStats collection, scope=UCL ────────────────
+      // Join labels from seasons since collection docs have no label field.
+      const seasonMap = new Map(seasons.map(s => [s.id, s.label]))
+      const uclDocs = statDocs.filter(d => d.scope === 'UCL')
+      setUclStats(sortNewestFirst(attachLabels(uclDocs, seasonMap)))
 
       setTransfers(t.filter(tr => tr.playerId === id || tr.player === p?.name))
       setLoading(false)
