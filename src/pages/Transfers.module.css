@@ -172,7 +172,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-} ──────────────────────────────────────────────────────── */
+}
+
+/* ── Loading / empty states ───────────────────────────────────────────────── */
 .loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
 .spinner {
   width: 24px; height: 24px;
