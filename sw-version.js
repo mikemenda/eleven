@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 25
+// Current: 26
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -25,5 +25,6 @@
 //   22 — Seasons filters removed (clean timeline); SeasonDetail UCL powered by match docs: LP matchday table MD1-MD8, KO leg detail with season-doc fallback
 //   23 — Opponent identity + logo layer: opponents collection, opponentMatcher, opponentSeed, backfillOpponents scripts; SeasonDetail UCL canonical names + crests; Rivals canonical names + crests; getOpponents/getOpponent services
 //   24 — Players Phase 1: sticky stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, seasonStats sorted newest-first, empty states, sessionStorage list state preservation
-//   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline, no stacked meta), PlayerProfile outfield 2x4 stat grid (Apps/G+A/Goals/Assists | Avg/C/G/G/G/A/G), GK 1x4 stat grid (Apps/CS/CS/G/Avg)
-const SW_VERSION = 25;
+//   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline), PlayerProfile outfield 2x4 stat grid, GK 1x4 stat grid
+//   26 — Players Phase 2: add getSeasonStatsByPlayer service (queries seasonStats collection by playerId); PlayerProfile reads real seasonStats collection docs (scope=ALL for All Comps, scope=UCL for UCL tab); UCL tab shows per-season table + career summary; averageRating/uclAverageRating render as "—" when absent; removed all player.seasonStats embedded-array assumptions
+const SW_VERSION = 26;

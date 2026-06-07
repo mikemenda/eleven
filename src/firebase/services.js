@@ -112,6 +112,19 @@ export const updatePlayer = async (playerId, data) => {
   return updateDoc(doc(db, 'players', playerId), data)
 }
 
+// Returns all seasonStats documents for a given player across all seasons and scopes.
+// Each doc has: scope ('ALL' or 'UCL'), seasonId, label, apps, goals, assists,
+// cleanSheets, contrib, gPerGame, aPerGame, cPerGame, csPerGame,
+// averageRating (optional), uclAverageRating (optional — only on UCL scope docs).
+export const getSeasonStatsByPlayer = async (playerId) => {
+  const q = query(
+    collection(db, 'seasonStats'),
+    where('playerId', '==', playerId)
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
 // ─── TRANSFERS ───────────────────────────────────────────────────────────────
 
 export const getTransfers = async (clubId) => {

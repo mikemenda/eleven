@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getPlayer, getSeasons, getTransfers } from '../firebase/services'
+import { getPlayer, getTransfers, getSeasonStatsByPlayer } from '../firebase/services'
 import styles from './PlayerProfile.module.css'
 
 // ─── Image components ─────────────────────────────────────────────────────────
@@ -37,13 +37,11 @@ function fmt(n) {
   return n >= 1e6 ? `€${(n / 1e6).toFixed(1)}M` : `€${(n / 1e3).toFixed(0)}K`
 }
 
-// Render a rate stat: null → "—", 0-denominator → "—", else 2dp
 function fmtRate(val) {
   if (val === null || val === undefined) return '—'
-  return val.toFixed(2)
+  return typeof val === 'number' ? val.toFixed(2) : '—'
 }
 
-// Render an optional field: null/undefined → "—"
 function fmtOpt(val, dp = 1) {
   if (val === null || val === undefined) return '—'
   return typeof val === 'number' ? val.toFixed(dp) : val
@@ -53,37 +51,44 @@ function isGK(player) {
   return player?.position === 'GK'
 }
 
+// ─── Season sort ──────────────────────────────────────────────────────────────
+// Sorts newest-first by label ("S7" > "S6" > … > "S1").
+// Falls back to seasonId string comparison if label is absent.
+function sortNewestFirst(docs) {
+  return [...docs].sort((a, b) => {
+    const na = parseInt((a.label || '').replace(/\D/g, ''), 10) || 0
+    const nb = parseInt((b.label || '').replace(/\D/g, ''), 10) || 0
+    return nb - na
+  })
+}
+
 // ─── Career totals grid ───────────────────────────────────────────────────────
-// Outfielders: 2×4 grid
-//   Row 1: Apps | G+A  | Goals   | Assists
-//   Row 2: Avg  | C/G  | G/G     | A/G
-// GKs: 1×4 grid
-//   Row 1: Apps | CS   | CS/G    | Avg
+// Outfielders 2×4: Row 1: Apps | G+A | Goals | Assists
+//                  Row 2: Avg  | C/G | G/G   | A/G
+// GKs 1×4:         Apps | CS  | CS/G | Avg
 
 function buildTotalsGrid(player) {
   const apps    = player.apps    || 0
   const goals   = player.goals   || 0
   const assists = player.assists || 0
   const cs      = player.cleanSheets
-  const rating  = player.averageRating
+  const rating  = player.averageRating  // top-level avg rating intentionally not stored — always null
 
   const contrib = goals + assists
-  const gpg     = apps > 0 ? (goals / apps)   : null
-  const apg     = apps > 0 ? (assists / apps) : null
-  const cpg     = apps > 0 ? (contrib / apps) : null
+  const gpg     = apps > 0 ? goals / apps    : null
+  const apg     = apps > 0 ? assists / apps  : null
+  const cpg     = apps > 0 ? contrib / apps  : null
   const cspg    = apps > 0 && cs != null ? cs / apps : null
 
   if (isGK(player)) {
-    // Single row, 4 boxes
     return [[
-      { key: 'apps',  label: 'Apps', value: apps },
-      { key: 'cs',    label: 'CS',   value: cs != null ? cs : '—' },
-      { key: 'cspg',  label: 'CS/G', value: fmtRate(cspg) },
-      { key: 'avg',   label: 'Avg',  value: fmtOpt(rating, 1) },
+      { key: 'apps', label: 'Apps', value: apps },
+      { key: 'cs',   label: 'CS',   value: cs != null ? cs : '—' },
+      { key: 'cspg', label: 'CS/G', value: fmtRate(cspg) },
+      { key: 'avg',  label: 'Avg',  value: fmtOpt(rating, 1) },
     ]]
   }
 
-  // Outfielder: two rows of 4
   return [
     [
       { key: 'apps',    label: 'Apps',    value: apps },
@@ -92,62 +97,117 @@ function buildTotalsGrid(player) {
       { key: 'assists', label: 'Assists', value: assists },
     ],
     [
-      { key: 'avg',  label: 'Avg',  value: fmtOpt(rating, 1) },
-      { key: 'cpg',  label: 'C/G',  value: fmtRate(cpg) },
-      { key: 'gpg',  label: 'G/G',  value: fmtRate(gpg) },
-      { key: 'apg',  label: 'A/G',  value: fmtRate(apg) },
+      { key: 'avg', label: 'Avg',  value: fmtOpt(rating, 1) },
+      { key: 'cpg', label: 'C/G',  value: fmtRate(cpg) },
+      { key: 'gpg', label: 'G/G',  value: fmtRate(gpg) },
+      { key: 'apg', label: 'A/G',  value: fmtRate(apg) },
     ],
   ]
 }
 
-// Season-by-season table columns (All Comps tab)
-// GKs show CS column; outfielders show G+A column. Avg Rating for both when present.
-function buildSeasonCols(player) {
+// ─── Season table column definitions ─────────────────────────────────────────
+// allCols: used for the All Comps tab (scope=ALL docs)
+// uclCols: used for the UCL tab (scope=UCL docs)
+// Avg column is always included; renders "—" when the field is absent.
+
+function allColsFor(player) {
   if (isGK(player)) {
     return [
-      { key: 'label',        header: 'Season' },
-      { key: 'apps',         header: 'Apps' },
-      { key: 'cleanSheets',  header: 'CS' },
-      { key: 'cspg',         header: 'CS/G',  rate: true },
-      { key: 'averageRating',header: 'Rtg' },
+      { key: 'label',         header: 'Season' },
+      { key: 'apps',          header: 'Apps' },
+      { key: 'cleanSheets',   header: 'CS' },
+      { key: 'csPerGame',     header: 'CS/G' },
+      { key: 'averageRating', header: 'Avg' },
     ]
   }
   return [
-    { key: 'label',        header: 'Season' },
-    { key: 'apps',         header: 'Apps' },
-    { key: 'goals',        header: 'G' },
-    { key: 'assists',      header: 'A' },
-    { key: 'contrib',      header: 'G+A',  derived: true },
-    { key: 'averageRating',header: 'Rtg' },
+    { key: 'label',         header: 'Season' },
+    { key: 'apps',          header: 'Apps' },
+    { key: 'goals',         header: 'G' },
+    { key: 'assists',       header: 'A' },
+    { key: '_contrib',      header: 'G+A' },
+    { key: 'gPerGame',      header: 'G/G' },
+    { key: 'aPerGame',      header: 'A/G' },
+    { key: 'cPerGame',      header: 'C/G' },
+    { key: 'averageRating', header: 'Avg' },
   ]
 }
 
-function getSeasonCellValue(ss, colKey) {
-  if (colKey === 'contrib') {
-    return (ss.goals || 0) + (ss.assists || 0)
+function uclColsFor(player) {
+  if (isGK(player)) {
+    return [
+      { key: 'label',            header: 'Season' },
+      { key: 'apps',             header: 'Apps' },
+      { key: 'cleanSheets',      header: 'CS' },
+      { key: 'csPerGame',        header: 'CS/G' },
+      { key: 'uclAverageRating', header: 'Avg' },
+    ]
   }
-  if (colKey === 'cspg') {
-    const apps = ss.apps || 0
-    const cs   = ss.cleanSheets
-    return apps > 0 && cs != null ? (cs / apps).toFixed(2) : '—'
+  return [
+    { key: 'label',            header: 'Season' },
+    { key: 'apps',             header: 'Apps' },
+    { key: 'goals',            header: 'G' },
+    { key: 'assists',          header: 'A' },
+    { key: '_contrib',         header: 'G+A' },
+    { key: 'gPerGame',         header: 'G/G' },
+    { key: 'aPerGame',         header: 'A/G' },
+    { key: 'cPerGame',         header: 'C/G' },
+    { key: 'uclAverageRating', header: 'Avg' },
+  ]
+}
+
+// Resolve a single cell value from a seasonStats document.
+// Handles derived _contrib, rate fields stored in Firestore (gPerGame etc.),
+// and optional rating fields that may be absent.
+function cellVal(doc, key) {
+  if (key === '_contrib') {
+    return (doc.goals || 0) + (doc.assists || 0)
   }
-  if (colKey === 'averageRating') {
-    const v = ss.averageRating
-    return v != null ? v.toFixed(1) : '—'
+  if (key === 'averageRating' || key === 'uclAverageRating') {
+    const v = doc[key]
+    return v != null ? fmtOpt(v, 1) : '—'
   }
-  const v = ss[colKey]
+  // Rate fields (gPerGame, aPerGame, cPerGame, csPerGame) are stored in Firestore
+  // from the seed scripts. Render as-is if present, otherwise "—".
+  if (key === 'gPerGame' || key === 'aPerGame' || key === 'cPerGame' || key === 'csPerGame') {
+    const v = doc[key]
+    return v != null ? fmtRate(v) : '—'
+  }
+  const v = doc[key]
   if (v === null || v === undefined) return '—'
   return v
 }
 
-// Sort seasonStats newest-first by label (S7 > S6 > ... > S1)
-// Label format: "S1", "S2", etc.
-function sortSeasons(statsArr) {
-  return [...statsArr].sort((a, b) => {
-    const na = parseInt((a.label || '').replace(/\D/g, ''), 10) || 0
-    const nb = parseInt((b.label || '').replace(/\D/g, ''), 10) || 0
-    return nb - na
-  })
+// ─── UCL career summary row ───────────────────────────────────────────────────
+// Built from top-level player fields (maintained by backfillPlayerTotals).
+// Used as the summary footer in the UCL tab.
+function uclSummaryCards(player) {
+  if (isGK(player)) {
+    const apps = player.uclApps || 0
+    const cs   = player.uclCleanSheets
+    const cspg = apps > 0 && cs != null ? cs / apps : null
+    return [
+      { key: 'apps', label: 'Apps',  value: apps },
+      { key: 'cs',   label: 'CS',    value: cs != null ? cs : '—' },
+      { key: 'cspg', label: 'CS/G',  value: fmtRate(cspg) },
+    ]
+  }
+  const apps    = player.uclApps    || 0
+  const goals   = player.uclGoals   || 0
+  const assists = player.uclAssists || 0
+  const contrib = goals + assists
+  const gpg     = apps > 0 ? goals / apps    : null
+  const apg     = apps > 0 ? assists / apps  : null
+  const cpg     = apps > 0 ? contrib / apps  : null
+  return [
+    { key: 'apps',    label: 'Apps',    value: apps },
+    { key: 'contrib', label: 'G+A',     value: contrib },
+    { key: 'goals',   label: 'Goals',   value: goals },
+    { key: 'assists', label: 'Assists', value: assists },
+    { key: 'gpg',     label: 'G/G',     value: fmtRate(gpg) },
+    { key: 'apg',     label: 'A/G',     value: fmtRate(apg) },
+    { key: 'cpg',     label: 'C/G',     value: fmtRate(cpg) },
+  ]
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -157,21 +217,28 @@ export default function PlayerProfile() {
   const { activeClub } = useApp()
   const navigate = useNavigate()
 
-  const [player,    setPlayer]    = useState(null)
-  const [seasons,   setSeasons]   = useState([])
-  const [transfers, setTransfers] = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [tab,       setTab]       = useState('career') // career | ucl | history
+  const [player,      setPlayer]      = useState(null)
+  const [allStats,    setAllStats]    = useState([])   // scope === 'ALL' docs, sorted newest-first
+  const [uclStats,    setUclStats]    = useState([])   // scope === 'UCL' docs, sorted newest-first
+  const [transfers,   setTransfers]   = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [tab,         setTab]         = useState('career') // career | ucl | history
 
   useEffect(() => {
     if (!activeClub) return
     Promise.all([
       getPlayer(id),
-      getSeasons(activeClub.id),
+      getSeasonStatsByPlayer(id),
       getTransfers(activeClub.id),
-    ]).then(([p, s, t]) => {
+    ]).then(([p, statDocs, t]) => {
       setPlayer(p)
-      setSeasons(s)
+
+      // Split by scope — scope field is 'ALL' or 'UCL'
+      const all = statDocs.filter(d => d.scope === 'ALL')
+      const ucl = statDocs.filter(d => d.scope === 'UCL')
+      setAllStats(sortNewestFirst(all))
+      setUclStats(sortNewestFirst(ucl))
+
       setTransfers(
         t.filter(tr => tr.playerId === id || tr.player === p?.name)
       )
@@ -196,13 +263,15 @@ export default function PlayerProfile() {
   const status       = player.status || 'Active'
   const statusColors = { Active: 'var(--en-green)', Sold: 'var(--en-text-3)', Loaned: 'var(--en-gold)' }
 
-  const seasonStats  = sortSeasons(player.seasonStats || [])
-  const seasonsCount = seasonStats.length
-  const totalsGrid   = buildTotalsGrid(player)
-  const seasonCols   = buildSeasonCols(player)
+  // Seasons count from ALL-scope docs (each doc = one season)
+  const seasonsCount = allStats.length
 
-  // UCL career totals (Phase 1 — aggregate only, no per-season breakdown yet)
-  const hasUcl       = player.uclApps != null && player.uclApps > 0
+  const totalsGrid  = buildTotalsGrid(player)
+  const allCols     = allColsFor(player)
+  const uclCols     = uclColsFor(player)
+  const uclSummary  = uclSummaryCards(player)
+  const hasUclData  = uclStats.length > 0
+  const hasUclTotals = player.uclApps != null && player.uclApps > 0
 
   return (
     <div className={styles.page}>
@@ -276,31 +345,34 @@ export default function PlayerProfile() {
       {/* ── TAB CONTENT ── */}
       <div className={styles.inner}>
 
-        {/* ALL COMPS */}
+        {/* ── ALL COMPS ─────────────────────────────────────────────────────── */}
         {tab === 'career' && (
           <div className={styles.section}>
-            {seasonStats.length === 0 ? (
+            {allStats.length === 0 ? (
               <p className={styles.noData}>No season data imported yet.</p>
             ) : (
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    {seasonCols.map(col => (
-                      <th key={col.key} className={col.key === 'label' ? styles.thLeft : undefined}>
+                    {allCols.map(col => (
+                      <th
+                        key={col.key}
+                        className={col.key === 'label' ? styles.thLeft : undefined}
+                      >
                         {col.header}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {seasonStats.map((ss, i) => (
-                    <tr key={i}>
-                      {seasonCols.map(col => (
+                  {allStats.map((ss) => (
+                    <tr key={ss.id}>
+                      {allCols.map(col => (
                         <td
                           key={col.key}
                           className={col.key === 'label' ? styles.seasonLabel : undefined}
                         >
-                          {getSeasonCellValue(ss, col.key)}
+                          {cellVal(ss, col.key)}
                         </td>
                       ))}
                     </tr>
@@ -311,44 +383,69 @@ export default function PlayerProfile() {
           </div>
         )}
 
-        {/* UCL — Phase 1: career totals only */}
+        {/* ── UCL ───────────────────────────────────────────────────────────── */}
         {tab === 'ucl' && (
           <div className={styles.section}>
-            {!hasUcl ? (
+            {!hasUclData && !hasUclTotals ? (
+              // No data at all
               <p className={styles.noData}>No UCL appearances recorded.</p>
             ) : (
               <>
-                <div className={styles.uclTotals}>
-                  <div className={styles.totalCard}>
-                    <span className={styles.totalVal}>{player.uclApps || 0}</span>
-                    <span className={styles.totalKey}>Apps</span>
-                  </div>
-                  <div className={styles.totalCard}>
-                    <span className={styles.totalVal}>{player.uclGoals || 0}</span>
-                    <span className={styles.totalKey}>Goals</span>
-                  </div>
-                  <div className={styles.totalCard}>
-                    <span className={styles.totalVal}>{player.uclAssists || 0}</span>
-                    <span className={styles.totalKey}>Assists</span>
-                  </div>
-                  {isGK(player) && (
-                    <div className={styles.totalCard}>
-                      <span className={styles.totalVal}>
-                        {player.uclCleanSheets != null ? player.uclCleanSheets : '—'}
-                      </span>
-                      <span className={styles.totalKey}>CS</span>
+                {/* Season-by-season UCL table */}
+                {hasUclData ? (
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        {uclCols.map(col => (
+                          <th
+                            key={col.key}
+                            className={col.key === 'label' ? styles.thLeft : undefined}
+                          >
+                            {col.header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {uclStats.map((ss) => (
+                        <tr key={ss.id}>
+                          {uclCols.map(col => (
+                            <td
+                              key={col.key}
+                              className={col.key === 'label' ? styles.seasonLabel : undefined}
+                            >
+                              {cellVal(ss, col.key)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  // Has top-level totals but no per-season UCL docs yet
+                  <p className={styles.noData}>Season-by-season UCL data not yet imported.</p>
+                )}
+
+                {/* UCL career summary — always shown when there are totals */}
+                {hasUclTotals && (
+                  <div className={styles.uclSummaryWrap}>
+                    <span className={styles.uclSummaryLabel}>Career UCL</span>
+                    <div className={styles.uclTotals}>
+                      {uclSummary.map(card => (
+                        <div key={card.key} className={styles.totalCard}>
+                          <span className={styles.totalVal}>{card.value}</span>
+                          <span className={styles.totalKey}>{card.label}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-                <p className={styles.uclNote}>
-                  Season-by-season UCL breakdown available after S4 import.
-                </p>
+                  </div>
+                )}
               </>
             )}
           </div>
         )}
 
-        {/* TRANSFER HISTORY */}
+        {/* ── TRANSFER HISTORY ──────────────────────────────────────────────── */}
         {tab === 'history' && (
           <div className={styles.section}>
             {transfers.length === 0 ? (
@@ -378,6 +475,7 @@ export default function PlayerProfile() {
             )}
           </div>
         )}
+
       </div>
     </div>
   )
