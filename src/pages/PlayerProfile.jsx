@@ -337,6 +337,12 @@ export default function PlayerProfile() {
           </svg>
         </button>
         <span className={styles.topLabel}>Player Profile</span>
+        <button
+          className={styles.compareBtn}
+          onClick={() => navigate(`/players/compare?a=${id}`)}
+        >
+          Compare
+        </button>
       </div>
 
       {/* ── HERO ── */}

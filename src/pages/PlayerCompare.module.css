@@ -5,7 +5,7 @@
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
 }
 
-/* ─── TOP BAR ── */
+/* ─── TOP BAR ────────────────────────────────────────────────────── */
 .topBar {
   max-width: 640px; margin: 0 auto;
   display: flex; align-items: center; gap: 10px;
@@ -17,7 +17,7 @@
   display: flex; align-items: center; justify-content: center;
   width: 28px; height: 28px;
   background: transparent; border: none; color: var(--en-text-3); cursor: pointer;
-  transition: color 0.15s;
+  transition: color 0.15s; flex-shrink: 0;
 }
 .backBtn:hover { color: var(--en-text-1); }
 .topLabel {
@@ -25,27 +25,33 @@
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
 }
 
-/* ─── HERO ────────────────────────────────────────────────────────── */
+/* ─── HERO ROW ───────────────────────────────────────────────────── */
 .heroRow {
   max-width: 640px; margin: 0 auto;
   display: grid; grid-template-columns: 1fr 0.5px 1fr;
   border-bottom: 0.5px solid var(--en-rule);
+  min-height: 88px;
 }
 .heroDivider {
   background: var(--en-rule);
   align-self: stretch;
 }
+
+/* Populated hero col */
 .heroCol {
-  display: flex; align-items: center; gap: 12px;
-  padding: 20px 16px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 14px;
+  position: relative;
 }
 .heroColRight {
   flex-direction: row-reverse;
   text-align: right;
 }
+
+.heroImgWrap { flex-shrink: 0; }
 .heroImg {
   object-fit: cover; object-position: top;
-  border-radius: 8px; flex-shrink: 0;
+  border-radius: 8px; display: block;
 }
 .silhouette {
   display: flex; align-items: flex-end; justify-content: center;
@@ -54,12 +60,10 @@
   color: var(--en-text-4);
   overflow: hidden; flex-shrink: 0;
 }
-.heroDetails { min-width: 0; }
+.heroDetails { flex: 1; min-width: 0; }
 .heroName {
-  font-family: var(--font-playfair); font-size: 15px; font-weight: 700;
-  color: var(--en-text-1); line-height: 1.2;
-  margin: 0 0 3px;
-  /* Allow wrapping for long names */
+  font-family: var(--font-playfair); font-size: 14px; font-weight: 700;
+  color: var(--en-text-1); line-height: 1.2; margin: 0 0 3px;
   word-break: break-word;
 }
 .heroMeta {
@@ -68,7 +72,44 @@
   color: var(--en-text-3); margin: 0;
 }
 
-/* ─── TABS ────────────────────────────────────────────────────────── */
+/* Clear (×) button — top-right corner of the populated slot */
+.heroClearBtn {
+  position: absolute; top: 8px;
+  /* left for side=a, right for side=b — handled by :first-child rule below */
+  right: 8px;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--en-surface); border: 0.5px solid var(--en-rule);
+  border-radius: 50%; cursor: pointer; color: var(--en-text-3);
+  transition: color 0.15s, border-color 0.15s;
+}
+.heroClearBtn:hover { color: var(--en-text-1); border-color: var(--en-text-3); }
+/* Right column: move clear button to left so it doesn't overlap text */
+.heroColRight .heroClearBtn { right: auto; left: 8px; }
+
+/* Empty hero col (button) */
+.heroColEmpty {
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 6px;
+  padding: 16px 14px;
+  background: transparent; border: none; cursor: pointer;
+  transition: background 0.15s;
+  color: var(--en-text-4);
+}
+.heroColEmpty:hover { background: var(--en-surface); }
+.heroEmptyIcon {
+  width: 36px; height: 36px;
+  border: 1.5px dashed var(--en-rule);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--en-text-4);
+}
+.heroEmptyLabel {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--en-text-4);
+}
+
+/* ─── TABS ───────────────────────────────────────────────────────── */
 .tabs {
   max-width: 640px; margin: 0 auto;
   display: flex; border-bottom: 0.5px solid var(--en-rule);
@@ -83,10 +124,10 @@
 .tab:hover { color: var(--en-text-2); }
 .tabActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
 
-/* ─── COLUMN LABELS ───────────────────────────────────────────────── */
+/* ─── COLUMN LABELS ──────────────────────────────────────────────── */
 .colLabels {
   max-width: 640px; margin: 0 auto;
-  display: grid; grid-template-columns: 1fr auto 1fr;
+  display: grid; grid-template-columns: 1fr 80px 1fr;
   padding: 8px 20px 4px;
   border-bottom: 0.5px solid var(--en-rule-faint);
 }
@@ -94,27 +135,25 @@
   font-family: var(--font-plex); font-size: 9px;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--en-green); text-align: left;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.colLabelCenter {
-  min-width: 80px; /* matches stat label column */
-}
+.colLabelCenter { min-width: 80px; }
 .colLabelB {
   font-family: var(--font-plex); font-size: 9px;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--en-green); text-align: right;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* ─── SECTION ─────────────────────────────────────────────────────── */
+/* ─── SECTION ────────────────────────────────────────────────────── */
 .section {
   max-width: 640px; margin: 0 auto;
   animation: fadeUp 0.25s ease both;
 }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ─── TOTALS BLOCK ────────────────────────────────────────────────── */
-.totalsBlock {
-  border-bottom: 0.5px solid var(--en-rule);
-}
+/* ─── TOTALS BLOCK ───────────────────────────────────────────────── */
+.totalsBlock { border-bottom: 0.5px solid var(--en-rule); }
 .statRow {
   display: grid; grid-template-columns: 1fr 80px 1fr;
   align-items: center;
@@ -130,9 +169,11 @@
 .statValLeft  { text-align: left; }
 .statValRight { text-align: right; }
 
-.statWin   { color: var(--en-green); }
-.statEqual { color: var(--en-text-1); }
-.statLose  { color: var(--en-text-3); }
+.statWin     { color: var(--en-green); }
+.statEqual   { color: var(--en-text-1); }
+.statLose    { color: var(--en-text-3); }
+/* Single player present — no winner logic, show value at mid brightness */
+.statNeutral { color: var(--en-text-2); }
 
 .statLabel {
   font-family: var(--font-plex); font-size: 8px;
@@ -140,19 +181,17 @@
   color: var(--en-text-4); text-align: center;
 }
 
-/* ─── SECTION DIVIDER (between totals and season table) ─────────────── */
+/* ─── SECTION DIVIDER ────────────────────────────────────────────── */
 .sectionDivider {
-  display: flex; align-items: center; gap: 12px;
   padding: 16px 20px 8px;
 }
 .sectionDividerLabel {
   font-family: var(--font-plex); font-size: 9px;
   letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--en-text-4);
-  white-space: nowrap;
 }
 
-/* ─── SEASON TABLE ────────────────────────────────────────────────── */
+/* ─── SEASON TABLE ───────────────────────────────────────────────── */
 .seasonTableWrap {
   overflow-x: auto;
   scrollbar-width: thin;
@@ -161,76 +200,153 @@
 .seasonTableWrap::-webkit-scrollbar { height: 3px; }
 .seasonTableWrap::-webkit-scrollbar-thumb { background: var(--en-rule); border-radius: 2px; }
 
-.seasonTable {
-  width: 100%; border-collapse: collapse;
-  min-width: 360px;
-}
+.seasonTable { width: 100%; border-collapse: collapse; min-width: 360px; }
 
-/* Header */
 .sthSeason {
   font-family: var(--font-plex); font-size: 9px;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--en-text-3); font-weight: 400;
-  padding: 10px 8px 8px 20px; text-align: left;
-  white-space: nowrap;
+  padding: 10px 8px 8px 20px; text-align: left; white-space: nowrap;
 }
 .sth {
   font-family: var(--font-plex); font-size: 9px;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--en-text-3); font-weight: 400;
-  padding: 10px 8px 8px; text-align: center;
-  white-space: nowrap;
+  padding: 10px 8px 8px; text-align: center; white-space: nowrap;
 }
-/* Hairline divider column between the two players */
-.sthDivider {
-  width: 0.5px;
-  background: var(--en-rule);
-  padding: 0;
-}
+.sthDivider { width: 1px; background: var(--en-rule); padding: 0; }
 
-/* Rows */
 .str { border-top: 0.5px solid var(--en-rule-faint); }
 .stdSeason {
   font-family: var(--font-plex); font-size: 12px; font-weight: 500;
   color: var(--en-text-1);
-  padding: 9px 8px 9px 20px; text-align: left;
-  white-space: nowrap;
+  padding: 9px 8px 9px 20px; text-align: left; white-space: nowrap;
 }
 .std {
   font-family: var(--font-plex); font-size: 12px;
   color: var(--en-text-2);
-  padding: 9px 8px; text-align: center;
-  white-space: nowrap;
+  padding: 9px 8px; text-align: center; white-space: nowrap;
 }
-.stdWin { color: var(--en-green); }
-.stdDivider {
-  width: 0.5px; background: var(--en-rule);
-  padding: 0;
-}
+.stdWin  { color: var(--en-green); }
+.stdDivider { width: 1px; background: var(--en-rule); padding: 0; }
 
-/* ─── UCL NOTE ────────────────────────────────────────────────────── */
+/* ─── NOTES ──────────────────────────────────────────────────────── */
 .uclNote {
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--en-text-4);
-  padding: 12px 20px 4px;
-  margin: 0;
+  font-family: var(--font-plex); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--en-text-4); padding: 12px 20px 4px; margin: 0;
 }
-
-/* ─── NO DATA ─────────────────────────────────────────────────────── */
+.pendingNote {
+  font-family: var(--font-inter); font-size: 12px;
+  color: var(--en-text-4); text-align: center;
+  padding: 24px 20px 8px; margin: 0;
+}
 .noData {
   font-family: var(--font-inter); font-size: 13px;
   color: var(--en-text-3); text-align: center; padding: 40px 20px;
 }
 
-/* ─── LOADING ─────────────────────────────────────────────────────── */
+/* ─── LOADING ────────────────────────────────────────────────────── */
 .loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
 .spinner {
   width: 24px; height: 24px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  border: 1.5px solid var(--en-rule); border-top-color: var(--en-blue);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .notFound { font-family: var(--font-inter); font-size: 14px; color: var(--en-text-3); }
+
+/* ─── PLAYER PICKER SHEET ────────────────────────────────────────── */
+.pickerBackdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.5);
+  animation: fadeIn 0.18s ease both;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.pickerSheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 101;
+  background: var(--en-surface);
+  border-top: 0.5px solid var(--en-rule);
+  border-radius: 16px 16px 0 0;
+  /* Height: tall enough to show ~6 players without being full screen */
+  max-height: 72dvh;
+  display: flex; flex-direction: column;
+  animation: slideUp 0.22s ease both;
+  /* Respect safe area at bottom */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.pickerHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
+}
+.pickerTitle {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
+}
+.pickerClose {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--en-text-3); transition: color 0.15s; border-radius: 4px;
+}
+.pickerClose:hover { color: var(--en-text-1); }
+
+.pickerSearchWrap {
+  position: relative; display: flex; align-items: center;
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  flex-shrink: 0;
+}
+.pickerSearchIcon {
+  position: absolute; left: 28px; color: var(--en-text-3); pointer-events: none;
+}
+.pickerSearch {
+  width: 100%;
+  background: var(--en-bg); border: 0.5px solid var(--en-rule);
+  border-radius: 6px; padding: 8px 10px 8px 32px;
+  font-family: var(--font-inter); font-size: 16px; /* prevent iOS zoom */
+  color: var(--en-text-1); outline: none;
+}
+.pickerSearch::placeholder { color: var(--en-text-3); }
+.pickerSearch:focus { border-color: var(--en-blue); }
+
+.pickerList {
+  overflow-y: auto; flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+.pickerEmpty {
+  font-family: var(--font-inter); font-size: 13px;
+  color: var(--en-text-3); text-align: center; padding: 32px 20px;
+}
+
+.pickerRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px;
+  background: transparent; border: none; width: 100%;
+  cursor: pointer; transition: background 0.1s;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  text-align: left;
+}
+.pickerRow:hover { background: var(--en-bg); }
+.pickerRow:last-child { border-bottom: none; }
+
+.pickerRowInfo { flex: 1; min-width: 0; }
+.pickerRowName {
+  font-family: var(--font-inter); font-size: 14px; font-weight: 600;
+  color: var(--en-text-1); display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pickerRowMeta {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--en-text-3); display: block; margin-top: 2px;
+}
