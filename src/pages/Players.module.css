@@ -427,8 +427,6 @@
   flex-shrink: 0;
 }
 
-  top: calc(56px + 45px + 32px); /* topBar + hintBar */
-}
 
 /* Selected row highlight */
 .trSelected .tdIdentity,
