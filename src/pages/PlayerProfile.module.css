@@ -75,52 +75,7 @@
   color: var(--en-text-4);
 }
 
-/* ── CAREER TOTALS GRID ── */
-.totalsGrid {
-  max-width: 640px;
-  margin: 0 auto;
-  border-bottom: 0.5px solid var(--en-rule);
-}
-/* Each row is a flex row of 4 equal boxes */
-.totalsRow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-bottom: 0.5px solid var(--en-rule-faint);
-}
-/* Last row has no bottom border (grid handles it, outer border-bottom on .totalsGrid covers bottom) */
-.totalsRow:last-child {
-  border-bottom: none;
-}
-.totalCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 14px 8px;
-  border-right: 0.5px solid var(--en-rule);
-}
-.totalCard:last-child { border-right: none; }
-.totalVal {
-  font-family: var(--font-plex);
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--en-text-1);
-  line-height: 1;
-}
-/* Second-row rate stats slightly smaller — they're supporting numbers */
-.totalsRow:nth-child(2) .totalVal {
-  font-size: 16px;
-}
-.totalKey {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
-  white-space: nowrap;
-}
-
-/* ── TABS ── */
+/* ── TABS — immediately after hero ── */
 .tabs {
   max-width: 640px; margin: 0 auto;
   display: flex; border-bottom: 0.5px solid var(--en-rule);
@@ -135,57 +90,68 @@
 .tab:hover { color: var(--en-text-2); }
 .tabActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
 
-/* ── SECTION ── */
-.section { padding: 20px; }
+/* ── SECTION wrapper — contains grid + table ── */
+.section { padding: 0; }
+
+/* ── STAT GRID (inside section, at top of each stats tab) ── */
+.totalsGrid {
+  max-width: 640px;
+  margin: 0 auto;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.totalsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.totalsRow:last-child { border-bottom: none; }
+.totalCard {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 14px 8px;
+  border-right: 0.5px solid var(--en-rule);
+}
+.totalCard:last-child { border-right: none; }
+.totalVal {
+  font-family: var(--font-plex); font-size: 20px; font-weight: 500;
+  color: var(--en-text-1); line-height: 1;
+}
+/* Rate-stat row (row 2) slightly smaller */
+.totalsRow:nth-child(2) .totalVal { font-size: 16px; }
+.totalKey {
+  font-family: var(--font-plex); font-size: 8px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--en-text-3); white-space: nowrap;
+}
+
+/* ── DIVIDER between grid and table ── */
+.tableDivider { height: 0; }   /* border already on totalsGrid bottom — no extra space needed */
+
+/* ── NO DATA state ── */
 .noData {
   font-family: var(--font-inter); font-size: 13px;
-  color: var(--en-text-3); text-align: center; padding: 40px 0;
+  color: var(--en-text-3); text-align: center; padding: 40px 20px;
 }
 
 /* ── SEASON TABLE ── */
-.table { width: 100%; border-collapse: collapse; }
+.table { width: 100%; border-collapse: collapse; padding: 0 20px; }
 .table th {
   font-family: var(--font-plex); font-size: 9px;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--en-text-3); font-weight: 400;
-  padding: 0 0 10px; text-align: center;
+  padding: 12px 8px 10px; text-align: center;
 }
-.table .thLeft,
-.table th:first-child { text-align: left; }
+.table th:first-child { text-align: left; padding-left: 20px; }
 .table td {
   font-family: var(--font-plex); font-size: 13px;
-  color: var(--en-text-2); padding: 10px 0;
+  color: var(--en-text-2); padding: 10px 8px;
   border-top: 0.5px solid var(--en-rule-faint);
   text-align: center;
 }
-.table td:first-child { text-align: left; }
+.table td:first-child { text-align: left; padding-left: 20px; }
 .seasonLabel { color: var(--en-text-1) !important; font-weight: 500; }
 
-/* ── UCL TOTALS (career summary, below season table) ── */
-.uclSummaryWrap {
-  margin-top: 20px;
-  border-top: 0.5px solid var(--en-rule);
-  padding-top: 16px;
-}
-.uclSummaryLabel {
-  display: block;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
-  margin-bottom: 10px;
-}
-.uclTotals {
-  display: flex;
-  flex-wrap: wrap;
-}
-.uclTotals .totalCard {
-  flex: 1;
-  min-width: 60px;
-}
 /* ── TRANSFER HISTORY ── */
-.transferList { display: flex; flex-direction: column; }
+.transferList { display: flex; flex-direction: column; padding: 0 20px; }
 .transferItem {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 0;

@@ -113,13 +113,18 @@ export const updatePlayer = async (playerId, data) => {
 }
 
 // Returns all seasonStats documents for a given player across all seasons and scopes.
-// Each doc has: scope ('ALL' or 'UCL'), seasonId, label, apps, goals, assists,
-// cleanSheets, contrib, gPerGame, aPerGame, cPerGame, csPerGame,
-// averageRating (optional), uclAverageRating (optional — only on UCL scope docs).
-export const getSeasonStatsByPlayer = async (playerId) => {
+// Queries by both playerId and clubId — matches the composite index pattern used
+// elsewhere in the app (seasonStats: clubId + playerId).
+// Each doc has: scope ('ALL' or 'UCL'), seasonId, clubId, playerId, playerName,
+// apps, goals, assists, cleanSheets, contrib, gPerGame, aPerGame, cPerGame, csPerGame,
+// averageRating (optional), uclAverageRating (optional).
+// NOTE: docs do NOT have a label field — label is on the seasons document.
+// Callers must join to seasons by seasonId to get "S1", "S2", etc.
+export const getSeasonStatsByPlayer = async (playerId, clubId) => {
   const q = query(
     collection(db, 'seasonStats'),
-    where('playerId', '==', playerId)
+    where('playerId', '==', playerId),
+    where('clubId',   '==', clubId)
   )
   const snap = await getDocs(q)
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))

@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 26
+// Current: 27
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -26,5 +26,6 @@
 //   23 — Opponent identity + logo layer: opponents collection, opponentMatcher, opponentSeed, backfillOpponents scripts; SeasonDetail UCL canonical names + crests; Rivals canonical names + crests; getOpponents/getOpponent services
 //   24 — Players Phase 1: sticky stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, seasonStats sorted newest-first, empty states, sessionStorage list state preservation
 //   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline), PlayerProfile outfield 2x4 stat grid, GK 1x4 stat grid
-//   26 — Players Phase 2: add getSeasonStatsByPlayer service (queries seasonStats collection by playerId); PlayerProfile reads real seasonStats collection docs (scope=ALL for All Comps, scope=UCL for UCL tab); UCL tab shows per-season table + career summary; averageRating/uclAverageRating render as "—" when absent; removed all player.seasonStats embedded-array assumptions
-const SW_VERSION = 26;
+//   26 — Players Phase 2: add getSeasonStatsByPlayer service; PlayerProfile reads seasonStats collection by scope; UCL per-season table; removed player.seasonStats embedded-array assumption
+//   27 — PlayerProfile debug fix: seasonStats docs have no label field — join to seasons collection by seasonId; query uses clubId filter; tabs moved before stat grid; stat grid is tab-gated (All Comps and UCL show their respective grids, Transfer History shows no grid); UCL career summary strip removed; layout order: hero → tabs → [grid + table per tab]
+const SW_VERSION = 27;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getPlayer, getTransfers, getSeasonStatsByPlayer } from '../firebase/services'
+import { getPlayer, getSeasons, getTransfers, getSeasonStatsByPlayer } from '../firebase/services'
 import styles from './PlayerProfile.module.css'
 
 // ─── Image components ─────────────────────────────────────────────────────────
@@ -51,9 +51,17 @@ function isGK(player) {
   return player?.position === 'GK'
 }
 
-// ─── Season sort ──────────────────────────────────────────────────────────────
-// Sorts newest-first by label ("S7" > "S6" > … > "S1").
-// Falls back to seasonId string comparison if label is absent.
+// ─── Label join ───────────────────────────────────────────────────────────────
+// seasonStats docs have no label field — label lives on the seasons document.
+// Build a Map<seasonId → label> from the seasons array, then attach to stat docs.
+function attachLabels(statDocs, seasonMap) {
+  return statDocs.map(d => ({
+    ...d,
+    label: seasonMap.get(d.seasonId) ?? d.seasonId ?? '—',
+  }))
+}
+
+// Sort newest-first by label ("S7" > "S6" > … > "S1").
 function sortNewestFirst(docs) {
   return [...docs].sort((a, b) => {
     const na = parseInt((a.label || '').replace(/\D/g, ''), 10) || 0
@@ -62,22 +70,22 @@ function sortNewestFirst(docs) {
   })
 }
 
-// ─── Career totals grid ───────────────────────────────────────────────────────
-// Outfielders 2×4: Row 1: Apps | G+A | Goals | Assists
-//                  Row 2: Avg  | C/G | G/G   | A/G
-// GKs 1×4:         Apps | CS  | CS/G | Avg
+// ─── Stat grid builders ───────────────────────────────────────────────────────
+// All Comps grid — sourced from top-level player fields (all-comp career totals)
+// UCL grid       — sourced from top-level uclApps/uclGoals/etc.
+// Both follow same 2×4 outfield / 1×4 GK layout.
 
-function buildTotalsGrid(player) {
+function buildAllCompsGrid(player) {
   const apps    = player.apps    || 0
   const goals   = player.goals   || 0
   const assists = player.assists || 0
   const cs      = player.cleanSheets
-  const rating  = player.averageRating  // top-level avg rating intentionally not stored — always null
+  const rating  = player.averageRating   // intentionally not stored at career level → always null/—
 
   const contrib = goals + assists
-  const gpg     = apps > 0 ? goals / apps    : null
-  const apg     = apps > 0 ? assists / apps  : null
-  const cpg     = apps > 0 ? contrib / apps  : null
+  const gpg     = apps > 0 ? goals / apps   : null
+  const apg     = apps > 0 ? assists / apps : null
+  const cpg     = apps > 0 ? contrib / apps : null
   const cspg    = apps > 0 && cs != null ? cs / apps : null
 
   if (isGK(player)) {
@@ -88,7 +96,6 @@ function buildTotalsGrid(player) {
       { key: 'avg',  label: 'Avg',  value: fmtOpt(rating, 1) },
     ]]
   }
-
   return [
     [
       { key: 'apps',    label: 'Apps',    value: apps },
@@ -105,10 +112,61 @@ function buildTotalsGrid(player) {
   ]
 }
 
+function buildUclGrid(player) {
+  const apps    = player.uclApps    || 0
+  const goals   = player.uclGoals   || 0
+  const assists = player.uclAssists || 0
+  const cs      = player.uclCleanSheets
+
+  const contrib = goals + assists
+  const gpg     = apps > 0 ? goals / apps   : null
+  const apg     = apps > 0 ? assists / apps : null
+  const cpg     = apps > 0 ? contrib / apps : null
+  const cspg    = apps > 0 && cs != null ? cs / apps : null
+
+  if (isGK(player)) {
+    return [[
+      { key: 'apps', label: 'Apps', value: apps },
+      { key: 'cs',   label: 'CS',   value: cs != null ? cs : '—' },
+      { key: 'cspg', label: 'CS/G', value: fmtRate(cspg) },
+      { key: 'avg',  label: 'Avg',  value: '—' },   // no career UCL avg stored
+    ]]
+  }
+  return [
+    [
+      { key: 'apps',    label: 'Apps',    value: apps },
+      { key: 'contrib', label: 'G+A',     value: contrib },
+      { key: 'goals',   label: 'Goals',   value: goals },
+      { key: 'assists', label: 'Assists', value: assists },
+    ],
+    [
+      { key: 'avg', label: 'Avg',  value: '—' },    // no career UCL avg stored
+      { key: 'cpg', label: 'C/G',  value: fmtRate(cpg) },
+      { key: 'gpg', label: 'G/G',  value: fmtRate(gpg) },
+      { key: 'apg', label: 'A/G',  value: fmtRate(apg) },
+    ],
+  ]
+}
+
+// Shared grid renderer
+function StatGrid({ grid }) {
+  return (
+    <div className={styles.totalsGrid}>
+      {grid.map((row, ri) => (
+        <div key={ri} className={styles.totalsRow}>
+          {row.map(cell => (
+            <div key={cell.key} className={styles.totalCard}>
+              <span className={styles.totalVal}>{cell.value}</span>
+              <span className={styles.totalKey}>{cell.label}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Season table column definitions ─────────────────────────────────────────
-// allCols: used for the All Comps tab (scope=ALL docs)
-// uclCols: used for the UCL tab (scope=UCL docs)
-// Avg column is always included; renders "—" when the field is absent.
 
 function allColsFor(player) {
   if (isGK(player)) {
@@ -157,8 +215,6 @@ function uclColsFor(player) {
 }
 
 // Resolve a single cell value from a seasonStats document.
-// Handles derived _contrib, rate fields stored in Firestore (gPerGame etc.),
-// and optional rating fields that may be absent.
 function cellVal(doc, key) {
   if (key === '_contrib') {
     return (doc.goals || 0) + (doc.assists || 0)
@@ -167,9 +223,8 @@ function cellVal(doc, key) {
     const v = doc[key]
     return v != null ? fmtOpt(v, 1) : '—'
   }
-  // Rate fields (gPerGame, aPerGame, cPerGame, csPerGame) are stored in Firestore
-  // from the seed scripts. Render as-is if present, otherwise "—".
-  if (key === 'gPerGame' || key === 'aPerGame' || key === 'cPerGame' || key === 'csPerGame') {
+  // gPerGame, aPerGame, cPerGame, csPerGame stored in Firestore from seed scripts
+  if (['gPerGame','aPerGame','cPerGame','csPerGame'].includes(key)) {
     const v = doc[key]
     return v != null ? fmtRate(v) : '—'
   }
@@ -178,36 +233,33 @@ function cellVal(doc, key) {
   return v
 }
 
-// ─── UCL career summary row ───────────────────────────────────────────────────
-// Built from top-level player fields (maintained by backfillPlayerTotals).
-// Used as the summary footer in the UCL tab.
-function uclSummaryCards(player) {
-  if (isGK(player)) {
-    const apps = player.uclApps || 0
-    const cs   = player.uclCleanSheets
-    const cspg = apps > 0 && cs != null ? cs / apps : null
-    return [
-      { key: 'apps', label: 'Apps',  value: apps },
-      { key: 'cs',   label: 'CS',    value: cs != null ? cs : '—' },
-      { key: 'cspg', label: 'CS/G',  value: fmtRate(cspg) },
-    ]
-  }
-  const apps    = player.uclApps    || 0
-  const goals   = player.uclGoals   || 0
-  const assists = player.uclAssists || 0
-  const contrib = goals + assists
-  const gpg     = apps > 0 ? goals / apps    : null
-  const apg     = apps > 0 ? assists / apps  : null
-  const cpg     = apps > 0 ? contrib / apps  : null
-  return [
-    { key: 'apps',    label: 'Apps',    value: apps },
-    { key: 'contrib', label: 'G+A',     value: contrib },
-    { key: 'goals',   label: 'Goals',   value: goals },
-    { key: 'assists', label: 'Assists', value: assists },
-    { key: 'gpg',     label: 'G/G',     value: fmtRate(gpg) },
-    { key: 'apg',     label: 'A/G',     value: fmtRate(apg) },
-    { key: 'cpg',     label: 'C/G',     value: fmtRate(cpg) },
-  ]
+// Shared season table renderer
+function SeasonTable({ cols, rows }) {
+  if (rows.length === 0) return null
+  return (
+    <table className={styles.table}>
+      <thead>
+        <tr>
+          {cols.map(col => (
+            <th key={col.key} className={col.key === 'label' ? styles.thLeft : undefined}>
+              {col.header}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(ss => (
+          <tr key={ss.id}>
+            {cols.map(col => (
+              <td key={col.key} className={col.key === 'label' ? styles.seasonLabel : undefined}>
+                {cellVal(ss, col.key)}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -217,31 +269,32 @@ export default function PlayerProfile() {
   const { activeClub } = useApp()
   const navigate = useNavigate()
 
-  const [player,      setPlayer]      = useState(null)
-  const [allStats,    setAllStats]    = useState([])   // scope === 'ALL' docs, sorted newest-first
-  const [uclStats,    setUclStats]    = useState([])   // scope === 'UCL' docs, sorted newest-first
-  const [transfers,   setTransfers]   = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [tab,         setTab]         = useState('career') // career | ucl | history
+  const [player,    setPlayer]    = useState(null)
+  const [allStats,  setAllStats]  = useState([])  // scope=ALL, labeled, sorted newest-first
+  const [uclStats,  setUclStats]  = useState([])  // scope=UCL, labeled, sorted newest-first
+  const [transfers, setTransfers] = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [tab,       setTab]       = useState('career')
 
   useEffect(() => {
     if (!activeClub) return
     Promise.all([
       getPlayer(id),
-      getSeasonStatsByPlayer(id),
+      getSeasons(activeClub.id),          // needed for label join
+      getSeasonStatsByPlayer(id, activeClub.id),
       getTransfers(activeClub.id),
-    ]).then(([p, statDocs, t]) => {
+    ]).then(([p, seasons, statDocs, t]) => {
       setPlayer(p)
 
-      // Split by scope — scope field is 'ALL' or 'UCL'
-      const all = statDocs.filter(d => d.scope === 'ALL')
-      const ucl = statDocs.filter(d => d.scope === 'UCL')
-      setAllStats(sortNewestFirst(all))
-      setUclStats(sortNewestFirst(ucl))
+      // Build seasonId → label map from seasons collection
+      const seasonMap = new Map(seasons.map(s => [s.id, s.label]))
 
-      setTransfers(
-        t.filter(tr => tr.playerId === id || tr.player === p?.name)
-      )
+      // Attach labels, split by scope, sort newest-first
+      const labeled = attachLabels(statDocs, seasonMap)
+      setAllStats(sortNewestFirst(labeled.filter(d => d.scope === 'ALL')))
+      setUclStats(sortNewestFirst(labeled.filter(d => d.scope === 'UCL')))
+
+      setTransfers(t.filter(tr => tr.playerId === id || tr.player === p?.name))
       setLoading(false)
     })
   }, [id, activeClub])
@@ -262,16 +315,11 @@ export default function PlayerProfile() {
 
   const status       = player.status || 'Active'
   const statusColors = { Active: 'var(--en-green)', Sold: 'var(--en-text-3)', Loaned: 'var(--en-gold)' }
-
-  // Seasons count from ALL-scope docs (each doc = one season)
   const seasonsCount = allStats.length
 
-  const totalsGrid  = buildTotalsGrid(player)
-  const allCols     = allColsFor(player)
-  const uclCols     = uclColsFor(player)
-  const uclSummary  = uclSummaryCards(player)
-  const hasUclData  = uclStats.length > 0
-  const hasUclTotals = player.uclApps != null && player.uclApps > 0
+  const allCompsGrid = buildAllCompsGrid(player)
+  const uclGrid      = buildUclGrid(player)
+  const hasUclTotals = (player.uclApps || 0) > 0
 
   return (
     <div className={styles.page}>
@@ -306,38 +354,15 @@ export default function PlayerProfile() {
         </div>
       </div>
 
-      {/* ── CAREER TOTALS GRID ── */}
-      <div className={styles.totalsGrid}>
-        {totalsGrid.map((row, ri) => (
-          <div key={ri} className={styles.totalsRow}>
-            {row.map(cell => (
-              <div key={cell.key} className={styles.totalCard}>
-                <span className={styles.totalVal}>{cell.value}</span>
-                <span className={styles.totalKey}>{cell.label}</span>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
       {/* ── TABS ── */}
       <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${tab === 'career' ? styles.tabActive : ''}`}
-          onClick={() => setTab('career')}
-        >
+        <button className={`${styles.tab} ${tab === 'career'  ? styles.tabActive : ''}`} onClick={() => setTab('career')}>
           All Comps
         </button>
-        <button
-          className={`${styles.tab} ${tab === 'ucl' ? styles.tabActive : ''}`}
-          onClick={() => setTab('ucl')}
-        >
+        <button className={`${styles.tab} ${tab === 'ucl'     ? styles.tabActive : ''}`} onClick={() => setTab('ucl')}>
           UCL
         </button>
-        <button
-          className={`${styles.tab} ${tab === 'history' ? styles.tabActive : ''}`}
-          onClick={() => setTab('history')}
-        >
+        <button className={`${styles.tab} ${tab === 'history' ? styles.tabActive : ''}`} onClick={() => setTab('history')}>
           Transfer History
         </button>
       </div>
@@ -345,107 +370,37 @@ export default function PlayerProfile() {
       {/* ── TAB CONTENT ── */}
       <div className={styles.inner}>
 
-        {/* ── ALL COMPS ─────────────────────────────────────────────────────── */}
+        {/* ── ALL COMPS ── */}
         {tab === 'career' && (
           <div className={styles.section}>
-            {allStats.length === 0 ? (
-              <p className={styles.noData}>No season data imported yet.</p>
-            ) : (
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    {allCols.map(col => (
-                      <th
-                        key={col.key}
-                        className={col.key === 'label' ? styles.thLeft : undefined}
-                      >
-                        {col.header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {allStats.map((ss) => (
-                    <tr key={ss.id}>
-                      {allCols.map(col => (
-                        <td
-                          key={col.key}
-                          className={col.key === 'label' ? styles.seasonLabel : undefined}
-                        >
-                          {cellVal(ss, col.key)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <StatGrid grid={allCompsGrid} />
+            <div className={styles.tableDivider} />
+            {allStats.length === 0
+              ? <p className={styles.noData}>No season data imported yet.</p>
+              : <SeasonTable cols={allColsFor(player)} rows={allStats} />
+            }
           </div>
         )}
 
-        {/* ── UCL ───────────────────────────────────────────────────────────── */}
+        {/* ── UCL ── */}
         {tab === 'ucl' && (
           <div className={styles.section}>
-            {!hasUclData && !hasUclTotals ? (
-              // No data at all
+            {!hasUclTotals && uclStats.length === 0 ? (
               <p className={styles.noData}>No UCL appearances recorded.</p>
             ) : (
               <>
-                {/* Season-by-season UCL table */}
-                {hasUclData ? (
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        {uclCols.map(col => (
-                          <th
-                            key={col.key}
-                            className={col.key === 'label' ? styles.thLeft : undefined}
-                          >
-                            {col.header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {uclStats.map((ss) => (
-                        <tr key={ss.id}>
-                          {uclCols.map(col => (
-                            <td
-                              key={col.key}
-                              className={col.key === 'label' ? styles.seasonLabel : undefined}
-                            >
-                              {cellVal(ss, col.key)}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  // Has top-level totals but no per-season UCL docs yet
-                  <p className={styles.noData}>Season-by-season UCL data not yet imported.</p>
-                )}
-
-                {/* UCL career summary — always shown when there are totals */}
-                {hasUclTotals && (
-                  <div className={styles.uclSummaryWrap}>
-                    <span className={styles.uclSummaryLabel}>Career UCL</span>
-                    <div className={styles.uclTotals}>
-                      {uclSummary.map(card => (
-                        <div key={card.key} className={styles.totalCard}>
-                          <span className={styles.totalVal}>{card.value}</span>
-                          <span className={styles.totalKey}>{card.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <StatGrid grid={uclGrid} />
+                <div className={styles.tableDivider} />
+                {uclStats.length === 0
+                  ? <p className={styles.noData}>Season-by-season UCL data not yet imported.</p>
+                  : <SeasonTable cols={uclColsFor(player)} rows={uclStats} />
+                }
               </>
             )}
           </div>
         )}
 
-        {/* ── TRANSFER HISTORY ──────────────────────────────────────────────── */}
+        {/* ── TRANSFER HISTORY ── */}
         {tab === 'history' && (
           <div className={styles.section}>
             {transfers.length === 0 ? (
@@ -454,19 +409,13 @@ export default function PlayerProfile() {
               <div className={styles.transferList}>
                 {transfers.map((t, i) => (
                   <div key={i} className={styles.transferItem}>
-                    <div
-                      className={styles.transferDir}
-                      style={{ color: t.direction === 'IN' ? 'var(--en-green)' : 'var(--danger, #ef4444)' }}
-                    >
+                    <div className={styles.transferDir}
+                      style={{ color: t.direction === 'IN' ? 'var(--en-green)' : 'var(--danger, #ef4444)' }}>
                       {t.direction === 'IN' ? '▼ IN' : '▲ OUT'}
                     </div>
                     <div className={styles.transferDetails}>
-                      <div className={styles.transferClubs}>
-                        {t.from_club} → {t.to_club}
-                      </div>
-                      <div className={styles.transferMeta}>
-                        {t.season} · {t.window} · {t.rule}
-                      </div>
+                      <div className={styles.transferClubs}>{t.from_club} → {t.to_club}</div>
+                      <div className={styles.transferMeta}>{t.season} · {t.window} · {t.rule}</div>
                     </div>
                     <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
                   </div>
