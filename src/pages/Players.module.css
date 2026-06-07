@@ -117,9 +117,9 @@
   scrollbar-width: none;
   border-bottom: 0.5px solid var(--en-rule);
   position: sticky;
-  top: calc(56px + 45px + 35px); /* below filterBar */
+  top: calc(56px + 45px + 35px + 37px); /* below filterBar + seasonBar */
   background: var(--en-bg);
-  z-index: 28;
+  z-index: 27;
   flex-shrink: 0;
 }
 .posBar::-webkit-scrollbar { display: none; }
@@ -427,8 +427,6 @@
   flex-shrink: 0;
 }
 
-/* posBar shifted up when filterBar is hidden (compare mode) */
-.posBarCompare {
   top: calc(56px + 45px + 32px); /* topBar + hintBar */
 }
 
@@ -530,3 +528,94 @@
 }
 .compareCtaBtn:hover { opacity: 0.88; }
 .compareCtaBtn:active { opacity: 0.75; }
+
+/* ─── SEASON FILTER ──────────────────────────────────────────────── */
+.seasonBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  position: sticky;
+  /* below topBar(45) + filterBar/compareHint(35) */
+  top: calc(56px + 45px + 35px);
+  background: var(--en-bg);
+  z-index: 28;
+  flex-shrink: 0;
+  min-height: 37px;
+}
+.seasonBar::-webkit-scrollbar { display: none; }
+
+.seasonBarLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  flex-shrink: 0;
+  padding-right: 4px;
+}
+
+.seasonBtn {
+  background: transparent;
+  border: 0.5px solid transparent;
+  padding: 3px 9px;
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  border-radius: 12px;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.seasonBtn:hover { color: var(--en-text-2); }
+.seasonActive {
+  color: var(--en-gold);
+  background: transparent;
+  border-color: var(--en-gold);
+}
+
+.seasonClear {
+  margin-left: 2px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  font-size: 10px;
+  color: var(--en-text-4);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+.seasonClear:hover { color: var(--en-text-2); }
+
+/* ─── SCOPE LABEL BAR ────────────────────────────────────────────── */
+/* Appears below season filter when a season is active.              */
+/* Not sticky — scrolls with content.                                */
+.scopeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 16px 4px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  flex-shrink: 0;
+  animation: fadeUp 0.2s ease both;
+}
+.scopeLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--en-gold);
+}
+.scopeCount {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  color: var(--en-text-4);
+}

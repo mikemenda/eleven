@@ -17,7 +17,7 @@ const ROLE_GROUPS = {
 const INDIVIDUAL_POS = POS_ORDER
 
 // Split a player's position string safely into an array of codes.
-// Handles: "CM", "CM, CAM", "CM,CAM", "CM / CAM"
+// Handles: "CM", "CM, CAM", "CM,CAM", "CM / CAM", "LM, RM, CAM"
 function splitPositions(posStr) {
   if (!posStr) return []
   return posStr.split(/[,\/]+/).map(p => p.trim()).filter(Boolean)
@@ -40,31 +40,67 @@ const STATUS_META = {
 // ─── Stat column definitions ──────────────────────────────────────────────────
 
 const STAT_COLS = [
-  { key: 'apps',    label: 'Apps',  title: 'Appearances' },
-  { key: 'goals',   label: 'G',     title: 'Goals' },
-  { key: 'assists', label: 'A',     title: 'Assists' },
-  { key: 'contrib', label: 'G+A',   title: 'Contributions (Goals + Assists)', derived: true },
-  { key: 'gpg',     label: 'G/G',   title: 'Goals per Game', derived: true },
-  { key: 'apg',     label: 'A/G',   title: 'Assists per Game', derived: true },
-  { key: 'cpg',     label: 'C/G',   title: 'Contributions per Game', derived: true },
-  { key: 'cleanSheets', label: 'CS',  title: 'Clean Sheets' },
-  { key: 'cspg',    label: 'CS/G',  title: 'Clean Sheets per Game', derived: true },
-  { key: 'rating',  label: 'Rtg',   title: 'Average Rating' },
+  { key: 'apps',        label: 'Apps',  title: 'Appearances' },
+  { key: 'goals',       label: 'G',     title: 'Goals' },
+  { key: 'assists',     label: 'A',     title: 'Assists' },
+  { key: 'contrib',     label: 'G+A',   title: 'Contributions (Goals + Assists)', derived: true },
+  { key: 'gpg',         label: 'G/G',   title: 'Goals per Game',          derived: true },
+  { key: 'apg',         label: 'A/G',   title: 'Assists per Game',        derived: true },
+  { key: 'cpg',         label: 'C/G',   title: 'Contributions per Game',  derived: true },
+  { key: 'cleanSheets', label: 'CS',    title: 'Clean Sheets' },
+  { key: 'cspg',        label: 'CS/G',  title: 'Clean Sheets per Game',   derived: true },
+  { key: 'rating',      label: 'Rtg',   title: 'Average Rating' },
 ]
 
-function getStatValue(player, key) {
-  const apps = player.apps || 0
+// ─── Season stat aggregation ──────────────────────────────────────────────────
+// Sums the selected seasons from player.seasonStats (embedded array).
+// Returns a flat stats object with the same shape as the career-total fields,
+// so getStatValue can work identically against it.
+//
+// player.seasonStats items have: label, apps, goals, assists, cleanSheets
+// Rate fields (gPerGame etc.) are NOT summed — they are recomputed from totals.
+// averageRating is not summed (no meaningful aggregate across seasons).
+
+function sumSeasonStats(player, selectedSeasons) {
+  if (!selectedSeasons || selectedSeasons.length === 0) return null
+
+  const rows = (player.seasonStats || []).filter(s => selectedSeasons.includes(s.label))
+  if (rows.length === 0) return null   // player has no data in selected seasons
+
+  let apps        = 0
+  let goals       = 0
+  let assists     = 0
+  let cleanSheets = null   // stays null unless at least one row has a value
+
+  for (const row of rows) {
+    apps        += row.apps        || 0
+    goals       += row.goals       || 0
+    assists     += row.assists     || 0
+    if (row.cleanSheets != null) {
+      cleanSheets = (cleanSheets || 0) + row.cleanSheets
+    }
+  }
+
+  return { apps, goals, assists, cleanSheets, _filtered: true }
+}
+
+// ─── Stat value resolver ──────────────────────────────────────────────────────
+// Accepts either a player doc (career totals) or a summed stats object.
+// The source object has the same field names in both cases.
+
+function getStatValue(source, key) {
+  const apps = source.apps || 0
   switch (key) {
     case 'apps':        return apps
-    case 'goals':       return player.goals || 0
-    case 'assists':     return player.assists || 0
-    case 'contrib':     return (player.goals || 0) + (player.assists || 0)
-    case 'gpg':         return apps > 0 ? (player.goals || 0) / apps : null
-    case 'apg':         return apps > 0 ? (player.assists || 0) / apps : null
-    case 'cpg':         return apps > 0 ? ((player.goals || 0) + (player.assists || 0)) / apps : null
-    case 'cleanSheets': return player.cleanSheets != null ? player.cleanSheets : null
-    case 'cspg':        return apps > 0 && player.cleanSheets != null ? player.cleanSheets / apps : null
-    case 'rating':      return player.averageRating != null ? player.averageRating : null
+    case 'goals':       return source.goals || 0
+    case 'assists':     return source.assists || 0
+    case 'contrib':     return (source.goals || 0) + (source.assists || 0)
+    case 'gpg':         return apps > 0 ? (source.goals   || 0) / apps : null
+    case 'apg':         return apps > 0 ? (source.assists || 0) / apps : null
+    case 'cpg':         return apps > 0 ? ((source.goals || 0) + (source.assists || 0)) / apps : null
+    case 'cleanSheets': return source.cleanSheets != null ? source.cleanSheets : null
+    case 'cspg':        return apps > 0 && source.cleanSheets != null ? source.cleanSheets / apps : null
+    case 'rating':      return source.averageRating != null ? source.averageRating : null
     default:            return null
   }
 }
@@ -74,6 +110,24 @@ function fmtStat(val, key) {
   if (key === 'gpg' || key === 'apg' || key === 'cpg' || key === 'cspg') return val.toFixed(2)
   if (key === 'rating') return typeof val === 'number' ? val.toFixed(1) : '—'
   return val
+}
+
+// ─── Season label helpers ─────────────────────────────────────────────────────
+
+function seasonNum(label) {
+  return parseInt((label || '').replace(/\D/g, ''), 10) || 0
+}
+
+// Derive the sorted union of all season labels present in the loaded squad.
+// Newest-first (S7, S6, … S1).
+function deriveSeasonOptions(players) {
+  const labels = new Set()
+  for (const p of players) {
+    for (const ss of p.seasonStats || []) {
+      if (ss.label) labels.add(ss.label)
+    }
+  }
+  return [...labels].sort((a, b) => seasonNum(b) - seasonNum(a))
 }
 
 // ─── Position sort for default ordering ───────────────────────────────────────
@@ -140,23 +194,33 @@ export default function Players() {
   // Restore state from sessionStorage on mount
   const saved = loadState()
 
-  const [players, setPlayers] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [players,      setPlayers]      = useState([])
+  const [loading,      setLoading]      = useState(true)
   const [statusFilter, setStatusFilter] = useState(saved?.statusFilter ?? 'All')
-  const [posFilter, setPosFilter] = useState(saved?.posFilter ?? 'All')
-  const [search, setSearch] = useState(saved?.search ?? '')
-  const [sortKey, setSortKey] = useState(saved?.sortKey ?? 'pos')
-  const [sortDir, setSortDir] = useState(saved?.sortDir ?? 'desc')
+  const [posFilter,    setPosFilter]    = useState(saved?.posFilter    ?? 'All')
+  const [search,       setSearch]       = useState(saved?.search       ?? '')
+  const [sortKey,      setSortKey]      = useState(saved?.sortKey      ?? 'pos')
+  const [sortDir,      setSortDir]      = useState(saved?.sortDir      ?? 'desc')
+
+  // Season filter: Set of selected season labels (e.g. new Set(['S2','S3']))
+  // Stored as an array in sessionStorage (Sets aren't JSON-serialisable).
+  const [seasonFilter, setSeasonFilter] = useState(
+    () => new Set(saved?.seasonFilter ?? [])
+  )
+
   const scrollRef = useRef(null)
 
   // ── Compare mode state ────────────────────────────────────────────────────
-  const [compareMode, setCompareMode]   = useState(false)
-  const [selectedIds, setSelectedIds]   = useState([])  // max 2 player IDs
+  const [compareMode, setCompareMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
 
-  // Persist state whenever it changes
+  // Persist state whenever filters change
   useEffect(() => {
-    saveState({ statusFilter, posFilter, search, sortKey, sortDir })
-  }, [statusFilter, posFilter, search, sortKey, sortDir])
+    saveState({
+      statusFilter, posFilter, search, sortKey, sortDir,
+      seasonFilter: [...seasonFilter],
+    })
+  }, [statusFilter, posFilter, search, sortKey, sortDir, seasonFilter])
 
   // Restore scroll position after players load
   useEffect(() => {
@@ -171,6 +235,20 @@ export default function Players() {
     getPlayers(activeClub.id).then(p => { setPlayers(p); setLoading(false) })
   }, [activeClub])
 
+  // ── Season filter toggle ──────────────────────────────────────────────────
+  function toggleSeason(label) {
+    setSeasonFilter(prev => {
+      const next = new Set(prev)
+      if (next.has(label)) next.delete(label)
+      else next.add(label)
+      return next
+    })
+  }
+
+  function clearSeasonFilter() {
+    setSeasonFilter(new Set())
+  }
+
   // ── Compare mode handlers ─────────────────────────────────────────────────
 
   function toggleCompareMode() {
@@ -180,14 +258,8 @@ export default function Players() {
 
   function handleSelectPlayer(playerId) {
     setSelectedIds(prev => {
-      if (prev.includes(playerId)) {
-        // Deselect
-        return prev.filter(id => id !== playerId)
-      }
-      if (prev.length >= 2) {
-        // Already 2 selected — ignore
-        return prev
-      }
+      if (prev.includes(playerId)) return prev.filter(id => id !== playerId)
+      if (prev.length >= 2) return prev
       return [...prev, playerId]
     })
   }
@@ -206,15 +278,16 @@ export default function Players() {
     if (scrollRef.current) {
       saveState({
         statusFilter, posFilter, search, sortKey, sortDir,
-        scrollY: scrollRef.current.scrollTop
+        seasonFilter: [...seasonFilter],
+        scrollY: scrollRef.current.scrollTop,
       })
     }
     navigate(`/players/${playerId}`)
-  }, [compareMode, navigate, statusFilter, posFilter, search, sortKey, sortDir, selectedIds])
+  }, [compareMode, navigate, statusFilter, posFilter, search, sortKey, sortDir, seasonFilter, selectedIds])
 
   // ── Sort handler ──────────────────────────────────────────────────────────
   function handleSort(key) {
-    if (compareMode) return  // disable sort during compare mode
+    if (compareMode) return
     if (sortKey === key) {
       setSortDir(d => d === 'desc' ? 'asc' : 'desc')
     } else {
@@ -223,17 +296,50 @@ export default function Players() {
     }
   }
 
+  // ── Season filter active? ─────────────────────────────────────────────────
+  const selectedSeasons     = [...seasonFilter]
+  const seasonFilterActive  = selectedSeasons.length > 0
+
+  // ── Per-player filtered stats ─────────────────────────────────────────────
+  // Build a Map<playerId, statsSource> so the render loop can look up
+  // the right source (career totals or summed seasons) in O(1).
+  //
+  // When seasonFilterActive:
+  //   statsSource = sumSeasonStats result (may be null if player has no data
+  //   in selected seasons — those players are excluded from the visible list)
+  // When not active:
+  //   statsSource = the player doc itself (career totals)
+
+  const statsMap = new Map()
+  for (const p of players) {
+    if (seasonFilterActive) {
+      const summed = sumSeasonStats(p, selectedSeasons)
+      statsMap.set(p.id, summed)  // null means player had no seasons matched
+    } else {
+      statsMap.set(p.id, p)
+    }
+  }
+
+  // ── Season visibility: player appeared in any selected season ─────────────
+  function playerInSelectedSeasons(player) {
+    if (!seasonFilterActive) return true
+    return statsMap.get(player.id) !== null
+  }
+
   // ── Derived/filtered/sorted list ──────────────────────────────────────────
   const filtered = players
     .filter(p => statusFilter === 'All' || p.status === statusFilter)
     .filter(p => playerMatchesFilter(p, posFilter))
     .filter(p => !search || p.name?.toLowerCase().includes(search.toLowerCase()))
+    .filter(p => playerInSelectedSeasons(p))
     .sort((a, b) => {
       if (sortKey === 'pos') {
         return posSort(a) - posSort(b)
       }
-      const av = getStatValue(a, sortKey) ?? -Infinity
-      const bv = getStatValue(b, sortKey) ?? -Infinity
+      const srcA = statsMap.get(a.id) ?? a
+      const srcB = statsMap.get(b.id) ?? b
+      const av = getStatValue(srcA, sortKey) ?? -Infinity
+      const bv = getStatValue(srcB, sortKey) ?? -Infinity
       return sortDir === 'desc' ? bv - av : av - bv
     })
 
@@ -243,8 +349,10 @@ export default function Players() {
     Sold:   players.filter(p => p.status === 'Sold').length,
   }
 
+  // ── Season options derived from squad data ────────────────────────────────
+  const seasonOptions = deriveSeasonOptions(players)
+
   // ── Position filter pills ─────────────────────────────────────────────────
-  // Show only positions that exist in the current club's squad
   const presentPositions = new Set(players.flatMap(p => splitPositions(p.position)))
   const posFilterOptions = [
     { key: 'All', label: 'All' },
@@ -258,6 +366,31 @@ export default function Players() {
 
   // ── Selected player names for CTA bar ─────────────────────────────────────
   const selectedPlayers = selectedIds.map(id => players.find(p => p.id === id)).filter(Boolean)
+
+  // ── Scope label shown when season filter is active ────────────────────────
+  // e.g. "S7" or "S2 + S3 + S4"
+  const scopeLabel = seasonFilterActive
+    ? [...seasonFilter]
+        .sort((a, b) => seasonNum(b) - seasonNum(a))
+        .join(' + ')
+    : null
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Sticky offset calculation for filter bars.
+  // topBar ≈ 45px. compareHint replaces filterBar (same height ≈ 35px).
+  // seasonBar is always visible: ≈ 37px.
+  // posBar sits below seasonBar.
+  //
+  // When normal mode:
+  //   filterBar top  = 56 + 45 = 101
+  //   seasonBar top  = 56 + 45 + 35 = 136
+  //   posBar top     = 56 + 45 + 35 + 37 = 173
+  //
+  // When compare mode (no filterBar, compareHint instead):
+  //   compareHint top = 56 + 45 = 101
+  //   seasonBar top   = 56 + 45 + 35 = 136
+  //   posBar top      = 56 + 45 + 35 + 37 = 173  (same)
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div className={styles.page}>
@@ -289,17 +422,14 @@ export default function Players() {
         </button>
       </div>
 
-      {/* ── COMPARE MODE HINT ── */}
-      {compareMode && (
+      {/* ── COMPARE MODE HINT / STATUS FILTER ── */}
+      {compareMode ? (
         <div className={styles.compareHint}>
           {selectedIds.length === 0 && 'Select two players to compare'}
           {selectedIds.length === 1 && 'Select one more player'}
           {selectedIds.length === 2 && 'Ready to compare'}
         </div>
-      )}
-
-      {/* ── STATUS FILTER ── */}
-      {!compareMode && (
+      ) : (
         <div className={styles.filterBar}>
           {['All', 'Active', 'Sold'].map(f => (
             <button
@@ -313,8 +443,41 @@ export default function Players() {
         </div>
       )}
 
+      {/* ── SEASON FILTER ── */}
+      {seasonOptions.length > 0 && (
+        <div className={styles.seasonBar}>
+          <span className={styles.seasonBarLabel}>Season</span>
+          {seasonOptions.map(label => (
+            <button
+              key={label}
+              className={`${styles.seasonBtn} ${seasonFilter.has(label) ? styles.seasonActive : ''}`}
+              onClick={() => toggleSeason(label)}
+            >
+              {label}
+            </button>
+          ))}
+          {seasonFilterActive && (
+            <button className={styles.seasonClear} onClick={clearSeasonFilter} title="Clear season filter">
+              ✕
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── SCOPE LABEL (shown when season filter active) ── */}
+      {seasonFilterActive && (
+        <div className={styles.scopeBar}>
+          <span className={styles.scopeLabel}>
+            Showing stats for {scopeLabel}
+          </span>
+          <span className={styles.scopeCount}>
+            {filtered.length} player{filtered.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+      )}
+
       {/* ── POSITION FILTER ── */}
-      <div className={`${styles.posBar} ${compareMode ? styles.posBarCompare : ''}`}>
+      <div className={styles.posBar}>
         {posFilterOptions.map(({ key, label }) => (
           <button
             key={key}
@@ -335,7 +498,11 @@ export default function Players() {
             <span className={styles.emptyIcon}>👤</span>
             <p className={styles.emptyText}>No players found</p>
             <p className={styles.emptyHint}>
-              {search ? 'Try a different name' : 'Import via CSV or add players manually'}
+              {seasonFilterActive
+                ? `No players appeared in ${scopeLabel}`
+                : search
+                  ? 'Try a different name'
+                  : 'Import via CSV or add players manually'}
             </p>
           </div>
         ) : (
@@ -375,8 +542,10 @@ export default function Players() {
               </thead>
               <tbody>
                 {filtered.map(player => {
-                  const isSelected = selectedIds.includes(player.id)
-                  const isDisabled = compareMode && selectedIds.length === 2 && !isSelected
+                  const isSelected  = selectedIds.includes(player.id)
+                  const isDisabled  = compareMode && selectedIds.length === 2 && !isSelected
+                  // Use filtered stats if season filter is active, otherwise career totals
+                  const statsSource = statsMap.get(player.id) ?? player
                   return (
                     <tr
                       key={player.id}
@@ -386,7 +555,6 @@ export default function Players() {
                       {/* Frozen identity cell */}
                       <td className={`${styles.td} ${styles.tdIdentity}`}>
                         <div className={styles.identity}>
-                          {/* Selection indicator (compare mode only) */}
                           {compareMode && (
                             <div className={`${styles.selectRing} ${isSelected ? styles.selectRingActive : ''}`}>
                               {isSelected && (
@@ -405,9 +573,9 @@ export default function Players() {
                           </div>
                         </div>
                       </td>
-                      {/* Stat cells */}
+                      {/* Stat cells — sourced from statsSource */}
                       {STAT_COLS.map(col => {
-                        const raw = getStatValue(player, col.key)
+                        const raw     = getStatValue(statsSource, col.key)
                         const display = fmtStat(raw, col.key)
                         const isActive = sortKey === col.key && !compareMode
                         return (
@@ -428,7 +596,7 @@ export default function Players() {
         )}
       </div>
 
-      {/* ── COMPARE CTA BAR (sticky, above NavBar) ── */}
+      {/* ── COMPARE CTA BAR ── */}
       {compareMode && selectedIds.length === 2 && (
         <div className={styles.compareCta}>
           <div className={styles.compareCtaPlayers}>
