@@ -10,6 +10,7 @@ import Seasons from './pages/Seasons'
 import SeasonDetail from './pages/SeasonDetail'
 import Players from './pages/Players'
 import PlayerProfile from './pages/PlayerProfile'
+import PlayerCompare from './pages/PlayerCompare'
 import Transfers from './pages/Transfers'
 import Records from './pages/Records'
 import Rivals from './pages/Rivals'
@@ -54,6 +55,8 @@ const InnerApp = () => (
           <Route path="/seasons"           element={<Seasons />} />
           <Route path="/seasons/:id"       element={<SeasonDetail />} />
           <Route path="/players"           element={<Players />} />
+          {/* /players/compare must be above /players/:id to avoid ID collision */}
+          <Route path="/players/compare"   element={<PlayerCompare />} />
           <Route path="/players/:id"       element={<PlayerProfile />} />
           <Route path="/transfers"         element={<Transfers />} />
           <Route path="/records"           element={<Records />} />

@@ -149,6 +149,10 @@ export default function Players() {
   const [sortDir, setSortDir] = useState(saved?.sortDir ?? 'desc')
   const scrollRef = useRef(null)
 
+  // ── Compare mode state ────────────────────────────────────────────────────
+  const [compareMode, setCompareMode]   = useState(false)
+  const [selectedIds, setSelectedIds]   = useState([])  // max 2 player IDs
+
   // Persist state whenever it changes
   useEffect(() => {
     saveState({ statusFilter, posFilter, search, sortKey, sortDir })
@@ -167,8 +171,38 @@ export default function Players() {
     getPlayers(activeClub.id).then(p => { setPlayers(p); setLoading(false) })
   }, [activeClub])
 
+  // ── Compare mode handlers ─────────────────────────────────────────────────
+
+  function toggleCompareMode() {
+    setCompareMode(m => !m)
+    setSelectedIds([])
+  }
+
+  function handleSelectPlayer(playerId) {
+    setSelectedIds(prev => {
+      if (prev.includes(playerId)) {
+        // Deselect
+        return prev.filter(id => id !== playerId)
+      }
+      if (prev.length >= 2) {
+        // Already 2 selected — ignore
+        return prev
+      }
+      return [...prev, playerId]
+    })
+  }
+
+  function handleCompareGo() {
+    if (selectedIds.length !== 2) return
+    navigate(`/players/compare?a=${selectedIds[0]}&b=${selectedIds[1]}`)
+  }
+
   // Save scroll position when navigating away
   const handleRowClick = useCallback((playerId) => {
+    if (compareMode) {
+      handleSelectPlayer(playerId)
+      return
+    }
     if (scrollRef.current) {
       saveState({
         statusFilter, posFilter, search, sortKey, sortDir,
@@ -176,10 +210,11 @@ export default function Players() {
       })
     }
     navigate(`/players/${playerId}`)
-  }, [navigate, statusFilter, posFilter, search, sortKey, sortDir])
+  }, [compareMode, navigate, statusFilter, posFilter, search, sortKey, sortDir, selectedIds])
 
   // ── Sort handler ──────────────────────────────────────────────────────────
   function handleSort(key) {
+    if (compareMode) return  // disable sort during compare mode
     if (sortKey === key) {
       setSortDir(d => d === 'desc' ? 'asc' : 'desc')
     } else {
@@ -221,6 +256,9 @@ export default function Players() {
       .map(p => ({ key: p, label: p })),
   ]
 
+  // ── Selected player names for CTA bar ─────────────────────────────────────
+  const selectedPlayers = selectedIds.map(id => players.find(p => p.id === id)).filter(Boolean)
+
   return (
     <div className={styles.page}>
 
@@ -242,23 +280,41 @@ export default function Players() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
+        {/* Compare toggle */}
+        <button
+          className={`${styles.compareBtn} ${compareMode ? styles.compareBtnActive : ''}`}
+          onClick={toggleCompareMode}
+        >
+          {compareMode ? 'Cancel' : 'Compare'}
+        </button>
       </div>
+
+      {/* ── COMPARE MODE HINT ── */}
+      {compareMode && (
+        <div className={styles.compareHint}>
+          {selectedIds.length === 0 && 'Select two players to compare'}
+          {selectedIds.length === 1 && 'Select one more player'}
+          {selectedIds.length === 2 && 'Ready to compare'}
+        </div>
+      )}
 
       {/* ── STATUS FILTER ── */}
-      <div className={styles.filterBar}>
-        {['All', 'Active', 'Sold'].map(f => (
-          <button
-            key={f}
-            className={`${styles.filterBtn} ${statusFilter === f ? styles.filterActive : ''}`}
-            onClick={() => setStatusFilter(f)}
-          >
-            {f} <span className={styles.filterCount}>{counts[f]}</span>
-          </button>
-        ))}
-      </div>
+      {!compareMode && (
+        <div className={styles.filterBar}>
+          {['All', 'Active', 'Sold'].map(f => (
+            <button
+              key={f}
+              className={`${styles.filterBtn} ${statusFilter === f ? styles.filterActive : ''}`}
+              onClick={() => setStatusFilter(f)}
+            >
+              {f} <span className={styles.filterCount}>{counts[f]}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── POSITION FILTER ── */}
-      <div className={styles.posBar}>
+      <div className={`${styles.posBar} ${compareMode ? styles.posBarCompare : ''}`}>
         {posFilterOptions.map(({ key, label }) => (
           <button
             key={key}
@@ -295,7 +351,7 @@ export default function Players() {
                       title="Sort by position"
                     >
                       Player
-                      {sortKey === 'pos' && (
+                      {sortKey === 'pos' && !compareMode && (
                         <span className={styles.sortArrow}>{sortDir === 'desc' ? '↑' : '↓'}</span>
                       )}
                     </button>
@@ -304,12 +360,12 @@ export default function Players() {
                   {STAT_COLS.map(col => (
                     <th key={col.key} className={`${styles.th} ${styles.thStat}`}>
                       <button
-                        className={`${styles.sortHeader} ${sortKey === col.key ? styles.sortActive : ''}`}
+                        className={`${styles.sortHeader} ${sortKey === col.key && !compareMode ? styles.sortActive : ''}`}
                         onClick={() => handleSort(col.key)}
                         title={`Sort by ${col.title}`}
                       >
                         {col.label}
-                        {sortKey === col.key && (
+                        {sortKey === col.key && !compareMode && (
                           <span className={styles.sortArrow}>{sortDir === 'desc' ? '↓' : '↑'}</span>
                         )}
                       </button>
@@ -318,45 +374,77 @@ export default function Players() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(player => (
-                  <tr
-                    key={player.id}
-                    className={styles.tr}
-                    onClick={() => handleRowClick(player.id)}
-                  >
-                    {/* Frozen identity cell */}
-                    <td className={`${styles.td} ${styles.tdIdentity}`}>
-                      <div className={styles.identity}>
-                        <div className={styles.thumb}>
-                          <SofifaImg sofifaId={player.sofifaId} name={player.name} size={32} />
+                {filtered.map(player => {
+                  const isSelected = selectedIds.includes(player.id)
+                  const isDisabled = compareMode && selectedIds.length === 2 && !isSelected
+                  return (
+                    <tr
+                      key={player.id}
+                      className={`${styles.tr} ${isSelected ? styles.trSelected : ''} ${isDisabled ? styles.trDisabled : ''}`}
+                      onClick={() => handleRowClick(player.id)}
+                    >
+                      {/* Frozen identity cell */}
+                      <td className={`${styles.td} ${styles.tdIdentity}`}>
+                        <div className={styles.identity}>
+                          {/* Selection indicator (compare mode only) */}
+                          {compareMode && (
+                            <div className={`${styles.selectRing} ${isSelected ? styles.selectRingActive : ''}`}>
+                              {isSelected && (
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                                  <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </div>
+                          )}
+                          <div className={styles.thumb}>
+                            <SofifaImg sofifaId={player.sofifaId} name={player.name} size={32} />
+                          </div>
+                          <div className={styles.identityInfo}>
+                            <span className={styles.playerName}>{player.name}</span>
+                            <span className={styles.playerPos}>{player.position || '—'}</span>
+                          </div>
                         </div>
-                        <div className={styles.identityInfo}>
-                          <span className={styles.playerName}>{player.name}</span>
-                          <span className={styles.playerPos}>{player.position || '—'}</span>
-                        </div>
-                      </div>
-                    </td>
-                    {/* Stat cells */}
-                    {STAT_COLS.map(col => {
-                      const raw = getStatValue(player, col.key)
-                      const display = fmtStat(raw, col.key)
-                      const isActive = sortKey === col.key
-                      return (
-                        <td
-                          key={col.key}
-                          className={`${styles.td} ${styles.tdStat} ${isActive ? styles.tdSortActive : ''}`}
-                        >
-                          {display}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
+                      </td>
+                      {/* Stat cells */}
+                      {STAT_COLS.map(col => {
+                        const raw = getStatValue(player, col.key)
+                        const display = fmtStat(raw, col.key)
+                        const isActive = sortKey === col.key && !compareMode
+                        return (
+                          <td
+                            key={col.key}
+                            className={`${styles.td} ${styles.tdStat} ${isActive ? styles.tdSortActive : ''}`}
+                          >
+                            {display}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* ── COMPARE CTA BAR (sticky, above NavBar) ── */}
+      {compareMode && selectedIds.length === 2 && (
+        <div className={styles.compareCta}>
+          <div className={styles.compareCtaPlayers}>
+            {selectedPlayers.map((p, i) => (
+              <span key={p.id} className={styles.compareCtaName}>
+                {i > 0 && <span className={styles.compareCtaVs}>vs</span>}
+                {p.name.split(' ').pop()}
+              </span>
+            ))}
+          </div>
+          <button className={styles.compareCtaBtn} onClick={handleCompareGo}>
+            Compare →
+          </button>
+        </div>
+      )}
+
     </div>
   )
 }

@@ -1,0 +1,236 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────── */
+.page {
+  background: var(--en-bg);
+  min-height: calc(100dvh - 56px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
+}
+
+/* ─── TOP BAR ── */
+.topBar {
+  max-width: 640px; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  position: sticky; top: 56px; background: var(--en-bg); z-index: 10;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.backBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: transparent; border: none; color: var(--en-text-3); cursor: pointer;
+  transition: color 0.15s;
+}
+.backBtn:hover { color: var(--en-text-1); }
+.topLabel {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
+}
+
+/* ─── HERO ────────────────────────────────────────────────────────── */
+.heroRow {
+  max-width: 640px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 0.5px 1fr;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.heroDivider {
+  background: var(--en-rule);
+  align-self: stretch;
+}
+.heroCol {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 16px;
+}
+.heroColRight {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.heroImg {
+  object-fit: cover; object-position: top;
+  border-radius: 8px; flex-shrink: 0;
+}
+.silhouette {
+  display: flex; align-items: flex-end; justify-content: center;
+  border-radius: 8px;
+  background: var(--en-surface-2, #1a2035);
+  color: var(--en-text-4);
+  overflow: hidden; flex-shrink: 0;
+}
+.heroDetails { min-width: 0; }
+.heroName {
+  font-family: var(--font-playfair); font-size: 15px; font-weight: 700;
+  color: var(--en-text-1); line-height: 1.2;
+  margin: 0 0 3px;
+  /* Allow wrapping for long names */
+  word-break: break-word;
+}
+.heroMeta {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--en-text-3); margin: 0;
+}
+
+/* ─── TABS ────────────────────────────────────────────────────────── */
+.tabs {
+  max-width: 640px; margin: 0 auto;
+  display: flex; border-bottom: 0.5px solid var(--en-rule);
+}
+.tab {
+  flex: 1; padding: 12px 8px;
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  font-family: var(--font-plex); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--en-text-3); cursor: pointer; transition: color 0.15s, border-color 0.15s;
+}
+.tab:hover { color: var(--en-text-2); }
+.tabActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
+
+/* ─── COLUMN LABELS ───────────────────────────────────────────────── */
+.colLabels {
+  max-width: 640px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  padding: 8px 20px 4px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.colLabelA {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--en-green); text-align: left;
+}
+.colLabelCenter {
+  min-width: 80px; /* matches stat label column */
+}
+.colLabelB {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--en-green); text-align: right;
+}
+
+/* ─── SECTION ─────────────────────────────────────────────────────── */
+.section {
+  max-width: 640px; margin: 0 auto;
+  animation: fadeUp 0.25s ease both;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── TOTALS BLOCK ────────────────────────────────────────────────── */
+.totalsBlock {
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.statRow {
+  display: grid; grid-template-columns: 1fr 80px 1fr;
+  align-items: center;
+  padding: 11px 20px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.statRow:last-child { border-bottom: none; }
+
+.statVal {
+  font-family: var(--font-plex); font-size: 18px; font-weight: 500;
+  line-height: 1;
+}
+.statValLeft  { text-align: left; }
+.statValRight { text-align: right; }
+
+.statWin   { color: var(--en-green); }
+.statEqual { color: var(--en-text-1); }
+.statLose  { color: var(--en-text-3); }
+
+.statLabel {
+  font-family: var(--font-plex); font-size: 8px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--en-text-4); text-align: center;
+}
+
+/* ─── SECTION DIVIDER (between totals and season table) ─────────────── */
+.sectionDivider {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px 8px;
+}
+.sectionDividerLabel {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--en-text-4);
+  white-space: nowrap;
+}
+
+/* ─── SEASON TABLE ────────────────────────────────────────────────── */
+.seasonTableWrap {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--en-rule) transparent;
+}
+.seasonTableWrap::-webkit-scrollbar { height: 3px; }
+.seasonTableWrap::-webkit-scrollbar-thumb { background: var(--en-rule); border-radius: 2px; }
+
+.seasonTable {
+  width: 100%; border-collapse: collapse;
+  min-width: 360px;
+}
+
+/* Header */
+.sthSeason {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--en-text-3); font-weight: 400;
+  padding: 10px 8px 8px 20px; text-align: left;
+  white-space: nowrap;
+}
+.sth {
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--en-text-3); font-weight: 400;
+  padding: 10px 8px 8px; text-align: center;
+  white-space: nowrap;
+}
+/* Hairline divider column between the two players */
+.sthDivider {
+  width: 0.5px;
+  background: var(--en-rule);
+  padding: 0;
+}
+
+/* Rows */
+.str { border-top: 0.5px solid var(--en-rule-faint); }
+.stdSeason {
+  font-family: var(--font-plex); font-size: 12px; font-weight: 500;
+  color: var(--en-text-1);
+  padding: 9px 8px 9px 20px; text-align: left;
+  white-space: nowrap;
+}
+.std {
+  font-family: var(--font-plex); font-size: 12px;
+  color: var(--en-text-2);
+  padding: 9px 8px; text-align: center;
+  white-space: nowrap;
+}
+.stdWin { color: var(--en-green); }
+.stdDivider {
+  width: 0.5px; background: var(--en-rule);
+  padding: 0;
+}
+
+/* ─── UCL NOTE ────────────────────────────────────────────────────── */
+.uclNote {
+  font-family: var(--font-plex); font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--en-text-4);
+  padding: 12px 20px 4px;
+  margin: 0;
+}
+
+/* ─── NO DATA ─────────────────────────────────────────────────────── */
+.noData {
+  font-family: var(--font-inter); font-size: 13px;
+  color: var(--en-text-3); text-align: center; padding: 40px 20px;
+}
+
+/* ─── LOADING ─────────────────────────────────────────────────────── */
+.loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
+.spinner {
+  width: 24px; height: 24px;
+  border: 1.5px solid var(--en-rule);
+  border-top-color: var(--en-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.notFound { font-family: var(--font-inter); font-size: 14px; color: var(--en-text-3); }

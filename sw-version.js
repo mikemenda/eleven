@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 30
+// Current: 31
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -31,4 +31,5 @@
 //   28 — Fix getSeasonStatsByPlayer: query playerId-only; client-side clubId filter tolerates absent clubId
 //   29 — Fix getSeasonStatsByPlayer: remove clubId filter entirely; playerId is club-scoped
 //   30 — Fix PlayerProfile All Comps: restore player.seasonStats embedded array as data source (original working path); UCL tab reads seasonStats collection scope=UCL with seasons label join; two data paths now independent and cannot interfere
-const SW_VERSION = 30;
+//   31 — Player Comparison: compare mode in Players list (select 2, sticky CTA); PlayerCompare page at /players/compare with All Comps + UCL tabs, totals with winner highlight, season-by-season table
+const SW_VERSION = 31;
