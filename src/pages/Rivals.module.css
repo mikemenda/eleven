@@ -130,6 +130,16 @@
 }
 
 .matchLog { display: flex; flex-direction: column; }
+/* Season divider inside rival detail — groups matches by season label (S1, S2 …).
+   Intentionally low-key: same visual language as table headers elsewhere in the app. */
+.seasonDivider {
+  padding: 6px 20px 4px;
+  font-family: var(--font-plex); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--en-text-4);
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  background: var(--en-bg);
+}
 .matchRow {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 20px;

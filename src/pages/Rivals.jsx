@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
-import { getMatchesByClub, getRivalStats, getOpponents } from '../firebase/services'
+import { getMatchesByClub, getRivalStats, getOpponents, getSeasons } from '../firebase/services'
 import styles from './Rivals.module.css'
 
 export default function Rivals() {
@@ -17,14 +17,28 @@ export default function Rivals() {
     Promise.all([
       getMatchesByClub(activeClub.id),
       getOpponents(),
-    ]).then(([matches, oppMap]) => {
-      setRivals(getRivalStats(matches))
+      getSeasons(activeClub.id),
+    ]).then(([matches, oppMap, seasons]) => {
+      // Build seasonId → label map (e.g. "abc123" → "S3") so every match row
+      // can display the correct season label. Match docs store seasonId, not the
+      // label — so we must join here rather than relying on m.seasonLabel existing.
+      const seasonLabelMap = {}
+      for (const s of seasons) {
+        seasonLabelMap[s.id] = s.label || ''
+      }
+      // Stamp each match with its resolved label before passing to getRivalStats.
+      // getRivalStats then sorts matches by this label so the detail log is chronological.
+      const enrichedMatches = matches.map(m => ({
+        ...m,
+        seasonLabel: seasonLabelMap[m.seasonId] || m.seasonLabel || '',
+      }))
+      setRivals(getRivalStats(enrichedMatches))
       setOpponents(oppMap)
       setLoading(false)
     })
   }, [activeClub])
 
-  // Enrich rival with canonical displayName and crestUrl from opponents map
+  // Enrich rival with canonical displayName and crestUrl from opponents collection.
   function enrichRival(r) {
     if (!r) return r
     const key = r.opponentKey
@@ -35,15 +49,37 @@ export default function Rivals() {
     return { ...r, displayName: r.opponent, crestUrl: null }
   }
 
+  // Finals filter: a match counts as a final if its round is 'Final'
+  // OR if its competition field is 'UCL_Final' (some docs store the stage
+  // in competition rather than round — checking both fields ensures no finals
+  // are silently excluded from the Finals tab).
+  function isFinal(m) {
+    return (
+      m.round === 'Final' ||
+      m.round === 'UCL_Final' ||
+      m.competition === 'UCL_Final' ||
+      m.competition === 'FA_Cup_Final' ||
+      m.competition === 'Carabao_Final'
+    )
+  }
+
   const filtered = rivals
-    .filter(r => filter === 'all'
-      || (filter === 'frequent' && r.played >= 2)
-      || (filter === 'finals'   && r.matches.some(m => m.round === 'Final' || m.round === 'UCL_Final')))
+    .filter(r =>
+      filter === 'all' ||
+      (filter === 'frequent' && r.played >= 2) ||
+      (filter === 'finals'   && r.matches.some(isFinal))
+    )
     .map(enrichRival)
 
   if (selected) {
     const rival = rivals.find(r => r.opponentKey === selected)
-    return <RivalDetail rival={enrichRival(rival)} onBack={() => setSelected(null)} />
+    return (
+      <RivalDetail
+        rival={enrichRival(rival)}
+        onBack={() => setSelected(null)}
+        isFinal={isFinal}
+      />
+    )
   }
 
   return (
@@ -95,6 +131,9 @@ export default function Rivals() {
                       onError={e => { e.currentTarget.style.display = 'none' }} />
                   )}
                   <span className={styles.rivalName}>{r.displayName}</span>
+                  {/* Rival badge: shown when 3+ matches played against this opponent.
+                      Threshold of 3 reflects meaningful repeated encounters across seasons.
+                      Adjust this number here if the definition of "rival" needs to change. */}
                   {r.played >= 3 && (
                     <span className={styles.rivalBadge} style={{ color: 'var(--en-gold)' }}>Rival</span>
                   )}
@@ -119,14 +158,36 @@ export default function Rivals() {
   )
 }
 
-function RivalDetail({ rival, onBack }) {
-  if (!rival) return null
-  const finals = rival.matches.filter(m => m.round === 'Final' || m.round === 'UCL_Final')
+// Competition code → display label map.
+// Carabao is "Carabao Cup" to match all other app competition labels.
+const COMP_LABEL = {
+  UCL_LP:    'UCL LP',
+  UCL_R16:   'UCL R16',
+  UCL_QF:    'UCL QF',
+  UCL_SF:    'UCL SF',
+  UCL_Final: 'UCL Final',
+  PL:        'PL',
+  FA_Cup:    'FA Cup',
+  Carabao:   'Carabao Cup',  // was 'Carabao' — fixed to match app-wide label
+}
 
-  const COMP_LABEL = {
-    UCL_LP: 'UCL LP', UCL_R16: 'UCL R16', UCL_QF: 'UCL QF',
-    UCL_SF: 'UCL SF', UCL_Final: 'UCL Final', PL: 'PL',
-    FA_Cup: 'FA Cup', Carabao: 'Carabao',
+function RivalDetail({ rival, onBack, isFinal }) {
+  if (!rival) return null
+
+  const finalsCount = rival.matches.filter(isFinal).length
+
+  // Group matches by seasonLabel for a cleaner chronological read.
+  // Matches are already sorted by seasonLabel inside getRivalStats,
+  // so we just need to split them into labelled groups here.
+  const seasonGroups = []
+  for (const m of rival.matches) {
+    const label = m.seasonLabel || '—'
+    const last = seasonGroups[seasonGroups.length - 1]
+    if (last && last.label === label) {
+      last.matches.push(m)
+    } else {
+      seasonGroups.push({ label, matches: [m] })
+    }
   }
 
   return (
@@ -164,33 +225,38 @@ function RivalDetail({ rival, onBack }) {
       </div>
 
       <div className={styles.inner}>
-        {finals.length > 0 && (
+        {finalsCount > 0 && (
           <div className={styles.finalsNote}>
-            ⚡ {finals.length} final{finals.length > 1 ? 's' : ''} against {rival.displayName}
+            ⚡ {finalsCount} final{finalsCount > 1 ? 's' : ''} against {rival.displayName}
           </div>
         )}
         <div className={styles.matchLog}>
-          {rival.matches.map((m, i) => {
-            const win   = m.score_for > m.score_against
-            const draw  = m.score_for === m.score_against
-            const res   = win ? 'W' : draw ? 'D' : 'L'
-            const color = win ? 'var(--en-green)' : draw ? 'var(--en-text-3)' : 'var(--danger)'
-            return (
-              <div key={i} className={styles.matchRow}>
-                <span className={styles.matchResult} style={{ color }}>{res}</span>
-                <div className={styles.matchInfo}>
-                  <span className={styles.matchComp}>{COMP_LABEL[m.competition] || m.competition}</span>
-                  {m.round      && <span className={styles.matchRound}>{m.round}</span>}
-                  {m.seasonLabel && <span className={styles.matchSeason}>{m.seasonLabel}</span>}
-                </div>
-                <span className={styles.matchScore}>{m.score_for}–{m.score_against}</span>
-                <span className={styles.matchVenue}
-                  style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
-                  {m.home_away || '—'}
-                </span>
-              </div>
-            )
-          })}
+          {seasonGroups.map(group => (
+            <div key={group.label}>
+              {/* Season divider — minimal: small label, no visual redesign */}
+              <div className={styles.seasonDivider}>{group.label}</div>
+              {group.matches.map((m, i) => {
+                const win   = m.score_for > m.score_against
+                const draw  = m.score_for === m.score_against
+                const res   = win ? 'W' : draw ? 'D' : 'L'
+                const color = win ? 'var(--en-green)' : draw ? 'var(--en-text-3)' : 'var(--danger)'
+                return (
+                  <div key={i} className={styles.matchRow}>
+                    <span className={styles.matchResult} style={{ color }}>{res}</span>
+                    <div className={styles.matchInfo}>
+                      <span className={styles.matchComp}>{COMP_LABEL[m.competition] || m.competition}</span>
+                      {m.round && <span className={styles.matchRound}>{m.round}</span>}
+                    </div>
+                    <span className={styles.matchScore}>{m.score_for}–{m.score_against}</span>
+                    <span className={styles.matchVenue}
+                      style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
+                      {m.home_away || '—'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </div>

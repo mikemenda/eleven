@@ -237,13 +237,36 @@ export const getRivalStats = (matches) => {
     if (m.rivalryNarrative) map[groupKey].narrative = m.rivalryNarrative
   }
   return Object.values(map).map(r => {
+    // Sort this rival's matches chronologically:
+    // Primary: seasonLabel ascending (S1 < S2 … S9 < S10 via localeCompare).
+    // Secondary: competition code so league-phase matches group before knockouts
+    // within the same season (UCL_LP < UCL_QF < UCL_SF < UCL_Final alphabetically).
+    // This sort is stable and will remain correct as future seasons are added.
+    r.matches.sort((a, b) => {
+      const sa = a.seasonLabel || ''
+      const sb = b.seasonLabel || ''
+      if (sa !== sb) return sa.localeCompare(sb, undefined, { numeric: true })
+      const ca = a.competition || ''
+      const cb = b.competition || ''
+      return ca.localeCompare(cb)
+    })
+
     const w = r.matches.filter(m => m.score_for > m.score_against).length
     const d = r.matches.filter(m => m.score_for === m.score_against).length
     const l = r.matches.filter(m => m.score_for < m.score_against).length
     const gf = r.matches.reduce((s, m) => s + (m.score_for || 0), 0)
     const ga = r.matches.reduce((s, m) => s + (m.score_against || 0), 0)
     return { ...r, played: r.matches.length, w, d, l, gf, ga, gd: gf - ga }
-  }).sort((a, b) => b.played - a.played)
+  }).sort((a, b) => {
+    // Primary sort: most matches played (descending).
+    if (b.played !== a.played) return b.played - a.played
+    // Tiebreaker 1: goal difference (descending) — more dominant rival ranks higher.
+    if (b.gd !== a.gd) return b.gd - a.gd
+    // Tiebreaker 2: goals for (descending) — more attacking encounters rank higher.
+    if (b.gf !== a.gf) return b.gf - a.gf
+    // Tiebreaker 3: alphabetical by opponent key — fully deterministic, never random.
+    return a.opponentKey.localeCompare(b.opponentKey)
+  })
 }
 
 // ─── RECORDS ─────────────────────────────────────────────────────────────────
