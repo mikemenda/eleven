@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 46
+// Current: 47
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -44,4 +44,5 @@
 //   44 — Rivals data reliability: seasonLabel join from seasons collection, chronological match sort, season grouping in detail, Finals filter checks both round+competition fields, Carabao→Carabao Cup label, stable rival list sort tiebreakers, Rival badge threshold documented
 //   45 — Standardize trophy data path: trophyUtils.js with TROPHY_REGISTRY + deriveTrophiesFromSeasons; Museum/Home both derive from season docs, Firestore trophies collection no longer drives counts; Museum bottom timeline removed, replaced with tap-to-detail modal per trophy
 //   46 — Harden trophy sort (NaN-safe seasonSortKey); Museum grid shows won trophies only; dead locked/unearned CSS removed
-const SW_VERSION = 46;
+//   47 — Remove Sporting Director: page, route, nav entry, CSS module deleted; shared services untouched
+const SW_VERSION = 47;
