@@ -332,10 +332,14 @@ function Top5Modal({ title, items, onClose, onPlayerClick }) {
                     <PlayerImg sofifaId={item.sofifaId} name={item.name} size={28} />
                   </button>
                 )}
-                <div className={styles.modalInfo}>
+                <button
+                  className={styles.modalInfoBtn}
+                  onClick={() => item.id && !item.isClub && onPlayerClick(item.id)}
+                  disabled={!item.id || item.isClub}
+                >
                   <span className={styles.modalName}>{item.name}</span>
                   {item.ctx && <span className={styles.modalCtx}>{item.ctx}</span>}
-                </div>
+                </button>
                 <span className={styles.modalValue}>
                   {item.fmt ? item.fmt(item.value) : item.value}
                 </span>
@@ -367,10 +371,14 @@ function RecordCard({ label, player, value, ctx, highlight, onCardClick, onPlaye
         ) : (
           <div className={styles.recordImgPlaceholder} />
         )}
-        <div className={styles.recordMeta}>
+        <button
+          className={styles.recordMetaBtn}
+          onClick={() => player?.id && onPlayerClick && onPlayerClick(player.id)}
+          disabled={!player?.id}
+        >
           <div className={styles.recordHolder}>{player?.name || '—'}</div>
           {ctx && <div className={styles.recordCtx}>{ctx}</div>}
-        </div>
+        </button>
       </div>
       {/* Right: label + value — clickable for Top 5 */}
       <button className={styles.recordRight} onClick={onCardClick}>

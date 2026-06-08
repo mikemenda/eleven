@@ -149,9 +149,17 @@
   display: block;
 }
 
-.recordMeta {
+.recordMetaBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
   min-width: 0;
+  transition: opacity 0.15s;
 }
+.recordMetaBtn:hover { opacity: 0.75; }
+.recordMetaBtn:disabled { cursor: default; opacity: 1; }
 
 .recordHolder {
   font-family: var(--font-playfair);
@@ -375,10 +383,18 @@
 .modalPlayerBtn:hover { opacity: 0.8; }
 .modalPlayerBtn:disabled { cursor: default; }
 
-.modalInfo {
+.modalInfoBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
   flex: 1;
   min-width: 0;
+  transition: opacity 0.15s;
 }
+.modalInfoBtn:hover { opacity: 0.75; }
+.modalInfoBtn:disabled { cursor: default; opacity: 1; }
 
 .modalName {
   font-family: var(--font-inter);
