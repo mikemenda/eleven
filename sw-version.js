@@ -45,5 +45,5 @@
 //   45 — Standardize trophy data path: trophyUtils.js with TROPHY_REGISTRY + deriveTrophiesFromSeasons; Museum/Home both derive from season docs, Firestore trophies collection no longer drives counts; Museum bottom timeline removed, replaced with tap-to-detail modal per trophy
 //   46 — Harden trophy sort (NaN-safe seasonSortKey); Museum grid shows won trophies only; dead locked/unearned CSS removed
 //   47 — Remove Sporting Director: page, route, nav entry, CSS module deleted; shared services untouched
-//   48 — Add full History competition archive: historyUtils.js (deriveHistoryFromSeasons, computeDynasties, detectTrebles, computeEraLeaders); History page with filters (season/comp/league/FC Richport only), season archive cards, era leaders, dynasties, treble detection, competition detail modal; added to hamburger nav
-const SW_VERSION = 48;
+//   49 — History patch: remove Dynasties, add Back-to-Back UCL detection, fix country ecosystem filter (England/Spain/Italy/Germany/France), extend historyUtils for all future canonical cup/UEL/UECL fields + leagueTop5, replace Dynasties summary card with UCL Finals count
+const SW_VERSION = 49;

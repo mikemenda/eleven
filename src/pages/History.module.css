@@ -505,65 +505,89 @@
   color: var(--en-text-3);
 }
 
-/* ── DYNASTIES ────────────────────────────────────────────────────────────── */
-.dynastyList {
+/* ── BACK-TO-BACK UCL ─────────────────────────────────────────────────────── */
+.b2bList {
   display: flex;
   flex-direction: column;
   border-top: 0.5px solid var(--en-rule-faint);
 }
 
-.dynastyRow {
+.b2bRow {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 0.5px solid var(--en-rule-faint);
-  background: transparent;
-  border-left: none;
-  border-right: none;
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.12s;
 }
 
-.dynastyRow:hover { background: rgba(255,255,255,0.02); }
+.b2bRow:last-child { border-bottom: none; }
 
-.dynastyContent {
+.b2bContent {
   flex: 1;
   min-width: 0;
 }
 
-.dynastyComp {
-  font-family: var(--font-inter);
-  font-size: 11px;
-  color: var(--en-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 2px;
-}
-
-.dynastyClub {
+.b2bClub {
   font-family: var(--font-inter);
   font-size: 14px;
   font-weight: 600;
   color: var(--en-text-1);
+  margin-bottom: 2px;
 }
 
-.dynastyBadge {
-  font-family: var(--font-plex);
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--en-gold);
-  flex-shrink: 0;
-}
-
-.dynastySeasons {
+.b2bSeasons {
   font-family: var(--font-plex);
   font-size: 11px;
   color: var(--en-text-3);
+}
+
+.b2bBadge {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  padding: 3px 7px;
+  white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* ── LEAGUE TOP 5 TABLE (future upload) ──────────────────────────────────── */
+.top5Table {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top5Row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-2);
+}
+
+.top5Pos {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-4);
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.top5Club {
+  flex: 1;
+}
+
+.top5Pts {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
 }
 
 /* ── TREBLES ──────────────────────────────────────────────────────────────── */
