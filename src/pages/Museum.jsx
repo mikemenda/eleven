@@ -32,19 +32,14 @@ const TROPHY_SVG_SRCS = {
   'UEFA Conference League': ueclSvg,
 }
 
-function TrophySVG({ competition, won }) {
+// TrophySVG is only rendered for won trophies — always applies the won glow class.
+function TrophySVG({ competition }) {
   const src = TROPHY_SVG_SRCS[competition]
   if (src) return (
-    <img
-      src={src}
-      alt={competition}
-      className={`${styles.trophyImg} ${won ? styles.trophyWon : styles.trophyUnearned}`}
-    />
+    <img src={src} alt={competition} className={`${styles.trophyImg} ${styles.trophyWon}`} />
   )
   return (
-    <div className={`${styles.trophyFallback} ${won ? styles.trophyWon : styles.trophyUnearned}`}>
-      🏆
-    </div>
+    <div className={`${styles.trophyFallback} ${styles.trophyWon}`}>🏆</div>
   )
 }
 
@@ -66,7 +61,7 @@ function TrophyDetail({ competition, wins, onClose }) {
         {/* Trophy header */}
         <div className={styles.modalHeader}>
           <div className={styles.modalTrophyVis}>
-            <TrophySVG competition={competition} won={true} />
+            <TrophySVG competition={competition} />
           </div>
           <div className={styles.modalTitleGroup}>
             <div className={styles.modalRegion}>{reg?.region}</div>
@@ -184,30 +179,31 @@ export default function Museum() {
           <div className={styles.loadWrap}><div className={styles.spinner} /></div>
         ) : (
           <div className={styles.shelf}>
-            {sorted.map(trophy => {
-              const wins = byComp[trophy.key] || []
-              const won = wins.length > 0
-              return (
-                <button
-                  key={trophy.key}
-                  className={`${styles.trophyCard} ${won ? styles.trophyCardWon : styles.trophyCardUnearned}`}
-                  onClick={() => won && setSelected(trophy.key)}
-                  disabled={!won}
-                  aria-label={won ? `${trophy.key} — ${wins.length} title${wins.length !== 1 ? 's' : ''}` : trophy.key}
-                >
-                  <div className={styles.trophyVis}>
-                    <TrophySVG competition={trophy.key} won={won} />
-                    {won && <div className={styles.trophyGlow} />}
-                  </div>
-                  <div className={styles.trophyName}>{trophy.key}</div>
-                  <div className={styles.trophyRegion}>{trophy.region}</div>
-                  {won
-                    ? <div className={styles.trophyCount}>×{wins.length}</div>
-                    : <div className={styles.trophyNone}>—</div>
-                  }
-                </button>
-              )
-            })}
+            {/* Only render trophies FC Richport has actually won.
+                Unwon competitions are hidden — the full registry is preserved
+                in trophyUtils for History page and future seasons. */}
+            {sorted
+              .filter(trophy => (byComp[trophy.key] || []).length > 0)
+              .map(trophy => {
+                const wins = byComp[trophy.key]
+                return (
+                  <button
+                    key={trophy.key}
+                    className={styles.trophyCard}
+                    onClick={() => setSelected(trophy.key)}
+                    aria-label={`${trophy.key} — ${wins.length} title${wins.length !== 1 ? 's' : ''}`}
+                  >
+                    <div className={styles.trophyVis}>
+                      <TrophySVG competition={trophy.key} />
+                      <div className={styles.trophyGlow} />
+                    </div>
+                    <div className={styles.trophyName}>{trophy.key}</div>
+                    <div className={styles.trophyRegion}>{trophy.region}</div>
+                    <div className={styles.trophyCount}>×{wins.length}</div>
+                  </button>
+                )
+              })
+            }
           </div>
         )}
       </div>

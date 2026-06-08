@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 45
+// Current: 46
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -43,4 +43,5 @@
 //   40 — Brand asset update: real XI PNG logo replaces SVG placeholder in Logo.jsx; icon set generated (pwa-192, pwa-512, apple-touch-icon, favicon.ico) from X1_App.png; index.html favicon + apple-touch-icon wired; vite.config.js includeAssets updated
 //   44 — Rivals data reliability: seasonLabel join from seasons collection, chronological match sort, season grouping in detail, Finals filter checks both round+competition fields, Carabao→Carabao Cup label, stable rival list sort tiebreakers, Rival badge threshold documented
 //   45 — Standardize trophy data path: trophyUtils.js with TROPHY_REGISTRY + deriveTrophiesFromSeasons; Museum/Home both derive from season docs, Firestore trophies collection no longer drives counts; Museum bottom timeline removed, replaced with tap-to-detail modal per trophy
-const SW_VERSION = 45;
+//   46 — Harden trophy sort (NaN-safe seasonSortKey); Museum grid shows won trophies only; dead locked/unearned CSS removed
+const SW_VERSION = 46;

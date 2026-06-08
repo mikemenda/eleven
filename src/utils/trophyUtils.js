@@ -53,17 +53,26 @@ export const TIER_ORDER = ['elite', 'league', 'european', 'cup']
 //     if (s.uclECLResult === 'Winner')
 //       push({ competition: 'UEFA Conference League', ... })
 
+// Parse a season's year string ("YYYY/YY" format, enforced by CreateSeasonModal's YEAR_RE)
+// into a sortable integer. Returns 0 for any season where year is missing or malformed
+// so those seasons sink to the bottom rather than throwing or producing NaN.
+function seasonSortKey(s) {
+  const raw = typeof s.year === 'string' ? s.year.trim() : ''
+  // Expected: "2027/28". Take first 4 chars and parse.
+  // Guard: if result is NaN (empty string, wrong format), return 0.
+  const n = parseInt(raw.slice(0, 4), 10)
+  return Number.isFinite(n) ? n : 0
+}
+
 export function deriveTrophiesFromSeasons(seasons) {
   const result = []
 
-  // Sort input by year ascending so timeline order is natural.
-  // getSeasons returns year desc; we reverse a copy to avoid mutating.
-  const sorted = [...seasons].sort((a, b) => {
-    // year field is stored as a string like "2027/28" — extract first 4 digits for sort.
-    const ya = parseInt((a.year || '0').slice(0, 4), 10)
-    const yb = parseInt((b.year || '0').slice(0, 4), 10)
-    return ya - yb
-  })
+  // Sort a copy oldest-first. getSeasons() returns year desc, so we re-sort here.
+  // Using seasonSortKey() rather than raw string sort because:
+  //   - Firestore orderBy('year') is lexicographic and works for YYYY/YY, but
+  //     client-side we want a single defensive numeric path regardless of call site.
+  //   - NaN-safe: malformed or missing year fields go to position 0, not crash.
+  const sorted = [...seasons].sort((a, b) => seasonSortKey(a) - seasonSortKey(b))
 
   for (const s of sorted) {
     const base = { seasonId: s.id, seasonLabel: s.label, season: s }

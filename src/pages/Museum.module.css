@@ -60,9 +60,7 @@
   border-right: 0.5px solid var(--en-rule);
   border-bottom: 0.5px solid var(--en-rule);
 }
-.trophyCard:hover:not(:disabled) { background: var(--en-surface-2); }
-.trophyCardWon { cursor: pointer; }
-.trophyCardUnearned { opacity: 0.35; cursor: default; }
+.trophyCard:hover { background: var(--en-surface-2); }
 
 .trophyVis { position: relative; width: 64px; height: 72px; }
 .trophyImg { width: 100%; height: 100%; object-fit: contain; }
@@ -72,7 +70,6 @@
   font-size: 32px;
 }
 .trophyWon { filter: drop-shadow(0 0 8px rgba(212,175,55,0.35)); }
-.trophyUnearned { filter: grayscale(1); }
 
 .trophyGlow {
   position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
@@ -91,9 +88,6 @@
 .trophyCount {
   font-family: var(--font-plex); font-size: 18px; font-weight: 500;
   color: var(--en-gold); line-height: 1;
-}
-.trophyNone {
-  font-family: var(--font-plex); font-size: 14px; color: var(--en-text-5);
 }
 
 /* ── LOAD ── */
