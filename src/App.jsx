@@ -15,6 +15,7 @@ import Transfers from './pages/Transfers'
 import Records from './pages/Records'
 import Rivals from './pages/Rivals'
 import Museum from './pages/Museum'
+import History from './pages/History'
 import Login from './pages/Login'
 import './styles/global.css'
 
@@ -61,6 +62,7 @@ const InnerApp = () => (
           <Route path="/records"           element={<Records />} />
           <Route path="/rivals"            element={<Rivals />} />
           <Route path="/museum"            element={<Museum />} />
+          <Route path="/history"           element={<History />} />
           <Route path="*"                  element={<Navigate to="/home" replace />} />
         </Routes>
         <NavBar />

@@ -1,0 +1,882 @@
+/* ── PAGE SHELL ──────────────────────────────────────────────────────────── */
+.page {
+  background: var(--en-bg);
+  min-height: calc(100dvh - 56px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 32px);
+}
+
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+  animation: fadeUp 0.35s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.historyHeader {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--en-blue-dim) 0%, var(--en-bg) 60%);
+  border-bottom: 0.5px solid rgba(30, 58, 138, 0.25);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.historyGlow {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 160px;
+  background: radial-gradient(ellipse, rgba(30, 58, 138, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.headerInner {
+  position: relative;
+  padding: 28px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.headerEyebrow {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--en-blue);
+  opacity: 0.8;
+}
+
+.headerTitle {
+  font-family: var(--font-playfair);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  text-align: center;
+}
+
+.headerSubtitle {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-3);
+  text-align: center;
+}
+
+/* ── SUMMARY GRID ────────────────────────────────────────────────────────── */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+.summaryCard {
+  padding: 16px 8px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-right: 0.5px solid var(--en-rule);
+}
+
+.summaryCard:last-child {
+  border-right: none;
+}
+
+.summaryNum {
+  font-family: var(--font-plex);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  line-height: 1;
+}
+
+.summaryLabel {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  color: var(--en-text-3);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* ── LOADING ─────────────────────────────────────────────────────────────── */
+.loadWrap {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--en-rule);
+  border-top-color: var(--en-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── FILTERS ─────────────────────────────────────────────────────────────── */
+.filtersWrap {
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+.fcToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--en-rule);
+  background: transparent;
+  color: var(--en-text-2);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  align-self: flex-start;
+}
+
+.fcToggle:hover { border-color: var(--en-green); color: var(--en-green); }
+
+.fcToggleOn {
+  background: var(--accent-dim);
+  border-color: var(--en-green);
+  color: var(--en-green);
+}
+
+.fcToggleDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  transition: background 0.15s;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.pillRow::-webkit-scrollbar { display: none; }
+
+.pillRowWrap {
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--en-rule);
+  background: transparent;
+  color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.pill:hover { border-color: var(--en-text-3); color: var(--en-text-2); }
+
+.pillActive {
+  background: var(--en-blue);
+  border-color: var(--en-blue);
+  color: #fff;
+}
+
+/* ── ARCHIVE LIST ─────────────────────────────────────────────────────────── */
+.archiveList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── SEASON CARD ─────────────────────────────────────────────────────────── */
+.seasonCard {
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+.seasonCardHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 16px 10px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+
+.seasonCardLabel {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--en-text-1);
+}
+
+.seasonCardYear {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  letter-spacing: 0.05em;
+}
+
+.seasonEntries {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── ENTRY ROW ───────────────────────────────────────────────────────────── */
+.entryRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.entryRow:hover { background: rgba(255,255,255,0.02); }
+
+.entryRow:last-child { border-bottom: none; }
+
+.entryRowFC {
+  background: rgba(74, 222, 128, 0.04);
+}
+
+.entryRowFC:hover {
+  background: rgba(74, 222, 128, 0.07);
+}
+
+.entryContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.entryCompName {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.entryWinnerLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.entryWinnerName {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+
+.entryMuted {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-4);
+  font-style: italic;
+}
+
+.entryPts {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+}
+
+.entryFinish {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+}
+
+.entryScore {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-2);
+}
+
+.entryRU {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
+
+.entryChevron {
+  color: var(--en-text-4);
+  flex-shrink: 0;
+}
+
+/* ── FC RICHPORT BADGES ──────────────────────────────────────────────────── */
+.fcBadgePill {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-green);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ruBadgePill {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── FC GREEN TEXT ───────────────────────────────────────────────────────── */
+.fcGreen {
+  color: var(--en-green) !important;
+}
+
+/* ── FC HIGHLIGHT ROW ────────────────────────────────────────────────────── */
+.fcHighlightRow {
+  background: rgba(74, 222, 128, 0.04);
+}
+
+/* ── CLUB BADGES ─────────────────────────────────────────────────────────── */
+.clubBadge {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.clubBadgeImg {
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.clubBadgeHighlight {
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.4));
+}
+
+.clubBadgeFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--en-text-4);
+  flex-shrink: 0;
+}
+
+.fcRichportBadge {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+/* ── COMPETITION ICON ────────────────────────────────────────────────────── */
+.compIcon {
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.compIconEmoji {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ── SECTIONS (Era, Dynasties, Trebles) ──────────────────────────────────── */
+.section {
+  margin-top: 0;
+  border-top: 0.5px solid var(--en-rule);
+}
+
+.sectionHeader {
+  padding: 18px 16px 10px;
+}
+
+.sectionTitle {
+  font-family: var(--font-playfair);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--en-text-1);
+}
+
+.sectionSub {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-3);
+  margin-top: 2px;
+}
+
+.sectionEmpty {
+  padding: 16px 16px 20px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+  font-style: italic;
+}
+
+/* ── ERA LEADERS ──────────────────────────────────────────────────────────── */
+.eraList {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid var(--en-rule-faint);
+}
+
+.eraRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+
+.eraRank {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-4);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.eraClub {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  flex: 1;
+}
+
+.eraRight {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.eraTotal {
+  font-family: var(--font-plex);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  line-height: 1;
+}
+
+.eraTotalLabel {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+}
+
+/* ── DYNASTIES ────────────────────────────────────────────────────────────── */
+.dynastyList {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid var(--en-rule-faint);
+}
+
+.dynastyRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s;
+}
+
+.dynastyRow:hover { background: rgba(255,255,255,0.02); }
+
+.dynastyContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.dynastyComp {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.dynastyClub {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+
+.dynastyBadge {
+  font-family: var(--font-plex);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--en-gold);
+  flex-shrink: 0;
+}
+
+.dynastySeasons {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  flex-shrink: 0;
+}
+
+/* ── TREBLES ──────────────────────────────────────────────────────────────── */
+.trebleList {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid var(--en-rule-faint);
+}
+
+.trebleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+
+.trebleLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  width: 32px;
+}
+
+.trebleSeason {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--en-text-1);
+}
+
+.trebleYear {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  color: var(--en-text-4);
+}
+
+.trebleContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.trebleClub {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  margin-bottom: 2px;
+}
+
+.trebleComps {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trebleBadge {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  padding: 3px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── EMPTY STATE ─────────────────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.emptyIcon { font-size: 36px; }
+
+.emptyTitle {
+  font-family: var(--font-playfair);
+  font-size: 18px;
+  color: var(--en-text-2);
+}
+
+.emptyBody {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+}
+
+/* ── COMPETITION DETAIL MODAL ─────────────────────────────────────────────── */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 201;
+  background: var(--en-surface);
+  border-top: 0.5px solid var(--en-rule);
+  border-radius: 16px 16px 0 0;
+  max-height: 80dvh;
+  overflow-y: auto;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  animation: slideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.modalHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--en-rule);
+  margin: 12px auto 4px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px 16px;
+}
+
+.modalTitleGroup {
+  flex: 1;
+}
+
+.modalRegion {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  margin-bottom: 4px;
+}
+
+.modalCompName {
+  font-family: var(--font-playfair);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--en-text-1);
+}
+
+.modalSubStat {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-3);
+  margin-top: 4px;
+}
+
+.modalRule {
+  height: 0.5px;
+  background: var(--en-rule);
+  margin: 0;
+}
+
+.modalSection {
+  padding: 14px 0;
+}
+
+.modalSectionLabel {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  padding: 0 20px 10px;
+}
+
+.modalEmpty {
+  padding: 16px 20px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+  font-style: italic;
+}
+
+/* Modal top winners row */
+.modalTopRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+}
+
+.modalRank {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-4);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.modalClubName {
+  flex: 1;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+
+.modalTitleCount {
+  font-family: var(--font-plex);
+  font-size: 16px;
+  color: var(--en-gold);
+  font-weight: 500;
+}
+
+/* Modal season rows */
+.modalSeasonRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+
+.modalSeasonRow:last-child { border-bottom: none; }
+
+.modalSeasonLabel {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--en-text-2);
+  width: 28px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.modalSeasonDetail {
+  flex: 1;
+  min-width: 0;
+}
+
+.muted {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-4);
+  font-style: italic;
+}
+
+.modalLeagueDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.modalLeagueWinner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leaguePts {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-3);
+}
+
+.leagueRecord {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-4);
+}
+
+.fcFinish {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-green);
+  opacity: 0.7;
+}
+
+.modalFinalDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.modalFinalWinner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.finalScore {
+  font-family: var(--font-plex);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-text-2);
+}
+
+.runnerUp {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+}

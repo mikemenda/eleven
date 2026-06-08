@@ -74,6 +74,16 @@ const SHEET_NAV = [
       </svg>
     ),
   },
+  {
+    path: '/history',
+    label: 'History',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M10 6v4l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
 ]
 
 const SHEET_PATHS = SHEET_NAV.map(item => item.path)
