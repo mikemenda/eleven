@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 41
+// Current: 42
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -41,4 +41,5 @@
 //   38 — Fix transfer-clubs.json: Brighton corrected 45→1808, Juventus added as 45; row layout changed to arrow→face→name/meta→fee→crest; patchHistoricalStubSofifaIds.mjs adds sofifaId to 9 confirmed historical stubs
 //   39 — Fix transfer-clubs.json: Roma 42→52, Tottenham 6→18, Brentford added (1925), brentform typo alias; Transfers.jsx uses resolveClubIdentity for both displayName label and crest — single source of truth
 //   40 — Brand asset update: real XI PNG logo replaces SVG placeholder in Logo.jsx; icon set generated (pwa-192, pwa-512, apple-touch-icon, favicon.ico) from X1_App.png; index.html favicon + apple-touch-icon wired; vite.config.js includeAssets updated
-const SW_VERSION = 40;
+//   42 — Records page rebuild: 3 tabs (All Comps / Champions League / Club); career + single-season player records computed live from embedded seasonStats[]; UCL records summed from uclGoals/uclAssists/uclApps fields; player photo + tap-to-PlayerProfile on every record card; Top 5 popup modal on record tap; competition display labels fixed; computeRecords removed from services.js (logic now in Records.jsx); PlayerProfile return context via location.state
+const SW_VERSION = 42;

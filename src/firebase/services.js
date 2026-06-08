@@ -246,76 +246,9 @@ export const getRivalStats = (matches) => {
   }).sort((a, b) => b.played - a.played)
 }
 
-// ─── RECORDS (computed client-side from players + seasons + matches) ──────────
+// ─── RECORDS ─────────────────────────────────────────────────────────────────
+// computeRecords has been removed. All record computation now lives in
+// Records.jsx (computeAllRecords) to keep logic co-located with the UI
+// and support the full expanded record set without any Firestore writes.
 
-export const computeRecords = ({ players, seasons, matches, goals, transfers }) => {
-  // Individual records — from player career stats stored on player docs
-  const active = players.filter(p => p.apps > 0 || p.goals > 0)
 
-  const topScorer     = [...active].sort((a, b) => (b.goals || 0) - (a.goals || 0))[0] || null
-  const topAssists    = [...active].sort((a, b) => (b.assists || 0) - (a.assists || 0))[0] || null
-  const mostApps      = [...active].sort((a, b) => (b.apps || 0) - (a.apps || 0))[0] || null
-  const bestGpg       = active.filter(p => (p.apps || 0) >= 30)
-    .map(p => ({ ...p, gpg: (p.goals || 0) / p.apps }))
-    .sort((a, b) => b.gpg - a.gpg)[0] || null
-
-  // Season records
-  const byPts    = [...seasons].sort((a, b) => (b.leaguePts || 0) - (a.leaguePts || 0))[0] || null
-  const byGoals  = [...seasons].sort((a, b) => (b.leagueGF || 0) - (a.leagueGF || 0))[0] || null
-  const byGpg    = seasons.filter(s => s.leagueP > 0)
-    .map(s => ({ ...s, gpg: (s.leagueGF || 0) / s.leagueP }))
-    .sort((a, b) => b.gpg - a.gpg)[0] || null
-
-  // Biggest win — from matches
-  const wins = matches.filter(m => m.score_for > m.score_against)
-  const biggestWin = [...wins].sort((a, b) =>
-    (b.score_for - b.score_against) - (a.score_for - a.score_against)
-  )[0] || null
-
-  // UCL finals
-  const uclFinals = seasons.filter(s =>
-    s.uclResult === 'Champions' || s.uclResult === 'Runners-Up'
-  ).map(s => ({
-    season: s.label,
-    year: s.year,
-    result: s.uclResult,
-    opponent: s.uclFinalOpponent || s.uclTournamentWinner || '?',
-    score: s.uclFinalScore || '?',
-  }))
-
-  // GK records — from players with position GK
-  const gks = players.filter(p => p.position === 'GK')
-
-  // Transfer records
-  const ins  = transfers.filter(t => t.direction === 'IN')
-  const outs = transfers.filter(t => t.direction === 'OUT')
-  // Resolve season label: prefer the snapshot on the doc, fall back to seasons array lookup
-  const resolveLabel = (t) => t.season || seasons.find(s => s.id === t.seasonId)?.label || '?'
-  const highestIn  = [...ins].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
-  const highestOut = [...outs].sort((a, b) => (b.fee_eur || 0) - (a.fee_eur || 0))[0] || null
-  if (highestIn)  highestIn._seasonLabel  = resolveLabel(highestIn)
-  if (highestOut) highestOut._seasonLabel = resolveLabel(highestOut)
-
-  // Net spend per season
-  const netByseason = {}
-  for (const t of transfers) {
-    if (!t.seasonId) continue
-    if (!netByseason[t.seasonId]) netByseason[t.seasonId] = { in: 0, out: 0, seasonId: t.seasonId }
-    if (t.direction === 'IN')  netByseason[t.seasonId].in  += (t.fee_eur || 0)
-    if (t.direction === 'OUT') netByseason[t.seasonId].out += (t.fee_eur || 0)
-  }
-  const netSpends = Object.values(netByseason).map(n => ({
-    ...n,
-    net: n.in - n.out,
-    season: seasons.find(s => s.id === n.seasonId)?.label || '?'
-  }))
-  const biggestSpend = [...netSpends].sort((a, b) => b.net - a.net)[0] || null
-
-  return {
-    individual: { topScorer, topAssists, mostApps, bestGpg },
-    season: { byPts, byGoals, byGpg, biggestWin },
-    ucl: { finals: uclFinals },
-    gk: { keepers: gks },
-    transfers: { highestIn, highestOut, biggestSpend }
-  }
-}
