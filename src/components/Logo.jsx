@@ -1,47 +1,54 @@
+import xiLogo from '../assets/xi-logo.png'
+import xiMark from '../assets/xi-mark.png'
+
+/**
+ * Logo component
+ * showWordmark={true}  → XI + "eleven" full lockup (xi-logo.png)
+ * showWordmark={false} → XI mark only (xi-mark.png)
+ *
+ * size = height in px. Width scales proportionally.
+ * maxWidth = optional cap on rendered width (used in header to prevent overflow).
+ */
 const Logo = ({ size = 40, showWordmark = false, className = '', maxWidth }) => {
-  const vw = showWordmark ? 520 : 220
-  const vh = 60
-  // Natural width based on size prop
-  const naturalW = showWordmark ? size * (520 / 60) : size * (220 / 60)
-  // In header contexts a maxWidth cap is passed to prevent overflow on narrow viewports
-  const displayW = maxWidth ? Math.min(naturalW, maxWidth) : naturalW
-  // Scale height proportionally if width was capped
-  const displayH = displayW * (vh / vw)
+  if (showWordmark) {
+    // Full lockup: xi-logo.png is approx 4.5:1 ratio (wide)
+    const naturalW = size * 4.5
+    const displayW = maxWidth ? Math.min(naturalW, maxWidth) : naturalW
+    const displayH = displayW / 4.5
+
+    return (
+      <div
+        className={`eleven-logo ${className}`}
+        style={{ display: 'inline-flex', alignItems: 'center' }}
+      >
+        <img
+          src={xiLogo}
+          alt="Eleven"
+          width={displayW}
+          height={displayH}
+          style={{ display: 'block', objectFit: 'contain' }}
+          draggable={false}
+        />
+      </div>
+    )
+  }
+
+  // Mark only: xi-mark.png is square-ish (~1:1)
+  const displayW = maxWidth ? Math.min(size, maxWidth) : size
 
   return (
     <div
       className={`eleven-logo ${className}`}
       style={{ display: 'inline-flex', alignItems: 'center' }}
     >
-      <svg
+      <img
+        src={xiMark}
+        alt="Eleven"
         width={displayW}
-        height={displayH}
-        viewBox={`0 0 ${vw} ${vh}`}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* X — two thick diagonal bars with cutout at crossing */}
-        <polygon points="0,0 22,0 110,60 88,60" fill="#4ade80" />
-        <polygon points="110,0 132,0 44,60 22,60" fill="#4ade80" />
-        <polygon points="56,30 66,24 76,30 66,36" fill="#0a1520" />
-
-        {/* I — thin tall bar */}
-        <rect x="148" y="0" width="16" height="60" rx="0" fill="#4ade80" />
-
-        {showWordmark && (
-          <text
-            x="200"
-            y="46"
-            fontFamily="'Barlow', -apple-system, BlinkMacSystemFont, sans-serif"
-            fontWeight="600"
-            fontSize="52"
-            letterSpacing="-0.5"
-            fill="#e8e0d0"
-          >
-            eleven
-          </text>
-        )}
-      </svg>
+        height={displayW}
+        style={{ display: 'block', objectFit: 'contain' }}
+        draggable={false}
+      />
     </div>
   )
 }
