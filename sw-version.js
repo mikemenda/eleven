@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 48
+// Current: 50
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -46,4 +46,5 @@
 //   46 — Harden trophy sort (NaN-safe seasonSortKey); Museum grid shows won trophies only; dead locked/unearned CSS removed
 //   47 — Remove Sporting Director: page, route, nav entry, CSS module deleted; shared services untouched
 //   49 — History patch: remove Dynasties, add Back-to-Back UCL detection, fix country ecosystem filter (England/Spain/Italy/Germany/France), extend historyUtils for all future canonical cup/UEL/UECL fields + leagueTop5, replace Dynasties summary card with UCL Finals count
-const SW_VERSION = 49;
+//   50 — UCL section: /ucl route, hamburger nav entry, tab shell (Overview/Seasons/Knockouts live; Players/Records/Rivals placeholder for v51); src/utils/uclUtils.js with shared derivation helpers; NATION_TO_LEAGUE mapping for 20+ countries
+const SW_VERSION = 50;

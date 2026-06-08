@@ -1,0 +1,836 @@
+/* ─── UCL PAGE SHELL ─────────────────────────────────────────────────────── */
+
+.page {
+  background: var(--en-bg);
+  min-height: calc(100dvh - 56px);
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
+}
+
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+  animation: fadeUp 0.35s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── TOP BAR ────────────────────────────────────────────────────────────── */
+
+.topBar {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 20px 10px;
+  border-bottom: 0.5px solid var(--en-rule);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.topLabel {
+  font-family: var(--font-playfair);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  letter-spacing: 0.01em;
+}
+
+.topSub {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  letter-spacing: 0.05em;
+}
+
+/* ─── TAB BAR ────────────────────────────────────────────────────────────── */
+
+.tabs {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  border-bottom: 0.5px solid var(--en-rule);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1;
+  padding: 12px 8px;
+  min-width: 80px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.tab:hover { color: var(--en-text-2); }
+.tabActive {
+  color: var(--en-text-1);
+  border-bottom-color: var(--en-gold);
+}
+
+/* ─── SHARED STATES ──────────────────────────────────────────────────────── */
+
+.loadWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--en-rule);
+  border-top-color: var(--en-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 80px 24px;
+  text-align: center;
+}
+.emptyIcon {
+  font-size: 32px;
+  opacity: 0.6;
+}
+.emptyText {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  color: var(--en-text-2);
+  margin: 0;
+}
+.emptyHint {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+  margin: 0;
+}
+
+/* ─── COMING SOON ────────────────────────────────────────────────────────── */
+
+.comingSoon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 80px 24px;
+  text-align: center;
+}
+.comingSoonIcon { font-size: 32px; opacity: 0.5; }
+.comingSoonTitle {
+  font-family: var(--font-playfair);
+  font-size: 17px;
+  color: var(--en-text-2);
+  margin: 0;
+}
+.comingSoonText {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+  margin: 0;
+}
+
+/* ─── OVERVIEW TAB ───────────────────────────────────────────────────────── */
+
+.ovWrap {
+  padding: 0 0 24px;
+}
+
+/* Hero */
+.ovHero {
+  padding: 28px 20px 20px;
+  border-bottom: 0.5px solid var(--en-rule);
+  background: linear-gradient(180deg, var(--en-blue-dim) 0%, transparent 100%);
+}
+.ovHeroLabel {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  margin-bottom: 4px;
+}
+.ovHeroName {
+  font-family: var(--font-playfair);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  line-height: 1.15;
+}
+.ovHeroSub {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+.ovHeroRecord {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ovWDL {
+  font-family: var(--font-plex);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.ovHeroDivider {
+  color: var(--en-text-4);
+}
+.ovHeroGoals {
+  font-family: var(--font-plex);
+  font-size: 14px;
+  color: var(--en-text-2);
+}
+
+/* Stat pill row */
+.ovStatRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.ovStatPill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  gap: 4px;
+  border-right: 0.5px solid var(--en-rule);
+}
+.ovStatPill:last-child { border-right: none; }
+.ovStatVal {
+  font-family: var(--font-plex);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  line-height: 1;
+}
+.ovStatKey {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+}
+
+/* Section */
+.ovSection {
+  padding: 20px 20px 0;
+  border-bottom: 0.5px solid var(--en-rule);
+  padding-bottom: 16px;
+}
+.ovSectionTitle {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  margin: 0 0 14px;
+}
+
+/* Stage grid */
+.ovStageGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.ovStageItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--en-surface);
+  border-radius: 8px;
+  padding: 14px 8px;
+  gap: 4px;
+}
+.ovStageVal {
+  font-family: var(--font-plex);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--en-text-3);
+  line-height: 1;
+}
+.ovStageKey {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  text-align: center;
+}
+
+/* Record table */
+.ovRecordTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 0.5px solid var(--en-rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ovRecordRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.ovRecordRow:last-child { border-bottom: none; }
+.ovRecordLabel {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+}
+.ovRecordValue {
+  font-family: var(--font-plex);
+  font-size: 13px;
+  color: var(--en-text-1);
+  text-align: right;
+}
+.ovMatchOpp {
+  font-size: 11px;
+  color: var(--en-text-3);
+  margin-left: 4px;
+}
+
+/* Latest campaign card */
+.ovLatestCard {
+  background: var(--en-surface);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ovLatestSeason {
+  font-family: var(--font-plex);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.ovLatestYear {
+  color: var(--en-text-3);
+  font-weight: 400;
+}
+.ovLatestResult {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.ovLatestFinal {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-3);
+}
+
+/* ─── SEASONS TAB ────────────────────────────────────────────────────────── */
+
+.sznList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 0;
+}
+
+/* Campaign card */
+.sznCard {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--en-rule);
+  padding: 16px 20px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: background 0.15s;
+}
+.sznCard:hover { background: var(--en-surface); }
+
+.sznCardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.sznCardLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sznLabel {
+  font-family: var(--font-plex);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.sznYear {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+}
+.sznResult {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-2);
+}
+.sznStar {
+  color: var(--en-gold);
+}
+.sznChevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--en-text-4);
+}
+
+/* Record row inside card */
+.sznCardRecord {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sznRecordItem {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.sznRecordVal {
+  font-family: var(--font-plex);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.sznRecordKey {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--en-text-3);
+  text-transform: uppercase;
+}
+.sznRecordDivider {
+  width: 1px;
+  height: 14px;
+  background: var(--en-rule);
+  margin: 0 2px;
+}
+
+/* KO strip */
+.sznKOStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sznKOItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sznKORound {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  min-width: 36px;
+}
+.sznKOCrest {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.sznKOOpp {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-2);
+  flex: 1;
+}
+.sznKOAgg {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* ── Season Detail ─────────────────────────────────────────────────────────── */
+
+.sznDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sznDetailHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.backBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--en-text-2);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.backBtn:hover { color: var(--en-text-1); }
+.sznDetailTitle {
+  flex: 1;
+}
+.sznDetailSection {
+  padding: 18px 20px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.sznDetailSectionLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  margin: 0 0 12px;
+}
+.sznDetailNote {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-2);
+  margin: 0 0 10px;
+}
+
+.sznDetailStatRow {
+  display: flex;
+  gap: 14px;
+}
+.sznDetailStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.sznDetailStatVal {
+  font-family: var(--font-plex);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  line-height: 1;
+}
+.sznDetailStatKey {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+}
+
+/* Match table (LP matchday) */
+.sznMatchTable {
+  border: 0.5px solid var(--en-rule);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sznMatchHead,
+.sznMatchRow {
+  display: grid;
+  grid-template-columns: 28px 1fr 32px 52px 24px;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.sznMatchHead:last-child,
+.sznMatchRow:last-child { border-bottom: none; }
+.sznMatchHead {
+  background: var(--en-surface);
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+.sznMatchRow {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-2);
+}
+.sznMD      { font-family: var(--font-plex); font-size: 11px; color: var(--en-text-3); }
+.sznMOpp    { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sznMVen    { font-family: var(--font-plex); font-size: 11px; text-align: center; }
+.sznMScore  { font-family: var(--font-plex); font-size: 12px; font-weight: 600; color: var(--en-text-1); text-align: right; }
+.sznMRes    { font-family: var(--font-plex); font-size: 11px; font-weight: 700; text-align: center; }
+.sznMCrest  { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+
+/* KO rows in detail */
+.sznKORow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-wrap: wrap;
+}
+.sznKORow:last-child { border-bottom: none; }
+.sznKORoundBadge {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  min-width: 40px;
+}
+.sznKOOppBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.sznKOCrestLg {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.sznKOOppName {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sznKOAggLg {
+  font-family: var(--font-plex);
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.sznKOLegs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 50px;
+}
+.sznKOLeg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sznKOLegLabel {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+  min-width: 36px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sznKOLegScore {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  min-width: 36px;
+}
+.sznKOLegVenue {
+  font-family: var(--font-plex);
+  font-size: 10px;
+}
+
+/* ─── KNOCKOUTS TAB ──────────────────────────────────────────────────────── */
+
+.koWrap {
+  padding: 0 0 24px;
+}
+
+.koSection {
+  padding: 20px 20px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.koSectionTitle {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  margin: 0 0 4px;
+}
+.koSectionNote {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-4);
+  margin: 0 0 14px;
+  font-style: italic;
+}
+
+/* Leg record table */
+.koTableHead,
+.koTableRow {
+  display: grid;
+  grid-template-columns: 90px repeat(7, 1fr);
+  gap: 4px;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.koTableHead:last-child,
+.koTableRow:last-child { border-bottom: none; }
+.koTableHead {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  background: var(--en-surface);
+  border-radius: 4px;
+  border-bottom: none;
+  margin-bottom: 4px;
+}
+.koThRound { }
+.koThStat  { text-align: right; }
+.koTdRound {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-2);
+  font-weight: 500;
+}
+.koTdStat {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-1);
+  text-align: right;
+}
+
+/* Tie record */
+.koTieHead,
+.koTieRow {
+  display: grid;
+  grid-template-columns: 1fr 64px 84px 64px;
+  gap: 4px;
+  align-items: center;
+  padding: 9px 4px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.koTieHead:last-child,
+.koTieRow:last-child { border-bottom: none; }
+.koTieHead {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  background: var(--en-surface);
+  border-radius: 4px;
+  border-bottom: none;
+  margin-bottom: 4px;
+}
+.koTieLabelCol {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-2);
+}
+.koTieCol {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-1);
+  text-align: right;
+}
+
+/* Finals log */
+.koFinalRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.koFinalRow:last-child { border-bottom: none; }
+.koFinalCrest {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.koFinalInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.koFinalSeason {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  letter-spacing: 0.06em;
+}
+.koFinalOpp {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.koFinalScore {
+  font-family: var(--font-plex);
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.koFinalResult {
+  font-family: var(--font-plex);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Shared record rows (used across tabs) */
+.koRecordRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.koRecordRow:last-child { border-bottom: none; }
+.koRecordLabel {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+}
+.koRecordValue {
+  font-family: var(--font-plex);
+  font-size: 13px;
+  color: var(--en-text-1);
+}

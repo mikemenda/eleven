@@ -56,6 +56,18 @@ const PRIMARY_NAV = [
 
 const SHEET_NAV = [
   {
+    path: '/ucl',
+    label: 'UCL',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M7 8h6M7 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M10 13v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M8 15h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
     path: '/rivals',
     label: 'Rivals',
     icon: (
