@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getSeasons, getPlayers, getTrophies } from '../firebase/services'
+import { getSeasons, getPlayers } from '../firebase/services'
+import { TROPHY_REGISTRY, deriveTrophiesFromSeasons } from '../utils/trophyUtils'
 import styles from './Home.module.css'
 
 // ─── TROPHY SILHOUETTES ───────────────────────────────────────────────────────
@@ -189,19 +190,9 @@ const TrophySVG = {
 }
 
 // ─── TROPHY CONFIG ────────────────────────────────────────────────────────────
-const TROPHY_LIST = [
-  { key: 'Premier League',         short: 'Premier League'    },
-  { key: 'UEFA Champions League',  short: 'Champions League'  },
-  { key: 'FA Cup',                 short: 'FA Cup'            },
-  { key: 'Carabao Cup',            short: 'Carabao Cup'       },
-  { key: 'La Liga',                short: 'La Liga'           },
-  { key: 'Copa del Rey',           short: 'Copa del Rey'      },
-  { key: 'Bundesliga',             short: 'Bundesliga'        },
-  { key: 'DFB-Pokal',              short: 'DFB-Pokal'         },
-  { key: 'UEFA Europa League',     short: 'Europa League'     },
-  { key: 'UEFA Conference League', short: 'Conference'        },
-  { key: 'English Championship',   short: 'Championship'      },
-]
+// TROPHY_LIST is now TROPHY_REGISTRY from trophyUtils — single source of truth.
+// Aliased here so TrophyCabinet below needs no other changes.
+const TROPHY_LIST = TROPHY_REGISTRY
 
 // ─── STAT HELPERS ─────────────────────────────────────────────────────────────
 const legendStat = (player) => {
@@ -294,7 +285,7 @@ const TrophyCabinet = ({ trophies }) => {
 }
 
 // ─── SECTION 3: CLUB LEGACY ──────────────────────────────────────────────────
-const ClubLegacy = ({ seasons, trophies }) => {
+const ClubLegacy = ({ seasons }) => {
   if (seasons.length === 0) return null
 
   // Fields use the canonical leagueW/leagueD/leagueL/leagueGF/leagueGA schema.
@@ -305,9 +296,8 @@ const ClubLegacy = ({ seasons, trophies }) => {
   const played = wins + draws + losses
   const winRate = played > 0 ? Math.round((wins / played) * 100) : null
 
-  // Count competitions where trophy type is a league win
-  const leagueTrophyKeys = ['Premier League','English Championship','La Liga','Bundesliga']
-  const leagueTitles = trophies.filter(t => leagueTrophyKeys.includes(t.competition)).length
+  // Derive league titles directly from season data (leaguePosition === 1)
+  const leagueTitles = seasons.filter(s => s.leaguePosition === 1).length
 
   const uclFinals = seasons.filter(s =>
     s.uclResult && (s.uclResult.toLowerCase().includes('winner') || s.uclResult.toLowerCase().includes('runner') || s.uclResult.toLowerCase().includes('final'))
@@ -491,7 +481,6 @@ const Home = () => {
 
   const [seasons,  setSeasons]  = useState([])
   const [players,  setPlayers]  = useState([])
-  const [trophies, setTrophies] = useState([])
   const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
@@ -503,14 +492,12 @@ const Home = () => {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [s, p, t] = await Promise.all([
+      const [s, p] = await Promise.all([
         getSeasons(activeClub.id),
         getPlayers(activeClub.id),
-        getTrophies(activeClub.id),
       ])
       setSeasons(s)
       setPlayers(p)
-      setTrophies(t)
     } catch (err) {
       console.error('Home load error:', err)
     } finally {
@@ -520,7 +507,9 @@ const Home = () => {
 
   if (!activeGame || !activeClub) return null
 
-  const trophyCount = activeClub.trophyCount || trophies.length
+  // Derive trophies from season data — single source of truth (same as Museum)
+  const trophies = deriveTrophiesFromSeasons(seasons)
+  const trophyCount = trophies.length
 
   return (
     <div className={styles.page}>
@@ -533,7 +522,7 @@ const Home = () => {
               trophyCount={trophyCount}
             />
             <TrophyCabinet trophies={trophies} />
-            <ClubLegacy seasons={seasons} trophies={trophies} />
+            <ClubLegacy seasons={seasons} />
             <DynastyArc seasons={seasons} />
             <ClubLegends players={players} />
             <LogMatchAction seasons={seasons} />

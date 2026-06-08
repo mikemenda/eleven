@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
-import { getTrophies, getSeasons } from '../firebase/services'
+import { getSeasons } from '../firebase/services'
+import { TROPHY_REGISTRY, TIER_ORDER, deriveTrophiesFromSeasons } from '../utils/trophyUtils'
 import styles from './Museum.module.css'
 
 // Trophy SVG imports — Vite resolves these to correct hashed paths at build time
@@ -16,6 +17,7 @@ import dfbPokalSvg   from '../assets/trophies/dfb-pokal.svg'
 import uelSvg        from '../assets/trophies/uel.svg'
 import ueclSvg       from '../assets/trophies/uecl.svg'
 
+// Museum-local: SVG asset map (visual concern, not shared)
 const TROPHY_SVG_SRCS = {
   'UEFA Champions League':  uclSvg,
   'Premier League':         plSvg,
@@ -30,87 +32,139 @@ const TROPHY_SVG_SRCS = {
   'UEFA Conference League': ueclSvg,
 }
 
-// ─── TROPHY CONFIG ────────────────────────────────────────────────────────────
-const TROPHIES = [
-  { key: 'UEFA Champions League',   icon: '🏆', tier: 'elite',    region: 'Europe' },
-  { key: 'Premier League',          icon: '🥇', tier: 'league',   region: 'England' },
-  { key: 'FA Cup',                  icon: '🏅', tier: 'cup',      region: 'England' },
-  { key: 'Carabao Cup',             icon: '🥤', tier: 'cup',      region: 'England' },
-  { key: 'English Championship',    icon: '🏅', tier: 'league',   region: 'England' },
-  { key: 'La Liga',                 icon: '🥇', tier: 'league',   region: 'Spain' },
-  { key: 'Copa del Rey',            icon: '🏅', tier: 'cup',      region: 'Spain' },
-  { key: 'Bundesliga',              icon: '🥇', tier: 'league',   region: 'Germany' },
-  { key: 'DFB-Pokal',               icon: '🏅', tier: 'cup',      region: 'Germany' },
-  { key: 'UEFA Europa League',      icon: '🌕', tier: 'european', region: 'Europe' },
-  { key: 'UEFA Conference League',  icon: '🌑', tier: 'european', region: 'Europe' },
-]
-
-const TIER_ORDER = ['elite', 'league', 'european', 'cup']
-
 function TrophySVG({ competition, won }) {
   const src = TROPHY_SVG_SRCS[competition]
-
   if (src) return (
-    <img src={src} alt={competition} className={`${styles.trophyImg} ${won ? styles.trophyWon : styles.trophyUnearned}`} />
+    <img
+      src={src}
+      alt={competition}
+      className={`${styles.trophyImg} ${won ? styles.trophyWon : styles.trophyUnearned}`}
+    />
   )
-
   return (
     <div className={`${styles.trophyFallback} ${won ? styles.trophyWon : styles.trophyUnearned}`}>
-      {TROPHIES.find(t => t.key === competition)?.icon || '🏆'}
+      🏆
     </div>
   )
 }
 
+// ─── TROPHY DETAIL MODAL ─────────────────────────────────────────────────────
+function TrophyDetail({ competition, wins, onClose }) {
+  if (!competition) return null
+
+  const reg = TROPHY_REGISTRY.find(t => t.key === competition)
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className={styles.modalBackdrop} onClick={onClose} aria-hidden="true" />
+
+      {/* Sheet */}
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={competition}>
+        <div className={styles.modalHandle} />
+
+        {/* Trophy header */}
+        <div className={styles.modalHeader}>
+          <div className={styles.modalTrophyVis}>
+            <TrophySVG competition={competition} won={true} />
+          </div>
+          <div className={styles.modalTitleGroup}>
+            <div className={styles.modalRegion}>{reg?.region}</div>
+            <div className={styles.modalTitle}>{competition}</div>
+            <div className={styles.modalWinCount}>×{wins.length} {wins.length === 1 ? 'title' : 'titles'}</div>
+          </div>
+        </div>
+
+        <div className={styles.modalRule} />
+
+        {/* Season entries */}
+        <div className={styles.modalWins}>
+          {wins.map((w, i) => {
+            const s = w.season
+            return (
+              <div key={i} className={styles.modalWinRow}>
+                <span className={styles.modalWinSeason}>{w.seasonLabel}</span>
+                <div className={styles.modalWinDetail}>
+                  {/* UCL: show final opponent + score if available */}
+                  {competition === 'UEFA Champions League' && (
+                    s.uclFinalOpponent && s.uclFinalScore
+                      ? <span className={styles.modalWinSub}>Final vs {s.uclFinalOpponent} · {s.uclFinalScore}</span>
+                      : <span className={styles.modalWinSubMuted}>Final details not recorded</span>
+                  )}
+
+                  {/* League: show pts and record if available */}
+                  {['Premier League','English Championship','La Liga','Bundesliga'].includes(competition) && (
+                    s.leaguePts
+                      ? <span className={styles.modalWinSub}>
+                          {s.leaguePts} pts
+                          {s.leagueW != null ? ` · ${s.leagueW}W ${s.leagueD ?? 0}D ${s.leagueL ?? 0}L` : ''}
+                          {s.leagueGF != null ? ` · ${s.leagueGF} GF` : ''}
+                        </span>
+                      : <span className={styles.modalWinSubMuted}>League record not recorded</span>
+                  )}
+
+                  {/* FA Cup: final opponent if available */}
+                  {competition === 'FA Cup' && (
+                    s.faCupFinalOpponent
+                      ? <span className={styles.modalWinSub}>Final vs {s.faCupFinalOpponent}</span>
+                      : <span className={styles.modalWinSubMuted}>Final details not recorded</span>
+                  )}
+
+                  {/* Carabao Cup: final opponent if available */}
+                  {competition === 'Carabao Cup' && (
+                    s.carabaoCupFinalOpponent
+                      ? <span className={styles.modalWinSub}>Final vs {s.carabaoCupFinalOpponent}</span>
+                      : <span className={styles.modalWinSubMuted}>Final details not recorded</span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <button className={styles.modalClose} onClick={onClose}>Done</button>
+      </div>
+    </>
+  )
+}
+
+// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function Museum() {
   const { activeClub } = useApp()
-  const [trophies, setTrophies] = useState([])
   const [seasons, setSeasons] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState(null) // competition key of open modal
 
   useEffect(() => {
     if (!activeClub) return
     setLoading(true)
-    Promise.all([getTrophies(activeClub.id), getSeasons(activeClub.id)]).then(([t, s]) => {
-      setTrophies(t)
+    getSeasons(activeClub.id).then(s => {
       setSeasons(s)
       setLoading(false)
     })
   }, [activeClub])
 
-  // Also derive trophies from season data (leaguePosition === 1, uclResult === 'Champions', etc.)
-  const derivedTrophies = []
-  for (const s of seasons) {
-    if (s.leaguePosition === 1 && s.leagueCompetition)
-      derivedTrophies.push({ competition: s.leagueCompetition, seasonId: s.id, seasonLabel: s.label })
-    if (s.uclResult === 'Champions')
-      derivedTrophies.push({ competition: 'UEFA Champions League', seasonId: s.id, seasonLabel: s.label })
-    if (s.faCupResult === 'Winner')
-      derivedTrophies.push({ competition: 'FA Cup', seasonId: s.id, seasonLabel: s.label })
-    if (s.carabaoCupResult === 'Winner')
-      derivedTrophies.push({ competition: 'Carabao Cup', seasonId: s.id, seasonLabel: s.label })
-    if (s.uclELResult === 'Winner')
-      derivedTrophies.push({ competition: 'UEFA Europa League', seasonId: s.id, seasonLabel: s.label })
-    if (s.uclECLResult === 'Winner')
-      derivedTrophies.push({ competition: 'UEFA Conference League', seasonId: s.id, seasonLabel: s.label })
-  }
-
-  // Merge Firestore trophies + derived (deduplicate by competition+seasonId)
-  const allTrophies = [...derivedTrophies, ...trophies.filter(t =>
-    !derivedTrophies.some(d => d.competition === t.competition && d.seasonId === t.seasonId)
-  )]
-
+  // All trophies derived from season data — single source of truth
+  const allTrophies = deriveTrophiesFromSeasons(seasons)
   const totalWins = allTrophies.length
+
+  // Group by competition key for O(1) lookup
   const byComp = {}
   for (const t of allTrophies) {
     if (!byComp[t.competition]) byComp[t.competition] = []
     byComp[t.competition].push(t)
   }
 
-  const sorted = [...TROPHIES].sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier))
+  // Sort registry by tier order for display
+  const sorted = [...TROPHY_REGISTRY].sort(
+    (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)
+  )
+
+  const selectedWins = selected ? (byComp[selected] || []) : []
 
   return (
     <div className={styles.page}>
+
       {/* ── HEADER ── */}
       <div className={styles.museumHeader}>
         <div className={styles.museumGlow} />
@@ -137,8 +191,9 @@ export default function Museum() {
                 <button
                   key={trophy.key}
                   className={`${styles.trophyCard} ${won ? styles.trophyCardWon : styles.trophyCardUnearned}`}
-                  onClick={() => won && setSelected(trophy.key === selected ? null : trophy.key)}
+                  onClick={() => won && setSelected(trophy.key)}
                   disabled={!won}
+                  aria-label={won ? `${trophy.key} — ${wins.length} title${wins.length !== 1 ? 's' : ''}` : trophy.key}
                 >
                   <div className={styles.trophyVis}>
                     <TrophySVG competition={trophy.key} won={won} />
@@ -146,47 +201,25 @@ export default function Museum() {
                   </div>
                   <div className={styles.trophyName}>{trophy.key}</div>
                   <div className={styles.trophyRegion}>{trophy.region}</div>
-                  {won ? (
-                    <div className={styles.trophyCount}>×{wins.length}</div>
-                  ) : (
-                    <div className={styles.trophyNone}>—</div>
-                  )}
-
-                  {/* Expanded seasons won */}
-                  {selected === trophy.key && wins.length > 0 && (
-                    <div className={styles.trophySeasons}>
-                      {wins.map((w, i) => (
-                        <span key={i} className={styles.trophySeason}>{w.seasonLabel || '?'}</span>
-                      ))}
-                    </div>
-                  )}
+                  {won
+                    ? <div className={styles.trophyCount}>×{wins.length}</div>
+                    : <div className={styles.trophyNone}>—</div>
+                  }
                 </button>
               )
             })}
           </div>
         )}
-
-        {/* ── TIMELINE ── */}
-        {!loading && totalWins > 0 && (
-          <div className={styles.timeline}>
-            <div className={styles.timelineLabel}>Trophy Timeline</div>
-            {[...seasons].reverse().map(s => {
-              const seasonTrophies = allTrophies.filter(t => t.seasonId === s.id)
-              if (!seasonTrophies.length) return null
-              return (
-                <div key={s.id} className={styles.timelineRow}>
-                  <span className={styles.timelineSeason}>{s.label}</span>
-                  <div className={styles.timelineTrophies}>
-                    {seasonTrophies.map((t, i) => (
-                      <span key={i} className={styles.timelineTrophy}>{t.competition}</span>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
       </div>
+
+      {/* ── TROPHY DETAIL MODAL ── */}
+      {selected && (
+        <TrophyDetail
+          competition={selected}
+          wins={selectedWins}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   )
 }
