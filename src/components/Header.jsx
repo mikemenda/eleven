@@ -12,7 +12,7 @@ const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   const handleVersionBadge = () => navigate('/')
-  const handleClubBadge = () => { if (activeGame) navigate('/clubs') }
+  const handleClubBadge    = () => { if (activeGame) navigate('/clubs') }
 
   const handleSignOut = async () => {
     setShowUserMenu(false)
@@ -38,7 +38,8 @@ const Header = () => {
           )}
           {activeGame && activeClub && (
             <>
-              <span className={styles.contextDot}>·</span>
+              {/* Vertical divider — CSS-styled, not a raw pipe character */}
+              <span className={styles.contextDivider} aria-hidden="true" />
               <button
                 className={styles.contextClub}
                 onClick={handleClubBadge}
@@ -76,9 +77,7 @@ const Header = () => {
               <div className={styles.userMenu}>
                 <div className={styles.menuName}>{user.displayName || user.email}</div>
                 <div className={styles.menuDivider} />
-                <button className={styles.menuItem} onClick={handleSignOut}>
-                  Sign out
-                </button>
+                <button className={styles.menuItem} onClick={handleSignOut}>Sign out</button>
               </div>
             </>
           )}

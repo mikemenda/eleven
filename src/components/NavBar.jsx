@@ -1,23 +1,21 @@
 import { useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useMatch } from 'react-router-dom'
 import styles from './NavBar.module.css'
 
 // ─── UCL STARBALL ICON ────────────────────────────────────────────────────────
-// Custom simplified starball: circle with 8 radial ticks at 45° intervals.
-// Communicates "Champions League" without copying the official logo.
+// Simplified starball: outer circle + 8-pointed star (4 diamond points rotated)
+// visually matches the UEFA Champions League ball reference image.
+// Implemented as filled star + circle stroke — legible at 20px.
 const UCLIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <circle cx="10" cy="10" r="6.5" stroke="currentColor" strokeWidth="1.4"/>
-    {/* 8 radial tick marks at 45° intervals */}
-    <line x1="10" y1="2"    x2="10" y2="3.8"  stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <line x1="10" y1="16.2" x2="10" y2="18"   stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <line x1="2"  y1="10"   x2="3.8" y2="10"  stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <line x1="16.2" y1="10" x2="18" y2="10"   stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    {/* Diagonal ticks */}
-    <line x1="4.34" y1="4.34" x2="5.61" y2="5.61" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <line x1="14.39" y1="14.39" x2="15.66" y2="15.66" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <line x1="15.66" y1="4.34" x2="14.39" y2="5.61" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <line x1="5.61"  y1="14.39" x2="4.34" y2="15.66" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    {/* Outer circle */}
+    <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.35"/>
+    {/* 8-pointed star — two overlapping rotated squares, filled */}
+    <path
+      d="M10 2.5 L11.3 8.7 L17.5 10 L11.3 11.3 L10 17.5 L8.7 11.3 L2.5 10 L8.7 8.7 Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
   </svg>
 )
 
@@ -59,7 +57,9 @@ const PRIMARY_NAV = [
   },
 ]
 
-// ─── SHEET NAV (hamburger overflow) ──────────────────────────────────────────
+// Sheet nav paths — used to determine if hamburger should be gold
+const SHEET_PATHS = ['/players', '/transfers', '/history', '/museum']
+
 const SHEET_NAV = [
   {
     path: '/players',
@@ -84,7 +84,6 @@ const SHEET_NAV = [
   {
     path: '/history',
     label: 'History',
-    // Trophy/cup icon — replaces clock
     icon: (
       <svg width="22" height="22" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <path d="M7 3h6l1 2H6L7 3Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
@@ -109,31 +108,40 @@ const SHEET_NAV = [
   },
 ]
 
-const SHEET_PATHS = SHEET_NAV.map(item => item.path)
-
 const HamburgerIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
     <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
   </svg>
 )
 
+// ─── ACTIVE STATE HELPERS ─────────────────────────────────────────────────────
+// NavLink's isActive only matches exactly. For nested routes like /seasons/:id
+// and /ucl/*, we need prefix matching. We use useMatch at component level.
+//
+// HamburgerButton receives a prop so we can calculate sheet-route active state
+// inside the parent component where all hooks must be called.
+
 const NavBar = () => {
   const [sheetOpen, setSheetOpen] = useState(false)
-  const location = useLocation()
-  const isSheetRouteActive = SHEET_PATHS.includes(location.pathname)
 
-  const closeSheet = () => setSheetOpen(false)
+  // Prefix matches for routes that have children
+  const onSeasons = useMatch('/seasons/*')
+  const onUCL     = useMatch('/ucl/*')
+
+  // Sheet route active — any sheet path is current
+  const onPlayers   = useMatch('/players/*')
+  const onTransfers = useMatch('/transfers')
+  const onHistory   = useMatch('/history')
+  const onMuseum    = useMatch('/museum')
+  const isSheetRouteActive = !!(onPlayers || onTransfers || onHistory || onMuseum)
+
+  const closeSheet  = () => setSheetOpen(false)
   const toggleSheet = () => setSheetOpen(prev => !prev)
 
   return (
     <>
-      {/* Backdrop */}
       {sheetOpen && (
-        <div
-          className={styles.backdrop}
-          onClick={closeSheet}
-          aria-hidden="true"
-        />
+        <div className={styles.backdrop} onClick={closeSheet} aria-hidden="true" />
       )}
 
       {/* Bottom Sheet */}
@@ -163,22 +171,29 @@ const NavBar = () => {
 
       {/* Primary NavBar */}
       <nav className={styles.nav} aria-label="Main navigation">
-        {PRIMARY_NAV.map(({ path, label, icon }) => (
-          <NavLink
-            key={path}
-            to={path}
-            className={({ isActive }) =>
-              `${styles.item} ${isActive ? styles.active : ''}`
-            }
-          >
-            <span className={styles.icon}>{icon}</span>
-            <span className={styles.label}>{label}</span>
-          </NavLink>
-        ))}
+        {PRIMARY_NAV.map(({ path, label, icon }) => {
+          // For /seasons and /ucl use prefix match so detail pages keep highlight
+          const forceActive =
+            (path === '/seasons' && !!onSeasons) ||
+            (path === '/ucl'     && !!onUCL)
 
-        {/* Hamburger */}
+          return (
+            <NavLink
+              key={path}
+              to={path}
+              className={({ isActive }) =>
+                `${styles.item} ${(isActive || forceActive) ? styles.active : ''}`
+              }
+            >
+              <span className={styles.icon}>{icon}</span>
+              <span className={styles.label}>{label}</span>
+            </NavLink>
+          )
+        })}
+
+        {/* Hamburger — gold when any sheet route is active */}
         <button
-          className={`${styles.item} ${styles.hamburgerBtn} ${isSheetRouteActive || sheetOpen ? styles.active : ''}`}
+          className={`${styles.item} ${styles.hamburgerBtn} ${(isSheetRouteActive || sheetOpen) ? styles.active : ''}`}
           onClick={toggleSheet}
           aria-label="More pages"
           aria-expanded={sheetOpen}

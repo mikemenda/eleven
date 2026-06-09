@@ -26,38 +26,38 @@
 .context {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   min-width: 0;
   overflow: hidden;
   flex: 1;
   justify-content: center;
 }
 
-/* Version label — small, muted, recedes behind club name */
+/* FC version — small, muted */
 .contextVersion {
   background: none;
   border: none;
-  padding: 2px 0;
+  padding: 0;
   cursor: pointer;
   font-family: var(--font-inter);
   font-size: 11px;
   font-weight: 500;
-  color: var(--en-text-4);
+  color: #6677aa;
   letter-spacing: 0.04em;
   white-space: nowrap;
   transition: color 0.15s;
   flex-shrink: 0;
 }
+.contextVersion:hover { color: #c8d0d8; }
 
-.contextVersion:hover { color: var(--en-text-2); }
-
-/* Separator dot */
-.contextDot {
-  color: var(--en-text-5);
-  font-size: 14px;
-  line-height: 1;
+/* Vertical divider — thin, refined, CSS-only */
+.contextDivider {
+  display: inline-block;
+  width: 1px;
+  height: 14px;
+  background: rgba(255,255,255,0.15);
   flex-shrink: 0;
-  user-select: none;
+  border-radius: 1px;
 }
 
 /* Club name — more prominent than version */
@@ -67,12 +67,12 @@
   gap: 7px;
   background: none;
   border: none;
-  padding: 2px 0;
+  padding: 0;
   cursor: pointer;
   font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 600;
-  color: var(--en-text-2);
+  color: #c8d4e0;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -80,8 +80,7 @@
   max-width: 180px;
   transition: color 0.15s;
 }
-
-.contextClub:hover { color: var(--en-text-1); }
+.contextClub:hover { color: #f0f4f8; }
 
 .crestDot {
   display: inline-block;
@@ -102,7 +101,7 @@
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: var(--en-surface);
+  background: rgba(255,255,255,0.07);
   cursor: pointer;
   overflow: hidden;
   display: flex;
@@ -110,9 +109,8 @@
   justify-content: center;
   transition: opacity 0.15s;
   padding: 0;
-  opacity: 0.65;
+  opacity: 0.6;
 }
-
 .avatar:hover { opacity: 1; }
 
 .avatarImg {
@@ -125,7 +123,7 @@
   font-family: var(--font-inter);
   font-size: 11px;
   font-weight: 600;
-  color: var(--en-text-4);
+  color: #8899aa;
 }
 
 .menuOverlay {
@@ -139,12 +137,12 @@
   top: calc(100% + 8px);
   right: 0;
   background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
+  border: 0.5px solid rgba(255,255,255,0.1);
   border-radius: 6px;
   padding: 8px 0;
   min-width: 200px;
   z-index: 100;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   animation: menuFade 0.15s ease both;
 }
 
@@ -157,7 +155,7 @@
   padding: 8px 14px;
   font-family: var(--font-inter);
   font-size: 12px;
-  color: var(--en-text-3);
+  color: #8899aa;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -165,7 +163,7 @@
 
 .menuDivider {
   height: 0.5px;
-  background: var(--en-rule);
+  background: rgba(255,255,255,0.08);
   margin: 4px 0;
 }
 
@@ -180,11 +178,10 @@
   font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 500;
-  color: var(--en-text-3);
+  color: #8899aa;
   transition: all 0.12s;
 }
-
 .menuItem:hover {
-  color: var(--danger);
-  background: rgba(248, 113, 113, 0.08);
+  color: #f87171;
+  background: rgba(248,113,113,0.08);
 }

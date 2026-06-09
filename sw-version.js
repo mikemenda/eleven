@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 56
+// Current: 57
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -52,4 +52,6 @@
 //   53 — UCL fixes: Seasons Ties/Finals boards removed (round record table only); Players season filter (single-select, All Seasons default) + individual position filters (groups + positions mirroring Players.jsx) + combined filtering + G+A column; Records Top5Modal fixed via createPortal (bypasses .inner transform stacking context), Players/Club toggle with Club records under Club view only; Rivals league table restored with column header row (League/Nation/P/W/D/L/GD), club names removed from summary rows, league detail tap-through unchanged
 //   54 — Entry flow design pass: Login/GameSelector/ClubSelector — champagne gold/ivory/slate palette; neon green removed from all three screens; simplified brand (no duplicate XI ELEVEN lockup); softer neutral pitch grid; premium copy; gold selected-card treatment; Club Save card crest monogram visually overridden to gold/ivory (no Firestore write); seasons+trophies derived client-side via getSeasons+deriveTrophiesFromSeasons (fixes 0/0 display); Header unchanged
 //   55 — Entry flow polish patch: gold local primary buttons (Add/Create Save) replace green global btn-primary on entry screens only; muted local cancel buttons replace green btn-ghost; Add Version form card uses dark navy surface + gold focus border; small XI mark seal added above Select Version heading; Club Save card meta line trimmed to Manager · Formation only (style field removed); Login note/prompt contrast nudged up; global.css and Header.jsx untouched
-const SW_VERSION = 55;
+//   56 — Home redesign (v56): Club Archive hero with crest slot + record line; Club Legacy 3-stat strip; Peak Season pull-quote card; Trophy Cabinet won-only with gold SVG icons; Dynasty Arc horizontal fill bars; Club Legends with Cloudflare Worker faces + dual stats; Rivals removed; NavBar restructured (UCL promoted, Players/Transfers to sheet, gold active states, starball UCL icon); Header premium archive context
+//   57 — Home/nav correction pass (v57): section order fixed (Hero→Strip→Honours→Peak→Arc→Legends); hero crest enlarged to 80px matching text height; trophies removed from hero summary line; trophy name two-line layout + count below name; Peak Season uses Inter 800 for season label; Dynasty Arc labels/badges use text not bullets (UCL/PL/Peak); Club Legends removes rank numbers, removes green status, adds 3rd stat (Apps/G+A/C/G or Apps/CS/CS/G); full typography overhaul (Inter 800 stats, visible slate labels, ivory values); header gets CSS vertical divider between FC version and club name; NavBar active state uses useMatch for prefix matching (seasons/*, ucl/*); UCL icon redesigned as proper 8-point starball
+const SW_VERSION = 57;
