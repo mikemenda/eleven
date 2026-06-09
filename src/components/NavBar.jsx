@@ -1,30 +1,26 @@
 import { useState } from 'react'
 import { NavLink, useMatch } from 'react-router-dom'
+import uclNavPng from '../assets/icons/ucl-nav.png'
 import styles from './NavBar.module.css'
 
-// ─── UCL STARBALL ICON ────────────────────────────────────────────────────────
-// Simplified starball: outer circle + 8-pointed star (4 diamond points rotated)
-// visually matches the UEFA Champions League ball reference image.
-// Implemented as filled star + circle stroke — legible at 20px.
-const UCLIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    {/* Outer circle */}
-    <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.35"/>
-    {/* 8-pointed star — two overlapping rotated squares, filled */}
-    <path
-      d="M10 2.5 L11.3 8.7 L17.5 10 L11.3 11.3 L10 17.5 L8.7 11.3 L2.5 10 L8.7 8.7 Z"
-      fill="currentColor"
-      opacity="0.9"
-    />
-  </svg>
+// ─── PRIMARY NAV (4 items + hamburger) ───────────────────────────────────────
+// UCL uses a PNG asset — white transparent starball, CSS-filtered for state.
+// isActive passed as prop to UclNavIcon so the correct filter class is applied.
+
+const UclNavIcon = ({ isActive }) => (
+  <img
+    src={uclNavPng}
+    alt=""
+    aria-hidden="true"
+    className={`${styles.uclIcon} ${isActive ? styles.uclIconActive : ''}`}
+  />
 )
 
-// ─── PRIMARY NAV (4 items + hamburger) ───────────────────────────────────────
 const PRIMARY_NAV = [
   {
     path: '/home',
     label: 'Home',
-    icon: (
+    icon: (active) => (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <path d="M3 9.5L10 3L17 9.5V17H13V12H7V17H3V9.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
       </svg>
@@ -33,12 +29,13 @@ const PRIMARY_NAV = [
   {
     path: '/ucl',
     label: 'UCL',
-    icon: <UCLIcon />,
+    icon: (active) => <UclNavIcon isActive={active} />,
+    isImage: true,
   },
   {
     path: '/seasons',
     label: 'Seasons',
-    icon: (
+    icon: (active) => (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5"/>
         <path d="M3 8H17" stroke="currentColor" strokeWidth="1.5"/>
@@ -49,16 +46,13 @@ const PRIMARY_NAV = [
   {
     path: '/records',
     label: 'Records',
-    icon: (
+    icon: (active) => (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <path d="M5 16V10M8 16V6M11 16V8M14 16V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
     ),
   },
 ]
-
-// Sheet nav paths — used to determine if hamburger should be gold
-const SHEET_PATHS = ['/players', '/transfers', '/history', '/museum']
 
 const SHEET_NAV = [
   {
@@ -114,21 +108,12 @@ const HamburgerIcon = () => (
   </svg>
 )
 
-// ─── ACTIVE STATE HELPERS ─────────────────────────────────────────────────────
-// NavLink's isActive only matches exactly. For nested routes like /seasons/:id
-// and /ucl/*, we need prefix matching. We use useMatch at component level.
-//
-// HamburgerButton receives a prop so we can calculate sheet-route active state
-// inside the parent component where all hooks must be called.
-
 const NavBar = () => {
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  // Prefix matches for routes that have children
-  const onSeasons = useMatch('/seasons/*')
-  const onUCL     = useMatch('/ucl/*')
-
-  // Sheet route active — any sheet path is current
+  // Prefix matches for routes with children
+  const onSeasons   = useMatch('/seasons/*')
+  const onUCL       = useMatch('/ucl/*')
   const onPlayers   = useMatch('/players/*')
   const onTransfers = useMatch('/transfers')
   const onHistory   = useMatch('/history')
@@ -144,7 +129,6 @@ const NavBar = () => {
         <div className={styles.backdrop} onClick={closeSheet} aria-hidden="true" />
       )}
 
-      {/* Bottom Sheet */}
       <div
         className={`${styles.sheet} ${sheetOpen ? styles.sheetOpen : ''}`}
         role="dialog"
@@ -169,10 +153,8 @@ const NavBar = () => {
         </nav>
       </div>
 
-      {/* Primary NavBar */}
       <nav className={styles.nav} aria-label="Main navigation">
         {PRIMARY_NAV.map(({ path, label, icon }) => {
-          // For /seasons and /ucl use prefix match so detail pages keep highlight
           const forceActive =
             (path === '/seasons' && !!onSeasons) ||
             (path === '/ucl'     && !!onUCL)
@@ -185,13 +167,19 @@ const NavBar = () => {
                 `${styles.item} ${(isActive || forceActive) ? styles.active : ''}`
               }
             >
-              <span className={styles.icon}>{icon}</span>
-              <span className={styles.label}>{label}</span>
+              {({ isActive }) => {
+                const active = isActive || forceActive
+                return (
+                  <>
+                    <span className={styles.icon}>{icon(active)}</span>
+                    <span className={styles.label}>{label}</span>
+                  </>
+                )
+              }}
             </NavLink>
           )
         })}
 
-        {/* Hamburger — gold when any sheet route is active */}
         <button
           className={`${styles.item} ${styles.hamburgerBtn} ${(isSheetRouteActive || sheetOpen) ? styles.active : ''}`}
           onClick={toggleSheet}

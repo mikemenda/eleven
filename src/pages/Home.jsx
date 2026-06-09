@@ -3,32 +3,29 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getSeasons, getPlayers } from '../firebase/services'
 import { TROPHY_REGISTRY, TIER_ORDER, deriveTrophiesFromSeasons } from '../utils/trophyUtils'
-import { TrophySVG, GenericTrophySVG } from '../utils/trophyAssets'
+import { TROPHY_PNG_MAP, TrophySVG, GenericTrophySVG } from '../utils/trophyAssets'
 import styles from './Home.module.css'
 
 // ─── CLOUDFLARE WORKER BASE ───────────────────────────────────────────────────
 const CF = 'https://fifa-img.michaelmenda92.workers.dev'
 
 // ─── STAT HELPERS ─────────────────────────────────────────────────────────────
-// Returns THREE stats per legend row (fix #10)
-// NOTE: record is league-only (leagueW/D/L fields). No all-comp totals exist
-// in season docs — so hero record and win rate are both league-only.
-// Labelled "League Record" in hero and comments accordingly.
+// Returns THREE stats per legend row.
+// NOTE: All records use league-only totals (leagueW/D/L/GF fields) — the only
+// all-seasons aggregates available in season docs.
 const legendStats = (player) => {
   const pos  = player.position || ''
   const apps = player.apps || 0
 
   if (pos === 'GK') {
-    const cs    = player.cleanSheets ?? 0
-    const csgm  = apps > 0 ? (cs / apps).toFixed(2) : '—'
+    const cs   = player.cleanSheets ?? 0
+    const csgm = apps > 0 ? (cs / apps).toFixed(2) : '—'
     return [
       { val: apps,  label: 'Apps' },
       { val: cs,    label: 'CS'   },
       { val: csgm,  label: 'CS/G' },
     ]
   }
-
-  // All outfield positions
   const goals   = player.goals   || 0
   const assists = player.assists || 0
   const ga      = goals + assists
@@ -40,13 +37,13 @@ const legendStats = (player) => {
   ]
 }
 
-// Derive accomplishment chips for Peak Season card
+// Accomplishment chips for Peak Season card
 const peakAccomplishments = (season) => {
   const list = []
   if (season.leaguePosition === 1 && season.leagueCompetition) list.push(season.leagueCompetition)
-  if (season.uclResult === 'Champions')        list.push('UCL Champions')
-  if (season.faCupResult === 'Winner')         list.push('FA Cup')
-  if (season.carabaoCupResult === 'Winner')    list.push('Carabao Cup')
+  if (season.uclResult === 'Champions')     list.push('UCL Champions')
+  if (season.faCupResult === 'Winner')      list.push('FA Cup')
+  if (season.carabaoCupResult === 'Winner') list.push('Carabao Cup')
   return list
 }
 
@@ -58,8 +55,6 @@ const Loading = () => (
 )
 
 // ─── SECTION 1: CLUB HERO ────────────────────────────────────────────────────
-// Record uses league-only totals (leagueW/D/L) — the only all-seasons totals
-// available in season docs. No all-competition match totals exist.
 const ClubHero = ({ club, game, seasons }) => {
   const wins   = seasons.reduce((a, s) => a + (s.leagueW || 0), 0)
   const draws  = seasons.reduce((a, s) => a + (s.leagueD || 0), 0)
@@ -73,14 +68,12 @@ const ClubHero = ({ club, game, seasons }) => {
   return (
     <div className={styles.hero}>
       <div className={styles.heroInner}>
-        {/* Crest slot — sized to match height of 3 text lines beside it */}
         <div className={styles.heroCrestSlot}>
           {club.crestUrl
             ? <img src={club.crestUrl} alt={club.name} className={styles.heroCrestImg} />
             : <span className={styles.heroCrestMonogram}>{initials}</span>
           }
         </div>
-
         <div className={styles.heroText}>
           <div className={styles.heroEyebrow}>Club Archive</div>
           <h1 className={styles.heroClubName}>{club.name}</h1>
@@ -89,10 +82,7 @@ const ClubHero = ({ club, game, seasons }) => {
           </div>
         </div>
       </div>
-
       <div className={styles.heroRule} />
-
-      {/* Summary line — trophies excluded (shown in stat strip + Honours) */}
       <div className={styles.heroSummary}>
         {[
           seasons.length > 0 && `${seasons.length} Season${seasons.length !== 1 ? 's' : ''}`,
@@ -146,8 +136,8 @@ const ClubLegacyStrip = ({ seasons, trophyCount }) => {
   )
 }
 
-// ─── SECTION 3: HONOURS (moved above Peak Season per fix #4) ──────────────────
-// Trophy name split map — two-line labels for symmetry under icon (fix #7)
+// ─── SECTION 3: HONOURS ──────────────────────────────────────────────────────
+// Two-line name map for symmetrical layout under trophy icon
 const TROPHY_NAME_LINES = {
   'UEFA Champions League':  ['Champions', 'League'],
   'Premier League':         ['Premier',   'League'],
@@ -160,6 +150,10 @@ const TROPHY_NAME_LINES = {
   'Bundesliga':             ['Bundesliga', ''],
   'Copa del Rey':           ['Copa',       'del Rey'],
   'DFB-Pokal':              ['DFB',        'Pokal'],
+  'Serie A':                ['Serie A',    ''],
+  'Coppa Italia':           ['Coppa',      'Italia'],
+  'Ligue 1':                ['Ligue 1',    ''],
+  'Coupe de France':        ['Coupe',      'de France'],
 }
 
 const TrophyCabinet = ({ trophies }) => {
@@ -193,13 +187,19 @@ const TrophyCabinet = ({ trophies }) => {
       </div>
       <div className={styles.cabinetShelf}>
         {wonList.map(t => {
-          const count      = countByKey[t.key]
-          const TrophyShape = TrophySVG[t.key] || GenericTrophySVG
-          const lines      = TROPHY_NAME_LINES[t.key] || [t.short, '']
+          const count  = countByKey[t.key]
+          const pngSrc = TROPHY_PNG_MAP[t.key]
+          const lines  = TROPHY_NAME_LINES[t.key] || [t.short, '']
+
+          // Use PNG if available, SVG fallback otherwise
+          const TrophyShape = !pngSrc ? (TrophySVG[t.key] || GenericTrophySVG) : null
+
           return (
             <div key={t.key} className={styles.trophyItem}>
-              <TrophyShape className={styles.trophySvg} />
-              {/* Name first, then count below — symmetrical layout (fix #7) */}
+              {pngSrc
+                ? <img src={pngSrc} alt={t.short} className={styles.trophyImg} />
+                : <TrophyShape className={styles.trophySvg} />
+              }
               <span className={styles.trophyName}>
                 {lines[0]}
                 {lines[1] ? <><br />{lines[1]}</> : null}
@@ -213,7 +213,7 @@ const TrophyCabinet = ({ trophies }) => {
   )
 }
 
-// ─── SECTION 4: PEAK SEASON (moved below Honours per fix #4) ─────────────────
+// ─── SECTION 4: PEAK SEASON ──────────────────────────────────────────────────
 const PeakSeason = ({ seasons }) => {
   if (seasons.length === 0) return null
 
@@ -227,11 +227,14 @@ const PeakSeason = ({ seasons }) => {
 
   return (
     <Link to={`/seasons/${peak.id}`} className={styles.peakCard}>
-      <div className={styles.peakHeader}>
-        <span className={styles.peakEyebrow}>Peak Season</span>
+      {/* Compact: season label + score + eyebrow all in one tight block */}
+      <div className={styles.peakRow}>
+        <div className={styles.peakLeft}>
+          <span className={styles.peakEyebrow}>Peak Season</span>
+          <span className={styles.peakSeasonLabel}>{peak.label}</span>
+        </div>
         <span className={styles.peakScorePill}>{peak.dynastyScore}</span>
       </div>
-      <div className={styles.peakSeasonLabel}>{peak.label}</div>
       {accomplishments.length > 0 && (
         <div className={styles.peakAccomplishments}>
           {accomplishments.map((a, i) => (
@@ -244,14 +247,12 @@ const PeakSeason = ({ seasons }) => {
 }
 
 // ─── SECTION 5: DYNASTY ARC ──────────────────────────────────────────────────
-// Badges: UCL = gold "UCL", PL = slate "PL", PEAK = gold "Peak"
-// Unexplained bullet removed entirely (fix #9)
 const DynastyArc = ({ seasons }) => {
   if (seasons.length === 0) return null
 
   const maxScore = Math.max(...seasons.map(s => s.dynastyScore || 0))
   const peakId   = seasons.find(s => s.dynastyScore === maxScore && maxScore > 0)?.id
-  const ordered  = [...seasons].reverse() // chronological
+  const ordered  = [...seasons].reverse()
 
   return (
     <div className={styles.dynasty}>
@@ -259,7 +260,6 @@ const DynastyArc = ({ seasons }) => {
         <span className={styles.sectionLabel}>Dynasty Arc</span>
         <Link to="/seasons" className={styles.sectionLink}>All seasons →</Link>
       </div>
-
       <div className={styles.arcRows}>
         {ordered.map(s => {
           const score   = s.dynastyScore ?? null
@@ -285,8 +285,7 @@ const DynastyArc = ({ seasons }) => {
               <div className={styles.arcBadges}>
                 {isPeak  && <span className={styles.arcBadgePeak}>Peak</span>}
                 {hasUCL  && <span className={styles.arcBadgeUCL}>UCL</span>}
-                {hasPL   && !hasUCL && !isPeak && <span className={styles.arcBadgePL}>PL</span>}
-                {hasPL   && (hasUCL || isPeak)  && <span className={styles.arcBadgePL}>PL</span>}
+                {hasPL   && <span className={styles.arcBadgePL}>PL</span>}
               </div>
             </Link>
           )
@@ -317,15 +316,13 @@ const ClubLegends = ({ players }) => {
       </div>
       <div className={styles.legendsList}>
         {sorted.map((player) => {
-          const stats    = legendStats(player)
-          const isLegend = player.status === 'Sold' && (player.apps || 0) >= 150
-          // Status label — no green, all muted/gold (fix #10)
+          const stats     = legendStats(player)
+          const isLegend  = player.status === 'Sold' && (player.apps || 0) >= 150
           const statusLabel = isLegend ? 'Legend' : (player.status || 'Active')
           const statusCls   = isLegend ? styles.statusLegend : styles.statusMuted
 
           return (
             <Link key={player.id} to={`/players/${player.id}`} className={styles.legendRow}>
-              {/* Face — no rank number (fix #10) */}
               <div className={styles.legendFace}>
                 {player.sofifaId ? (
                   <img
@@ -349,8 +346,6 @@ const ClubLegends = ({ players }) => {
                   </svg>
                 </div>
               </div>
-
-              {/* Info */}
               <div className={styles.legendInfo}>
                 <span className={styles.legendName}>{player.name}</span>
                 <span className={styles.legendMeta}>
@@ -358,8 +353,6 @@ const ClubLegends = ({ players }) => {
                   <span className={`${styles.legendStatus} ${statusCls}`}>{statusLabel}</span>
                 </span>
               </div>
-
-              {/* 3 stats (fix #10) */}
               <div className={styles.legendStats}>
                 {stats.map((st, si) => (
                   <div key={si} className={styles.legendStatCell}>
@@ -377,6 +370,7 @@ const ClubLegends = ({ players }) => {
 }
 
 // ─── MAIN HOME PAGE ───────────────────────────────────────────────────────────
+// Section order: Hero → Strip → Honours → Peak → Arc → Legends
 const Home = () => {
   const { activeGame, activeClub } = useApp()
   const navigate = useNavigate()
@@ -412,13 +406,12 @@ const Home = () => {
   const trophies    = deriveTrophiesFromSeasons(seasons)
   const trophyCount = trophies.length
 
-  // Section order (fix #4): Hero → Strip → Honours → Peak → Arc → Legends
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
         {loading ? <Loading /> : (
           <>
-            <ClubHero    club={activeClub} game={activeGame} seasons={seasons} />
+            <ClubHero        club={activeClub} game={activeGame} seasons={seasons} />
             <ClubLegacyStrip seasons={seasons} trophyCount={trophyCount} />
             <TrophyCabinet   trophies={trophies} />
             <PeakSeason      seasons={seasons} />

@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 57
+// Current: 58
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -24,34 +24,35 @@
 //   21 — Seasons + SeasonDetail audit: 2-filter (All/UCL), UCL detection fix, uclEntered reliability, trophy shelf won-only, UCL major section (LP terminology), league record default-open, dynasty verdict meter, edit form reorder, key moments separators, arc touch targets, creation CTAs hidden, score clamp
 //   22 — Seasons filters removed (clean timeline); SeasonDetail UCL powered by match docs: LP matchday table MD1-MD8, KO leg detail with season-doc fallback
 //   23 — Opponent identity + logo layer: opponents collection, opponentMatcher, opponentSeed, backfillOpponents scripts; SeasonDetail UCL canonical names + crests; Rivals canonical names + crests; getOpponents/getOpponent services
-//   24 — Players Phase 1: sticky stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, seasonStats sorted newest-first, empty states, sessionStorage list state preservation
-//   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed from list rows, identity column flattened (name+pos inline), PlayerProfile outfield 2x4 stat grid, GK 1x4 stat grid
-//   26 — Players Phase 2: add getSeasonStatsByPlayer service; PlayerProfile reads seasonStats collection by scope; UCL per-season table; removed player.seasonStats embedded-array assumption
-//   27 — PlayerProfile debug fix: label join from seasons collection, tabs before grid, tab-gated stat grids
+//   24 — Players Phase 1: sticky stat table, position/role filters, header sort, Loaned filter removed; PlayerProfile: richer totals, GK-aware stats, All Comps tab, Transfer History tab, seasons-at-club, sofifaId removed from hero, sessionStorage list state preservation
+//   25 — Players+PlayerProfile Phase 1B: search font-size 16px (iOS zoom fix), status badge removed, identity column flattened, PlayerProfile outfield 2x4 stat grid, GK 1x4 stat grid
+//   26 — Players Phase 2: getSeasonStatsByPlayer; PlayerProfile UCL tab reads seasonStats collection scope=UCL; two data paths independent
+//   27 — PlayerProfile debug fix: label join from seasons collection, tabs before grid
 //   28 — Fix getSeasonStatsByPlayer: query playerId-only; client-side clubId filter tolerates absent clubId
-//   29 — Fix getSeasonStatsByPlayer: remove clubId filter entirely; playerId is club-scoped
-//   30 — Fix PlayerProfile All Comps: restore player.seasonStats embedded array as data source (original working path); UCL tab reads seasonStats collection scope=UCL with seasons label join; two data paths now independent and cannot interfere
-//   31 — Player Comparison: compare mode in Players list (select 2, sticky CTA); PlayerCompare page at /players/compare with All Comps + UCL tabs, totals with winner highlight, season-by-season table
-//   32 — PlayerCompare improvements: Compare button on PlayerProfile; single-slot mode with picker sheet; remove/replace player slots; no winner highlight with one player; season table hidden until both present; simplified season cols (Apps/C/G/G/G/A/G)
-//   33 — Players season filter: multi-select season pills (OR logic), per-season stat display, summed multi-season stats, scope label bar, career totals when no filter active
-//   34 — Transfers: S1 schema migration script (migrateS1Transfers.mjs); dropdown label fix; deterministic window group sort; context-aware summary bar; stable getTransfers orderBy createdAt
-//   35 — Transfers completion: patchTransferCleanup.mjs (Generated Player rename + legacy removal, Mercado CM, Newerton LW); TransferRow tap-through to PlayerProfile when playerId present; non-playerId rows silent non-tappable
-//   36 — Fix Transfers stuck loading: remove orderBy from getTransfers (no composite index needed); client-side sort unchanged; catch/finally prevents infinite spinner
-//   37 — Transfers identity layer: player face thumbnails (36x36) + club crests (36x36) in transfer rows; layout arrow→face→name/meta→crest→fee; data/transfer-clubs.json (verified sofifaTeamIds); historical stubs hidden from Players list via isHistoricalStub filter
-//   38 — Fix transfer-clubs.json: Brighton corrected 45→1808, Juventus added as 45; row layout changed to arrow→face→name/meta→fee→crest; patchHistoricalStubSofifaIds.mjs adds sofifaId to 9 confirmed historical stubs
-//   39 — Fix transfer-clubs.json: Roma 42→52, Tottenham 6→18, Brentford added (1925), brentform typo alias; Transfers.jsx uses resolveClubIdentity for both displayName label and crest — single source of truth
-//   40 — Brand asset update: real XI PNG logo replaces SVG placeholder in Logo.jsx; icon set generated (pwa-192, pwa-512, apple-touch-icon, favicon.ico) from X1_App.png; index.html favicon + apple-touch-icon wired; vite.config.js includeAssets updated
-//   44 — Rivals data reliability: seasonLabel join from seasons collection, chronological match sort, season grouping in detail, Finals filter checks both round+competition fields, Carabao→Carabao Cup label, stable rival list sort tiebreakers, Rival badge threshold documented
-//   45 — Standardize trophy data path: trophyUtils.js with TROPHY_REGISTRY + deriveTrophiesFromSeasons; Museum/Home both derive from season docs, Firestore trophies collection no longer drives counts; Museum bottom timeline removed, replaced with tap-to-detail modal per trophy
-//   46 — Harden trophy sort (NaN-safe seasonSortKey); Museum grid shows won trophies only; dead locked/unearned CSS removed
-//   47 — Remove Sporting Director: page, route, nav entry, CSS module deleted; shared services untouched
-//   49 — History patch: remove Dynasties, add Back-to-Back UCL detection, fix country ecosystem filter (England/Spain/Italy/Germany/France), extend historyUtils for all future canonical cup/UEL/UECL fields + leagueTop5, replace Dynasties summary card with UCL Finals count
-//   50 — UCL section: /ucl route, hamburger nav entry, tab shell (Overview/Seasons/Knockouts live; Players/Records/Rivals placeholder for v51); src/utils/uclUtils.js with shared derivation helpers; NATION_TO_LEAGUE mapping for 20+ countries
-//   51 — UCL complete: Players tab (sortable UCL stats, GK-aware, player face thumbnails, tap-to-profile); Records tab (UCL player records matching Records→Champions League scope, same min-5-apps rule); Rivals tab (UCL-only opponents, tap-through detail, league/nation records sub-section, deterministic narratives); patch buildUclRivalNarrative club name hardcode; patch Overview "Semi-Finals" label → "SF or Further"
-//   52 — UCL consolidation: 6→5 tabs (Knockouts removed, content absorbed into Seasons); header → UEFA Champions League; Overview restructured (dual stat grids, cleaned hero, Notable with round/season context, removed All-Time Record + Latest Campaign); UclPlayers HTML table with sticky identity column, position group filters, All default; UclRecords Top5Modal + Club Records section; UclRivals full round names in detail, no Final badge, league cards with drill-through detail; PlayerProfile defaults to UCL tab when launched from UCL section via location.state
-//   53 — UCL fixes: Seasons Ties/Finals boards removed (round record table only); Players season filter (single-select, All Seasons default) + individual position filters (groups + positions mirroring Players.jsx) + combined filtering + G+A column; Records Top5Modal fixed via createPortal (bypasses .inner transform stacking context), Players/Club toggle with Club records under Club view only; Rivals league table restored with column header row (League/Nation/P/W/D/L/GD), club names removed from summary rows, league detail tap-through unchanged
-//   54 — Entry flow design pass: Login/GameSelector/ClubSelector — champagne gold/ivory/slate palette; neon green removed from all three screens; simplified brand (no duplicate XI ELEVEN lockup); softer neutral pitch grid; premium copy; gold selected-card treatment; Club Save card crest monogram visually overridden to gold/ivory (no Firestore write); seasons+trophies derived client-side via getSeasons+deriveTrophiesFromSeasons (fixes 0/0 display); Header unchanged
-//   55 — Entry flow polish patch: gold local primary buttons (Add/Create Save) replace green global btn-primary on entry screens only; muted local cancel buttons replace green btn-ghost; Add Version form card uses dark navy surface + gold focus border; small XI mark seal added above Select Version heading; Club Save card meta line trimmed to Manager · Formation only (style field removed); Login note/prompt contrast nudged up; global.css and Header.jsx untouched
-//   56 — Home redesign (v56): Club Archive hero with crest slot + record line; Club Legacy 3-stat strip; Peak Season pull-quote card; Trophy Cabinet won-only with gold SVG icons; Dynasty Arc horizontal fill bars; Club Legends with Cloudflare Worker faces + dual stats; Rivals removed; NavBar restructured (UCL promoted, Players/Transfers to sheet, gold active states, starball UCL icon); Header premium archive context
-//   57 — Home/nav correction pass (v57): section order fixed (Hero→Strip→Honours→Peak→Arc→Legends); hero crest enlarged to 80px matching text height; trophies removed from hero summary line; trophy name two-line layout + count below name; Peak Season uses Inter 800 for season label; Dynasty Arc labels/badges use text not bullets (UCL/PL/Peak); Club Legends removes rank numbers, removes green status, adds 3rd stat (Apps/G+A/C/G or Apps/CS/CS/G); full typography overhaul (Inter 800 stats, visible slate labels, ivory values); header gets CSS vertical divider between FC version and club name; NavBar active state uses useMatch for prefix matching (seasons/*, ucl/*); UCL icon redesigned as proper 8-point starball
-const SW_VERSION = 57;
+//   29 — Fix getSeasonStatsByPlayer: remove clubId filter entirely
+//   30 — Fix PlayerProfile All Comps: restore player.seasonStats embedded array; UCL tab reads seasonStats collection scope=UCL
+//   31 — Player Comparison: compare mode; PlayerCompare page with All Comps + UCL tabs
+//   32 — PlayerCompare improvements: Compare button on PlayerProfile; single-slot picker sheet
+//   33 — Players season filter: multi-select season pills, per-season stat display, summed multi-season stats
+//   34 — Transfers: S1 schema migration; dropdown label fix; deterministic window group sort
+//   35 — Transfers completion: patchTransferCleanup; TransferRow tap-through to PlayerProfile
+//   36 — Fix Transfers stuck loading: remove orderBy from getTransfers
+//   37 — Transfers identity layer: player face thumbnails + club crests; transfer-clubs.json
+//   38 — Fix transfer-clubs.json: Brighton/Juventus; row layout arrow→face→name/meta→fee→crest
+//   39 — Fix transfer-clubs.json: Roma/Tottenham/Brentford; resolveClubIdentity single source
+//   40 — Brand asset update: real XI PNG logo; icon set generated from X1_App.png
+//   44 — Rivals data reliability: seasonLabel join, chronological sort, Finals filter both fields
+//   45 — Standardize trophy data path: trophyUtils.js + deriveTrophiesFromSeasons; Museum/Home both derive from season docs
+//   46 — Harden trophy sort (NaN-safe); Museum won-only grid
+//   47 — Remove Sporting Director
+//   49 — History patch: Back-to-Back UCL, country ecosystem filter, UCL Finals count
+//   50 — UCL section: /ucl route, tab shell, uclUtils.js, NATION_TO_LEAGUE
+//   51 — UCL complete: Players/Records/Rivals tabs; UclRivals narratives
+//   52 — UCL consolidation: 5 tabs; Overview restructured; UclPlayers table; UclRecords Top5Modal
+//   53 — UCL fixes: round record table; season/position filters; Top5Modal createPortal; Rivals league table
+//   54 — Entry flow design pass: gold/ivory/slate palette; neon green removed; gold selected-card
+//   55 — Entry flow polish: gold local buttons; Add Version dark surface; XI mark seal
+//   56 — Home redesign: Club Archive hero; Legacy strip; Peak Season; Honours won-only; Dynasty Arc bars; Legends CF Worker faces; Rivals removed; NavBar restructured; Header premium
+//   57 — Home/nav corrections: section order; crest 80px; trophy two-line layout; Peak Inter 800; Dynasty text badges; Legends 3 stats, no rank, no green; full typography overhaul; header vertical divider; NavBar useMatch active state; UCL starball redesign
+//   58 — Asset polish: real trophy PNGs integrated (12 competitions); UCL nav PNG (transparent white starball, CSS-filtered for active/inactive); --en-gold updated to #E0C27A across global.css + all hardcoded rgba values; Peak Season compacted (single row with eyebrow+S3+score pill, ~40% height reduction); trophyAssets.jsx split into TROPHY_PNG_MAP + SVG fallbacks
+const SW_VERSION = 58;

@@ -41,7 +41,7 @@
 
 /* Subtle gold glow on active icon */
 .active .icon svg {
-  filter: drop-shadow(0 0 4px rgba(212,175,55,0.4));
+  filter: drop-shadow(0 0 4px rgba(224,194,122,0.4));
 }
 
 .label {
@@ -121,7 +121,7 @@
 
 .sheetItem:hover,
 .sheetItem:active {
-  background: rgba(212,175,55,0.05);
+  background: rgba(224,194,122,0.05);
   color: #c8d0d8;
 }
 
@@ -129,7 +129,7 @@
 .sheetItemActive { color: var(--en-gold) !important; }
 
 .sheetItemActive .sheetItemIcon svg {
-  filter: drop-shadow(0 0 4px rgba(212,175,55,0.35));
+  filter: drop-shadow(0 0 4px rgba(224,194,122,0.35));
 }
 
 .sheetItemIcon {
@@ -144,4 +144,20 @@
   font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.01em;
+}
+
+/* ── UCL PNG icon ──────────────────────────────────────────────── */
+/* White transparent starball — CSS filter for inactive/active states */
+.uclIcon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  /* Inactive: desaturate to dark slate using CSS filter */
+  filter: brightness(0) saturate(100%) invert(35%) sepia(10%) saturate(500%) hue-rotate(180deg);
+  transition: filter 0.15s ease;
+}
+
+/* Active: shift white starball to gold (#E0C27A) */
+.uclIconActive {
+  filter: brightness(0) saturate(100%) invert(82%) sepia(28%) saturate(600%) hue-rotate(10deg) brightness(1.0);
 }

@@ -238,7 +238,7 @@
 
 .cabinetShelf {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   overflow-x: auto;
   padding-bottom: 4px;
   scrollbar-width: none;
@@ -252,9 +252,18 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  min-width: 52px;
+  min-width: 56px;
 }
 
+/* Real PNG trophy image */
+.trophyImg {
+  width: 56px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* SVG fallback — for competitions with no PNG */
 .trophySvg {
   width: 40px;
   height: 54px;
@@ -262,7 +271,7 @@
   flex-shrink: 0;
 }
 
-/* Trophy name — two lines, centered, readable (fix #7) */
+/* Trophy name — two lines, centered, readable */
 .trophyName {
   font-family: var(--font-inter);
   font-size: 9px;
@@ -274,7 +283,7 @@
   line-height: 1.4;
 }
 
-/* Count — below name, gold, always shown (×1, ×7, etc.) (fix #7) */
+/* Count — below name, gold, always shown */
 .trophyCount {
   font-family: var(--font-inter);
   font-size: 12px;
@@ -293,65 +302,75 @@
   padding: 4px 0 2px;
 }
 
-/* ─── SECTION 4: PEAK SEASON ─────────────────────────────────────── */
+/* ─── SECTION 4: PEAK SEASON — compact layout ────────────────────── */
 .peakCard {
   display: block;
-  padding: 24px 24px 20px 22px;
+  padding: 16px 24px 14px 22px;
   border-bottom: 0.5px solid var(--en-rule);
   border-left: 2px solid var(--en-gold);
-  background: rgba(212, 175, 55, 0.04);
+  background: rgba(224, 194, 122, 0.04);
   text-decoration: none;
   transition: background 0.15s;
 }
-.peakCard:hover { background: rgba(212, 175, 55, 0.07); }
+.peakCard:hover { background: rgba(224, 194, 122, 0.07); }
 
-.peakHeader {
+/* Single row: [eyebrow + season label] on left, score pill on right */
+.peakRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-/* "PEAK SEASON" label — visible gold, not tiny */
+.peakLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* "PEAK SEASON" eyebrow */
 .peakEyebrow {
   font-family: var(--font-inter);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--en-gold);
+  opacity: 0.85;
+}
+
+/* Season label — S3, compact but clear */
+.peakSeasonLabel {
+  font-family: var(--font-inter);
+  font-weight: 800;
+  font-size: 28px;
+  color: #f0f4f8;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 /* Dynasty score pill */
 .peakScorePill {
   font-family: var(--font-inter);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--en-gold);
-  background: rgba(212,175,55,0.12);
-  padding: 2px 8px;
+  background: rgba(224, 194, 122, 0.12);
+  padding: 4px 10px;
   border-radius: 4px;
   letter-spacing: 0.02em;
-}
-
-/* Season label (S3) — Inter 800, large, ivory. Not Playfair. (fix #8) */
-.peakSeasonLabel {
-  font-family: var(--font-inter);
-  font-weight: 800;
-  font-size: 40px;
-  color: #f0f4f8;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
 .peakAccomplishments {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
-/* Achievement chips — ivory border, readable */
+/* Achievement chips */
 .peakChip {
   font-family: var(--font-inter);
   font-size: 11px;
@@ -458,7 +477,7 @@
   text-transform: uppercase;
   color: var(--en-gold);
   padding: 1px 5px;
-  border: 0.5px solid rgba(212,175,55,0.5);
+  border: 0.5px solid rgba(224,194,122,0.5);
   border-radius: 3px;
 }
 
