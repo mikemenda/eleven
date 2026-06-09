@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getPlayer, getSeasons, getTransfers, getSeasonStatsByPlayer } from '../firebase/services'
 import styles from './PlayerProfile.module.css'
@@ -268,13 +268,16 @@ export default function PlayerProfile() {
   const { id } = useParams()
   const { activeClub } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [player,    setPlayer]    = useState(null)
   const [allStats,  setAllStats]  = useState([])  // from player.seasonStats embedded array
   const [uclStats,  setUclStats]  = useState([])  // from seasonStats collection, scope=UCL
   const [transfers, setTransfers] = useState([])
   const [loading,   setLoading]   = useState(true)
-  const [tab,       setTab]       = useState('career')
+  // Default to 'ucl' tab when navigated from UCL section (via location.state.defaultTab)
+  // All other navigation paths pass no state and default to 'career' as before.
+  const [tab,       setTab]       = useState(location.state?.defaultTab || 'career')
 
   useEffect(() => {
     if (!activeClub) return

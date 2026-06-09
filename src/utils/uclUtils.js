@@ -490,6 +490,7 @@ export function deriveUclLeagueRecords(uclMatches, opponents) {
     return {
       country, league,
       clubs:   [...clubs].sort(),
+      matches,          // kept so league detail view can render per-match rows
       p:       matches.length,
       w, d, l,
       gf, ga,
@@ -498,7 +499,145 @@ export function deriveUclLeagueRecords(uclMatches, opponents) {
   }).sort((a, b) => b.p - a.p)
 }
 
-// ─── DETERMINISTIC RIVAL NARRATIVE ───────────────────────────────────────────
+// ─── UCL CLUB RECORDS ─────────────────────────────────────────────────────────
+// Derives club-level UCL match and campaign records.
+// Sources: uclMatches (match docs) + uclSeasons (season docs).
+// Returns a plain object — all values are null-safe.
+export function deriveUclClubRecords(uclMatches, uclSeasons, opponents) {
+  // ── Match-level records ────────────────────────────────────────────────────
+
+  function oppName(m) {
+    if (!m) return null
+    const rec = opponents?.get(m.opponentKey)
+    return rec?.displayName || m.opponent || null
+  }
+
+  function compLabel(comp) {
+    return ROUND_LABELS[comp] || comp || ''
+  }
+
+  const wins   = uclMatches.filter(m => m.score_for  > m.score_against)
+  const losses = uclMatches.filter(m => m.score_for  < m.score_against)
+
+  const biggestWin = wins.length
+    ? [...wins].sort((a, b) => {
+        const dA = a.score_for - a.score_against
+        const dB = b.score_for - b.score_against
+        if (dB !== dA) return dB - dA
+        return (b.score_for || 0) - (a.score_for || 0)
+      })[0]
+    : null
+
+  const worstDefeat = losses.length
+    ? [...losses].sort((a, b) => {
+        const dA = a.score_for - a.score_against  // most negative = worst
+        const dB = b.score_for - b.score_against
+        if (dA !== dB) return dA - dB
+        return (b.score_against || 0) - (a.score_against || 0)
+      })[0]
+    : null
+
+  const highestScoringMatch = uclMatches.length
+    ? [...uclMatches].sort((a, b) => (b.score_for || 0) - (a.score_for || 0))[0]
+    : null
+
+  // ── Campaign-level records ─────────────────────────────────────────────────
+
+  // Group match totals by seasonId
+  const campaignTotals = {}
+  for (const m of uclMatches) {
+    if (!campaignTotals[m.seasonId]) {
+      campaignTotals[m.seasonId] = { gf: 0, ga: 0, w: 0, d: 0, l: 0 }
+    }
+    const ct = campaignTotals[m.seasonId]
+    ct.gf += m.score_for     || 0
+    ct.ga += m.score_against || 0
+    if      (m.score_for > m.score_against) ct.w++
+    else if (m.score_for < m.score_against) ct.l++
+    else                                    ct.d++
+  }
+
+  // Join to season docs for labels
+  const seasonById = {}
+  for (const s of uclSeasons) { if (s.id) seasonById[s.id] = s }
+
+  const campaignEntries = Object.entries(campaignTotals).map(([seasonId, ct]) => {
+    const s = seasonById[seasonId] || {}
+    const p = ct.w + ct.d + ct.l
+    return {
+      seasonId,
+      label:   s.label || '—',
+      year:    s.year  || '',
+      gf: ct.gf, ga: ct.ga,
+      w: ct.w, d: ct.d, l: ct.l, p,
+      pts: ct.w * 3 + ct.d,
+    }
+  }).filter(e => e.p > 0)
+
+  const mostGoalsCampaign = campaignEntries.length
+    ? [...campaignEntries].sort((a, b) => b.gf - a.gf)[0]
+    : null
+
+  const fewestConcededCampaign = campaignEntries.length
+    ? [...campaignEntries].sort((a, b) => a.ga - b.ga)[0]
+    : null
+
+  // Best campaign record — by points, then GD as tiebreaker
+  const bestCampaign = campaignEntries.length
+    ? [...campaignEntries].sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts
+        return (b.gf - b.ga) - (a.gf - a.ga)
+      })[0]
+    : null
+
+  // ── Finals record ──────────────────────────────────────────────────────────
+  const finalSeasons = uclSeasons.filter(s =>
+    s.uclResult === 'Champions' || s.uclResult === 'Runners-Up'
+  )
+  const finalWins = finalSeasons.filter(s => s.uclResult === 'Champions').length
+  const finalLoss = finalSeasons.filter(s => s.uclResult === 'Runners-Up').length
+
+  return {
+    biggestWin:           biggestWin ? {
+      score: `${biggestWin.score_for}–${biggestWin.score_against}`,
+      opp:   oppName(biggestWin),
+      round: compLabel(biggestWin.competition),
+      season: biggestWin.seasonLabel || '',
+    } : null,
+    worstDefeat:          worstDefeat ? {
+      score: `${worstDefeat.score_for}–${worstDefeat.score_against}`,
+      opp:   oppName(worstDefeat),
+      round: compLabel(worstDefeat.competition),
+      season: worstDefeat.seasonLabel || '',
+    } : null,
+    highestScoringMatch:  highestScoringMatch ? {
+      score: `${highestScoringMatch.score_for}–${highestScoringMatch.score_against}`,
+      opp:   oppName(highestScoringMatch),
+      round: compLabel(highestScoringMatch.competition),
+      season: highestScoringMatch.seasonLabel || '',
+    } : null,
+    mostGoalsCampaign:    mostGoalsCampaign ? {
+      gf:     mostGoalsCampaign.gf,
+      label:  mostGoalsCampaign.label,
+      record: `${mostGoalsCampaign.w}W ${mostGoalsCampaign.d}D ${mostGoalsCampaign.l}L`,
+    } : null,
+    fewestConcededCampaign: fewestConcededCampaign ? {
+      ga:     fewestConcededCampaign.ga,
+      label:  fewestConcededCampaign.label,
+      record: `${fewestConcededCampaign.w}W ${fewestConcededCampaign.d}D ${fewestConcededCampaign.l}L`,
+    } : null,
+    bestCampaign:         bestCampaign ? {
+      label:  bestCampaign.label,
+      record: `${bestCampaign.w}W ${bestCampaign.d}D ${bestCampaign.l}L`,
+      pts:    bestCampaign.pts,
+      gf:     bestCampaign.gf,
+      ga:     bestCampaign.ga,
+    } : null,
+    finals: { played: finalSeasons.length, won: finalWins, lost: finalLoss },
+  }
+}
+
+
 // Generates a data-grounded summary sentence from UCL match history.
 // No AI, no invented facts. All statements derived directly from match docs.
 // clubName: pass activeClub.name — never hardcode a club name here.

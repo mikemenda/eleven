@@ -1,7 +1,6 @@
 import styles from './UCL.module.css'
-import { fmtScore, fmtGD } from '../../utils/uclUtils'
+import { fmtScore, fmtGD, ROUND_LABELS } from '../../utils/uclUtils'
 
-// Result finish label → display string
 const FINISH_DISPLAY = {
   'Champions':  'Champions',
   'Runners-Up': 'Runners-Up',
@@ -12,43 +11,33 @@ const FINISH_DISPLAY = {
   'LP Only':    'League Phase',
 }
 
-// Small stat block used in the hero row
-function StatPill({ label, value, accent }) {
-  return (
-    <div className={styles.ovStatPill}>
-      <span
-        className={styles.ovStatVal}
-        style={accent ? { color: 'var(--en-gold)' } : undefined}
-      >
-        {value}
-      </span>
-      <span className={styles.ovStatKey}>{label}</span>
-    </div>
-  )
-}
-
-// Inline W/D/L coloured stat
-function WDL({ w, d, l }) {
-  return (
-    <span className={styles.ovWDL}>
-      <span style={{ color: 'var(--en-green)' }}>{w}W</span>
-      {' '}
-      <span style={{ color: 'var(--en-text-3)' }}>{d}D</span>
-      {' '}
-      <span style={{ color: 'var(--danger)' }}>{l}L</span>
-    </span>
-  )
-}
-
-// Enrich a match doc with opponent display name from the opponents map
-function matchDisplayName(m, opponents) {
+// Lookup opponent display name from opponents map
+function oppName(m, opponents) {
   if (!m) return null
-  const key = m.opponentKey
-  if (key && opponents?.has(key)) return opponents.get(key).displayName || m.opponent
-  return m.opponent || null
+  const rec = opponents?.get(m.opponentKey)
+  return rec?.displayName || m.opponent || null
 }
 
-export default function UclOverview({ overview, uclSeasons, opponents, loading }) {
+// Compact round + season context string
+function matchCtx(m) {
+  const round  = ROUND_LABELS[m.competition] || m.competition || ''
+  const season = m.seasonLabel || ''
+  if (round && season) return `${round} · ${season}`
+  return round || season || null
+}
+
+// Record vs most common opponent
+function recordVsOpp(uclMatches, oppKey) {
+  if (!oppKey) return null
+  const ms = uclMatches.filter(m => (m.opponentKey || m.opponent) === oppKey)
+  if (!ms.length) return null
+  const w = ms.filter(m => m.score_for  > m.score_against).length
+  const d = ms.filter(m => m.score_for === m.score_against).length
+  const l = ms.filter(m => m.score_for  < m.score_against).length
+  return `${w}W ${d}D ${l}L`
+}
+
+export default function UclOverview({ overview, uclSeasons, uclMatches, opponents, loading }) {
   if (loading) {
     return (
       <div className={styles.loadWrap}>
@@ -67,13 +56,21 @@ export default function UclOverview({ overview, uclSeasons, opponents, loading }
     )
   }
 
-  const { campaigns, titles, finals, semis, quarters, played, w, d, l, gf, ga, gd, bestFinish, biggestWin, worstLoss, mostCommonOppKey, winRate } = overview
+  const {
+    campaigns, titles, finals, semis, quarters,
+    played, w, d, l, gf, ga, gd,
+    bestFinish, biggestWin, worstLoss,
+    mostCommonOppKey, winRate,
+  } = overview
 
-  const biggestWinOpp  = matchDisplayName(biggestWin,  opponents)
-  const worstLossOpp   = matchDisplayName(worstLoss,   opponents)
+  const biggestWinOpp  = oppName(biggestWin,  opponents)
+  const worstLossOpp   = oppName(worstLoss,   opponents)
   const mostCommonName = mostCommonOppKey && opponents?.has(mostCommonOppKey)
     ? opponents.get(mostCommonOppKey).displayName
     : mostCommonOppKey
+  const vsRecord = recordVsOpp(uclMatches || [], mostCommonOppKey)
+
+  const gpg = played > 0 ? (gf / played).toFixed(2) : '0.00'
 
   return (
     <div className={styles.ovWrap}>
@@ -82,38 +79,68 @@ export default function UclOverview({ overview, uclSeasons, opponents, loading }
       <div className={styles.ovHero}>
         <div className={styles.ovHeroLabel}>UEFA Champions League</div>
         <div className={styles.ovHeroName}>European Record</div>
-        <div className={styles.ovHeroSub}>
-          {campaigns} campaign{campaigns !== 1 ? 's' : ''}
-          {titles > 0 && ` · ${titles} title${titles !== 1 ? 's' : ''}`}
-          {finals > 0 && ` · ${finals} final${finals !== 1 ? 's' : ''}`}
-        </div>
-        <div className={styles.ovHeroRecord}>
-          <WDL w={w} d={d} l={l} />
-          <span className={styles.ovHeroDivider}>·</span>
-          <span className={styles.ovHeroGoals}>{gf}–{ga}</span>
-        </div>
       </div>
 
-      {/* ── Stat row ──────────────────────────────────────────────── */}
+      {/* ── Stat grid 1: Match record ─────────────────────────────── */}
       <div className={styles.ovStatRow}>
-        <StatPill label="Matches"    value={played} />
-        <StatPill label="Goals For"  value={gf} />
-        <StatPill label="Goals Ag."  value={ga} />
-        <StatPill label="Win Rate"   value={`${winRate}%`} accent />
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal}>{played}</span>
+          <span className={styles.ovStatKey}>Matches</span>
+        </div>
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal} style={{ color: 'var(--en-green)' }}>{w}</span>
+          <span className={styles.ovStatKey}>Wins</span>
+        </div>
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal} style={{ color: 'var(--en-text-3)' }}>{d}</span>
+          <span className={styles.ovStatKey}>Draws</span>
+        </div>
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal} style={{ color: 'var(--danger)' }}>{l}</span>
+          <span className={styles.ovStatKey}>Losses</span>
+        </div>
       </div>
 
-      {/* ── Stage breakdown ───────────────────────────────────────── */}
+      {/* ── Stat grid 2: Goals ────────────────────────────────────── */}
+      <div className={styles.ovStatRow}>
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal}>{gf}</span>
+          <span className={styles.ovStatKey}>GF</span>
+        </div>
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal}>{ga}</span>
+          <span className={styles.ovStatKey}>GA</span>
+        </div>
+        <div className={styles.ovStatPill}>
+          <span
+            className={styles.ovStatVal}
+            style={{ color: gd > 0 ? 'var(--en-green)' : gd < 0 ? 'var(--danger)' : undefined }}
+          >
+            {gd > 0 ? `+${gd}` : gd}
+          </span>
+          <span className={styles.ovStatKey}>GD</span>
+        </div>
+        <div className={styles.ovStatPill}>
+          <span className={styles.ovStatVal} style={{ color: 'var(--en-gold)' }}>{gpg}</span>
+          <span className={styles.ovStatKey}>G/G</span>
+        </div>
+      </div>
+
+      {/* ── Results grid ──────────────────────────────────────────── */}
       <div className={styles.ovSection}>
-        <p className={styles.ovSectionTitle}>Campaign Results</p>
+        <p className={styles.ovSectionTitle}>Results</p>
         <div className={styles.ovStageGrid}>
           {[
-            { label: 'Titles',       value: titles },
-            { label: 'Finals',       value: finals },
-            { label: 'SF or Further', value: semis + finals },
-            { label: 'QF or Further', value: quarters + semis + finals },
+            { label: 'Appearances', value: campaigns },
+            { label: 'KO Round',    value: quarters + semis + finals },
+            { label: 'Finals',      value: finals },
+            { label: 'Titles',      value: titles },
           ].map(({ label, value }) => (
             <div key={label} className={styles.ovStageItem}>
-              <span className={styles.ovStageVal} style={value > 0 ? { color: 'var(--en-gold)' } : undefined}>
+              <span
+                className={styles.ovStageVal}
+                style={value > 0 ? { color: 'var(--en-gold)' } : undefined}
+              >
                 {value}
               </span>
               <span className={styles.ovStageKey}>{label}</span>
@@ -122,95 +149,57 @@ export default function UclOverview({ overview, uclSeasons, opponents, loading }
         </div>
       </div>
 
-      {/* ── Record detail ─────────────────────────────────────────── */}
-      <div className={styles.ovSection}>
-        <p className={styles.ovSectionTitle}>All-Time Record</p>
-        <div className={styles.ovRecordTable}>
-          {[
-            { label: 'Played',         value: played },
-            { label: 'Won',            value: w,  color: 'var(--en-green)' },
-            { label: 'Drawn',          value: d,  color: 'var(--en-text-3)' },
-            { label: 'Lost',           value: l,  color: 'var(--danger)' },
-            { label: 'Goals For',      value: gf },
-            { label: 'Goals Against',  value: ga },
-            { label: 'Goal Difference',value: fmtGD(gf, ga), color: gd > 0 ? 'var(--en-green)' : gd < 0 ? 'var(--danger)' : undefined },
-            { label: 'Best Finish',    value: bestFinish ? (FINISH_DISPLAY[bestFinish] || bestFinish) : '—' },
-          ].map(({ label, value, color }) => (
-            <div key={label} className={styles.ovRecordRow}>
-              <span className={styles.ovRecordLabel}>{label}</span>
-              <span className={styles.ovRecordValue} style={color ? { color } : undefined}>{value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Notable matches ───────────────────────────────────────── */}
+      {/* ── Notable ───────────────────────────────────────────────── */}
       {(biggestWin || worstLoss || mostCommonName) && (
         <div className={styles.ovSection}>
           <p className={styles.ovSectionTitle}>Notable</p>
           <div className={styles.ovRecordTable}>
+
             {biggestWin && (
               <div className={styles.ovRecordRow}>
                 <span className={styles.ovRecordLabel}>Biggest Win</span>
-                <span className={styles.ovRecordValue} style={{ color: 'var(--en-green)' }}>
-                  {fmtScore(biggestWin.score_for, biggestWin.score_against)}
-                  {biggestWinOpp && <span className={styles.ovMatchOpp}> vs {biggestWinOpp}</span>}
-                </span>
+                <div className={styles.ovRecordRight}>
+                  <span className={styles.ovRecordValue} style={{ color: 'var(--en-green)' }}>
+                    {fmtScore(biggestWin.score_for, biggestWin.score_against)}
+                    {biggestWinOpp && ` vs ${biggestWinOpp}`}
+                  </span>
+                  {biggestWin.competition && (
+                    <span className={styles.ovRecordSub}>{matchCtx(biggestWin)}</span>
+                  )}
+                </div>
               </div>
             )}
+
             {worstLoss && (
               <div className={styles.ovRecordRow}>
-                <span className={styles.ovRecordLabel}>Worst Loss</span>
-                <span className={styles.ovRecordValue} style={{ color: 'var(--danger)' }}>
-                  {fmtScore(worstLoss.score_for, worstLoss.score_against)}
-                  {worstLossOpp && <span className={styles.ovMatchOpp}> vs {worstLossOpp}</span>}
-                </span>
+                <span className={styles.ovRecordLabel}>Worst Defeat</span>
+                <div className={styles.ovRecordRight}>
+                  <span className={styles.ovRecordValue} style={{ color: 'var(--danger)' }}>
+                    {fmtScore(worstLoss.score_for, worstLoss.score_against)}
+                    {worstLossOpp && ` vs ${worstLossOpp}`}
+                  </span>
+                  {worstLoss.competition && (
+                    <span className={styles.ovRecordSub}>{matchCtx(worstLoss)}</span>
+                  )}
+                </div>
               </div>
             )}
+
             {mostCommonName && (
               <div className={styles.ovRecordRow}>
                 <span className={styles.ovRecordLabel}>Most Common Opp.</span>
-                <span className={styles.ovRecordValue}>{mostCommonName}</span>
+                <div className={styles.ovRecordRight}>
+                  <span className={styles.ovRecordValue}>{mostCommonName}</span>
+                  {vsRecord && (
+                    <span className={styles.ovRecordSub}>{vsRecord}</span>
+                  )}
+                </div>
               </div>
             )}
+
           </div>
         </div>
       )}
-
-      {/* ── Latest campaign ───────────────────────────────────────── */}
-      {uclSeasons.length > 0 && (() => {
-        const latest = [...uclSeasons].sort((a, b) => {
-          const ya = typeof a.year === 'string' ? parseInt(a.year.slice(0, 4), 10) : 0
-          const yb = typeof b.year === 'string' ? parseInt(b.year.slice(0, 4), 10) : 0
-          return yb - ya
-        })[0]
-        if (!latest) return null
-        const finishLabel = FINISH_DISPLAY[latest.uclResult] || latest.uclResult || '—'
-        const won = latest.uclResult === 'Champions'
-        return (
-          <div className={styles.ovSection}>
-            <p className={styles.ovSectionTitle}>Latest Campaign</p>
-            <div className={styles.ovLatestCard}>
-              <div className={styles.ovLatestSeason}>
-                {latest.label}
-                <span className={styles.ovLatestYear}> · {latest.year}</span>
-              </div>
-              <div
-                className={styles.ovLatestResult}
-                style={{ color: won ? 'var(--en-gold)' : undefined }}
-              >
-                {finishLabel}
-              </div>
-              {latest.uclFinalOpponent && (
-                <div className={styles.ovLatestFinal}>
-                  Final vs {latest.uclFinalOpponent}
-                  {latest.uclFinalScore ? ` · ${latest.uclFinalScore}` : ''}
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      })()}
     </div>
   )
 }

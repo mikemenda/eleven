@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import styles from './UCL.module.css'
-import { fmtScore, ROUND_SHORT, ROUND_LABELS } from '../../utils/uclUtils'
+import { fmtScore, fmtGD, ROUND_LABELS, UCL_KO_COMPS } from '../../utils/uclUtils'
 
 const FINISH_DISPLAY = {
   'Champions':  'Champions',
@@ -34,50 +34,49 @@ function matchCrest(opponentKey, opponents) {
   return opponents.get(opponentKey)?.crestUrl || null
 }
 
-// Campaign card — collapsed view in the list
+function ordinal(n) {
+  if (n == null) return ''
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return s[(v - 20) % 10] || s[v] || s[0]
+}
+
+const MD_ORDER = ['MD1','MD2','MD3','MD4','MD5','MD6','MD7','MD8']
+
+// ─── Campaign card ────────────────────────────────────────────────────────────
 function CampaignCard({ summary, opponents, onSelect }) {
-  const { season, matchRecord, lpRecord, koPath } = summary
-  const finish = season.uclResult
+  const { season, matchRecord, koPath } = summary
+  const finish      = season.uclResult
   const finishLabel = FINISH_DISPLAY[finish] || finish || '—'
-  const finishColor = FINISH_COLOR[finish] || 'var(--en-text-3)'
-  const isChampion = finish === 'Champions'
+  const finishColor = FINISH_COLOR[finish]   || 'var(--en-text-3)'
+  const isChampion  = finish === 'Champions'
 
   return (
     <button className={styles.sznCard} onClick={() => onSelect(summary)}>
-      {/* Header row */}
       <div className={styles.sznCardHead}>
         <div className={styles.sznCardLeft}>
           <span className={styles.sznLabel}>{season.label}</span>
           <span className={styles.sznYear}>{season.year}</span>
         </div>
-        <span
-          className={styles.sznResult}
-          style={{ color: finishColor }}
-        >
+        <span className={styles.sznResult} style={{ color: finishColor }}>
           {isChampion && <span className={styles.sznStar}>★ </span>}
           {finishLabel}
         </span>
       </div>
 
-      {/* Record row */}
       {matchRecord.p > 0 && (
         <div className={styles.sznCardRecord}>
-          <span className={styles.sznRecordItem}>
-            <span className={styles.sznRecordVal}>{matchRecord.p}</span>
-            <span className={styles.sznRecordKey}>P</span>
-          </span>
-          <span className={styles.sznRecordItem}>
-            <span className={styles.sznRecordVal} style={{ color: 'var(--en-green)' }}>{matchRecord.w}</span>
-            <span className={styles.sznRecordKey}>W</span>
-          </span>
-          <span className={styles.sznRecordItem}>
-            <span className={styles.sznRecordVal} style={{ color: 'var(--en-text-3)' }}>{matchRecord.d}</span>
-            <span className={styles.sznRecordKey}>D</span>
-          </span>
-          <span className={styles.sznRecordItem}>
-            <span className={styles.sznRecordVal} style={{ color: 'var(--danger)' }}>{matchRecord.l}</span>
-            <span className={styles.sznRecordKey}>L</span>
-          </span>
+          {[
+            { k: 'P',  v: matchRecord.p },
+            { k: 'W',  v: matchRecord.w,  c: 'var(--en-green)'  },
+            { k: 'D',  v: matchRecord.d,  c: 'var(--en-text-3)' },
+            { k: 'L',  v: matchRecord.l,  c: 'var(--danger)'    },
+          ].map(({ k, v, c }) => (
+            <span key={k} className={styles.sznRecordItem}>
+              <span className={styles.sznRecordVal} style={c ? { color: c } : undefined}>{v}</span>
+              <span className={styles.sznRecordKey}>{k}</span>
+            </span>
+          ))}
           <span className={styles.sznRecordDivider} />
           <span className={styles.sznRecordItem}>
             <span className={styles.sznRecordVal}>{matchRecord.gf}</span>
@@ -90,16 +89,16 @@ function CampaignCard({ summary, opponents, onSelect }) {
         </div>
       )}
 
-      {/* KO path strip */}
+      {/* KO path strip in card — short labels fine here */}
       {koPath.length > 0 && (
         <div className={styles.sznKOStrip}>
           {koPath.map(ko => {
-            const oppName = ko.oppKey && opponents?.has(ko.oppKey)
+            const name  = ko.oppKey && opponents?.has(ko.oppKey)
               ? opponents.get(ko.oppKey).displayName
               : ko.opp || '?'
             const crest = matchCrest(ko.oppKey, opponents)
-            const aggStr = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
-            const resColor = ko.res === 'W' ? 'var(--en-green)' : ko.res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
+            const agg   = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
+            const col   = ko.res === 'W' ? 'var(--en-green)' : ko.res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
             return (
               <div key={ko.comp} className={styles.sznKOItem}>
                 <span className={styles.sznKORound}>{ko.label}</span>
@@ -107,10 +106,8 @@ function CampaignCard({ summary, opponents, onSelect }) {
                   <img src={crest} alt="" className={styles.sznKOCrest}
                     onError={e => { e.currentTarget.style.display = 'none' }} />
                 )}
-                <span className={styles.sznKOOpp}>{oppName}</span>
-                {aggStr && (
-                  <span className={styles.sznKOAgg} style={{ color: resColor }}>{aggStr}</span>
-                )}
+                <span className={styles.sznKOOpp}>{name}</span>
+                {agg && <span className={styles.sznKOAgg} style={{ color: col }}>{agg}</span>}
               </div>
             )
           })}
@@ -124,25 +121,17 @@ function CampaignCard({ summary, opponents, onSelect }) {
   )
 }
 
-// ── MD_ORDER for sorting League Phase matchdays ───────────────────────────────
-const MD_ORDER = ['MD1','MD2','MD3','MD4','MD5','MD6','MD7','MD8']
-
-// Campaign detail — expanded view
+// ─── Campaign detail ──────────────────────────────────────────────────────────
 function CampaignDetail({ summary, opponents, onBack }) {
   const { season, lpRecord, koPath, matchRecord, biggestWin } = summary
-  const finish = season.uclResult
+  const finish      = season.uclResult
   const finishLabel = FINISH_DISPLAY[finish] || finish || '—'
   const isChampion  = finish === 'Champions'
-  const finishColor = FINISH_COLOR[finish] || 'var(--en-text-3)'
-
-  // League Phase matchday rows from the UCL matches for this season
-  // We need to pull these from the koPath's parent — actually they're passed
-  // from the parent component as the full match set per season
-  // (LP rows are in summary.lpMatchDocs if populated, else use lpRecord)
+  const finishColor = FINISH_COLOR[finish]   || 'var(--en-text-3)'
 
   return (
     <div className={styles.sznDetail}>
-      {/* Back button + header */}
+      {/* Header */}
       <div className={styles.sznDetailHead}>
         <button className={styles.backBtn} onClick={onBack}>
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
@@ -158,18 +147,18 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </span>
       </div>
 
-      {/* Overall record */}
+      {/* Campaign record */}
       {matchRecord.p > 0 && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Campaign Record</p>
           <div className={styles.sznDetailStatRow}>
             {[
-              { k: 'P',   v: matchRecord.p },
-              { k: 'W',   v: matchRecord.w, c: 'var(--en-green)'  },
-              { k: 'D',   v: matchRecord.d, c: 'var(--en-text-3)' },
-              { k: 'L',   v: matchRecord.l, c: 'var(--danger)'    },
-              { k: 'GF',  v: matchRecord.gf },
-              { k: 'GA',  v: matchRecord.ga },
+              { k: 'P',  v: matchRecord.p },
+              { k: 'W',  v: matchRecord.w, c: 'var(--en-green)'  },
+              { k: 'D',  v: matchRecord.d, c: 'var(--en-text-3)' },
+              { k: 'L',  v: matchRecord.l, c: 'var(--danger)'    },
+              { k: 'GF', v: matchRecord.gf },
+              { k: 'GA', v: matchRecord.ga },
             ].map(({ k, v, c }) => (
               <div key={k} className={styles.sznDetailStat}>
                 <span className={styles.sznDetailStatVal} style={c ? { color: c } : undefined}>{v}</span>
@@ -180,7 +169,7 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* League Phase from season doc */}
+      {/* League Phase summary */}
       {(lpRecord || season.uclLeaguePhasePosition != null) && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>League Phase</p>
@@ -209,7 +198,7 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* LP matchday table from match docs */}
+      {/* LP matchday table */}
       {summary.lpMatchDocs?.length > 0 && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Matchday Results</p>
@@ -229,24 +218,24 @@ function CampaignDetail({ summary, opponents, onBack }) {
                 return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
               })
               .map((m, i) => {
-                const oppName = matchOppName(m, opponents)
-                const crest   = matchCrest(m.opponentKey, opponents)
-                const res = m.score_for > m.score_against ? 'W' : m.score_for < m.score_against ? 'L' : 'D'
-                const resColor = res === 'W' ? 'var(--en-green)' : res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
+                const name  = matchOppName(m, opponents)
+                const crest = matchCrest(m.opponentKey, opponents)
+                const res   = m.score_for > m.score_against ? 'W' : m.score_for < m.score_against ? 'L' : 'D'
+                const col   = res === 'W' ? 'var(--en-green)' : res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
                 return (
                   <div key={m.id ?? i} className={styles.sznMatchRow}>
                     <span className={styles.sznMD}>{m.round ? m.round.replace('MD','') : '—'}</span>
                     <span className={styles.sznMOpp}>
                       {crest && <img src={crest} alt="" className={styles.sznMCrest}
                         onError={e => { e.currentTarget.style.display = 'none' }} />}
-                      {oppName}
+                      {name}
                     </span>
                     <span className={styles.sznMVen}
                       style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
                       {m.home_away || '—'}
                     </span>
                     <span className={styles.sznMScore}>{fmtScore(m.score_for, m.score_against) ?? '—'}</span>
-                    <span className={styles.sznMRes} style={{ color: resColor }}>{res}</span>
+                    <span className={styles.sznMRes} style={{ color: col }}>{res}</span>
                   </div>
                 )
               })
@@ -255,42 +244,41 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* Knockout path */}
+      {/* Knockout path — full round names */}
       {koPath.length > 0 && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Knockout Path</p>
           {koPath.map(ko => {
-            const oppName = ko.oppKey && opponents?.has(ko.oppKey)
+            const name   = ko.oppKey && opponents?.has(ko.oppKey)
               ? opponents.get(ko.oppKey).displayName
               : ko.opp || '?'
-            const crest   = matchCrest(ko.oppKey, opponents)
-            const aggStr  = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
-            const resColor = ko.res === 'W' ? 'var(--en-green)' : ko.res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
+            const crest  = matchCrest(ko.oppKey, opponents)
+            const agg    = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
+            const col    = ko.res === 'W' ? 'var(--en-green)' : ko.res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
+            // Full round label from ROUND_LABELS
+            const fullLabel = ROUND_LABELS[ko.comp] || ko.label
 
             return (
               <div key={ko.comp} className={styles.sznKORow}>
-                <span className={styles.sznKORoundBadge}>{ko.label}</span>
+                <span className={styles.sznKORoundBadge}>{fullLabel}</span>
                 <div className={styles.sznKOOppBlock}>
                   {crest && (
                     <img src={crest} alt="" className={styles.sznKOCrestLg}
                       onError={e => { e.currentTarget.style.display = 'none' }} />
                   )}
-                  <span className={styles.sznKOOppName}>{oppName}</span>
+                  <span className={styles.sznKOOppName}>{name}</span>
                 </div>
-                {aggStr && (
-                  <span className={styles.sznKOAggLg} style={{ color: resColor }}>{aggStr}</span>
-                )}
-                {/* Individual legs */}
+                {agg && <span className={styles.sznKOAggLg} style={{ color: col }}>{agg}</span>}
                 {ko.legs?.length > 0 && (
                   <div className={styles.sznKOLegs}>
                     {ko.legs.map((leg, li) => {
-                      const legRes = leg.score_for > leg.score_against ? 'W' : leg.score_for < leg.score_against ? 'L' : 'D'
-                      const legResColor = legRes === 'W' ? 'var(--en-green)' : legRes === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
+                      const lr  = leg.score_for > leg.score_against ? 'W' : leg.score_for < leg.score_against ? 'L' : 'D'
+                      const lc  = lr === 'W' ? 'var(--en-green)' : lr === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
                       return (
                         <span key={li} className={styles.sznKOLeg}>
                           <span className={styles.sznKOLegLabel}>Leg {leg.leg ?? li + 1}</span>
                           <span className={styles.sznKOLegScore}>{fmtScore(leg.score_for, leg.score_against)}</span>
-                          <span style={{ color: legResColor }}>{legRes}</span>
+                          <span style={{ color: lc }}>{lr}</span>
                           <span className={styles.sznKOLegVenue}
                             style={{ color: leg.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
                             {leg.home_away || ''}
@@ -321,14 +309,113 @@ function CampaignDetail({ summary, opponents, onBack }) {
   )
 }
 
-function ordinal(n) {
-  if (n == null) return ''
-  const s = ['th','st','nd','rd']
-  const v = n % 100
-  return s[(v - 20) % 10] || s[v] || s[0]
+// ─── Career knockout section (moved from UclKnockouts) ───────────────────────
+// Compact aggregate view placed at the bottom of the seasons list.
+function CareerKnockoutSection({ knockoutData, finals, opponents }) {
+  const { legRecord, tieRecord, lpRecord, koTotal } = knockoutData || {}
+
+  const hasLegData  = legRecord  && UCL_KO_COMPS.some(c => legRecord[c]?.p > 0)
+  const hasTieData  = tieRecord  && UCL_KO_COMPS.some(c => tieRecord[c]?.ties > 0)
+  const hasFinals   = finals?.length > 0
+
+  if (!hasLegData && !hasFinals) return null
+
+  return (
+    <div className={styles.sznCareerKO}>
+      <p className={styles.sznCareerKOTitle}>Career Knockout Record</p>
+
+      {/* Round record table */}
+      {hasLegData && (
+        <>
+          <div className={styles.koTableHead}>
+            <span className={styles.koThRound}>Round</span>
+            <span className={styles.koThStat}>P</span>
+            <span className={styles.koThStat}>W</span>
+            <span className={styles.koThStat}>D</span>
+            <span className={styles.koThStat}>L</span>
+            <span className={styles.koThStat}>GD</span>
+          </div>
+
+          {UCL_KO_COMPS.map(comp => {
+            const row = legRecord[comp]
+            if (!row || row.p === 0) return null
+            const isFinal = comp === 'UCL_Final'
+            return (
+              <div key={comp} className={styles.koTableRow}
+                style={isFinal ? { borderTop: '0.5px solid var(--en-rule)' } : undefined}>
+                <span className={styles.koTdRound} style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
+                  {ROUND_LABELS[comp] || comp}
+                </span>
+                <span className={styles.koTdStat}>{row.p}</span>
+                <span className={styles.koTdStat} style={{ color: 'var(--en-green)' }}>{row.w}</span>
+                <span className={styles.koTdStat} style={{ color: 'var(--en-text-3)' }}>{row.d}</span>
+                <span className={styles.koTdStat} style={{ color: 'var(--danger)' }}>{row.l}</span>
+                <span className={styles.koTdStat}
+                  style={{ color: row.gd > 0 ? 'var(--en-green)' : row.gd < 0 ? 'var(--danger)' : undefined }}>
+                  {fmtGD(row.gf, row.ga)}
+                </span>
+              </div>
+            )
+          })}
+        </>
+      )}
+
+      {/* Tie record — compact */}
+      {hasTieData && (
+        <div className={styles.sznTieBlock}>
+          <p className={styles.sznTieBlockLabel}>Ties</p>
+          {UCL_KO_COMPS.map(comp => {
+            const row = tieRecord[comp]
+            if (!row || row.ties === 0) return null
+            const isFinal = comp === 'UCL_Final'
+            return (
+              <div key={comp} className={styles.sznTieRow}>
+                <span className={styles.sznTieRound}
+                  style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
+                  {ROUND_LABELS[comp] || comp}
+                </span>
+                <span className={styles.sznTieAdv} style={{ color: 'var(--en-green)' }}>
+                  {row.advanced} advanced
+                </span>
+                <span className={styles.sznTieElim} style={{ color: 'var(--danger)' }}>
+                  {row.eliminated} out
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Finals log — compact */}
+      {hasFinals && (
+        <div className={styles.sznFinalsBlock}>
+          <p className={styles.sznTieBlockLabel}>Finals</p>
+          {finals.map(f => {
+            const won   = f.result === 'Champions'
+            const color = won ? 'var(--en-gold)' : 'var(--en-text-3)'
+            return (
+              <div key={f.seasonId} className={styles.sznFinalRow}>
+                {f.crest && (
+                  <img src={f.crest} alt="" className={styles.sznFinalCrest}
+                    onError={e => { e.currentTarget.style.display = 'none' }} />
+                )}
+                <div className={styles.sznFinalInfo}>
+                  <span className={styles.sznFinalSeason}>{f.seasonLabel}</span>
+                  <span className={styles.sznFinalOpp}>vs {f.opponent || '—'}</span>
+                </div>
+                {f.score && <span className={styles.sznFinalScore} style={{ color }}>{f.score}</span>}
+                <span className={styles.sznFinalRes} style={{ color }}>{won ? '★ W' : 'L'}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
-export default function UclSeasons({ summaries, opponents, loading }) {
+// ─── Main component ───────────────────────────────────────────────────────────
+export default function UclSeasons({ summaries, opponents, knockoutData, finals, loading }) {
   const [selected, setSelected] = useState(null)
 
   if (loading) {
@@ -359,7 +446,6 @@ export default function UclSeasons({ summaries, opponents, loading }) {
     )
   }
 
-  // Most recent first
   const sorted = [...summaries].sort((a, b) => {
     const ya = typeof a.season.year === 'string' ? parseInt(a.season.year.slice(0, 4), 10) : 0
     const yb = typeof b.season.year === 'string' ? parseInt(b.season.year.slice(0, 4), 10) : 0
@@ -376,6 +462,13 @@ export default function UclSeasons({ summaries, opponents, loading }) {
           onSelect={setSelected}
         />
       ))}
+
+      {/* Career knockout aggregate — compact, below campaign cards */}
+      <CareerKnockoutSection
+        knockoutData={knockoutData}
+        finals={finals}
+        opponents={opponents}
+      />
     </div>
   )
 }

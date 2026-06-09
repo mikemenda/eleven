@@ -17,7 +17,6 @@ import {
 } from '../../utils/uclUtils'
 import UclOverview   from './UclOverview'
 import UclSeasons    from './UclSeasons'
-import UclKnockouts  from './UclKnockouts'
 import UclPlayers    from './UclPlayers'
 import UclRecords    from './UclRecords'
 import UclRivals     from './UclRivals'
@@ -25,12 +24,11 @@ import styles from './UCL.module.css'
 
 // ─── Tab definitions ─────────────────────────────────────────────────────────
 const TABS = [
-  { key: 'overview',   label: 'Overview'  },
-  { key: 'seasons',    label: 'Seasons'   },
-  { key: 'knockouts',  label: 'Knockouts' },
-  { key: 'players',    label: 'Players'   },
-  { key: 'records',    label: 'Records'   },
-  { key: 'rivals',     label: 'Rivals'    },
+  { key: 'overview',  label: 'Overview' },
+  { key: 'seasons',   label: 'Seasons'  },
+  { key: 'players',   label: 'Players'  },
+  { key: 'records',   label: 'Records'  },
+  { key: 'rivals',    label: 'Rivals'   },
 ]
 
 const VALID_TABS = TABS.map(t => t.key)
@@ -121,10 +119,7 @@ export default function UCL() {
 
       {/* Top bar */}
       <div className={styles.topBar}>
-        <span className={styles.topLabel}>UCL</span>
-        <span className={styles.topSub}>
-          {loading ? '…' : `${uclSeasons.length} campaign${uclSeasons.length !== 1 ? 's' : ''}`}
-        </span>
+        <span className={styles.topLabel}>UEFA Champions League</span>
       </div>
 
       {/* Tab bar */}
@@ -148,6 +143,7 @@ export default function UCL() {
           <UclOverview
             overview={overview}
             uclSeasons={uclSeasons}
+            uclMatches={uclMatches}
             opponents={opponents}
             loading={loading}
           />
@@ -155,13 +151,8 @@ export default function UCL() {
           <UclSeasons
             summaries={summaries}
             opponents={opponents}
-            loading={loading}
-          />
-        ) : tab === 'knockouts' ? (
-          <UclKnockouts
             knockoutData={knockoutData}
             finals={finals}
-            opponents={opponents}
             loading={loading}
           />
         ) : tab === 'players' ? (
@@ -172,6 +163,9 @@ export default function UCL() {
         ) : tab === 'records' ? (
           <UclRecords
             players={players}
+            uclMatches={uclMatches}
+            uclSeasons={uclSeasons}
+            opponents={opponents}
             loading={loading}
           />
         ) : tab === 'rivals' ? (
