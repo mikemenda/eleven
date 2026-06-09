@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './UCL.module.css'
-import { deriveUclPlayerStats, isGK } from '../../utils/uclUtils'
+import { isGK } from '../../utils/uclUtils'
 
-// ─── Position constants (from Players.jsx) ───────────────────────────────────
-const POS_ORDER   = ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','CF','ST']
+// ─── Position constants (mirrors Players.jsx exactly) ────────────────────────
+const POS_ORDER = ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','CF','ST']
 const ROLE_GROUPS = {
   Attackers:   ['ST','RW','LW','LM','RM','CAM','CF'],
   Midfielders: ['CM','CDM'],
@@ -16,16 +16,53 @@ function splitPositions(posStr) {
   return posStr.split(/[,\/]+/).map(p => p.trim()).filter(Boolean)
 }
 
-function playerMatchesFilter(player, filter) {
-  if (filter === 'All') return true
-  if (filter === 'GK')  return isGK(player)
+function playerMatchesFilter(player, posFilter) {
+  if (posFilter === 'All') return true
+  if (posFilter === 'GK')  return isGK(player)
   const positions = splitPositions(player.position)
-  if (ROLE_GROUPS[filter]) return positions.some(p => ROLE_GROUPS[filter].includes(p))
-  return positions.includes(filter)
+  if (ROLE_GROUPS[posFilter]) return positions.some(p => ROLE_GROUPS[posFilter].includes(p))
+  return positions.includes(posFilter)
+}
+
+// ─── UCL season stat summation ────────────────────────────────────────────────
+// For a selected season, sum that season's UCL fields from embedded seasonStats[].
+// Returns null if the player has no UCL data in that season.
+function sumUclSeasonStats(player, seasonLabel) {
+  const rows = (player.seasonStats || []).filter(
+    ss => ss.label === seasonLabel && (ss.uclApps || 0) > 0
+  )
+  if (!rows.length) return null
+  return rows.reduce((acc, ss) => ({
+    uclApps:        acc.uclApps        + (ss.uclApps        || 0),
+    uclGoals:       acc.uclGoals       + (ss.uclGoals       || 0),
+    uclAssists:     acc.uclAssists     + (ss.uclAssists     || 0),
+    uclCleanSheets: acc.uclCleanSheets + (ss.uclCleanSheets || 0),
+  }), { uclApps: 0, uclGoals: 0, uclAssists: 0, uclCleanSheets: 0 })
+}
+
+// ─── Derive UCL stats for a single player ────────────────────────────────────
+// Career mode: sum all uclApps/etc from embedded seasonStats[].
+// Fallback to top-level fields if no embedded array.
+function derivePlayerUclStats(player) {
+  let uclApps = 0, uclGoals = 0, uclAssists = 0, uclCleanSheets = 0
+  if (player.seasonStats?.length) {
+    for (const ss of player.seasonStats) {
+      uclApps        += ss.uclApps        || 0
+      uclGoals       += ss.uclGoals       || 0
+      uclAssists     += ss.uclAssists     || 0
+      uclCleanSheets += ss.uclCleanSheets || 0
+    }
+  } else {
+    uclApps        = player.uclApps        || 0
+    uclGoals       = player.uclGoals       || 0
+    uclAssists     = player.uclAssists     || 0
+    uclCleanSheets = player.uclCleanSheets || 0
+  }
+  return { uclApps, uclGoals, uclAssists, uclCleanSheets }
 }
 
 // ─── Player photo ─────────────────────────────────────────────────────────────
-function PlayerImg({ sofifaId, name, size = 32 }) {
+function PlayerImg({ sofifaId, name, size = 28 }) {
   const [err, setErr] = useState(false)
   if (!sofifaId || err) return <Silhouette size={size} />
   return (
@@ -39,7 +76,7 @@ function PlayerImg({ sofifaId, name, size = 32 }) {
   )
 }
 
-function Silhouette({ size = 32 }) {
+function Silhouette({ size = 28 }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
@@ -57,28 +94,19 @@ function Silhouette({ size = 32 }) {
 
 // ─── Column definitions ───────────────────────────────────────────────────────
 const OUTFIELD_COLS = [
-  { key: 'uclApps',    label: 'Apps', title: 'UCL Appearances',      isRate: false },
-  { key: 'uclGoals',   label: 'G',    title: 'UCL Goals',            isRate: false },
-  { key: 'uclAssists', label: 'A',    title: 'UCL Assists',          isRate: false },
-  { key: 'uclContrib', label: 'G+A',  title: 'UCL Contributions',    isRate: false },
-  { key: 'uclGpg',     label: 'G/G',  title: 'UCL Goals per Game',   isRate: true  },
-  { key: 'uclCpg',     label: 'C/G',  title: 'UCL Contribs per Game',isRate: true  },
+  { key: 'uclApps',    label: 'Apps', title: 'UCL Appearances',       isRate: false },
+  { key: 'uclGoals',   label: 'G',    title: 'UCL Goals',             isRate: false },
+  { key: 'uclAssists', label: 'A',    title: 'UCL Assists',           isRate: false },
+  { key: 'uclContrib', label: 'G+A',  title: 'UCL Contributions',     isRate: false },
+  { key: 'uclGpg',     label: 'G/G',  title: 'UCL Goals per Game',    isRate: true  },
+  { key: 'uclCpg',     label: 'C/G',  title: 'UCL Contributions/Game',isRate: true  },
 ]
 
 const GK_COLS = [
-  { key: 'uclApps',        label: 'Apps', title: 'UCL Appearances',            isRate: false },
-  { key: 'uclCleanSheets', label: 'CS',   title: 'UCL Clean Sheets',           isRate: false },
-  { key: 'uclCspg',        label: 'CS/G', title: 'UCL Clean Sheets per Game',  isRate: true  },
-  { key: 'uclGoals',       label: 'G',    title: 'UCL Goals',                  isRate: false },
-]
-
-// Filter bar options
-const FILTER_OPTIONS = [
-  { key: 'All',        label: 'All',        isGroup: false },
-  { key: 'Attackers',  label: 'Attackers',  isGroup: true  },
-  { key: 'Midfielders',label: 'Mids',       isGroup: true  },
-  { key: 'Defenders',  label: 'Defenders',  isGroup: true  },
-  { key: 'GK',         label: 'GK',         isGroup: false },
+  { key: 'uclApps',        label: 'Apps', title: 'UCL Appearances',           isRate: false },
+  { key: 'uclCleanSheets', label: 'CS',   title: 'UCL Clean Sheets',          isRate: false },
+  { key: 'uclCspg',        label: 'CS/G', title: 'UCL Clean Sheets per Game', isRate: true  },
+  { key: 'uclGoals',       label: 'G',    title: 'UCL Goals',                 isRate: false },
 ]
 
 function fmtStat(v, isRate) {
@@ -86,26 +114,69 @@ function fmtStat(v, isRate) {
   return isRate ? Number(v).toFixed(2) : String(v)
 }
 
-export default function UclPlayers({ players, loading }) {
+// ─── Enrich a stats object with derived rate fields ───────────────────────────
+function enrichStats(raw) {
+  const { uclApps, uclGoals, uclAssists, uclCleanSheets } = raw
+  return {
+    ...raw,
+    uclContrib: uclGoals + uclAssists,
+    uclGpg:     uclApps > 0 ? uclGoals   / uclApps : 0,
+    uclApg:     uclApps > 0 ? uclAssists / uclApps : 0,
+    uclCpg:     uclApps > 0 ? (uclGoals + uclAssists) / uclApps : 0,
+    uclCspg:    uclApps > 0 ? uclCleanSheets / uclApps : 0,
+  }
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+export default function UclPlayers({ players, uclSeasons, loading }) {
   const navigate = useNavigate()
-  const [filter,  setFilter]  = useState('All')       // default All
-  const [sortKey, setSortKey] = useState('uclApps')
-  const [sortDir, setSortDir] = useState('desc')
+
+  const [posFilter,    setPosFilter]    = useState('All')
+  const [seasonFilter, setSeasonFilter] = useState('all')   // 'all' or a season label string
+  const [sortKey,      setSortKey]      = useState('uclApps')
+  const [sortDir,      setSortDir]      = useState('desc')
 
   if (loading) {
+    return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
+  }
+
+  // ── Base player set: only non-stubs ──────────────────────────────────────
+  const base = players.filter(p => !p.isHistoricalStub)
+
+  // ── Build stats per player (career or season-filtered) ───────────────────
+  const withStats = base.map(p => {
+    let raw
+    if (seasonFilter === 'all') {
+      raw = derivePlayerUclStats(p)
+    } else {
+      raw = sumUclSeasonStats(p, seasonFilter)
+      if (!raw) return null   // player had no UCL data this season
+    }
+    return {
+      id:       p.id,
+      name:     p.name,
+      position: p.position,
+      sofifaId: p.sofifaId,
+      status:   p.status,
+      ...enrichStats(raw),
+    }
+  }).filter(Boolean).filter(p => p.uclApps > 0)
+
+  if (withStats.length === 0 && base.length > 0) {
     return (
-      <div className={styles.loadWrap}>
-        <div className={styles.spinner} />
+      <div className={styles.empty}>
+        <span className={styles.emptyIcon}>👤</span>
+        <p className={styles.emptyText}>No UCL stats found</p>
+        <p className={styles.emptyHint}>
+          {seasonFilter !== 'all'
+            ? `No UCL data for ${seasonFilter}.`
+            : 'Player UCL stats appear once seasonStats are seeded.'}
+        </p>
       </div>
     )
   }
 
-  const allStats = deriveUclPlayerStats(players).map(p => ({
-    ...p,
-    uclCspg: p.uclApps > 0 ? p.uclCleanSheets / p.uclApps : 0,
-  }))
-
-  if (allStats.length === 0) {
+  if (withStats.length === 0) {
     return (
       <div className={styles.empty}>
         <span className={styles.emptyIcon}>👤</span>
@@ -115,9 +186,36 @@ export default function UclPlayers({ players, loading }) {
     )
   }
 
-  const filtered = allStats.filter(p => playerMatchesFilter(p, filter))
-  const cols     = filter === 'GK' ? GK_COLS : OUTFIELD_COLS
+  // ── Build position filter options (dynamic, mirrors Players.jsx) ──────────
+  // Only show groups/positions present in the current (season-filtered) player set
+  const presentPositions = new Set(withStats.flatMap(p => splitPositions(p.position)))
+  const posFilterOptions = [
+    { key: 'All', label: 'All' },
+    ...Object.keys(ROLE_GROUPS)
+      .filter(g => ROLE_GROUPS[g].some(p => presentPositions.has(p)))
+      .map(g => ({ key: g, label: g })),
+    ...POS_ORDER
+      .filter(p => presentPositions.has(p))
+      .map(p => ({ key: p, label: p })),
+  ]
 
+  // ── Season pills: derived from uclSeasons, newest-first ──────────────────
+  const seasonLabels = [...(uclSeasons || [])]
+    .sort((a, b) => {
+      const ya = typeof a.year === 'string' ? parseInt(a.year.slice(0, 4), 10) : 0
+      const yb = typeof b.year === 'string' ? parseInt(b.year.slice(0, 4), 10) : 0
+      return yb - ya
+    })
+    .map(s => s.label)
+    .filter(Boolean)
+
+  // ── Apply position filter ─────────────────────────────────────────────────
+  const cols = (posFilter === 'GK' || (posFilter === 'All' && withStats.every(p => isGK(p))))
+    ? GK_COLS : OUTFIELD_COLS
+
+  const filtered = withStats.filter(p => playerMatchesFilter(p, posFilter))
+
+  // ── Sort ──────────────────────────────────────────────────────────────────
   const sorted = [...filtered].sort((a, b) => {
     const av = a[sortKey] ?? 0
     const bv = b[sortKey] ?? 0
@@ -129,27 +227,53 @@ export default function UclPlayers({ players, loading }) {
     else { setSortKey(key); setSortDir('desc') }
   }
 
-  function handleRowClick(id) {
-    // Navigate to PlayerProfile defaulting to UCL tab
-    navigate(`/players/${id}`, { state: { defaultTab: 'ucl' } })
-  }
-
-  // Rebuild filter when switching group so sort key is valid for new cols
-  function handleFilter(key) {
-    setFilter(key)
+  function handlePosFilter(key) {
+    setPosFilter(key)
     setSortKey('uclApps')
     setSortDir('desc')
   }
 
+  function handleSeasonFilter(label) {
+    setSeasonFilter(label)
+    setSortKey('uclApps')
+    setSortDir('desc')
+  }
+
+  function handleRowClick(id) {
+    navigate(`/players/${id}`, { state: { defaultTab: 'ucl' } })
+  }
+
   return (
     <div className={styles.plWrap}>
-      {/* Filter bar */}
+
+      {/* ── Season filter pills ───────────────────────────────────── */}
+      {seasonLabels.length > 0 && (
+        <div className={styles.plSeasonBar}>
+          <button
+            className={`${styles.plSeasonBtn} ${seasonFilter === 'all' ? styles.plSeasonActive : ''}`}
+            onClick={() => handleSeasonFilter('all')}
+          >
+            All Seasons
+          </button>
+          {seasonLabels.map(label => (
+            <button
+              key={label}
+              className={`${styles.plSeasonBtn} ${seasonFilter === label ? styles.plSeasonActive : ''}`}
+              onClick={() => handleSeasonFilter(label)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Position filter pills ─────────────────────────────────── */}
       <div className={styles.plFilterBar}>
-        {FILTER_OPTIONS.map(f => (
+        {posFilterOptions.map(f => (
           <button
             key={f.key}
-            className={`${styles.plFilterBtn} ${filter === f.key ? styles.plFilterActive : ''}`}
-            onClick={() => handleFilter(f.key)}
+            className={`${styles.plFilterBtn} ${posFilter === f.key ? styles.plFilterActive : ''} ${ROLE_GROUPS[f.key] ? styles.plFilterGroup : ''}`}
+            onClick={() => handlePosFilter(f.key)}
           >
             {f.label}
           </button>
@@ -157,16 +281,14 @@ export default function UclPlayers({ players, loading }) {
         <span className={styles.plCount}>{sorted.length} player{sorted.length !== 1 ? 's' : ''}</span>
       </div>
 
-      {/* Table — HTML table with sticky identity column, same pattern as Players.jsx */}
+      {/* ── Table ────────────────────────────────────────────────── */}
       <div className={styles.plTableScroll}>
         <table className={styles.plTableEl}>
           <thead>
             <tr>
-              {/* Frozen identity header */}
               <th className={styles.plThIdentity}>
                 <span className={styles.plThNameInner}>Player</span>
               </th>
-              {/* Scrollable stat headers */}
               {cols.map(c => (
                 <th key={c.key} className={styles.plThStat}>
                   <button
@@ -185,12 +307,7 @@ export default function UclPlayers({ players, loading }) {
           </thead>
           <tbody>
             {sorted.map(p => (
-              <tr
-                key={p.id}
-                className={styles.plTr}
-                onClick={() => handleRowClick(p.id)}
-              >
-                {/* Frozen identity cell */}
+              <tr key={p.id} className={styles.plTr} onClick={() => handleRowClick(p.id)}>
                 <td className={styles.plTdIdentity}>
                   <div className={styles.plIdentity}>
                     <div className={styles.plThumb}>
@@ -202,7 +319,6 @@ export default function UclPlayers({ players, loading }) {
                     </div>
                   </div>
                 </td>
-                {/* Stat cells */}
                 {cols.map(c => (
                   <td
                     key={c.key}

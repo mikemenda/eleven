@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import styles from './UCL.module.css'
 import { isGK, deriveUclClubRecords } from '../../utils/uclUtils'
@@ -34,7 +35,7 @@ function Silhouette({ size = 36 }) {
   )
 }
 
-// ─── Record helpers (mirrors Records.jsx — local to avoid refactor) ──────────
+// ─── Record helpers (local, mirrors Records.jsx — avoids risky refactor) ─────
 function maxBy(arr, fn) {
   if (!arr.length) return null
   return arr.reduce((best, x) => fn(x) > fn(best) ? x : best, arr[0])
@@ -111,7 +112,6 @@ function computeUclRecords(players) {
     bestCpg:    maxByEntryRate(seasonEntries, e => (e.ss.uclApps || 0) >= 5 ? ((e.ss.uclGoals || 0) + (e.ss.uclAssists || 0)) / e.ss.uclApps : null),
   }
 
-  // Pre-compute top5 lists for modal
   const top5 = {
     career_goals:   top5By(withUCL, p => p.uclGoals,
       p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.uclGoals, ctx: `${p.uclApps} UCL apps` })),
@@ -146,10 +146,11 @@ function computeUclRecords(players) {
   return { career, season, top5 }
 }
 
-// ─── Top 5 Modal — mirrors Records.jsx Top5Modal exactly ─────────────────────
+// ─── Top 5 Modal — rendered via createPortal to document.body ────────────────
+// This bypasses the CSS transform on .inner which would otherwise trap position:fixed.
 function Top5Modal({ title, items, onClose, onPlayerClick }) {
   if (!items) return null
-  return (
+  const modal = (
     <div className={styles.rModalOverlay} onClick={onClose}>
       <div className={styles.rModal} onClick={e => e.stopPropagation()}>
         <div className={styles.rModalHeader}>
@@ -190,9 +191,11 @@ function Top5Modal({ title, items, onClose, onPlayerClick }) {
       </div>
     </div>
   )
+  // Portal to document.body — bypasses .inner transform stacking context
+  return createPortal(modal, document.body)
 }
 
-// ─── RecordCard — right side now tappable for Top5 ───────────────────────────
+// ─── Record card — right side tappable for Top5 ──────────────────────────────
 function RecordCard({ label, player, value, ctx, highlight, onCardClick, onPlayerClick }) {
   function handlePlayer() {
     if (player?.id && onPlayerClick) onPlayerClick(player.id)
@@ -218,7 +221,7 @@ function RecordCard({ label, player, value, ctx, highlight, onCardClick, onPlaye
   )
 }
 
-// Club record card — no photo, just label + holder + value
+// Club record card — no photo
 function ClubRecordCard({ label, holder, value, ctx }) {
   return (
     <div className={styles.rClubCard}>
@@ -250,7 +253,8 @@ function fmtRate(n) {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function UclRecords({ players, uclMatches, uclSeasons, opponents, loading }) {
   const navigate = useNavigate()
-  const [modal, setModal] = useState(null)  // { items, title }
+  const [recordView, setRecordView] = useState('players')  // 'players' | 'club'
+  const [modal,      setModal]      = useState(null)       // { items, title }
 
   if (loading) {
     return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
@@ -274,7 +278,6 @@ export default function UclRecords({ players, uclMatches, uclSeasons, opponents,
   const fromEntry  = e => e ? { id: e.player.id, name: e.player.name, sofifaId: e.player.sofifaId } : null
 
   function onPlayerClick(id) {
-    // Navigate to PlayerProfile defaulting to UCL tab
     navigate(`/players/${id}`, { state: { defaultTab: 'ucl' } })
   }
 
@@ -285,149 +288,170 @@ export default function UclRecords({ players, uclMatches, uclSeasons, opponents,
   return (
     <div className={styles.rWrap}>
 
-      {/* ── Career ─────────────────────────────────────────────────── */}
-      <Section title="Career">
-        <RecordCard label="Most UCL goals"
-          player={fromPlayer(c.topGoals)}
-          value={c.topGoals ? `${c.topGoals.uclGoals} goals` : '—'}
-          ctx={c.topGoals ? `${c.topGoals.uclApps} UCL apps` : null}
-          highlight
-          onCardClick={() => openModal('career_goals', 'Most UCL Career Goals')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL assists"
-          player={fromPlayer(c.topAssists)}
-          value={c.topAssists ? `${c.topAssists.uclAssists} assists` : '—'}
-          ctx={c.topAssists ? `${c.topAssists.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('career_assists', 'Most UCL Career Assists')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL contributions"
-          player={fromPlayer(c.topContrib)}
-          value={c.topContrib ? `${c.topContrib.uclGoals + c.topContrib.uclAssists} G+A` : '—'}
-          ctx={c.topContrib ? `${c.topContrib.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('career_contrib', 'Most UCL Career Contributions')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL apps (outfield)"
-          player={fromPlayer(c.topApps)}
-          value={c.topApps ? `${c.topApps.uclApps} apps` : '—'}
-          ctx={c.topApps?.position || null}
-          onCardClick={() => openModal('career_apps', 'Most UCL Appearances')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL G/Game"
-          player={fromPlayer(c.bestGpg)}
-          value={c.bestGpg ? fmtRate(c.bestGpg.uclGoals / c.bestGpg.uclApps) : '—'}
-          ctx={c.bestGpg ? `${c.bestGpg.uclGoals}G · ${c.bestGpg.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('career_gpg', 'Best UCL Career G/Game')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL A/Game"
-          player={fromPlayer(c.bestApg)}
-          value={c.bestApg ? fmtRate(c.bestApg.uclAssists / c.bestApg.uclApps) : '—'}
-          ctx={c.bestApg ? `${c.bestApg.uclAssists}A · ${c.bestApg.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('career_apg', 'Best UCL Career A/Game')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL C/Game"
-          player={fromPlayer(c.bestCpg)}
-          value={c.bestCpg ? fmtRate((c.bestCpg.uclGoals + c.bestCpg.uclAssists) / c.bestCpg.uclApps) : '—'}
-          ctx={c.bestCpg ? `${c.bestCpg.uclGoals + c.bestCpg.uclAssists} G+A · ${c.bestCpg.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('career_cpg', 'Best UCL Career C/Game')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL CS/Game (GK)"
-          player={fromPlayer(c.bestCspg)}
-          value={c.bestCspg ? fmtRate(c.bestCspg.uclCleanSheets / c.bestCspg.uclApps) : '—'}
-          ctx={c.bestCspg ? `${c.bestCspg.uclCleanSheets} CS · ${c.bestCspg.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('career_cspg', 'Best UCL Career CS/Game')}
-          onPlayerClick={onPlayerClick} />
-      </Section>
+      {/* ── Players / Club toggle ───────────────────────────────────── */}
+      <div className={styles.rvToggleBar}>
+        <button
+          className={`${styles.rvToggleBtn} ${recordView === 'players' ? styles.rvToggleActive : ''}`}
+          onClick={() => setRecordView('players')}
+        >
+          Players
+        </button>
+        <button
+          className={`${styles.rvToggleBtn} ${recordView === 'club' ? styles.rvToggleActive : ''}`}
+          onClick={() => setRecordView('club')}
+        >
+          Club
+        </button>
+      </div>
 
-      {/* ── Single Season ───────────────────────────────────────────── */}
-      <Section title="Single Season">
-        <RecordCard label="Most UCL goals (season)"
-          player={fromEntry(s.topGoals)}
-          value={s.topGoals ? `${s.topGoals.ss.uclGoals} goals` : '—'}
-          ctx={s.topGoals ? `${s.topGoals.ss.label} · ${s.topGoals.ss.uclApps} UCL apps` : null}
-          highlight
-          onCardClick={() => openModal('season_goals', 'Most UCL Goals — Single Season')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL assists (season)"
-          player={fromEntry(s.topAssists)}
-          value={s.topAssists ? `${s.topAssists.ss.uclAssists} assists` : '—'}
-          ctx={s.topAssists ? `${s.topAssists.ss.label} · ${s.topAssists.ss.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('season_assists', 'Most UCL Assists — Single Season')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL contributions (season)"
-          player={fromEntry(s.topContrib)}
-          value={s.topContrib ? `${(s.topContrib.ss.uclGoals || 0) + (s.topContrib.ss.uclAssists || 0)} G+A` : '—'}
-          ctx={s.topContrib ? `${s.topContrib.ss.label} · ${s.topContrib.ss.uclApps} UCL apps` : null}
-          onCardClick={() => openModal('season_contrib', 'Most UCL Contributions — Single Season')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL G/Game (season)"
-          player={fromEntry(s.bestGpg)}
-          value={s.bestGpg ? fmtRate((s.bestGpg.ss.uclGoals || 0) / s.bestGpg.ss.uclApps) : '—'}
-          ctx={s.bestGpg ? `${s.bestGpg.ss.label} · ${s.bestGpg.ss.uclGoals || 0}G · ${s.bestGpg.ss.uclApps} apps` : null}
-          onCardClick={() => openModal('season_gpg', 'Best UCL G/Game — Single Season')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL A/Game (season)"
-          player={fromEntry(s.bestApg)}
-          value={s.bestApg ? fmtRate((s.bestApg.ss.uclAssists || 0) / s.bestApg.ss.uclApps) : '—'}
-          ctx={s.bestApg ? `${s.bestApg.ss.label} · ${s.bestApg.ss.uclAssists || 0}A · ${s.bestApg.ss.uclApps} apps` : null}
-          onCardClick={() => openModal('season_apg', 'Best UCL A/Game — Single Season')}
-          onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL C/Game (season)"
-          player={fromEntry(s.bestCpg)}
-          value={s.bestCpg ? fmtRate(((s.bestCpg.ss.uclGoals || 0) + (s.bestCpg.ss.uclAssists || 0)) / s.bestCpg.ss.uclApps) : '—'}
-          ctx={s.bestCpg ? `${s.bestCpg.ss.label} · ${(s.bestCpg.ss.uclGoals || 0) + (s.bestCpg.ss.uclAssists || 0)} G+A · ${s.bestCpg.ss.uclApps} apps` : null}
-          onCardClick={() => openModal('season_cpg', 'Best UCL C/Game — Single Season')}
-          onPlayerClick={onPlayerClick} />
-      </Section>
+      {/* ── Player records view ─────────────────────────────────────── */}
+      {recordView === 'players' && (
+        <>
+          <Section title="Career">
+            <RecordCard label="Most UCL goals"
+              player={fromPlayer(c.topGoals)}
+              value={c.topGoals ? `${c.topGoals.uclGoals} goals` : '—'}
+              ctx={c.topGoals ? `${c.topGoals.uclApps} UCL apps` : null}
+              highlight
+              onCardClick={() => openModal('career_goals', 'Most UCL Career Goals')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Most UCL assists"
+              player={fromPlayer(c.topAssists)}
+              value={c.topAssists ? `${c.topAssists.uclAssists} assists` : '—'}
+              ctx={c.topAssists ? `${c.topAssists.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('career_assists', 'Most UCL Career Assists')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Most UCL contributions"
+              player={fromPlayer(c.topContrib)}
+              value={c.topContrib ? `${c.topContrib.uclGoals + c.topContrib.uclAssists} G+A` : '—'}
+              ctx={c.topContrib ? `${c.topContrib.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('career_contrib', 'Most UCL Career Contributions')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Most UCL apps (outfield)"
+              player={fromPlayer(c.topApps)}
+              value={c.topApps ? `${c.topApps.uclApps} apps` : '—'}
+              ctx={c.topApps?.position || null}
+              onCardClick={() => openModal('career_apps', 'Most UCL Appearances')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL G/Game"
+              player={fromPlayer(c.bestGpg)}
+              value={c.bestGpg ? fmtRate(c.bestGpg.uclGoals / c.bestGpg.uclApps) : '—'}
+              ctx={c.bestGpg ? `${c.bestGpg.uclGoals}G · ${c.bestGpg.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('career_gpg', 'Best UCL Career G/Game')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL A/Game"
+              player={fromPlayer(c.bestApg)}
+              value={c.bestApg ? fmtRate(c.bestApg.uclAssists / c.bestApg.uclApps) : '—'}
+              ctx={c.bestApg ? `${c.bestApg.uclAssists}A · ${c.bestApg.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('career_apg', 'Best UCL Career A/Game')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL C/Game"
+              player={fromPlayer(c.bestCpg)}
+              value={c.bestCpg ? fmtRate((c.bestCpg.uclGoals + c.bestCpg.uclAssists) / c.bestCpg.uclApps) : '—'}
+              ctx={c.bestCpg ? `${c.bestCpg.uclGoals + c.bestCpg.uclAssists} G+A · ${c.bestCpg.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('career_cpg', 'Best UCL Career C/Game')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL CS/Game (GK)"
+              player={fromPlayer(c.bestCspg)}
+              value={c.bestCspg ? fmtRate(c.bestCspg.uclCleanSheets / c.bestCspg.uclApps) : '—'}
+              ctx={c.bestCspg ? `${c.bestCspg.uclCleanSheets} CS · ${c.bestCspg.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('career_cspg', 'Best UCL Career CS/Game')}
+              onPlayerClick={onPlayerClick} />
+          </Section>
 
-      <p className={styles.rQualNote}>Rate records require a minimum of 5 UCL appearances.</p>
+          <Section title="Single Season">
+            <RecordCard label="Most UCL goals (season)"
+              player={fromEntry(s.topGoals)}
+              value={s.topGoals ? `${s.topGoals.ss.uclGoals} goals` : '—'}
+              ctx={s.topGoals ? `${s.topGoals.ss.label} · ${s.topGoals.ss.uclApps} UCL apps` : null}
+              highlight
+              onCardClick={() => openModal('season_goals', 'Most UCL Goals — Single Season')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Most UCL assists (season)"
+              player={fromEntry(s.topAssists)}
+              value={s.topAssists ? `${s.topAssists.ss.uclAssists} assists` : '—'}
+              ctx={s.topAssists ? `${s.topAssists.ss.label} · ${s.topAssists.ss.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('season_assists', 'Most UCL Assists — Single Season')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Most UCL contributions (season)"
+              player={fromEntry(s.topContrib)}
+              value={s.topContrib ? `${(s.topContrib.ss.uclGoals || 0) + (s.topContrib.ss.uclAssists || 0)} G+A` : '—'}
+              ctx={s.topContrib ? `${s.topContrib.ss.label} · ${s.topContrib.ss.uclApps} UCL apps` : null}
+              onCardClick={() => openModal('season_contrib', 'Most UCL Contributions — Single Season')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL G/Game (season)"
+              player={fromEntry(s.bestGpg)}
+              value={s.bestGpg ? fmtRate((s.bestGpg.ss.uclGoals || 0) / s.bestGpg.ss.uclApps) : '—'}
+              ctx={s.bestGpg ? `${s.bestGpg.ss.label} · ${s.bestGpg.ss.uclGoals || 0}G · ${s.bestGpg.ss.uclApps} apps` : null}
+              onCardClick={() => openModal('season_gpg', 'Best UCL G/Game — Single Season')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL A/Game (season)"
+              player={fromEntry(s.bestApg)}
+              value={s.bestApg ? fmtRate((s.bestApg.ss.uclAssists || 0) / s.bestApg.ss.uclApps) : '—'}
+              ctx={s.bestApg ? `${s.bestApg.ss.label} · ${s.bestApg.ss.uclAssists || 0}A · ${s.bestApg.ss.uclApps} apps` : null}
+              onCardClick={() => openModal('season_apg', 'Best UCL A/Game — Single Season')}
+              onPlayerClick={onPlayerClick} />
+            <RecordCard label="Best UCL C/Game (season)"
+              player={fromEntry(s.bestCpg)}
+              value={s.bestCpg ? fmtRate(((s.bestCpg.ss.uclGoals || 0) + (s.bestCpg.ss.uclAssists || 0)) / s.bestCpg.ss.uclApps) : '—'}
+              ctx={s.bestCpg ? `${s.bestCpg.ss.label} · ${(s.bestCpg.ss.uclGoals || 0) + (s.bestCpg.ss.uclAssists || 0)} G+A · ${s.bestCpg.ss.uclApps} apps` : null}
+              onCardClick={() => openModal('season_cpg', 'Best UCL C/Game — Single Season')}
+              onPlayerClick={onPlayerClick} />
+          </Section>
 
-      {/* ── Club Records ────────────────────────────────────────────── */}
-      <Section title="Club">
-        {club.biggestWin && (
-          <ClubRecordCard label="Biggest UCL Win"
-            holder={club.biggestWin.opp ? `vs ${club.biggestWin.opp}` : '—'}
-            value={club.biggestWin.score}
-            ctx={[club.biggestWin.round, club.biggestWin.season].filter(Boolean).join(' · ')} />
-        )}
-        {club.worstDefeat && (
-          <ClubRecordCard label="Worst UCL Defeat"
-            holder={club.worstDefeat.opp ? `vs ${club.worstDefeat.opp}` : '—'}
-            value={club.worstDefeat.score}
-            ctx={[club.worstDefeat.round, club.worstDefeat.season].filter(Boolean).join(' · ')} />
-        )}
-        {club.highestScoringMatch && (
-          <ClubRecordCard label="Most Goals in a Match"
-            holder={club.highestScoringMatch.opp ? `vs ${club.highestScoringMatch.opp}` : '—'}
-            value={club.highestScoringMatch.score}
-            ctx={[club.highestScoringMatch.round, club.highestScoringMatch.season].filter(Boolean).join(' · ')} />
-        )}
-        {club.mostGoalsCampaign && (
-          <ClubRecordCard label="Most Goals in a Campaign"
-            holder={club.mostGoalsCampaign.label}
-            value={`${club.mostGoalsCampaign.gf} goals`}
-            ctx={club.mostGoalsCampaign.record} />
-        )}
-        {club.fewestConcededCampaign && (
-          <ClubRecordCard label="Fewest Conceded in a Campaign"
-            holder={club.fewestConcededCampaign.label}
-            value={`${club.fewestConcededCampaign.ga} conceded`}
-            ctx={club.fewestConcededCampaign.record} />
-        )}
-        {club.bestCampaign && (
-          <ClubRecordCard label="Best Campaign Record"
-            holder={club.bestCampaign.label}
-            value={`${club.bestCampaign.pts} pts`}
-            ctx={`${club.bestCampaign.record} · ${club.bestCampaign.gf}–${club.bestCampaign.ga}`} />
-        )}
-        {club.finals && club.finals.played > 0 && (
-          <ClubRecordCard label="Finals Record"
-            holder={`${club.finals.played} final${club.finals.played !== 1 ? 's' : ''}`}
-            value={`${club.finals.won}W ${club.finals.lost}L`}
-            ctx={null} />
-        )}
-      </Section>
+          <p className={styles.rQualNote}>Rate records require a minimum of 5 UCL appearances.</p>
+        </>
+      )}
 
-      {/* Top5 Modal */}
+      {/* ── Club records view ───────────────────────────────────────── */}
+      {recordView === 'club' && (
+        <Section title="Club Records">
+          {club.biggestWin && (
+            <ClubRecordCard label="Biggest UCL Win"
+              holder={club.biggestWin.opp ? `vs ${club.biggestWin.opp}` : '—'}
+              value={club.biggestWin.score}
+              ctx={[club.biggestWin.round, club.biggestWin.season].filter(Boolean).join(' · ')} />
+          )}
+          {club.worstDefeat && (
+            <ClubRecordCard label="Worst UCL Defeat"
+              holder={club.worstDefeat.opp ? `vs ${club.worstDefeat.opp}` : '—'}
+              value={club.worstDefeat.score}
+              ctx={[club.worstDefeat.round, club.worstDefeat.season].filter(Boolean).join(' · ')} />
+          )}
+          {club.highestScoringMatch && (
+            <ClubRecordCard label="Most Goals in a Match"
+              holder={club.highestScoringMatch.opp ? `vs ${club.highestScoringMatch.opp}` : '—'}
+              value={club.highestScoringMatch.score}
+              ctx={[club.highestScoringMatch.round, club.highestScoringMatch.season].filter(Boolean).join(' · ')} />
+          )}
+          {club.mostGoalsCampaign && (
+            <ClubRecordCard label="Most Goals in a Campaign"
+              holder={club.mostGoalsCampaign.label}
+              value={`${club.mostGoalsCampaign.gf} goals`}
+              ctx={club.mostGoalsCampaign.record} />
+          )}
+          {club.fewestConcededCampaign && (
+            <ClubRecordCard label="Fewest Conceded in a Campaign"
+              holder={club.fewestConcededCampaign.label}
+              value={`${club.fewestConcededCampaign.ga} conceded`}
+              ctx={club.fewestConcededCampaign.record} />
+          )}
+          {club.bestCampaign && (
+            <ClubRecordCard label="Best Campaign Record"
+              holder={club.bestCampaign.label}
+              value={`${club.bestCampaign.pts} pts`}
+              ctx={`${club.bestCampaign.record} · ${club.bestCampaign.gf}–${club.bestCampaign.ga}`} />
+          )}
+          {club.finals && club.finals.played > 0 && (
+            <ClubRecordCard label="Finals Record"
+              holder={`${club.finals.played} final${club.finals.played !== 1 ? 's' : ''}`}
+              value={`${club.finals.won}W ${club.finals.lost}L`}
+              ctx={null} />
+          )}
+        </Section>
+      )}
+
+      {/* Top5 Modal — portal to document.body (bypasses .inner transform) */}
       {modal && (
         <Top5Modal
           title={modal.title}

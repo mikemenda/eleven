@@ -15,7 +15,6 @@ function RivalDetail({ rival, clubName, onBack }) {
   const narrative   = buildUclRivalNarrative(rival, clubName)
   const finalsCount = rival.matches.filter(m => m.competition === 'UCL_Final').length
 
-  // Group by season label
   const seasonGroups = []
   for (const m of rival.matches) {
     const label = m.seasonLabel || '—'
@@ -44,7 +43,6 @@ function RivalDetail({ rival, clubName, onBack }) {
         </div>
       </div>
 
-      {/* H2H bar */}
       <div className={styles.rvH2H}>
         {[
           { k: 'Won',   v: rival.w,  c: 'var(--en-green)'  },
@@ -77,19 +75,15 @@ function RivalDetail({ rival, clubName, onBack }) {
               const res  = win ? 'W' : draw ? 'D' : 'L'
               const col  = win ? 'var(--en-green)' : draw ? 'var(--en-text-3)' : 'var(--danger)'
               const isFinal = m.competition === 'UCL_Final'
-              // Full round name from ROUND_LABELS
-              const roundName = ROUND_LABELS[m.competition] || m.competition || '—'
               return (
                 <div key={i} className={styles.rvMatchRow}>
                   <span className={styles.rvMatchRes} style={{ color: col }}>{res}</span>
                   <div className={styles.rvMatchInfo}>
                     <span className={styles.rvMatchComp}
                       style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
-                      {roundName}
+                      {ROUND_LABELS[m.competition] || m.competition || '—'}
                     </span>
-                    {m.leg != null && (
-                      <span className={styles.rvMatchLeg}>· Leg {m.leg}</span>
-                    )}
+                    {m.leg != null && <span className={styles.rvMatchLeg}>· Leg {m.leg}</span>}
                   </div>
                   <span className={styles.rvMatchScore}>{fmtScore(m.score_for, m.score_against)}</span>
                   <span className={styles.rvMatchVenue}
@@ -110,7 +104,6 @@ function RivalDetail({ rival, clubName, onBack }) {
 function LeagueDetail({ group, opponents, onBack }) {
   if (!group) return null
 
-  // Group matches by opponent
   const byOpp = {}
   for (const m of group.matches) {
     const key = m.opponentKey || m.opponent || 'unknown'
@@ -142,7 +135,6 @@ function LeagueDetail({ group, opponents, onBack }) {
         </div>
       </div>
 
-      {/* League H2H bar */}
       <div className={styles.rvH2H}>
         {[
           { k: 'Won',   v: group.w,  c: 'var(--en-green)'  },
@@ -157,7 +149,6 @@ function LeagueDetail({ group, opponents, onBack }) {
         ))}
       </div>
 
-      {/* Per-club breakdown */}
       {clubs.map(club => {
         const cw  = club.matches.filter(m => m.score_for  > m.score_against).length
         const cd  = club.matches.filter(m => m.score_for === m.score_against).length
@@ -165,7 +156,6 @@ function LeagueDetail({ group, opponents, onBack }) {
         const cgf = club.matches.reduce((s, m) => s + (m.score_for || 0), 0)
         const cga = club.matches.reduce((s, m) => s + (m.score_against || 0), 0)
 
-        // Match log grouped by season
         const seasonGroups = []
         for (const m of club.matches) {
           const label = m.seasonLabel || '—'
@@ -227,9 +217,9 @@ function LeagueDetail({ group, opponents, onBack }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function UclRivals({ uclMatches, opponents, clubName, loading }) {
-  const [selected,      setSelected]      = useState(null)  // rival opponentKey
-  const [selectedLeague, setSelectedLeague] = useState(null) // league group object
-  const [view,          setView]          = useState('rivals')
+  const [selected,       setSelected]       = useState(null)
+  const [selectedLeague, setSelectedLeague] = useState(null)
+  const [view,           setView]           = useState('rivals')
 
   if (loading) {
     return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
@@ -238,23 +228,15 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
   const rivals       = deriveUclRivals(uclMatches, opponents)
   const leagueGroups = deriveUclLeagueRecords(uclMatches, opponents)
 
-  // ── Detail views ────────────────────────────────────────────────
   if (selected) {
     const rival = rivals.find(r => r.opponentKey === selected)
-    return (
-      <RivalDetail rival={rival} clubName={clubName}
-        onBack={() => setSelected(null)} />
-    )
+    return <RivalDetail rival={rival} clubName={clubName} onBack={() => setSelected(null)} />
   }
 
   if (selectedLeague) {
-    return (
-      <LeagueDetail group={selectedLeague} opponents={opponents}
-        onBack={() => setSelectedLeague(null)} />
-    )
+    return <LeagueDetail group={selectedLeague} opponents={opponents} onBack={() => setSelectedLeague(null)} />
   }
 
-  // ── Empty ────────────────────────────────────────────────────────
   if (rivals.length === 0) {
     return (
       <div className={styles.empty}>
@@ -267,7 +249,7 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
 
   return (
     <div className={styles.rvWrap}>
-      {/* Toggle bar */}
+      {/* Toggle */}
       <div className={styles.rvToggleBar}>
         <button className={`${styles.rvToggleBtn} ${view === 'rivals' ? styles.rvToggleActive : ''}`}
           onClick={() => setView('rivals')}>
@@ -281,39 +263,44 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
       </div>
 
       {view === 'leagues' ? (
-        /* League cards — each tappable, opens LeagueDetail */
+        /* ── League table — clean summary, no club names, column header ── */
         <div>
+          {/* Column header row */}
+          <div className={styles.rvLeagueTableHead}>
+            <span className={styles.rvLgThLeague}>League</span>
+            <span className={styles.rvLgThNation}>Nation</span>
+            <span className={styles.rvLgThStat}>P</span>
+            <span className={styles.rvLgThStat}>W</span>
+            <span className={styles.rvLgThStat}>D</span>
+            <span className={styles.rvLgThStat}>L</span>
+            <span className={styles.rvLgThStat}>GD</span>
+          </div>
+
           {leagueGroups.map(g => (
-            <button key={g.country} className={styles.rvLeagueCard}
+            <button key={g.country} className={styles.rvLeagueRow53}
               onClick={() => setSelectedLeague(g)}>
-              <div className={styles.rvLeagueCardLeft}>
-                <span className={styles.rvLeagueCardName}>
-                  {g.league !== 'Unknown' ? g.league : g.country}
-                </span>
-                <span className={styles.rvLeagueCardNation}>
-                  {g.country !== 'Unknown' ? g.country : ''}
-                  {g.clubs.length > 0 && ` · ${g.clubs.join(', ')}`}
-                </span>
-              </div>
-              <div className={styles.rvLeagueCardRight}>
-                <span className={styles.rvLeagueCardRecord}>
-                  <span style={{ color: 'var(--en-green)' }}>{g.w}W</span>
-                  {' '}<span style={{ color: 'var(--en-text-3)' }}>{g.d}D</span>
-                  {' '}<span style={{ color: 'var(--danger)' }}>{g.l}L</span>
-                </span>
-                <span className={styles.rvLeagueCardGD}
-                  style={{ color: g.gd > 0 ? 'var(--en-green)' : g.gd < 0 ? 'var(--danger)' : undefined }}>
-                  {g.gd > 0 ? `+${g.gd}` : g.gd}
-                </span>
-              </div>
-              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
+              <span className={styles.rvLgTdLeague}>
+                {g.league !== 'Unknown' ? g.league : g.country}
+              </span>
+              <span className={styles.rvLgTdNation}>
+                {g.country !== 'Unknown' ? g.country : '—'}
+              </span>
+              <span className={styles.rvLgTdStat}>{g.p}</span>
+              <span className={styles.rvLgTdStat} style={{ color: 'var(--en-green)' }}>{g.w}</span>
+              <span className={styles.rvLgTdStat} style={{ color: 'var(--en-text-3)' }}>{g.d}</span>
+              <span className={styles.rvLgTdStat} style={{ color: 'var(--danger)' }}>{g.l}</span>
+              <span className={styles.rvLgTdStat}
+                style={{ color: g.gd > 0 ? 'var(--en-green)' : g.gd < 0 ? 'var(--danger)' : undefined }}>
+                {fmtGD(g.gf, g.ga)}
+              </span>
+              <svg width="10" height="10" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
                 <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
           ))}
         </div>
       ) : (
-        /* Opponents table — no Final badge */
+        /* ── Opponents table ── */
         <>
           <div className={styles.rvTableHead}>
             <span className={styles.rvThOpp}>Opponent</span>
@@ -337,7 +324,6 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
                     <span className={styles.rvOppLeague}>{r.league || r.country}</span>
                   )}
                 </div>
-                {/* Final badge removed per v52 spec */}
               </div>
               <span className={styles.rvStat}>{r.played}</span>
               <span className={styles.rvStat} style={{ color: 'var(--en-green)' }}>{r.w}</span>

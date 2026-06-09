@@ -1997,3 +1997,125 @@
   color: var(--en-text-2);
   flex-shrink: 0;
 }
+
+/* ─── v53 PLAYERS ADDITIONS ──────────────────────────────────────────────── */
+
+/* Season filter bar — sits above position filters */
+.plSeasonBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: none;
+}
+.plSeasonBar::-webkit-scrollbar { display: none; }
+
+.plSeasonBtn {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 0.5px solid var(--en-rule);
+  background: transparent;
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.plSeasonBtn:hover { color: var(--en-text-2); }
+.plSeasonActive {
+  background: var(--en-blue-dim);
+  color: var(--en-text-1);
+  border-color: var(--en-blue);
+}
+
+/* Group filter style variant — slightly different look to distinguish from individual positions */
+.plFilterGroup {
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+/* ─── v53 RIVALS LEAGUE TABLE ────────────────────────────────────────────── */
+
+/* Column header row for the league summary table */
+.rvLeagueTableHead {
+  display: grid;
+  grid-template-columns: 1fr 80px 32px 32px 32px 32px 40px;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  background: var(--en-surface);
+  gap: 4px;
+}
+.rvLgThLeague {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+.rvLgThNation {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+.rvLgThStat {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  text-align: right;
+}
+
+/* Tappable league row (summary, no club names) */
+.rvLeagueRow53 {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 80px 32px 32px 32px 32px 40px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  gap: 4px;
+  position: relative;
+}
+.rvLeagueRow53:hover  { background: var(--en-surface); }
+.rvLeagueRow53:last-child { border-bottom: none; }
+
+.rvLgTdLeague {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rvLgTdNation {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rvLgTdStat {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-1);
+  text-align: right;
+}

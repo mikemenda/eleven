@@ -67,10 +67,10 @@ function CampaignCard({ summary, opponents, onSelect }) {
       {matchRecord.p > 0 && (
         <div className={styles.sznCardRecord}>
           {[
-            { k: 'P',  v: matchRecord.p },
-            { k: 'W',  v: matchRecord.w,  c: 'var(--en-green)'  },
-            { k: 'D',  v: matchRecord.d,  c: 'var(--en-text-3)' },
-            { k: 'L',  v: matchRecord.l,  c: 'var(--danger)'    },
+            { k: 'P', v: matchRecord.p },
+            { k: 'W', v: matchRecord.w, c: 'var(--en-green)'  },
+            { k: 'D', v: matchRecord.d, c: 'var(--en-text-3)' },
+            { k: 'L', v: matchRecord.l, c: 'var(--danger)'    },
           ].map(({ k, v, c }) => (
             <span key={k} className={styles.sznRecordItem}>
               <span className={styles.sznRecordVal} style={c ? { color: c } : undefined}>{v}</span>
@@ -89,7 +89,6 @@ function CampaignCard({ summary, opponents, onSelect }) {
         </div>
       )}
 
-      {/* KO path strip in card — short labels fine here */}
       {koPath.length > 0 && (
         <div className={styles.sznKOStrip}>
           {koPath.map(ko => {
@@ -131,7 +130,6 @@ function CampaignDetail({ summary, opponents, onBack }) {
 
   return (
     <div className={styles.sznDetail}>
-      {/* Header */}
       <div className={styles.sznDetailHead}>
         <button className={styles.backBtn} onClick={onBack}>
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
@@ -147,7 +145,6 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </span>
       </div>
 
-      {/* Campaign record */}
       {matchRecord.p > 0 && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Campaign Record</p>
@@ -169,7 +166,6 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* League Phase summary */}
       {(lpRecord || season.uclLeaguePhasePosition != null) && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>League Phase</p>
@@ -198,7 +194,6 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* LP matchday table */}
       {summary.lpMatchDocs?.length > 0 && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Matchday Results</p>
@@ -224,7 +219,7 @@ function CampaignDetail({ summary, opponents, onBack }) {
                 const col   = res === 'W' ? 'var(--en-green)' : res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
                 return (
                   <div key={m.id ?? i} className={styles.sznMatchRow}>
-                    <span className={styles.sznMD}>{m.round ? m.round.replace('MD','') : '—'}</span>
+                    <span className={styles.sznMD}>{m.round ? m.round.replace('MD', '') : '—'}</span>
                     <span className={styles.sznMOpp}>
                       {crest && <img src={crest} alt="" className={styles.sznMCrest}
                         onError={e => { e.currentTarget.style.display = 'none' }} />}
@@ -244,20 +239,17 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* Knockout path — full round names */}
       {koPath.length > 0 && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Knockout Path</p>
           {koPath.map(ko => {
-            const name   = ko.oppKey && opponents?.has(ko.oppKey)
+            const name  = ko.oppKey && opponents?.has(ko.oppKey)
               ? opponents.get(ko.oppKey).displayName
               : ko.opp || '?'
             const crest  = matchCrest(ko.oppKey, opponents)
             const agg    = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
             const col    = ko.res === 'W' ? 'var(--en-green)' : ko.res === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
-            // Full round label from ROUND_LABELS
             const fullLabel = ROUND_LABELS[ko.comp] || ko.label
-
             return (
               <div key={ko.comp} className={styles.sznKORow}>
                 <span className={styles.sznKORoundBadge}>{fullLabel}</span>
@@ -272,8 +264,8 @@ function CampaignDetail({ summary, opponents, onBack }) {
                 {ko.legs?.length > 0 && (
                   <div className={styles.sznKOLegs}>
                     {ko.legs.map((leg, li) => {
-                      const lr  = leg.score_for > leg.score_against ? 'W' : leg.score_for < leg.score_against ? 'L' : 'D'
-                      const lc  = lr === 'W' ? 'var(--en-green)' : lr === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
+                      const lr = leg.score_for > leg.score_against ? 'W' : leg.score_for < leg.score_against ? 'L' : 'D'
+                      const lc = lr === 'W' ? 'var(--en-green)' : lr === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
                       return (
                         <span key={li} className={styles.sznKOLeg}>
                           <span className={styles.sznKOLegLabel}>Leg {leg.leg ?? li + 1}</span>
@@ -294,7 +286,6 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* Biggest win */}
       {biggestWin && (
         <div className={styles.sznDetailSection}>
           <p className={styles.sznDetailSectionLabel}>Biggest Win</p>
@@ -309,107 +300,47 @@ function CampaignDetail({ summary, opponents, onBack }) {
   )
 }
 
-// ─── Career knockout section (moved from UclKnockouts) ───────────────────────
-// Compact aggregate view placed at the bottom of the seasons list.
-function CareerKnockoutSection({ knockoutData, finals, opponents }) {
-  const { legRecord, tieRecord, lpRecord, koTotal } = knockoutData || {}
+// ─── Career knockout section — round record table only (Ties + Finals removed) ──
+function CareerKnockoutSection({ knockoutData }) {
+  const { legRecord } = knockoutData || {}
 
-  const hasLegData  = legRecord  && UCL_KO_COMPS.some(c => legRecord[c]?.p > 0)
-  const hasTieData  = tieRecord  && UCL_KO_COMPS.some(c => tieRecord[c]?.ties > 0)
-  const hasFinals   = finals?.length > 0
-
-  if (!hasLegData && !hasFinals) return null
+  const hasLegData = legRecord && UCL_KO_COMPS.some(c => legRecord[c]?.p > 0)
+  if (!hasLegData) return null
 
   return (
     <div className={styles.sznCareerKO}>
       <p className={styles.sznCareerKOTitle}>Career Knockout Record</p>
 
-      {/* Round record table */}
-      {hasLegData && (
-        <>
-          <div className={styles.koTableHead}>
-            <span className={styles.koThRound}>Round</span>
-            <span className={styles.koThStat}>P</span>
-            <span className={styles.koThStat}>W</span>
-            <span className={styles.koThStat}>D</span>
-            <span className={styles.koThStat}>L</span>
-            <span className={styles.koThStat}>GD</span>
+      <div className={styles.koTableHead}>
+        <span className={styles.koThRound}>Round</span>
+        <span className={styles.koThStat}>P</span>
+        <span className={styles.koThStat}>W</span>
+        <span className={styles.koThStat}>D</span>
+        <span className={styles.koThStat}>L</span>
+        <span className={styles.koThStat}>GD</span>
+      </div>
+
+      {UCL_KO_COMPS.map(comp => {
+        const row = legRecord[comp]
+        if (!row || row.p === 0) return null
+        const isFinal = comp === 'UCL_Final'
+        return (
+          <div key={comp} className={styles.koTableRow}
+            style={isFinal ? { borderTop: '0.5px solid var(--en-rule)' } : undefined}>
+            <span className={styles.koTdRound} style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
+              {ROUND_LABELS[comp] || comp}
+            </span>
+            <span className={styles.koTdStat}>{row.p}</span>
+            <span className={styles.koTdStat} style={{ color: 'var(--en-green)' }}>{row.w}</span>
+            <span className={styles.koTdStat} style={{ color: 'var(--en-text-3)' }}>{row.d}</span>
+            <span className={styles.koTdStat} style={{ color: 'var(--danger)' }}>{row.l}</span>
+            <span className={styles.koTdStat}
+              style={{ color: row.gd > 0 ? 'var(--en-green)' : row.gd < 0 ? 'var(--danger)' : undefined }}>
+              {fmtGD(row.gf, row.ga)}
+            </span>
           </div>
-
-          {UCL_KO_COMPS.map(comp => {
-            const row = legRecord[comp]
-            if (!row || row.p === 0) return null
-            const isFinal = comp === 'UCL_Final'
-            return (
-              <div key={comp} className={styles.koTableRow}
-                style={isFinal ? { borderTop: '0.5px solid var(--en-rule)' } : undefined}>
-                <span className={styles.koTdRound} style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
-                  {ROUND_LABELS[comp] || comp}
-                </span>
-                <span className={styles.koTdStat}>{row.p}</span>
-                <span className={styles.koTdStat} style={{ color: 'var(--en-green)' }}>{row.w}</span>
-                <span className={styles.koTdStat} style={{ color: 'var(--en-text-3)' }}>{row.d}</span>
-                <span className={styles.koTdStat} style={{ color: 'var(--danger)' }}>{row.l}</span>
-                <span className={styles.koTdStat}
-                  style={{ color: row.gd > 0 ? 'var(--en-green)' : row.gd < 0 ? 'var(--danger)' : undefined }}>
-                  {fmtGD(row.gf, row.ga)}
-                </span>
-              </div>
-            )
-          })}
-        </>
-      )}
-
-      {/* Tie record — compact */}
-      {hasTieData && (
-        <div className={styles.sznTieBlock}>
-          <p className={styles.sznTieBlockLabel}>Ties</p>
-          {UCL_KO_COMPS.map(comp => {
-            const row = tieRecord[comp]
-            if (!row || row.ties === 0) return null
-            const isFinal = comp === 'UCL_Final'
-            return (
-              <div key={comp} className={styles.sznTieRow}>
-                <span className={styles.sznTieRound}
-                  style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
-                  {ROUND_LABELS[comp] || comp}
-                </span>
-                <span className={styles.sznTieAdv} style={{ color: 'var(--en-green)' }}>
-                  {row.advanced} advanced
-                </span>
-                <span className={styles.sznTieElim} style={{ color: 'var(--danger)' }}>
-                  {row.eliminated} out
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Finals log — compact */}
-      {hasFinals && (
-        <div className={styles.sznFinalsBlock}>
-          <p className={styles.sznTieBlockLabel}>Finals</p>
-          {finals.map(f => {
-            const won   = f.result === 'Champions'
-            const color = won ? 'var(--en-gold)' : 'var(--en-text-3)'
-            return (
-              <div key={f.seasonId} className={styles.sznFinalRow}>
-                {f.crest && (
-                  <img src={f.crest} alt="" className={styles.sznFinalCrest}
-                    onError={e => { e.currentTarget.style.display = 'none' }} />
-                )}
-                <div className={styles.sznFinalInfo}>
-                  <span className={styles.sznFinalSeason}>{f.seasonLabel}</span>
-                  <span className={styles.sznFinalOpp}>vs {f.opponent || '—'}</span>
-                </div>
-                {f.score && <span className={styles.sznFinalScore} style={{ color }}>{f.score}</span>}
-                <span className={styles.sznFinalRes} style={{ color }}>{won ? '★ W' : 'L'}</span>
-              </div>
-            )
-          })}
-        </div>
-      )}
+        )
+      })}
     </div>
   )
 }
@@ -419,11 +350,7 @@ export default function UclSeasons({ summaries, opponents, knockoutData, finals,
   const [selected, setSelected] = useState(null)
 
   if (loading) {
-    return (
-      <div className={styles.loadWrap}>
-        <div className={styles.spinner} />
-      </div>
-    )
+    return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
   }
 
   if (summaries.length === 0) {
@@ -462,13 +389,8 @@ export default function UclSeasons({ summaries, opponents, knockoutData, finals,
           onSelect={setSelected}
         />
       ))}
-
-      {/* Career knockout aggregate — compact, below campaign cards */}
-      <CareerKnockoutSection
-        knockoutData={knockoutData}
-        finals={finals}
-        opponents={opponents}
-      />
+      {/* Career knockout round record — compact, no Ties, no Finals */}
+      <CareerKnockoutSection knockoutData={knockoutData} />
     </div>
   )
 }

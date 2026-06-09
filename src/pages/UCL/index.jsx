@@ -158,6 +158,7 @@ export default function UCL() {
         ) : tab === 'players' ? (
           <UclPlayers
             players={players}
+            uclSeasons={uclSeasons}
             loading={loading}
           />
         ) : tab === 'records' ? (
