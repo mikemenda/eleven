@@ -17,35 +17,21 @@ import {
 import TRANSFER_CLUBS from '../../data/transfer-clubs.json'
 import styles from './History.module.css'
 
-// Trophy SVGs
-import uclSvg        from '../assets/trophies/ucl.svg'
-import plSvg         from '../assets/trophies/premier-league.svg'
-import faCupSvg      from '../assets/trophies/fa-cup.svg'
-import carabaoSvg    from '../assets/trophies/carabao.svg'
-import laLigaSvg     from '../assets/trophies/la-liga.svg'
-import copaDelReySvg from '../assets/trophies/copa-del-rey.svg'
-import bundesligaSvg from '../assets/trophies/bundesliga.svg'
-import dfbPokalSvg   from '../assets/trophies/dfb-pokal.svg'
-import uelSvg        from '../assets/trophies/uel.svg'
+// Trophy PNG assets — shared map from trophyAssets.jsx (12 competitions)
+// Covers: UCL, Premier League, FA Cup, Carabao Cup, La Liga, Copa del Rey,
+//         Bundesliga, DFB-Pokal, Serie A, Coppa Italia, Ligue 1, Coupe de France
+import { TROPHY_PNG_MAP } from '../utils/trophyAssets'
 
-const TROPHY_SVG = {
-  'UEFA Champions League': uclSvg,
-  'Premier League':        plSvg,
-  'FA Cup':                faCupSvg,
-  'Carabao Cup':           carabaoSvg,
-  'La Liga':               laLigaSvg,
-  'Copa del Rey':          copaDelReySvg,
-  'Bundesliga':            bundesligaSvg,
-  'DFB-Pokal':             dfbPokalSvg,
-  'UEFA Europa League':    uelSvg,
-}
-
+// Emoji fallback for competitions with no PNG asset yet
+// (English Championship, Europa League, Conference League handled here)
 const COMP_EMOJI = {
-  'Serie A':              '🇮🇹',
-  'Coppa Italia':         '🇮🇹',
-  'Ligue 1':              '🇫🇷',
-  'Coupe de France':      '🇫🇷',
-  'UEFA Conference League':'🏆',
+  'English Championship':   '🏆',
+  'UEFA Europa League':     '🏆',
+  'UEFA Conference League': '🏆',
+  'Serie A':                '🇮🇹',
+  'Coppa Italia':           '🇮🇹',
+  'Ligue 1':                '🇫🇷',
+  'Coupe de France':        '🇫🇷',
 }
 
 const WORKER_BASE = 'https://fifa-img.michaelmenda92.workers.dev'
@@ -66,8 +52,10 @@ function ordinal(n) {
 // ─── SMALL COMPONENTS ─────────────────────────────────────────────────────────
 
 function TrophyIcon({ competition, size = 26 }) {
-  const src = TROPHY_SVG[competition]
+  // Use real PNG if available (12 competitions covered by TROPHY_PNG_MAP)
+  const src = TROPHY_PNG_MAP[competition]
   if (src) return <img src={src} alt="" className={styles.compIcon} style={{ width: size, height: size }} />
+  // Emoji fallback for all other competitions
   const emoji = COMP_EMOJI[competition]
   return <span className={styles.compIconEmoji} style={{ fontSize: size * 0.72 }}>{emoji || '🏆'}</span>
 }

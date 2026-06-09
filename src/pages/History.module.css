@@ -362,7 +362,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--en-gold);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(224, 194, 122, 0.3);
   border-radius: 4px;
   padding: 2px 6px;
   white-space: nowrap;
@@ -548,7 +548,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--en-gold);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(224, 194, 122, 0.3);
   border-radius: 4px;
   padding: 3px 7px;
   white-space: nowrap;
@@ -656,7 +656,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--en-gold);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(224, 194, 122, 0.3);
   border-radius: 4px;
   padding: 3px 7px;
   white-space: nowrap;
