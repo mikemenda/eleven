@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Logo from './Logo'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
@@ -25,30 +25,38 @@ const Header = () => {
         <Logo size={32} showWordmark maxWidth={172} className={styles.logo} />
       </div>
 
-      <div className={styles.context}>
-        {activeGame && (
-          <button className={styles.badge} onClick={handleVersionBadge} title="Switch FC version">
-            <span className={styles.badgeLabel}>{activeGame.title}</span>
-          </button>
-        )}
-        {activeGame && activeClub && (
-          <>
-            <span className={styles.divider}>/</span>
+      {(activeGame || activeClub) && (
+        <div className={styles.context}>
+          {activeGame && (
             <button
-              className={`${styles.badge} ${styles.clubBadge}`}
-              onClick={handleClubBadge}
-              title="Switch club"
+              className={styles.contextVersion}
+              onClick={handleVersionBadge}
+              title="Switch FC version"
             >
-              {activeClub.crestColor && (
-                <span className={styles.crestDot} style={{ background: activeClub.crestColor }} />
-              )}
-              <span className={styles.badgeLabel}>{activeClub.name}</span>
+              {activeGame.title}
             </button>
-          </>
-        )}
-      </div>
+          )}
+          {activeGame && activeClub && (
+            <>
+              <span className={styles.contextDot}>·</span>
+              <button
+                className={styles.contextClub}
+                onClick={handleClubBadge}
+                title="Switch club"
+              >
+                {activeClub.crestColor && (
+                  <span
+                    className={styles.crestDot}
+                    style={{ background: activeClub.crestColor }}
+                  />
+                )}
+                {activeClub.name}
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
-      {/* User avatar + sign out */}
       {user && (
         <div className={styles.userArea}>
           <button

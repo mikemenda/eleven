@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 55
+// Current: 56
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar

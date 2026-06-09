@@ -13,7 +13,6 @@ import PlayerProfile from './pages/PlayerProfile'
 import PlayerCompare from './pages/PlayerCompare'
 import Transfers from './pages/Transfers'
 import Records from './pages/Records'
-import Rivals from './pages/Rivals'
 import Museum from './pages/Museum'
 import History from './pages/History'
 import UCL from './pages/UCL'
@@ -32,7 +31,7 @@ const RequireAuth = ({ children }) => {
       <div style={{
         width: 32, height: 32,
         border: '1.5px solid var(--en-rule)',
-        borderTopColor: 'var(--en-blue)',
+        borderTopColor: 'var(--en-gold)',
         borderRadius: '50%',
         animation: 'spin 0.7s linear infinite'
       }} />
@@ -61,7 +60,6 @@ const InnerApp = () => (
           <Route path="/players/:id"       element={<PlayerProfile />} />
           <Route path="/transfers"         element={<Transfers />} />
           <Route path="/records"           element={<Records />} />
-          <Route path="/rivals"            element={<Rivals />} />
           <Route path="/museum"            element={<Museum />} />
           <Route path="/history"           element={<History />} />
           <Route path="/ucl"               element={<UCL />} />

@@ -29,7 +29,8 @@
 
 .item:hover { color: var(--en-text-2); }
 
-.active { color: var(--en-green); }
+/* Gold active state — replaces green */
+.active { color: var(--en-gold); }
 
 .icon {
   display: flex;
@@ -38,26 +39,26 @@
   line-height: 1;
 }
 
+/* Subtle gold glow on active icon */
 .active .icon svg {
-  filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.4));
+  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.35));
 }
 
 .label {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1;
 }
 
-/* Hamburger button — same visual style as nav items, no browser defaults */
+/* Hamburger button — same visual as nav items */
 .hamburgerBtn {
   background: none;
   border: none;
   cursor: pointer;
   font: inherit;
-  /* no label, so center icon only */
 }
 
 /* ── Backdrop ──────────────────────────────────────────────── */
@@ -65,7 +66,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   animation: fadeIn 0.2s ease;
@@ -86,10 +87,8 @@
   border-top: 0.5px solid var(--en-rule);
   border-radius: 16px 16px 0 0;
   padding-bottom: env(safe-area-inset-bottom, 0);
-
-  /* sheet sits below the fold by default */
   transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
   will-change: transform;
 }
 
@@ -98,25 +97,25 @@
 }
 
 .sheetHandle {
-  width: 36px;
-  height: 4px;
+  width: 32px;
+  height: 3px;
   border-radius: 2px;
   background: var(--en-rule);
-  margin: 12px auto 4px;
+  margin: 12px auto 8px;
 }
 
 .sheetNav {
   display: flex;
   flex-direction: column;
-  padding: 8px 0 16px;
+  padding: 4px 0 20px;
 }
 
 .sheetItem {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 24px;
-  color: var(--en-text-2, #c8d8c8);
+  padding: 15px 24px;
+  color: var(--en-text-3);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.15s ease, background 0.15s ease;
@@ -124,16 +123,17 @@
 
 .sheetItem:hover,
 .sheetItem:active {
-  background: rgba(74, 222, 128, 0.06);
-  color: var(--en-text-1, #e2f5e2);
+  background: rgba(212, 175, 55, 0.05);
+  color: var(--en-text-1);
 }
 
+/* Gold active state — replaces green */
 .sheetItemActive {
-  color: var(--en-green, #4ade80);
+  color: var(--en-gold);
 }
 
 .sheetItemActive .sheetItemIcon svg {
-  filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.4));
+  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
 }
 
 .sheetItemIcon {
@@ -144,7 +144,7 @@
 }
 
 .sheetItemLabel {
-  font-family: var(--font-body, Inter, sans-serif);
+  font-family: var(--font-inter);
   font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.01em;

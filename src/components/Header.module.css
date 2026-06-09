@@ -5,64 +5,83 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 max(20px, env(safe-area-inset-right, 20px)) 0 max(20px, env(safe-area-inset-left, 20px));
   height: 56px;
-  background: rgba(8, 13, 26, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(8, 13, 26, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 0.5px solid var(--en-rule);
 }
 
 .left {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
-.logo {
-  cursor: default;
-}
+.logo { cursor: default; }
 
+/* ─── CONTEXT AREA ───────────────────────────────────────────────── */
 .context {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
   overflow: hidden;
+  flex: 1;
+  justify-content: center;
 }
 
-.badge {
+/* Version label — small, muted, recedes behind club name */
+.contextVersion {
+  background: none;
+  border: none;
+  padding: 2px 0;
+  cursor: pointer;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--en-text-4);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.contextVersion:hover { color: var(--en-text-2); }
+
+/* Separator dot */
+.contextDot {
+  color: var(--en-text-5);
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Club name — more prominent than version */
+.contextClub {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  gap: 7px;
+  background: none;
+  border: none;
+  padding: 2px 0;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-2);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  transition: color 0.15s;
 }
 
-.badge:hover {
-  border-color: var(--accent-border);
-  color: var(--accent);
-  background: var(--accent-dim);
-}
-
-.clubBadge {
-  color: var(--text);
-}
-
-.divider {
-  color: var(--text-dim);
-  font-size: 12px;
-  font-family: var(--font-display);
-}
+.contextClub:hover { color: var(--en-text-1); }
 
 .crestDot {
   display: inline-block;
@@ -72,38 +91,29 @@
   flex-shrink: 0;
 }
 
-.badgeLabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-}
-
-/* ─── USER AREA ──────────────────────────────────────────────────── */
+/* ─── USER AVATAR ────────────────────────────────────────────────── */
 .userArea {
   position: relative;
-  margin-left: auto;
   flex-shrink: 0;
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  border: none;
+  background: var(--en-surface);
   cursor: pointer;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.15s;
+  transition: opacity 0.15s;
   padding: 0;
+  opacity: 0.65;
 }
 
-.avatar:hover {
-  border-color: var(--accent-border);
-}
+.avatar:hover { opacity: 1; }
 
 .avatarImg {
   width: 100%;
@@ -112,10 +122,10 @@
 }
 
 .avatarInitial {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--en-text-4);
 }
 
 .menuOverlay {
@@ -128,29 +138,34 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 6px;
   padding: 8px 0;
   min-width: 200px;
   z-index: 100;
-  box-shadow: var(--shadow-card);
-  animation: fadeIn 0.15s ease both;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: menuFade 0.15s ease both;
+}
+
+@keyframes menuFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .menuName {
   padding: 8px 14px;
-  font-family: var(--font-body);
+  font-family: var(--font-inter);
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--en-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .menuDivider {
-  height: 1px;
-  background: var(--border);
+  height: 0.5px;
+  background: var(--en-rule);
   margin: 4px 0;
 }
 
@@ -162,11 +177,10 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-family: var(--font-display);
+  font-family: var(--font-inter);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
+  font-weight: 500;
+  color: var(--en-text-3);
   transition: all 0.12s;
 }
 
