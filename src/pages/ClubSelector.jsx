@@ -51,7 +51,6 @@ const ClubSelector = () => {
 
       // Derive accurate season + trophy counts client-side from existing Firestore data.
       // The club document's seasonsLogged/trophyCount fields are stale (written at creation).
-      // We re-derive here using the same logic as Home/Museum — no Firestore writes needed.
       const enriched = await Promise.all(
         data.map(async (club) => {
           try {
@@ -63,7 +62,6 @@ const ClubSelector = () => {
               trophyCount: trophies.length,
             }
           } catch {
-            // If season fetch fails, fall back to stored values rather than crashing
             return club
           }
         })
@@ -176,7 +174,7 @@ const ClubCard = ({ club, isActive, index, onSelect }) => (
     onClick={() => onSelect(club)}
     style={{ animationDelay: `${index * 60}ms` }}
   >
-    {/* Left accent rail — uses club crest color for custom identity */}
+    {/* Left accent rail — uses club crest color for personal identity */}
     <div
       className={styles.crestAccent}
       style={{ background: club.crestColor || '#D4AF37' }}
@@ -197,13 +195,12 @@ const ClubCard = ({ club, isActive, index, onSelect }) => (
 
       <div className={styles.clubName}>{club.name}</div>
 
+      {/* Manager · Formation only — club.style removed for cleaner card */}
       {(club.manager || club.formation) && (
         <div className={styles.clubMeta}>
-          {club.manager}
+          {club.manager && <span>{club.manager}</span>}
           {club.manager && club.formation && <span className={styles.sep}>·</span>}
           {club.formation && <span>{club.formation}</span>}
-          {(club.manager || club.formation) && club.style && <span className={styles.sep}>·</span>}
-          {club.style && <span>{club.style}</span>}
         </div>
       )}
 
@@ -248,7 +245,7 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
 
     <div className={styles.formFields}>
       <div className={styles.field}>
-        <label className={styles.label}>Club name *</label>
+        <label className={styles.label}>Club name</label>
         <input
           autoFocus
           className={styles.input}
@@ -325,15 +322,17 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
     </div>
 
     <div className={styles.formActions}>
+      {/* Local gold primary — does not use global btn-primary */}
       <button
-        className="btn btn-primary"
+        className={styles.saveBtn}
         onClick={onSave}
         disabled={saving || !form.name.trim()}
       >
         {saving ? 'Saving...' : 'Create save'}
       </button>
       {onCancel && (
-        <button className="btn btn-ghost" onClick={onCancel}>
+        /* Local muted cancel */
+        <button className={styles.cancelBtn} onClick={onCancel}>
           Cancel
         </button>
       )}

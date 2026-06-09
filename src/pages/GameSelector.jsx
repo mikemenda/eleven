@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getGames, addGame } from '../firebase/services'
+import Logo from '../components/Logo'
 import styles from './GameSelector.module.css'
 
 const DEFAULT_VERSIONS = [
@@ -69,9 +70,13 @@ const GameSelector = () => {
       <div className={styles.radialGlow} />
 
       <div className={styles.inner}>
-        {/* Selector — no brand lockup; header already shows XI eleven */}
+        {/* Selector — small XI mark seal above heading, no full brand lockup */}
         <div className={styles.selectorSection}>
           <div className={styles.sectionHeading}>
+            {/* Restrained archive seal — XI mark only, no wordmark */}
+            <div className={styles.sealMark}>
+              <Logo size={36} />
+            </div>
             <p className={styles.prompt}>Select version</p>
             <p className={styles.promptSub}>Choose the FC title tied to your career archive.</p>
           </div>
@@ -118,18 +123,18 @@ const GameSelector = () => {
                     }}
                   />
                   <div className={styles.addFormActions}>
+                    {/* Local gold primary — does not use global btn-primary */}
                     <button
-                      className="btn btn-primary"
+                      className={styles.addBtn}
                       onClick={() => handleAddVersion(newVersion)}
                       disabled={adding || !newVersion.trim()}
-                      style={{ padding: '7px 14px', fontSize: 12 }}
                     >
                       {adding ? '...' : 'Add'}
                     </button>
+                    {/* Local muted cancel */}
                     <button
-                      className="btn btn-ghost"
+                      className={styles.cancelBtn}
                       onClick={() => { setShowAddForm(false); setNewVersion('') }}
-                      style={{ padding: '7px 14px', fontSize: 12 }}
                     >
                       Cancel
                     </button>
@@ -176,7 +181,6 @@ const GameCard = ({ game, isActive, index, onSelect }) => (
 
     {isActive && (
       <div className={styles.activeIndicator}>
-        {/* Gold ring indicator */}
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <circle cx="6" cy="6" r="5" stroke="#D4AF37" strokeWidth="1.5" />
           <circle cx="6" cy="6" r="2.5" fill="#D4AF37" />

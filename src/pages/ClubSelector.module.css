@@ -69,7 +69,6 @@
   gap: 4px;
 }
 
-/* Heading — refined, not arcade */
 .title {
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 24px;
@@ -87,7 +86,7 @@
   letter-spacing: 0.01em;
 }
 
-/* New save button — gold ghost treatment */
+/* New save button — gold ghost */
 .newSaveBtn {
   flex-shrink: 0;
   display: inline-flex;
@@ -146,7 +145,6 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Active/selected — champagne gold border */
 .activeCard {
   border-color: rgba(212, 175, 55, 0.35);
   background: rgba(212, 175, 55, 0.04);
@@ -178,9 +176,7 @@
   justify-content: space-between;
 }
 
-/* Crest circle — palette override: gold border, ivory initial.
-   Ignores stored club.crestColor so the card always uses the
-   Eleven design system regardless of what was saved in Firestore. */
+/* Crest circle — gold palette override, ignores stored crestColor */
 .crestCircle {
   width: 36px;
   height: 36px;
@@ -222,6 +218,7 @@
   line-height: 1.15;
 }
 
+/* Manager · Formation only — style field removed */
 .clubMeta {
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 13px;
@@ -229,14 +226,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
 }
 
 .sep {
   color: #2A3A52;
 }
 
-/* Stats row */
 .clubStats {
   display: flex;
   align-items: center;
@@ -273,7 +268,6 @@
   background: rgba(242, 241, 237, 0.07);
 }
 
-/* Chevron arrow */
 .cardArrow {
   display: flex;
   align-items: center;
@@ -314,21 +308,20 @@
 .formSub {
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: #6B7A8D;
 }
 
 .formFields {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .row {
@@ -337,19 +330,20 @@
   gap: 12px;
 }
 
+/* Refined labels — less aggressive, natural weight */
 .label {
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #6B7A8D;
 }
 
 .input,
 .select {
-  background: var(--bg);
-  border: 1px solid rgba(242, 241, 237, 0.10);
+  background: #080d1a;
+  border: 1px solid rgba(242, 241, 237, 0.09);
   border-radius: 6px;
   padding: 10px 12px;
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
@@ -363,7 +357,7 @@
 
 .input:focus,
 .select:focus {
-  border-color: rgba(212, 175, 55, 0.35);
+  border-color: rgba(212, 175, 55, 0.40);
 }
 
 .input::placeholder {
@@ -382,8 +376,8 @@
 }
 
 .colorSwatch {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
@@ -395,10 +389,11 @@
   transform: scale(1.15);
 }
 
+/* Active swatch — gold ring to match the new palette */
 .swatchActive {
-  border-color: #F2F1ED;
+  border-color: #D4AF37;
   transform: scale(1.15);
-  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(242, 241, 237, 0.4);
+  box-shadow: 0 0 0 2px #080d1a, 0 0 0 3.5px rgba(212, 175, 55, 0.5);
 }
 
 /* ─── FORM ACTIONS ───────────────────────────────────────────────── */
@@ -406,4 +401,56 @@
   display: flex;
   gap: 10px;
   padding-top: 4px;
+}
+
+/* ─── LOCAL GOLD PRIMARY BUTTON ──────────────────────────────────── */
+/* Entry-flow only — does not override global .btn-primary */
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  border: none;
+  background: #D4AF37;
+  color: #080d1a;
+  transition: all 0.15s ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #E2C14A;
+  transform: translateY(-1px);
+}
+
+.saveBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ─── LOCAL MUTED CANCEL BUTTON ──────────────────────────────────── */
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border-radius: 8px;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  background: transparent;
+  color: #6B7A8D;
+  border: 1px solid rgba(242, 241, 237, 0.09);
+  transition: all 0.15s ease;
+}
+
+.cancelBtn:hover {
+  color: #AEB7C8;
+  border-color: rgba(242, 241, 237, 0.15);
 }

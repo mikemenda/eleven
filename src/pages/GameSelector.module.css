@@ -4,7 +4,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  /* Shift content slightly above true center — feels intentionally placed */
+  padding: 32px 20px 56px;
   position: relative;
   overflow: hidden;
 }
@@ -54,22 +55,26 @@
   animation: fadeUp 0.5s ease both;
 }
 
-/* ─── SELECTOR HEADER ────────────────────────────────────────────── */
-/* No brand lockup here — global header already shows XI eleven.
-   This section is a clean heading only. */
+/* ─── SELECTOR SECTION ───────────────────────────────────────────── */
 .selectorSection {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .sectionHeading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   text-align: center;
+}
+
+/* Small archive seal — XI mark only, no wordmark, no green */
+.sealMark {
+  margin-bottom: 4px;
+  opacity: 0.9;
 }
 
 .prompt {
@@ -123,7 +128,6 @@
 .activeCard {
   border-color: rgba(212, 175, 55, 0.35);
   background: rgba(212, 175, 55, 0.06);
-  box-shadow: 0 0 0 0 transparent;
 }
 
 .activeCard:hover {
@@ -138,7 +142,6 @@
   flex: 1;
 }
 
-/* Version label — refined, not beefy */
 .versionBadge {
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 20px;
@@ -148,7 +151,6 @@
   line-height: 1;
 }
 
-/* Gold text on active card */
 .activeCard .versionBadge {
   color: #D4AF37;
 }
@@ -182,7 +184,6 @@
   background: #D4AF37;
 }
 
-/* Active indicator ring — gold */
 .activeIndicator {
   position: absolute;
   bottom: 12px;
@@ -190,7 +191,6 @@
 }
 
 /* ─── ADD CARD ───────────────────────────────────────────────────── */
-/* Quiet and premium — solid border, not heavy dashed placeholder */
 .addCard {
   border-color: rgba(242, 241, 237, 0.06);
   flex-direction: column;
@@ -226,20 +226,24 @@
   color: #D4AF37;
 }
 
+/* ─── ADD FORM CARD ──────────────────────────────────────────────── */
+/* Feels continuous with the dark entry surface — not a blue panel */
 .addFormCard {
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 14px;
+  border-color: rgba(212, 175, 55, 0.20);
+  background: #0b1220;
 }
 
 .addInput {
-  background: var(--bg);
+  background: #080d1a;
   border: 1px solid rgba(242, 241, 237, 0.10);
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #F2F1ED;
   width: 100%;
@@ -248,7 +252,7 @@
 }
 
 .addInput:focus {
-  border-color: rgba(212, 175, 55, 0.35);
+  border-color: rgba(212, 175, 55, 0.40);
 }
 
 .addInput::placeholder {
@@ -259,6 +263,58 @@
 .addFormActions {
   display: flex;
   gap: 6px;
+}
+
+/* ─── LOCAL GOLD PRIMARY BUTTON ──────────────────────────────────── */
+/* Entry-flow only — does not override global .btn-primary */
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: none;
+  background: #D4AF37;
+  color: #080d1a;
+  transition: all 0.15s ease;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: #E2C14A;
+  transform: translateY(-1px);
+}
+
+.addBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── LOCAL MUTED CANCEL BUTTON ──────────────────────────────────── */
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  background: transparent;
+  color: #6B7A8D;
+  border: 1px solid rgba(242, 241, 237, 0.08);
+  transition: all 0.15s ease;
+}
+
+.cancelBtn:hover {
+  color: #AEB7C8;
+  border-color: rgba(242, 241, 237, 0.14);
 }
 
 /* ─── SKELETONS ──────────────────────────────────────────────────── */
