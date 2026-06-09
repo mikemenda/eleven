@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 50
+// Current: 54
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -50,4 +50,5 @@
 //   51 — UCL complete: Players tab (sortable UCL stats, GK-aware, player face thumbnails, tap-to-profile); Records tab (UCL player records matching Records→Champions League scope, same min-5-apps rule); Rivals tab (UCL-only opponents, tap-through detail, league/nation records sub-section, deterministic narratives); patch buildUclRivalNarrative club name hardcode; patch Overview "Semi-Finals" label → "SF or Further"
 //   52 — UCL consolidation: 6→5 tabs (Knockouts removed, content absorbed into Seasons); header → UEFA Champions League; Overview restructured (dual stat grids, cleaned hero, Notable with round/season context, removed All-Time Record + Latest Campaign); UclPlayers HTML table with sticky identity column, position group filters, All default; UclRecords Top5Modal + Club Records section; UclRivals full round names in detail, no Final badge, league cards with drill-through detail; PlayerProfile defaults to UCL tab when launched from UCL section via location.state
 //   53 — UCL fixes: Seasons Ties/Finals boards removed (round record table only); Players season filter (single-select, All Seasons default) + individual position filters (groups + positions mirroring Players.jsx) + combined filtering + G+A column; Records Top5Modal fixed via createPortal (bypasses .inner transform stacking context), Players/Club toggle with Club records under Club view only; Rivals league table restored with column header row (League/Nation/P/W/D/L/GD), club names removed from summary rows, league detail tap-through unchanged
-const SW_VERSION = 53;
+//   54 — Entry flow design pass: Login/GameSelector/ClubSelector — champagne gold/ivory/slate palette; neon green removed from all three screens; simplified brand (no duplicate XI ELEVEN lockup); softer neutral pitch grid; premium copy; gold selected-card treatment; Club Save card crest monogram visually overridden to gold/ivory (no Firestore write); seasons+trophies derived client-side via getSeasons+deriveTrophiesFromSeasons (fixes 0/0 display); Header unchanged
+const SW_VERSION = 54;

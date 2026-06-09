@@ -25,19 +25,16 @@ const Login = () => {
       <div className={styles.radialGlow} />
 
       <div className={styles.inner}>
-        {/* Brand */}
+        {/* Brand — XI mark + "eleven" wordmark, no duplicate */}
         <div className={styles.brand}>
           <Logo size={72} />
-          <div className={styles.wordmark}>
-            <span className={styles.xi}>XI</span>
-            <span className={styles.eleven}>eleven</span>
-          </div>
+          <p className={styles.wordmarkText}>eleven</p>
           <p className={styles.tagline}>FC Career Mode Companion</p>
         </div>
 
         {/* Sign in card */}
         <div className={styles.card}>
-          <p className={styles.prompt}>Sign in to access your saves</p>
+          <p className={styles.prompt}>Continue to your career archive</p>
 
           <button
             className={styles.googleBtn}
@@ -57,7 +54,7 @@ const Login = () => {
           )}
 
           <p className={styles.note}>
-            Your data is private and only accessible when signed in with your Google account.
+            Your data stays private and is only accessible from your signed-in account.
           </p>
         </div>
       </div>

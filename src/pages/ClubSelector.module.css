@@ -1,10 +1,12 @@
 .page {
   min-height: 100vh;
-  padding: 24px 20px 60px;
+  min-height: 100dvh;
+  padding: 24px 20px 80px;
   position: relative;
   overflow: hidden;
 }
 
+/* Soft neutral pitch grid — no green */
 .pitchOverlay {
   position: fixed;
   inset: 0;
@@ -13,8 +15,8 @@
       0deg,
       transparent,
       transparent 56px,
-      rgba(74, 222, 128, 0.02) 56px,
-      rgba(74, 222, 128, 0.02) 57px
+      rgba(255, 255, 255, 0.015) 56px,
+      rgba(255, 255, 255, 0.015) 57px
     );
   pointer-events: none;
   z-index: 0;
@@ -39,33 +41,75 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-muted);
-  font-family: var(--font-display);
+  color: #6B7A8D;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 4px 0;
   transition: color 0.15s;
 }
 
 .backBtn:hover {
-  color: var(--accent);
+  color: #D4AF37;
 }
 
 /* ─── HEADER ─────────────────────────────────────────────────────── */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
 }
 
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Heading — refined, not arcade */
 .title {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 800;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--text);
+  color: #F2F1ED;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  color: #6B7A8D;
+  letter-spacing: 0.01em;
+}
+
+/* New save button — gold ghost treatment */
+.newSaveBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  background: transparent;
+  color: #AEB7C8;
+  border: 1px solid rgba(242, 241, 237, 0.10);
+  transition: all 0.15s ease;
+  margin-top: 2px;
+}
+
+.newSaveBtn:hover {
+  border-color: rgba(212, 175, 55, 0.30);
+  color: #D4AF37;
 }
 
 /* ─── GRID ───────────────────────────────────────────────────────── */
@@ -77,15 +121,15 @@
 
 .skeleton {
   height: 130px;
-  border-radius: var(--radius);
+  border-radius: 12px;
 }
 
 /* ─── CLUB CARD ──────────────────────────────────────────────────── */
 .card {
   position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: #0e1829;
+  border: 1px solid rgba(242, 241, 237, 0.08);
+  border-radius: 12px;
   padding: 0;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -97,20 +141,27 @@
 }
 
 .card:hover {
-  border-color: var(--border-accent);
+  border-color: rgba(212, 175, 55, 0.22);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* Active/selected — champagne gold border */
 .activeCard {
-  border-color: var(--accent-border);
-  background: var(--accent-dim);
+  border-color: rgba(212, 175, 55, 0.35);
+  background: rgba(212, 175, 55, 0.04);
 }
 
+.activeCard:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.06);
+}
+
+/* Left accent rail — keeps club crestColor for personal identity */
 .crestAccent {
   width: 4px;
   flex-shrink: 0;
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .cardBody {
@@ -127,58 +178,65 @@
   justify-content: space-between;
 }
 
+/* Crest circle — palette override: gold border, ivory initial.
+   Ignores stored club.crestColor so the card always uses the
+   Eleven design system regardless of what was saved in Firestore. */
 .crestCircle {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid;
+  border: 1.5px solid rgba(212, 175, 55, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.2);
+  background: rgba(212, 175, 55, 0.08);
 }
 
 .crestInitial {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 800;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: #D4AF37;
 }
 
+/* Active badge — champagne gold */
 .activeBadge {
-  font-family: var(--font-display);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: var(--accent-dim);
-  border: 1px solid var(--accent-border);
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.10);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: 20px;
   padding: 2px 8px;
 }
 
 .clubName {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  color: var(--text);
-  line-height: 1.1;
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #F2F1ED;
+  line-height: 1.15;
 }
 
 .clubMeta {
-  font-family: var(--font-body);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 13px;
-  color: var(--text-muted);
+  color: #6B7A8D;
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .sep {
-  color: var(--text-dim);
+  color: #2A3A52;
 }
 
+/* Stats row */
 .clubStats {
   display: flex;
   align-items: center;
@@ -193,44 +251,46 @@
 }
 
 .statValue {
-  font-family: var(--font-display);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
+  font-weight: 600;
+  color: #F2F1ED;
   line-height: 1;
 }
 
 .statLabel {
-  font-family: var(--font-display);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: #4A5568;
 }
 
 .statDivider {
   width: 1px;
   height: 24px;
-  background: var(--border);
+  background: rgba(242, 241, 237, 0.07);
 }
 
+/* Chevron arrow */
 .cardArrow {
   display: flex;
   align-items: center;
   padding: 0 16px 0 0;
-  color: var(--text-dim);
+  color: #2A3A52;
+  transition: color 0.15s;
 }
 
 .card:hover .cardArrow {
-  color: var(--accent);
+  color: #D4AF37;
 }
 
 /* ─── FORM ───────────────────────────────────────────────────────── */
 .form {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: #0e1829;
+  border: 1px solid rgba(242, 241, 237, 0.08);
+  border-radius: 14px;
   padding: 28px 24px;
   display: flex;
   flex-direction: column;
@@ -245,18 +305,18 @@
 }
 
 .formTitle {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: #F2F1ED;
 }
 
 .formSub {
-  font-family: var(--font-display);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 12px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #6B7A8D;
 }
 
 .formFields {
@@ -278,23 +338,23 @@
 }
 
 .label {
-  font-family: var(--font-display);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #6B7A8D;
 }
 
 .input,
 .select {
   background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(242, 241, 237, 0.10);
+  border-radius: 6px;
   padding: 10px 12px;
-  font-family: var(--font-body);
+  font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 14px;
-  color: var(--text);
+  color: #F2F1ED;
   width: 100%;
   outline: none;
   transition: border-color 0.15s;
@@ -303,15 +363,15 @@
 
 .input:focus,
 .select:focus {
-  border-color: var(--accent-border);
+  border-color: rgba(212, 175, 55, 0.35);
 }
 
 .input::placeholder {
-  color: var(--text-dim);
+  color: #2A3A52;
 }
 
 .select option {
-  background: var(--surface);
+  background: #0e1829;
 }
 
 /* ─── COLOR GRID ─────────────────────────────────────────────────── */
@@ -336,9 +396,9 @@
 }
 
 .swatchActive {
-  border-color: var(--text);
+  border-color: #F2F1ED;
   transform: scale(1.15);
-  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px currentColor;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(242, 241, 237, 0.4);
 }
 
 /* ─── FORM ACTIONS ───────────────────────────────────────────────── */

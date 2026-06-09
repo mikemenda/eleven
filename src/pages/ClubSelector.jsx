@@ -1,23 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getClubs, addClub } from '../firebase/services'
+import { getClubs, addClub, getSeasons } from '../firebase/services'
+import { deriveTrophiesFromSeasons } from '../utils/trophyUtils'
 import styles from './ClubSelector.module.css'
 
-// Preset crest colors for quick selection
 const CREST_COLORS = [
-  '#ef4444', // Red
-  '#3b82f6', // Blue
-  '#8b5cf6', // Purple
-  '#f97316', // Orange
-  '#eab308', // Yellow
-  '#06b6d4', // Cyan
-  '#ec4899', // Pink
-  '#14b8a6', // Teal
-  '#f43f5e', // Rose
-  '#84cc16', // Lime
-  '#6366f1', // Indigo
-  '#ffffff', // White
+  '#ef4444', '#3b82f6', '#8b5cf6', '#f97316',
+  '#eab308', '#06b6d4', '#ec4899', '#14b8a6',
+  '#f43f5e', '#84cc16', '#6366f1', '#ffffff',
 ]
 
 const MANAGER_STYLES = [
@@ -57,9 +48,29 @@ const ClubSelector = () => {
   const loadClubs = async () => {
     try {
       const data = await getClubs(activeGame.id)
-      setClubs(data)
-      // Auto-open form if no clubs exist
-      if (data.length === 0) setShowForm(true)
+
+      // Derive accurate season + trophy counts client-side from existing Firestore data.
+      // The club document's seasonsLogged/trophyCount fields are stale (written at creation).
+      // We re-derive here using the same logic as Home/Museum — no Firestore writes needed.
+      const enriched = await Promise.all(
+        data.map(async (club) => {
+          try {
+            const seasons = await getSeasons(club.id)
+            const trophies = deriveTrophiesFromSeasons(seasons)
+            return {
+              ...club,
+              seasonsLogged: seasons.length,
+              trophyCount: trophies.length,
+            }
+          } catch {
+            // If season fetch fails, fall back to stored values rather than crashing
+            return club
+          }
+        })
+      )
+
+      setClubs(enriched)
+      if (enriched.length === 0) setShowForm(true)
     } catch (err) {
       console.error('Error loading clubs:', err)
     } finally {
@@ -86,7 +97,6 @@ const ClubSelector = () => {
       setClubs(prev => [...prev, newClub])
       setShowForm(false)
       setForm({ name: '', manager: '', style: '', formation: '', crestColor: CREST_COLORS[0], league: '' })
-      // Auto-select new club
       handleSelect(newClub)
     } catch (err) {
       console.error('Error saving club:', err)
@@ -111,12 +121,14 @@ const ClubSelector = () => {
         </button>
 
         <div className={styles.header}>
-          <h1 className={styles.title}>Select club save</h1>
+          <div className={styles.headerText}>
+            <h1 className={styles.title}>Select club save</h1>
+            <p className={styles.subtitle}>Choose the career archive you want to open.</p>
+          </div>
           {clubs.length > 0 && (
             <button
-              className="btn btn-ghost"
+              className={styles.newSaveBtn}
               onClick={() => setShowForm(true)}
-              style={{ fontSize: 12, padding: '7px 14px' }}
             >
               + New save
             </button>
@@ -164,16 +176,17 @@ const ClubCard = ({ club, isActive, index, onSelect }) => (
     onClick={() => onSelect(club)}
     style={{ animationDelay: `${index * 60}ms` }}
   >
-    {/* Crest accent bar */}
+    {/* Left accent rail — uses club crest color for custom identity */}
     <div
       className={styles.crestAccent}
-      style={{ background: club.crestColor || 'var(--accent)' }}
+      style={{ background: club.crestColor || '#D4AF37' }}
     />
 
     <div className={styles.cardBody}>
       <div className={styles.cardTop}>
-        <div className={styles.crestCircle} style={{ borderColor: club.crestColor || 'var(--accent)' }}>
-          <span className={styles.crestInitial} style={{ color: club.crestColor || 'var(--accent)' }}>
+        {/* Crest monogram — always gold/ivory palette regardless of stored crestColor */}
+        <div className={styles.crestCircle}>
+          <span className={styles.crestInitial}>
             {club.name?.[0] || '?'}
           </span>
         </div>
@@ -184,22 +197,24 @@ const ClubCard = ({ club, isActive, index, onSelect }) => (
 
       <div className={styles.clubName}>{club.name}</div>
 
-      {club.manager && (
+      {(club.manager || club.formation) && (
         <div className={styles.clubMeta}>
           {club.manager}
-          {club.formation && <span className={styles.sep}>·</span>}
+          {club.manager && club.formation && <span className={styles.sep}>·</span>}
           {club.formation && <span>{club.formation}</span>}
+          {(club.manager || club.formation) && club.style && <span className={styles.sep}>·</span>}
+          {club.style && <span>{club.style}</span>}
         </div>
       )}
 
       <div className={styles.clubStats}>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{club.seasonsLogged || 0}</span>
+          <span className={styles.statValue}>{club.seasonsLogged ?? 0}</span>
           <span className={styles.statLabel}>Seasons</span>
         </div>
         <div className={styles.statDivider} />
         <div className={styles.stat}>
-          <span className={styles.statValue}>{club.trophyCount || 0}</span>
+          <span className={styles.statValue}>{club.trophyCount ?? 0}</span>
           <span className={styles.statLabel}>Trophies</span>
         </div>
         {club.league && (
@@ -232,7 +247,6 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
     </div>
 
     <div className={styles.formFields}>
-      {/* Club name */}
       <div className={styles.field}>
         <label className={styles.label}>Club name *</label>
         <input
@@ -244,7 +258,6 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
         />
       </div>
 
-      {/* Manager */}
       <div className={styles.field}>
         <label className={styles.label}>Manager</label>
         <input
@@ -255,7 +268,6 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
         />
       </div>
 
-      {/* League */}
       <div className={styles.field}>
         <label className={styles.label}>Starting league</label>
         <input
@@ -266,7 +278,6 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
         />
       </div>
 
-      {/* Style + Formation row */}
       <div className={styles.row}>
         <div className={styles.field}>
           <label className={styles.label}>Style</label>
@@ -297,7 +308,6 @@ const ClubForm = ({ form, updateForm, onSave, onCancel, saving, gameTitle }) => 
         </div>
       </div>
 
-      {/* Crest color */}
       <div className={styles.field}>
         <label className={styles.label}>Crest color</label>
         <div className={styles.colorGrid}>

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getGames, addGame } from '../firebase/services'
-import Logo from '../components/Logo'
 import styles from './GameSelector.module.css'
 
 const DEFAULT_VERSIONS = [
@@ -31,7 +30,6 @@ const GameSelector = () => {
       setGames(data)
     } catch (err) {
       console.error('Error loading games:', err)
-      // If Firebase not configured, show defaults as placeholders
       setGames([])
     } finally {
       setLoading(false)
@@ -59,7 +57,6 @@ const GameSelector = () => {
     }
   }
 
-  // Show default FC versions if no games in DB yet (onboarding state)
   const displayGames = games.length > 0 ? games : DEFAULT_VERSIONS.map((v, i) => ({
     id: `default-${i}`,
     title: v.title,
@@ -68,24 +65,16 @@ const GameSelector = () => {
 
   return (
     <div className={styles.page}>
-      {/* Background elements */}
       <div className={styles.pitchOverlay} />
       <div className={styles.radialGlow} />
 
       <div className={styles.inner}>
-        {/* Brand lockup */}
-        <div className={styles.brand}>
-          <Logo size={64} />
-          <div className={styles.wordmark}>
-            <span className={styles.xi}>XI</span>
-            <span className={styles.eleven}>eleven</span>
-          </div>
-          <p className={styles.tagline}>FC Career Mode Companion</p>
-        </div>
-
-        {/* Selector */}
+        {/* Selector — no brand lockup; header already shows XI eleven */}
         <div className={styles.selectorSection}>
-          <p className={styles.prompt}>Select FC version</p>
+          <div className={styles.sectionHeading}>
+            <p className={styles.prompt}>Select version</p>
+            <p className={styles.promptSub}>Choose the FC title tied to your career archive.</p>
+          </div>
 
           {loading ? (
             <div className={styles.skeletons}>
@@ -151,7 +140,6 @@ const GameSelector = () => {
           )}
         </div>
 
-        {/* Firebase setup hint for first run */}
         {games.length === 0 && !loading && (
           <p className={styles.setupHint}>
             Connect Firebase in <code>src/firebase/config.js</code> to persist data
@@ -162,50 +150,40 @@ const GameSelector = () => {
   )
 }
 
-const GameCard = ({ game, isActive, index, onSelect }) => {
-  // Map game title to a visual treatment
-  const versionNum = parseInt(game.title?.replace(/\D/g, '')) || 25
-  const hue = ((versionNum - 25) * 40) % 360  // each version gets shifted hue
-  const accent = isActive ? 'var(--accent)' : undefined
+const GameCard = ({ game, isActive, index, onSelect }) => (
+  <button
+    className={`${styles.card} ${isActive ? styles.activeCard : ''}`}
+    onClick={() => onSelect(game)}
+    style={{ animationDelay: `${index * 60}ms` }}
+  >
+    {isActive && <div className={styles.activePip} />}
 
-  return (
-    <button
-      className={`${styles.card} ${isActive ? styles.activeCard : ''}`}
-      onClick={() => onSelect(game)}
-      style={{ animationDelay: `${index * 60}ms` }}
-    >
-      {isActive && <div className={styles.activePip} />}
-
-      <div className={styles.cardInner}>
-        <div
-          className={styles.versionBadge}
-          style={isActive ? { color: 'var(--accent)', borderColor: 'var(--accent-border)' } : {}}
-        >
-          {game.title}
-        </div>
-
-        {/* Stats summary if clubs exist */}
-        {game.clubCount > 0 && (
-          <div className={styles.cardMeta}>
-            <span>{game.clubCount} save{game.clubCount !== 1 ? 's' : ''}</span>
-          </div>
-        )}
-
-        {game.isDefault && (
-          <div className={styles.defaultNote}>Not started</div>
-        )}
+    <div className={styles.cardInner}>
+      <div className={styles.versionBadge}>
+        {game.title}
       </div>
 
-      {isActive && (
-        <div className={styles.activeIndicator}>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <circle cx="6" cy="6" r="5" stroke="var(--accent)" strokeWidth="1.5" />
-            <circle cx="6" cy="6" r="2.5" fill="var(--accent)" />
-          </svg>
+      {game.clubCount > 0 && (
+        <div className={styles.cardMeta}>
+          <span>{game.clubCount} save{game.clubCount !== 1 ? 's' : ''}</span>
         </div>
       )}
-    </button>
-  )
-}
+
+      {game.isDefault && (
+        <div className={styles.defaultNote}>Not started</div>
+      )}
+    </div>
+
+    {isActive && (
+      <div className={styles.activeIndicator}>
+        {/* Gold ring indicator */}
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="6" r="5" stroke="#D4AF37" strokeWidth="1.5" />
+          <circle cx="6" cy="6" r="2.5" fill="#D4AF37" />
+        </svg>
+      </div>
+    )}
+  </button>
+)
 
 export default GameSelector
