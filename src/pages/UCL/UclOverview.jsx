@@ -3,12 +3,12 @@ import { fmtScore, fmtGD, ROUND_LABELS } from '../../utils/uclUtils'
 
 const FINISH_DISPLAY = {
   'Champions':  'Champions',
-  'Runners-Up': 'Runners-Up',
-  'SF':         'Semi-Final',
-  'QF':         'Quarter-Final',
-  'R16':        'Round of 16',
+  'Runners-Up': 'Finalist',
+  'SF':         'Semi-Finalist',
+  'QF':         'Quarterfinalist',
+  'R16':        'Round of 16 Exit',
   'Playoff':    'Playoff',
-  'LP Only':    'League Phase',
+  'LP Only':    'League Phase Exit',
 }
 
 // Lookup opponent display name from opponents map
@@ -35,6 +35,11 @@ function recordVsOpp(uclMatches, oppKey) {
   const d = ms.filter(m => m.score_for === m.score_against).length
   const l = ms.filter(m => m.score_for  < m.score_against).length
   return `${w}W ${d}D ${l}L`
+}
+
+// Singular/plural helper
+function pl(n, singular, plural) {
+  return n === 1 ? singular : (plural || `${singular}s`)
 }
 
 export default function UclOverview({ overview, uclSeasons, uclMatches, opponents, loading }) {
@@ -71,37 +76,45 @@ export default function UclOverview({ overview, uclSeasons, uclMatches, opponent
   const vsRecord = recordVsOpp(uclMatches || [], mostCommonOppKey)
 
   const gpg = played > 0 ? (gf / played).toFixed(2) : '0.00'
+  const koApps = (quarters || 0) + (semis || 0) + (finals || 0)
 
   return (
     <div className={styles.ovWrap}>
 
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <div className={styles.ovHero}>
-        <div className={styles.ovHeroLabel}>UEFA Champions League</div>
         <div className={styles.ovHeroName}>European Record</div>
+        <div className={styles.ovHeroRecord}>
+          <span className={styles.ovWDL}>{w}W</span>
+          <span className={styles.ovHeroDivider}>·</span>
+          <span className={styles.ovWDL}>{d}D</span>
+          <span className={styles.ovHeroDivider}>·</span>
+          <span className={styles.ovWDL}>{l}L</span>
+          <span className={styles.ovHeroDivider}>·</span>
+          <span className={styles.ovHeroGoals}>{gf} GF · {ga} GA</span>
+        </div>
       </div>
 
-      {/* ── Stat grid 1: Match record ─────────────────────────────── */}
+      {/* ── Stat grid: neutral ivory, no green/red ────────────────── */}
       <div className={styles.ovStatRow}>
         <div className={styles.ovStatPill}>
           <span className={styles.ovStatVal}>{played}</span>
-          <span className={styles.ovStatKey}>Matches</span>
+          <span className={styles.ovStatKey}>Played</span>
         </div>
         <div className={styles.ovStatPill}>
-          <span className={styles.ovStatVal} style={{ color: 'var(--en-green)' }}>{w}</span>
+          <span className={styles.ovStatVal}>{w}</span>
           <span className={styles.ovStatKey}>Wins</span>
         </div>
         <div className={styles.ovStatPill}>
-          <span className={styles.ovStatVal} style={{ color: 'var(--en-text-3)' }}>{d}</span>
+          <span className={styles.ovStatVal}>{d}</span>
           <span className={styles.ovStatKey}>Draws</span>
         </div>
         <div className={styles.ovStatPill}>
-          <span className={styles.ovStatVal} style={{ color: 'var(--danger)' }}>{l}</span>
+          <span className={styles.ovStatVal}>{l}</span>
           <span className={styles.ovStatKey}>Losses</span>
         </div>
       </div>
 
-      {/* ── Stat grid 2: Goals ────────────────────────────────────── */}
       <div className={styles.ovStatRow}>
         <div className={styles.ovStatPill}>
           <span className={styles.ovStatVal}>{gf}</span>
@@ -112,10 +125,7 @@ export default function UclOverview({ overview, uclSeasons, uclMatches, opponent
           <span className={styles.ovStatKey}>GA</span>
         </div>
         <div className={styles.ovStatPill}>
-          <span
-            className={styles.ovStatVal}
-            style={{ color: gd > 0 ? 'var(--en-green)' : gd < 0 ? 'var(--danger)' : undefined }}
-          >
+          <span className={styles.ovStatVal}>
             {gd > 0 ? `+${gd}` : gd}
           </span>
           <span className={styles.ovStatKey}>GD</span>
@@ -126,24 +136,24 @@ export default function UclOverview({ overview, uclSeasons, uclMatches, opponent
         </div>
       </div>
 
-      {/* ── Results grid ──────────────────────────────────────────── */}
+      {/* ── Results grid — with corrected labels + plurals ────────── */}
       <div className={styles.ovSection}>
         <p className={styles.ovSectionTitle}>Results</p>
         <div className={styles.ovStageGrid}>
           {[
-            { label: 'Appearances', value: campaigns },
-            { label: 'KO Round',    value: quarters + semis + finals },
-            { label: 'Finals',      value: finals },
-            { label: 'Titles',      value: titles },
-          ].map(({ label, value }) => (
-            <div key={label} className={styles.ovStageItem}>
+            { value: campaigns, singular: 'Campaign',  plural: 'Campaigns' },
+            { value: koApps,    singular: 'KO App',    plural: 'KO Apps'   },
+            { value: finals,    singular: 'Final',     plural: 'Finals'    },
+            { value: titles,    singular: 'Title',     plural: 'Titles'    },
+          ].map(({ value, singular, plural }) => (
+            <div key={singular} className={styles.ovStageItem}>
               <span
                 className={styles.ovStageVal}
                 style={value > 0 ? { color: 'var(--en-gold)' } : undefined}
               >
                 {value}
               </span>
-              <span className={styles.ovStageKey}>{label}</span>
+              <span className={styles.ovStageKey}>{pl(value, singular, plural)}</span>
             </div>
           ))}
         </div>
@@ -153,45 +163,45 @@ export default function UclOverview({ overview, uclSeasons, uclMatches, opponent
       {(biggestWin || worstLoss || mostCommonName) && (
         <div className={styles.ovSection}>
           <p className={styles.ovSectionTitle}>Notable</p>
-          <div className={styles.ovRecordTable}>
+          <div className={styles.ovNotableList}>
 
             {biggestWin && (
-              <div className={styles.ovRecordRow}>
-                <span className={styles.ovRecordLabel}>Biggest Win</span>
-                <div className={styles.ovRecordRight}>
-                  <span className={styles.ovRecordValue} style={{ color: 'var(--en-green)' }}>
+              <div className={styles.ovNotableRow}>
+                <span className={styles.ovNotableLabel}>Biggest Win</span>
+                <div className={styles.ovNotableRight}>
+                  <span className={styles.ovNotableValue}>
                     {fmtScore(biggestWin.score_for, biggestWin.score_against)}
                     {biggestWinOpp && ` vs ${biggestWinOpp}`}
                   </span>
                   {biggestWin.competition && (
-                    <span className={styles.ovRecordSub}>{matchCtx(biggestWin)}</span>
+                    <span className={styles.ovNotableSub}>{matchCtx(biggestWin)}</span>
                   )}
                 </div>
               </div>
             )}
 
             {worstLoss && (
-              <div className={styles.ovRecordRow}>
-                <span className={styles.ovRecordLabel}>Worst Defeat</span>
-                <div className={styles.ovRecordRight}>
-                  <span className={styles.ovRecordValue} style={{ color: 'var(--danger)' }}>
+              <div className={styles.ovNotableRow}>
+                <span className={styles.ovNotableLabel}>Worst Defeat</span>
+                <div className={styles.ovNotableRight}>
+                  <span className={styles.ovNotableValue}>
                     {fmtScore(worstLoss.score_for, worstLoss.score_against)}
                     {worstLossOpp && ` vs ${worstLossOpp}`}
                   </span>
                   {worstLoss.competition && (
-                    <span className={styles.ovRecordSub}>{matchCtx(worstLoss)}</span>
+                    <span className={styles.ovNotableSub}>{matchCtx(worstLoss)}</span>
                   )}
                 </div>
               </div>
             )}
 
             {mostCommonName && (
-              <div className={styles.ovRecordRow}>
-                <span className={styles.ovRecordLabel}>Most Common Opp.</span>
-                <div className={styles.ovRecordRight}>
-                  <span className={styles.ovRecordValue}>{mostCommonName}</span>
+              <div className={styles.ovNotableRow}>
+                <span className={styles.ovNotableLabel}>Most Faced</span>
+                <div className={styles.ovNotableRight}>
+                  <span className={styles.ovNotableValue}>{mostCommonName}</span>
                   {vsRecord && (
-                    <span className={styles.ovRecordSub}>{vsRecord}</span>
+                    <span className={styles.ovNotableSub}>{vsRecord}</span>
                   )}
                 </div>
               </div>

@@ -9,8 +9,8 @@ import {
   ROUND_LABELS,
 } from '../../utils/uclUtils'
 
-// ─── Rival detail view ────────────────────────────────────────────────────────
-function RivalDetail({ rival, clubName, onBack }) {
+// ─── Opponent detail view ─────────────────────────────────────────────────────
+function OpponentDetail({ rival, clubName, onBack }) {
   if (!rival) return null
   const narrative   = buildUclRivalNarrative(rival, clubName)
   const finalsCount = rival.matches.filter(m => m.competition === 'UCL_Final').length
@@ -43,11 +43,12 @@ function RivalDetail({ rival, clubName, onBack }) {
         </div>
       </div>
 
+      {/* H2H stat bar */}
       <div className={styles.rvH2H}>
         {[
-          { k: 'Won',   v: rival.w,  c: 'var(--en-green)'  },
+          { k: 'Won',   v: rival.w,  c: 'var(--en-text-1)'  },
           { k: 'Drawn', v: rival.d,  c: 'var(--en-text-3)' },
-          { k: 'Lost',  v: rival.l,  c: 'var(--danger)'    },
+          { k: 'Lost',  v: rival.l,  c: 'var(--en-text-1)'  },
           { k: 'Goals', v: `${rival.gf}–${rival.ga}` },
         ].map(({ k, v, c }) => (
           <div key={k} className={styles.rvH2HItem}>
@@ -61,7 +62,7 @@ function RivalDetail({ rival, clubName, onBack }) {
 
       {finalsCount > 0 && (
         <div className={styles.rvFinalsNote}>
-          ⚡ {finalsCount} UCL final{finalsCount > 1 ? 's' : ''} against {rival.displayName}
+          ★ {finalsCount} UCL final{finalsCount > 1 ? 's' : ''} against {rival.displayName}
         </div>
       )}
 
@@ -137,9 +138,9 @@ function LeagueDetail({ group, opponents, onBack }) {
 
       <div className={styles.rvH2H}>
         {[
-          { k: 'Won',   v: group.w,  c: 'var(--en-green)'  },
+          { k: 'Won',   v: group.w,  c: 'var(--en-text-1)'  },
           { k: 'Drawn', v: group.d,  c: 'var(--en-text-3)' },
-          { k: 'Lost',  v: group.l,  c: 'var(--danger)'    },
+          { k: 'Lost',  v: group.l,  c: 'var(--en-text-1)'  },
           { k: 'Goals', v: `${group.gf}–${group.ga}` },
         ].map(({ k, v, c }) => (
           <div key={k} className={styles.rvH2HItem}>
@@ -172,8 +173,7 @@ function LeagueDetail({ group, opponents, onBack }) {
                   onError={e => { e.currentTarget.style.display = 'none' }} />
               )}
               <span className={styles.rvLeagueClubName}>{club.displayName}</span>
-              <span className={styles.rvLeagueClubRecord}
-                style={{ color: cw > cl ? 'var(--en-green)' : cl > cw ? 'var(--danger)' : undefined }}>
+              <span className={styles.rvLeagueClubRecord}>
                 {cw}W {cd}D {cl}L · {cgf}–{cga}
               </span>
             </div>
@@ -230,7 +230,7 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
 
   if (selected) {
     const rival = rivals.find(r => r.opponentKey === selected)
-    return <RivalDetail rival={rival} clubName={clubName} onBack={() => setSelected(null)} />
+    return <OpponentDetail rival={rival} clubName={clubName} onBack={() => setSelected(null)} />
   }
 
   if (selectedLeague) {
@@ -249,7 +249,7 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
 
   return (
     <div className={styles.rvWrap}>
-      {/* Toggle */}
+      {/* View toggle */}
       <div className={styles.rvToggleBar}>
         <button className={`${styles.rvToggleBtn} ${view === 'rivals' ? styles.rvToggleActive : ''}`}
           onClick={() => setView('rivals')}>
@@ -263,9 +263,7 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
       </div>
 
       {view === 'leagues' ? (
-        /* ── League table — clean summary, no club names, column header ── */
         <div>
-          {/* Column header row */}
           <div className={styles.rvLeagueTableHead}>
             <span className={styles.rvLgThLeague}>League</span>
             <span className={styles.rvLgThNation}>Nation</span>
@@ -286,13 +284,10 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
                 {g.country !== 'Unknown' ? g.country : '—'}
               </span>
               <span className={styles.rvLgTdStat}>{g.p}</span>
-              <span className={styles.rvLgTdStat} style={{ color: 'var(--en-green)' }}>{g.w}</span>
-              <span className={styles.rvLgTdStat} style={{ color: 'var(--en-text-3)' }}>{g.d}</span>
-              <span className={styles.rvLgTdStat} style={{ color: 'var(--danger)' }}>{g.l}</span>
-              <span className={styles.rvLgTdStat}
-                style={{ color: g.gd > 0 ? 'var(--en-green)' : g.gd < 0 ? 'var(--danger)' : undefined }}>
-                {fmtGD(g.gf, g.ga)}
-              </span>
+              <span className={styles.rvLgTdStat}>{g.w}</span>
+              <span className={styles.rvLgTdStat}>{g.d}</span>
+              <span className={styles.rvLgTdStat}>{g.l}</span>
+              <span className={styles.rvLgTdStat}>{fmtGD(g.gf, g.ga)}</span>
               <svg width="10" height="10" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
                 <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -300,7 +295,6 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
           ))}
         </div>
       ) : (
-        /* ── Opponents table ── */
         <>
           <div className={styles.rvTableHead}>
             <span className={styles.rvThOpp}>Opponent</span>
@@ -326,13 +320,10 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
                 </div>
               </div>
               <span className={styles.rvStat}>{r.played}</span>
-              <span className={styles.rvStat} style={{ color: 'var(--en-green)' }}>{r.w}</span>
-              <span className={styles.rvStat} style={{ color: 'var(--en-text-3)' }}>{r.d}</span>
-              <span className={styles.rvStat} style={{ color: 'var(--danger)' }}>{r.l}</span>
-              <span className={styles.rvStat}
-                style={{ color: r.gd > 0 ? 'var(--en-green)' : r.gd < 0 ? 'var(--danger)' : undefined }}>
-                {r.gd > 0 ? `+${r.gd}` : r.gd}
-              </span>
+              <span className={styles.rvStat}>{r.w}</span>
+              <span className={styles.rvStat}>{r.d}</span>
+              <span className={styles.rvStat}>{r.l}</span>
+              <span className={styles.rvStat}>{r.gd > 0 ? `+${r.gd}` : r.gd}</span>
               <svg width="12" height="12" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
                 <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>

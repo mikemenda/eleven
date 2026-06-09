@@ -25,8 +25,19 @@
   padding: 12px 20px 10px;
   border-bottom: 0.5px solid var(--en-rule);
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
+  background: linear-gradient(180deg, var(--en-blue-dim) 0%, transparent 100%);
+}
+
+/* UCL starball icon — small, restrained, white tinted */
+.topBarIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.7;
+  filter: brightness(0) invert(1);
 }
 
 .topLabel {
@@ -35,13 +46,6 @@
   font-weight: 700;
   color: var(--en-text-1);
   letter-spacing: 0.01em;
-}
-
-.topSub {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-3);
-  letter-spacing: 0.05em;
 }
 
 /* ─── TAB BAR ────────────────────────────────────────────────────────────── */
@@ -59,13 +63,14 @@
 .tab {
   flex: 1;
   padding: 12px 8px;
-  min-width: 80px;
+  min-width: 76px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
@@ -90,8 +95,8 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -124,30 +129,6 @@
   margin: 0;
 }
 
-/* ─── COMING SOON ────────────────────────────────────────────────────────── */
-
-.comingSoon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 80px 24px;
-  text-align: center;
-}
-.comingSoonIcon { font-size: 32px; opacity: 0.5; }
-.comingSoonTitle {
-  font-family: var(--font-playfair);
-  font-size: 17px;
-  color: var(--en-text-2);
-  margin: 0;
-}
-.comingSoonText {
-  font-family: var(--font-inter);
-  font-size: 13px;
-  color: var(--en-text-3);
-  margin: 0;
-}
-
 /* ─── OVERVIEW TAB ───────────────────────────────────────────────────────── */
 
 .ovWrap {
@@ -156,54 +137,41 @@
 
 /* Hero */
 .ovHero {
-  padding: 28px 20px 20px;
+  padding: 24px 20px 20px;
   border-bottom: 0.5px solid var(--en-rule);
   background: linear-gradient(180deg, var(--en-blue-dim) 0%, transparent 100%);
 }
-.ovHeroLabel {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
-  margin-bottom: 4px;
-}
 .ovHeroName {
   font-family: var(--font-playfair);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--en-text-1);
   line-height: 1.15;
-}
-.ovHeroSub {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-3);
-  margin-top: 6px;
-  letter-spacing: 0.04em;
+  margin-bottom: 10px;
 }
 .ovHeroRecord {
-  margin-top: 12px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 .ovWDL {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  color: var(--en-text-2);
 }
 .ovHeroDivider {
   color: var(--en-text-4);
+  font-family: var(--font-inter);
+  font-size: 14px;
 }
 .ovHeroGoals {
-  font-family: var(--font-plex);
-  font-size: 14px;
-  color: var(--en-text-2);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
 }
 
-/* Stat pill row */
+/* Stat grid */
 .ovStatRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -214,41 +182,42 @@
   flex-direction: column;
   align-items: center;
   padding: 16px 8px;
-  gap: 4px;
+  gap: 5px;
   border-right: 0.5px solid var(--en-rule);
 }
 .ovStatPill:last-child { border-right: none; }
 .ovStatVal {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--en-text-1);
   line-height: 1;
 }
 .ovStatKey {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-text-3);
 }
 
 /* Section */
 .ovSection {
-  padding: 20px 20px 0;
+  padding: 20px 20px 16px;
   border-bottom: 0.5px solid var(--en-rule);
-  padding-bottom: 16px;
 }
 .ovSectionTitle {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin: 0 0 14px;
 }
 
-/* Stage grid */
+/* Results stage grid */
 .ovStageGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -259,89 +228,73 @@
   flex-direction: column;
   align-items: center;
   background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
   border-radius: 8px;
   padding: 14px 8px;
-  gap: 4px;
+  gap: 5px;
 }
 .ovStageVal {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 22px;
   font-weight: 700;
   color: var(--en-text-3);
   line-height: 1;
 }
 .ovStageKey {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-text-3);
   text-align: center;
 }
 
-/* Record table */
-.ovRecordTable {
+/* Notable rows */
+.ovNotableList {
   display: flex;
   flex-direction: column;
-  gap: 0;
   border: 0.5px solid var(--en-rule);
   border-radius: 8px;
   overflow: hidden;
 }
-.ovRecordRow {
+.ovNotableRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 11px 14px;
+  align-items: flex-start;
+  padding: 13px 16px;
   border-bottom: 0.5px solid var(--en-rule);
+  gap: 12px;
 }
-.ovRecordRow:last-child { border-bottom: none; }
-.ovRecordLabel {
+.ovNotableRow:last-child { border-bottom: none; }
+.ovNotableLabel {
   font-family: var(--font-inter);
-  font-size: 13px;
-  color: var(--en-text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8899aa;
+  flex-shrink: 0;
+  padding-top: 1px;
 }
-.ovRecordValue {
-  font-family: var(--font-plex);
-  font-size: 13px;
+.ovNotableRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.ovNotableValue {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--en-text-1);
   text-align: right;
 }
-.ovMatchOpp {
+.ovNotableSub {
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-3);
-  margin-left: 4px;
-}
-
-/* Latest campaign card */
-.ovLatestCard {
-  background: var(--en-surface);
-  border-radius: 8px;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.ovLatestSeason {
-  font-family: var(--font-plex);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--en-text-1);
-}
-.ovLatestYear {
-  color: var(--en-text-3);
-  font-weight: 400;
-}
-.ovLatestResult {
-  font-family: var(--font-inter);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--en-text-1);
-}
-.ovLatestFinal {
-  font-family: var(--font-inter);
-  font-size: 12px;
-  color: var(--en-text-3);
+  text-align: right;
 }
 
 /* ─── SEASONS TAB ────────────────────────────────────────────────────────── */
@@ -359,12 +312,12 @@
   background: transparent;
   border: none;
   border-bottom: 0.5px solid var(--en-rule);
-  padding: 16px 20px;
+  padding: 16px 20px 16px 20px;
   cursor: pointer;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   position: relative;
   transition: background 0.15s;
 }
@@ -378,18 +331,24 @@
 .sznCardLeft {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
 }
 .sznLabel {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--en-text-1);
 }
 .sznYear {
-  font-family: var(--font-plex);
-  font-size: 11px;
+  font-family: var(--font-inter);
+  font-size: 12px;
   color: var(--en-text-3);
+}
+
+/* Result badge — own line */
+.sznResultRow {
+  display: flex;
+  align-items: center;
 }
 .sznResult {
   font-family: var(--font-inter);
@@ -408,42 +367,44 @@
   color: var(--en-text-4);
 }
 
-/* Record row inside card */
+/* Record row */
 .sznCardRecord {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .sznRecordItem {
   display: flex;
   align-items: baseline;
-  gap: 3px;
+  gap: 2px;
 }
 .sznRecordVal {
-  font-family: var(--font-plex);
-  font-size: 14px;
+  font-family: var(--font-inter);
+  font-size: 13px;
   font-weight: 600;
   color: var(--en-text-1);
 }
 .sznRecordKey {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--en-text-3);
   text-transform: uppercase;
 }
 .sznRecordDivider {
   width: 1px;
-  height: 14px;
+  height: 12px;
   background: var(--en-rule);
   margin: 0 2px;
 }
 
-/* KO strip */
+/* KO strip on card */
 .sznKOStrip {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding-right: 24px;
 }
 .sznKOItem {
   display: flex;
@@ -451,16 +412,17 @@
   gap: 8px;
 }
 .sznKORound {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
   min-width: 36px;
 }
 .sznKOCrest {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -471,9 +433,9 @@
   flex: 1;
 }
 .sznKOAgg {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   margin-left: auto;
 }
 
@@ -506,16 +468,29 @@
 .sznDetailTitle {
   flex: 1;
 }
+.sznDetailSeason {
+  font-family: var(--font-playfair);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--en-text-1);
+}
+.sznDetailYear {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+}
+
 .sznDetailSection {
   padding: 18px 20px;
   border-bottom: 0.5px solid var(--en-rule);
 }
 .sznDetailSectionLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin: 0 0 12px;
 }
 .sznDetailNote {
@@ -536,21 +511,22 @@
   gap: 3px;
 }
 .sznDetailStatVal {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--en-text-1);
   line-height: 1;
 }
 .sznDetailStatKey {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-text-3);
 }
 
-/* Match table (LP matchday) */
+/* Matchday table */
 .sznMatchTable {
   border: 0.5px solid var(--en-rule);
   border-radius: 6px;
@@ -569,41 +545,44 @@
 .sznMatchRow:last-child { border-bottom: none; }
 .sznMatchHead {
   background: var(--en-surface);
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
 }
 .sznMatchRow {
   font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-2);
 }
-.sznMD      { font-family: var(--font-plex); font-size: 11px; color: var(--en-text-3); }
-.sznMOpp    { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sznMVen    { font-family: var(--font-plex); font-size: 11px; text-align: center; }
-.sznMScore  { font-family: var(--font-plex); font-size: 12px; font-weight: 600; color: var(--en-text-1); text-align: right; }
-.sznMRes    { font-family: var(--font-plex); font-size: 11px; font-weight: 700; text-align: center; }
-.sznMCrest  { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+/* Score uses mono for alignment — genuinely useful here */
+.sznMD     { font-family: var(--font-inter); font-size: 11px; color: var(--en-text-3); }
+.sznMOpp   { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sznMVen   { font-family: var(--font-inter); font-size: 11px; text-align: center; }
+.sznMScore { font-family: var(--font-plex); font-size: 12px; font-weight: 600; color: var(--en-text-1); text-align: right; }
+.sznMRes   { font-family: var(--font-inter); font-size: 11px; font-weight: 700; text-align: center; }
+.sznMCrest { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
 
 /* KO rows in detail */
 .sznKORow {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 0.5px solid var(--en-rule);
   flex-wrap: wrap;
 }
 .sznKORow:last-child { border-bottom: none; }
 .sznKORoundBadge {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-text-3);
-  min-width: 40px;
+  min-width: 56px;
 }
 .sznKOOppBlock {
   display: flex;
@@ -645,12 +624,10 @@
   gap: 10px;
 }
 .sznKOLegLabel {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
   min-width: 36px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 .sznKOLegScore {
   font-family: var(--font-plex);
@@ -660,189 +637,109 @@
   min-width: 36px;
 }
 .sznKOLegVenue {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
 }
 
-/* ─── KNOCKOUTS TAB ──────────────────────────────────────────────────────── */
+/* ── Career Knockout Record table (new v59 classes) ────────────────────────── */
 
-.koWrap {
-  padding: 0 0 24px;
+.sznCareerKO {
+  padding: 20px 16px 8px;
+  border-top: 0.5px solid var(--en-rule);
+  margin-top: 8px;
 }
-
-.koSection {
-  padding: 20px 20px 16px;
-  border-bottom: 0.5px solid var(--en-rule);
-}
-.koSectionTitle {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  margin: 0 0 4px;
-}
-.koSectionNote {
+.sznCareerKOTitle {
   font-family: var(--font-inter);
   font-size: 11px;
-  color: var(--en-text-4);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8899aa;
   margin: 0 0 14px;
-  font-style: italic;
 }
 
-/* Leg record table */
-.koTableHead,
-.koTableRow {
+.sznKOTableHead,
+.sznKOTableRow {
   display: grid;
-  grid-template-columns: 90px repeat(7, 1fr);
+  grid-template-columns: 56px repeat(5, 1fr);
   gap: 4px;
   align-items: center;
   padding: 8px 4px;
   border-bottom: 0.5px solid var(--en-rule);
 }
-.koTableHead:last-child,
-.koTableRow:last-child { border-bottom: none; }
-.koTableHead {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  background: var(--en-surface);
-  border-radius: 4px;
-  border-bottom: none;
-  margin-bottom: 4px;
-}
-.koThRound { }
-.koThStat  { text-align: right; }
-.koTdRound {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-2);
-  font-weight: 500;
-}
-.koTdStat {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-1);
-  text-align: right;
-}
-
-/* Tie record */
-.koTieHead,
-.koTieRow {
-  display: grid;
-  grid-template-columns: 1fr 64px 84px 64px;
-  gap: 4px;
-  align-items: center;
-  padding: 9px 4px;
-  border-bottom: 0.5px solid var(--en-rule);
-}
-.koTieHead:last-child,
-.koTieRow:last-child { border-bottom: none; }
-.koTieHead {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  background: var(--en-surface);
-  border-radius: 4px;
-  border-bottom: none;
-  margin-bottom: 4px;
-}
-.koTieLabelCol {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-2);
-}
-.koTieCol {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-1);
-  text-align: right;
-}
-
-/* Finals log */
-.koFinalRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 0.5px solid var(--en-rule);
-}
-.koFinalRow:last-child { border-bottom: none; }
-.koFinalCrest {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-.koFinalInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.koFinalSeason {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-3);
-  letter-spacing: 0.06em;
-}
-.koFinalOpp {
+.sznKOTableHead:last-child,
+.sznKOTableRow:last-child { border-bottom: none; }
+.sznKOTableHead {
   font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--en-text-1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.koFinalScore {
-  font-family: var(--font-plex);
-  font-size: 16px;
+  font-size: 9px;
   font-weight: 700;
-  flex-shrink: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
+  background: var(--en-surface);
+  border-radius: 4px;
+  border-bottom: none;
+  margin-bottom: 4px;
 }
-.koFinalResult {
-  font-family: var(--font-plex);
+.sznKOThRound { }
+.sznKOThStat  { text-align: right; }
+.sznKOTdRound {
+  font-family: var(--font-inter);
   font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
-  min-width: 28px;
+  font-weight: 500;
+  color: var(--en-text-2);
+}
+.sznKOTdStat {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-1);
   text-align: right;
 }
 
-/* Shared record rows (used across tabs) */
-.koRecordRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 11px 0;
-  border-bottom: 0.5px solid var(--en-rule);
-}
-.koRecordRow:last-child { border-bottom: none; }
-.koRecordLabel {
-  font-family: var(--font-inter);
-  font-size: 13px;
-  color: var(--en-text-3);
-}
-.koRecordValue {
-  font-family: var(--font-plex);
-  font-size: 13px;
-  color: var(--en-text-1);
-}
 /* ─── PLAYERS TAB ────────────────────────────────────────────────────────── */
 
 .plWrap { padding: 0 0 24px; }
 
+/* Season filter pills */
+.plSeasonBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plSeasonBar::-webkit-scrollbar { display: none; }
+
+.plSeasonBtn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 0.5px solid var(--en-rule);
+  background: transparent;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.plSeasonBtn:hover { color: var(--en-text-2); }
+.plSeasonActive {
+  background: rgba(224, 194, 122, 0.1);
+  color: var(--en-gold);
+  border-color: rgba(224, 194, 122, 0.4);
+}
+
+/* Position filter pills */
 .plFilterBar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 10px 16px;
   border-bottom: 0.5px solid var(--en-rule);
   overflow-x: auto;
   scrollbar-width: none;
@@ -850,113 +747,151 @@
 .plFilterBar::-webkit-scrollbar { display: none; }
 
 .plFilterBtn {
-  padding: 5px 14px;
+  padding: 5px 12px;
   border-radius: 20px;
   border: 0.5px solid var(--en-rule);
   background: transparent;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--en-text-3);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .plFilterBtn:hover { color: var(--en-text-2); }
 .plFilterActive {
-  background: var(--en-surface);
-  color: var(--en-text-1);
-  border-color: var(--en-text-4);
+  background: rgba(224, 194, 122, 0.1);
+  color: var(--en-gold);
+  border-color: rgba(224, 194, 122, 0.4);
 }
 
 .plCount {
   margin-left: auto;
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
   color: var(--en-text-4);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* Sticky table */
-.plTable {
+/* Sticky scroll table */
+.plTableScroll {
   overflow-x: auto;
-  scrollbar-width: none;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: var(--en-rule) transparent;
+  -webkit-overflow-scrolling: touch;
 }
-.plTable::-webkit-scrollbar { display: none; }
+.plTableScroll::-webkit-scrollbar { height: 3px; }
 
-.plHead,
-.plRow {
-  display: grid;
-  /* Identity column + 6 stat columns */
-  grid-template-columns: 1fr repeat(6, 48px);
-  align-items: center;
-  padding: 0 16px;
-  min-width: 360px;
+.plTableEl {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
 }
 
-.plHead {
+/* Identity column header — sticky left + top */
+.plThIdentity {
+  padding: 0;
+  background: var(--en-bg);
   border-bottom: 0.5px solid var(--en-rule);
-  background: var(--en-surface);
-  padding-top: 6px;
-  padding-bottom: 6px;
+  white-space: nowrap;
   position: sticky;
   top: 0;
-  z-index: 1;
+  left: 0;
+  z-index: 21;
+  min-width: 168px;
+  max-width: 210px;
+  border-right: 0.5px solid var(--en-rule);
 }
-.plThName {
-  font-family: var(--font-plex);
+.plThNameInner {
+  display: block;
+  padding: 8px 12px 8px 16px;
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  text-align: left;
-}
-.plTh {
-  font-family: var(--font-plex);
-  font-size: 9px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
-  text-align: right;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
+  color: #8899aa;
+}
+
+/* Stat column headers — sticky top */
+.plThStat {
+  padding: 0;
+  background: var(--en-bg);
+  border-bottom: 0.5px solid var(--en-rule);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-width: 52px;
+  text-align: center;
+}
+
+.plSortBtn {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 2px;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  padding: 8px 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
   transition: color 0.15s;
 }
-.plTh:hover { color: var(--en-text-2); }
-.plThActive { color: var(--en-text-1); }
+.plSortBtn:hover { color: var(--en-text-1); }
+/* Gold on active sorted column header */
+.plSortActive { color: var(--en-gold) !important; }
 .plSortArrow { font-size: 9px; }
 
 /* Data rows */
-.plRow {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 0.5px solid var(--en-rule);
+.plTr {
   cursor: pointer;
-  padding-top: 9px;
-  padding-bottom: 9px;
-  text-align: left;
-  transition: background 0.12s;
+  transition: background 0.1s;
 }
-.plRow:hover { background: var(--en-surface); }
-.plRow:last-child { border-bottom: none; }
+.plTr:hover .plTdIdentity,
+.plTr:hover .plTdStat { background: var(--en-surface); }
 
-.plTdName {
+.plTdIdentity {
+  padding: 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  vertical-align: middle;
+  position: sticky;
+  left: 0;
+  background: var(--en-bg);
+  z-index: 10;
+  min-width: 168px;
+  max-width: 210px;
+  border-right: 0.5px solid var(--en-rule);
+  transition: background 0.1s;
+}
+
+.plIdentity {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 0;
+  padding: 7px 12px 7px 16px;
 }
-.plNameInner {
+.plThumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.plIdentityInfo {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 .plName {
@@ -968,21 +903,33 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Position — readable slate (was near-invisible) */
 .plPos {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  color: var(--en-text-4);
-  letter-spacing: 0.06em;
+  font-weight: 500;
+  color: var(--en-text-3);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.plTd {
-  font-family: var(--font-plex);
+.plTdStat {
+  font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-2);
-  text-align: right;
+  text-align: center;
+  padding: 0 6px;
+  height: 44px;
+  vertical-align: middle;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  white-space: nowrap;
+  transition: background 0.1s;
 }
-.plTdActive { color: var(--en-text-1); font-weight: 600; }
+/* Active sorted column — gold value + very subtle wash */
+.plTdActive {
+  color: var(--en-gold) !important;
+  background: rgba(224, 194, 122, 0.04);
+}
 
 /* ─── RECORDS TAB ────────────────────────────────────────────────────────── */
 
@@ -991,15 +938,16 @@
 .rSection { padding: 20px 16px 0; }
 
 .rSectionTitle {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.18em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin-bottom: 10px;
 }
 
-/* Record card — mirrors Records.jsx RecordCard layout exactly */
+/* Record card */
 .rCard {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
@@ -1060,8 +1008,8 @@
 }
 
 .rCtx {
-  font-family: var(--font-plex);
-  font-size: 10px;
+  font-family: var(--font-inter);
+  font-size: 11px;
   color: var(--en-text-3);
   margin-top: 2px;
   white-space: nowrap;
@@ -1069,46 +1017,83 @@
   text-overflow: ellipsis;
 }
 
+/* Right panel — fixed width for consistent alignment across all cards */
 .rRight {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   padding: 10px 14px;
+  background: none;
+  border: none;
   border-left: 0.5px solid var(--en-rule);
-  min-width: 110px;
-  align-self: stretch;
+  cursor: pointer;
+  width: 120px;
   flex-shrink: 0;
+  align-self: stretch;
+  transition: background 0.15s;
 }
+.rRight:hover { background: rgba(255,255,255,0.03); }
 
+/* Record label — was barely visible, now clearly readable */
 .rLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   text-align: right;
 }
 
+/* Record value */
 .rValue {
-  font-family: var(--font-plex);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--en-text-2);
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--en-text-1);
   text-align: right;
 }
 
 .rQualNote {
   font-family: var(--font-inter);
   font-size: 11px;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
   font-style: italic;
   padding: 16px 16px 0;
   margin: 0;
 }
 
-/* ─── RIVALS TAB ─────────────────────────────────────────────────────────── */
+/* Club record card */
+.rClubCard {
+  background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  overflow: hidden;
+}
+.rClubLeft {
+  flex: 1;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.rClubRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-left: 0.5px solid var(--en-rule);
+  width: 120px;
+  flex-shrink: 0;
+}
+
+/* ─── OPPONENTS (RIVALS) TAB ─────────────────────────────────────────────── */
 
 .rvWrap { padding: 0 0 24px; }
 
@@ -1125,29 +1110,29 @@
   border-radius: 20px;
   border: 0.5px solid var(--en-rule);
   background: transparent;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   color: var(--en-text-3);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .rvToggleBtn:hover { color: var(--en-text-2); }
 .rvToggleActive {
-  background: var(--en-surface);
-  color: var(--en-text-1);
-  border-color: var(--en-text-4);
+  background: rgba(224, 194, 122, 0.1);
+  color: var(--en-gold);
+  border-color: rgba(224, 194, 122, 0.4);
 }
 .rvCount {
   margin-left: auto;
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
   color: var(--en-text-4);
 }
 
-/* Rivals table header */
+/* Opponents table header */
 .rvTableHead {
   display: grid;
   grid-template-columns: 1fr 32px 32px 32px 32px 36px;
@@ -1156,22 +1141,24 @@
   background: var(--en-surface);
 }
 .rvThOpp {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-}
-.rvThStat {
-  font-family: var(--font-plex);
-  font-size: 9px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
+}
+.rvThStat {
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8899aa;
   text-align: right;
 }
 
-/* Rival row */
+/* Opponent row */
 .rvRow {
   width: 100%;
   display: grid;
@@ -1218,19 +1205,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* League subtitle — upgraded from near-invisible */
 .rvOppLeague {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  color: var(--en-text-4);
-  letter-spacing: 0.04em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  color: var(--en-text-3);
+  letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .rvFinalBadge {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 8px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-gold);
   border: 0.5px solid var(--en-gold);
@@ -1240,7 +1229,7 @@
   flex-shrink: 0;
 }
 .rvStat {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-1);
   text-align: right;
@@ -1251,7 +1240,7 @@
   color: var(--en-text-4);
 }
 
-/* ── Rival Detail ─────────────────────────────────────────────────────────── */
+/* ── Opponent/League Detail ────────────────────────────────────────────────── */
 .rvDetail { display: flex; flex-direction: column; }
 
 .rvDetailHead {
@@ -1280,14 +1269,15 @@
   font-weight: 700;
   color: var(--en-text-1);
 }
+/* League subtitle in detail — upgraded from near-invisible */
 .rvDetailLeague {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-4);
-  letter-spacing: 0.04em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  letter-spacing: 0.03em;
 }
 
-/* H2H bar */
+/* H2H stat bar */
 .rvH2H {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1298,21 +1288,22 @@
   flex-direction: column;
   align-items: center;
   padding: 14px 8px;
-  gap: 3px;
+  gap: 4px;
   border-right: 0.5px solid var(--en-rule);
 }
 .rvH2HItem:last-child { border-right: none; }
 .rvH2HVal {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 20px;
   font-weight: 700;
   color: var(--en-text-1);
   line-height: 1;
 }
 .rvH2HKey {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-text-3);
 }
@@ -1330,10 +1321,11 @@
 
 /* Finals note */
 .rvFinalsNote {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
+  font-weight: 600;
   color: var(--en-gold);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   padding: 10px 16px;
   border-bottom: 0.5px solid var(--en-rule);
 }
@@ -1343,23 +1335,24 @@
   padding: 8px 0;
 }
 .rvSeasonDivider {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
   padding: 8px 16px 4px;
 }
 .rvMatchRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px;
+  padding: 9px 16px;
   border-bottom: 0.5px solid var(--en-rule);
 }
 .rvMatchRow:last-child { border-bottom: none; }
 .rvMatchRes {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
   font-weight: 700;
   width: 16px;
@@ -1372,16 +1365,16 @@
   flex: 1;
 }
 .rvMatchComp {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-3);
-  letter-spacing: 0.06em;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-2);
 }
 .rvMatchLeg {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
   color: var(--en-text-4);
 }
+/* Score — mono allowed for score alignment */
 .rvMatchScore {
   font-family: var(--font-plex);
   font-size: 13px;
@@ -1389,52 +1382,70 @@
   color: var(--en-text-1);
 }
 .rvMatchVenue {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   min-width: 18px;
   text-align: right;
 }
 
-/* ── League/Nation Records ───────────────────────────────────────────────── */
-.rvLeagueWrap { padding: 16px 0 24px; }
+/* ── League / Nation view ─────────────────────────────────────────────────── */
 
-.rvLeagueTitle {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  padding: 0 16px 12px;
-  margin: 0;
-}
-
-.rvLeagueHead,
-.rvLeagueRow {
+.rvLeagueTableHead {
   display: grid;
-  grid-template-columns: 1fr 36px 36px 36px 36px 44px;
+  grid-template-columns: 1fr 80px 32px 32px 32px 32px 40px;
   align-items: center;
   padding: 8px 16px;
   border-bottom: 0.5px solid var(--en-rule);
-}
-.rvLeagueHead {
   background: var(--en-surface);
-  font-family: var(--font-plex);
+  gap: 4px;
+}
+.rvLgThLeague {
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
 }
-.rvLeagueRow {
-  border-bottom: 0.5px solid var(--en-rule);
+.rvLgThNation {
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
 }
-.rvLeagueRow:last-child { border-bottom: none; }
+.rvLgThStat {
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8899aa;
+  text-align: right;
+}
 
-.rvLgLeague {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+.rvLeagueRow53 {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 80px 32px 32px 32px 32px 40px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  gap: 4px;
+  position: relative;
 }
-.rvLgName {
+.rvLeagueRow53:hover  { background: var(--en-surface); }
+.rvLeagueRow53:last-child { border-bottom: none; }
+
+.rvLgTdLeague {
   font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 500;
@@ -1443,336 +1454,50 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.rvLgNation {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  color: var(--en-text-4);
-  letter-spacing: 0.04em;
+.rvLgTdNation {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.rvLgStat {
-  font-family: var(--font-plex);
+.rvLgTdStat {
+  font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-1);
   text-align: right;
 }
 
-/* Clubs subscript list */
-.rvLgClubs {
-  font-family: var(--font-inter);
-  font-size: 11px;
-  color: var(--en-text-4);
-  padding: 4px 16px;
-  line-height: 1.5;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+/* League detail — per-club block */
+.rvLeagueClubBlock {
+  border-bottom: 0.5px solid var(--en-rule);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
 }
-.rvLgClubs:last-child { border-bottom: none; }
-.rvLgClubsLabel {
-  color: var(--en-text-3);
-  font-weight: 500;
-}
-
-/* ─── v52 OVERVIEW ADDITIONS ─────────────────────────────────────────────── */
-
-/* Two-line Notable rows */
-.ovRecordRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-.ovRecordSub {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-4);
-  text-align: right;
-}
-
-/* ─── v52 SEASONS ADDITIONS ──────────────────────────────────────────────── */
-
-/* Career knockout section at bottom of seasons list */
-.sznCareerKO {
-  padding: 20px 16px 8px;
-  border-top: 0.5px solid var(--en-rule);
-  margin-top: 8px;
-}
-.sznCareerKOTitle {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  margin: 0 0 14px;
-}
-
-/* Tie record compact block */
-.sznTieBlock {
-  margin-top: 16px;
-  border-top: 0.5px solid var(--en-rule-faint);
-  padding-top: 12px;
-}
-.sznTieBlockLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  margin: 0 0 8px;
-}
-.sznTieRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 7px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
-}
-.sznTieRow:last-child { border-bottom: none; }
-.sznTieRound {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-2);
-  flex: 1;
-}
-.sznTieAdv {
-  font-family: var(--font-plex);
-  font-size: 11px;
-}
-.sznTieElim {
-  font-family: var(--font-plex);
-  font-size: 11px;
-}
-
-/* Finals compact block */
-.sznFinalsBlock {
-  margin-top: 16px;
-  border-top: 0.5px solid var(--en-rule-faint);
-  padding-top: 12px;
-}
-.sznFinalRow {
+.rvLeagueClubBlock:last-child { border-bottom: none; }
+.rvLeagueClubHead {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  padding: 12px 16px 8px;
 }
-.sznFinalRow:last-child { border-bottom: none; }
-.sznFinalCrest {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-.sznFinalInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.sznFinalSeason {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-3);
-  letter-spacing: 0.05em;
-}
-.sznFinalOpp {
+.rvLeagueClubName {
   font-family: var(--font-inter);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--en-text-1);
-}
-.sznFinalScore {
-  font-family: var(--font-plex);
   font-size: 14px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.sznFinalRes {
-  font-family: var(--font-plex);
-  font-size: 12px;
   font-weight: 600;
-  flex-shrink: 0;
-  min-width: 24px;
-  text-align: right;
-}
-
-/* ─── v52 PLAYERS TABLE — HTML table with sticky identity ─────────────────── */
-
-.plTableScroll {
-  overflow-x: auto;
-  overflow-y: visible;
-  scrollbar-width: thin;
-  scrollbar-color: var(--en-rule) transparent;
-  -webkit-overflow-scrolling: touch;
-}
-.plTableScroll::-webkit-scrollbar { height: 3px; }
-
-.plTableEl {
-  border-collapse: collapse;
-  width: max-content;
-  min-width: 100%;
-}
-
-.plThIdentity {
-  padding: 0;
-  background: var(--en-bg);
-  border-bottom: 0.5px solid var(--en-rule);
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 21;
-  min-width: 160px;
-  max-width: 200px;
-  border-right: 0.5px solid var(--en-rule);
-}
-.plThNameInner {
-  display: block;
-  padding: 8px 12px 8px 16px;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-}
-
-.plThStat {
-  padding: 0;
-  background: var(--en-bg);
-  border-bottom: 0.5px solid var(--en-rule);
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  min-width: 52px;
-  text-align: center;
-}
-
-.plSortBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  width: 100%;
-  padding: 8px 6px;
-  background: transparent;
-  border: none;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
-  cursor: pointer;
-  transition: color 0.15s;
-}
-.plSortBtn:hover { color: var(--en-text-1); }
-.plSortActive { color: var(--en-text-1); }
-.plSortArrow { font-size: 9px; }
-
-.plTr {
-  cursor: pointer;
-  transition: background 0.1s;
-}
-.plTr:hover .plTdIdentity,
-.plTr:hover .plTdStat { background: var(--en-surface); }
-
-.plTdIdentity {
-  padding: 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
-  vertical-align: middle;
-  position: sticky;
-  left: 0;
-  background: var(--en-bg);
-  z-index: 10;
-  min-width: 160px;
-  max-width: 200px;
-  border-right: 0.5px solid var(--en-rule);
-  transition: background 0.1s;
-}
-
-.plIdentity {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 12px 7px 16px;
-}
-.plThumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.plIdentityInfo {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
-
-.plTdStat {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-2);
-  text-align: center;
-  padding: 0 6px;
-  height: 44px;
-  vertical-align: middle;
-  border-bottom: 0.5px solid var(--en-rule-faint);
-  white-space: nowrap;
-  transition: background 0.1s;
-}
-.plTdActive { color: var(--en-text-1); }
-
-/* ─── v52 RECORDS ADDITIONS ──────────────────────────────────────────────── */
-
-/* Club record card (no photo) */
-.rClubCard {
-  background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  min-height: 56px;
-  overflow: hidden;
-}
-.rClubLeft {
+  color: var(--en-text-1);
   flex: 1;
-  padding: 10px 12px;
-  min-width: 0;
 }
-.rClubRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 3px;
-  padding: 10px 14px;
-  border-left: 0.5px solid var(--en-rule);
-  min-width: 110px;
+.rvLeagueClubRecord {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-2);
   flex-shrink: 0;
 }
 
-/* rRight as button for Top5 */
-.rRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 3px;
-  padding: 10px 14px;
-  background: none;
-  border: none;
-  border-left: 0.5px solid var(--en-rule);
-  cursor: pointer;
-  min-width: 110px;
-  align-self: stretch;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-.rRight:hover { background: rgba(255,255,255,0.03); }
+/* ─── MODAL ──────────────────────────────────────────────────────────────── */
 
-/* Modal styles (mirrors Records.module.css) */
 .rModalOverlay {
   position: fixed;
   inset: 0;
@@ -1821,8 +1546,9 @@
 .rModalClose {
   background: none;
   border: none;
-  font-size: 14px;
-  color: var(--en-text-3);
+  font-size: 13px;
+  font-family: var(--font-inter);
+  color: var(--en-text-2);
   cursor: pointer;
   padding: 4px 8px;
   transition: color 0.15s;
@@ -1841,7 +1567,7 @@
 }
 .rModalRow:not(:last-child) { border-bottom: 0.5px solid var(--en-rule); }
 .rModalRank {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-4);
   width: 16px;
@@ -1882,8 +1608,8 @@
   text-overflow: ellipsis;
 }
 .rModalCtx {
-  font-family: var(--font-plex);
-  font-size: 10px;
+  font-family: var(--font-inter);
+  font-size: 11px;
   color: var(--en-text-3);
   display: block;
   white-space: nowrap;
@@ -1891,11 +1617,12 @@
   text-overflow: ellipsis;
 }
 .rModalValue {
-  font-family: var(--font-plex);
-  font-size: 15px;
-  font-weight: 600;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 700;
   color: var(--en-gold);
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .rModalEmpty {
   padding: 20px;
@@ -1903,219 +1630,4 @@
   font-size: 13px;
   color: var(--en-text-3);
   text-align: center;
-}
-
-/* ─── v52 RIVALS ADDITIONS ───────────────────────────────────────────────── */
-
-/* League cards (tappable, replace flat table rows) */
-.rvLeagueCard {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 0.5px solid var(--en-rule);
-  background: transparent;
-  border-left: none;
-  border-right: none;
-  border-top: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s;
-  position: relative;
-}
-.rvLeagueCard:hover { background: var(--en-surface); }
-.rvLeagueCard:last-child { border-bottom: none; }
-
-.rvLeagueCardLeft {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.rvLeagueCardName {
-  font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--en-text-1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rvLeagueCardNation {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-4);
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rvLeagueCardRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 3px;
-  flex-shrink: 0;
-  padding-right: 20px;
-}
-.rvLeagueCardRecord {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  font-weight: 500;
-}
-.rvLeagueCardGD {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-3);
-}
-
-/* League detail — per-club block */
-.rvLeagueClubBlock {
-  border-bottom: 0.5px solid var(--en-rule);
-  padding-bottom: 8px;
-  margin-bottom: 4px;
-}
-.rvLeagueClubBlock:last-child { border-bottom: none; }
-.rvLeagueClubHead {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px 8px;
-}
-.rvLeagueClubName {
-  font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--en-text-1);
-  flex: 1;
-}
-.rvLeagueClubRecord {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-2);
-  flex-shrink: 0;
-}
-
-/* ─── v53 PLAYERS ADDITIONS ──────────────────────────────────────────────── */
-
-/* Season filter bar — sits above position filters */
-.plSeasonBar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  border-bottom: none;
-}
-.plSeasonBar::-webkit-scrollbar { display: none; }
-
-.plSeasonBtn {
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 0.5px solid var(--en-rule);
-  background: transparent;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-}
-.plSeasonBtn:hover { color: var(--en-text-2); }
-.plSeasonActive {
-  background: var(--en-blue-dim);
-  color: var(--en-text-1);
-  border-color: var(--en-blue);
-}
-
-/* Group filter style variant — slightly different look to distinguish from individual positions */
-.plFilterGroup {
-  font-style: italic;
-  letter-spacing: 0.04em;
-}
-
-/* ─── v53 RIVALS LEAGUE TABLE ────────────────────────────────────────────── */
-
-/* Column header row for the league summary table */
-.rvLeagueTableHead {
-  display: grid;
-  grid-template-columns: 1fr 80px 32px 32px 32px 32px 40px;
-  align-items: center;
-  padding: 8px 16px;
-  border-bottom: 0.5px solid var(--en-rule);
-  background: var(--en-surface);
-  gap: 4px;
-}
-.rvLgThLeague {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-}
-.rvLgThNation {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-}
-.rvLgThStat {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  text-align: right;
-}
-
-/* Tappable league row (summary, no club names) */
-.rvLeagueRow53 {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 80px 32px 32px 32px 32px 40px;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 0.5px solid var(--en-rule);
-  background: transparent;
-  border-left: none;
-  border-right: none;
-  border-top: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s;
-  gap: 4px;
-  position: relative;
-}
-.rvLeagueRow53:hover  { background: var(--en-surface); }
-.rvLeagueRow53:last-child { border-bottom: none; }
-
-.rvLgTdLeague {
-  font-family: var(--font-inter);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--en-text-1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rvLgTdNation {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  color: var(--en-text-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rvLgTdStat {
-  font-family: var(--font-plex);
-  font-size: 12px;
-  color: var(--en-text-1);
-  text-align: right;
 }

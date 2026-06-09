@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 58
+// Current: 59
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -55,4 +55,5 @@
 //   56 — Home redesign: Club Archive hero; Legacy strip; Peak Season; Honours won-only; Dynasty Arc bars; Legends CF Worker faces; Rivals removed; NavBar restructured; Header premium
 //   57 — Home/nav corrections: section order; crest 80px; trophy two-line layout; Peak Inter 800; Dynasty text badges; Legends 3 stats, no rank, no green; full typography overhaul; header vertical divider; NavBar useMatch active state; UCL starball redesign
 //   58 — Asset polish: real trophy PNGs integrated (12 competitions); UCL nav PNG (transparent white starball, CSS-filtered for active/inactive); --en-gold updated to #E0C27A across global.css + all hardcoded rgba values; Peak Season compacted (single row with eyebrow+S3+score pill, ~40% height reduction); trophyAssets.jsx split into TROPHY_PNG_MAP + SVG fallbacks
-const SW_VERSION = 58;
+//   59 — UCL full design system pass: starball branding in topBar; tab bar Inter fonts; Rivals tab renamed Opponents; all mono fonts replaced with Inter except scores/aggregates; section labels, record titles, filter chips, player positions upgraded to readable #8899aa; Overview stat grid neutral (no green/red); Results labels with correct plural logic; Notable rows redesigned; Seasons — Finalist label, gold finals emphasis, Inter record rows, Career KO table with short round labels; Players — A/G column added, default sort G+A, gold sorted-column highlight, gold active filter chips, position readability improved; Records — label readability fixed, consistent card alignment (120px right panel), units in Top5 modal values; Opponents — renamed from Rivals, Inter typography throughout
+const SW_VERSION = 59;

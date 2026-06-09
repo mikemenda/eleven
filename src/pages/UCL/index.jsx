@@ -20,15 +20,16 @@ import UclSeasons    from './UclSeasons'
 import UclPlayers    from './UclPlayers'
 import UclRecords    from './UclRecords'
 import UclRivals     from './UclRivals'
+import uclNavIcon    from '../../assets/icons/ucl-nav.png'
 import styles from './UCL.module.css'
 
 // ─── Tab definitions ─────────────────────────────────────────────────────────
 const TABS = [
-  { key: 'overview',  label: 'Overview' },
-  { key: 'seasons',   label: 'Seasons'  },
-  { key: 'players',   label: 'Players'  },
-  { key: 'records',   label: 'Records'  },
-  { key: 'rivals',    label: 'Rivals'   },
+  { key: 'overview',  label: 'Overview'   },
+  { key: 'seasons',   label: 'Seasons'    },
+  { key: 'players',   label: 'Players'    },
+  { key: 'records',   label: 'Records'    },
+  { key: 'rivals',    label: 'Opponents'  },
 ]
 
 const VALID_TABS = TABS.map(t => t.key)
@@ -61,13 +62,11 @@ export default function UCL() {
       getPlayers(activeClub.id),
       getOpponents(),
     ]).then(([matches, seasons, plrs, oppMap]) => {
-      // Build seasonId → label map for season label stamping on matches
       const seasonLabelMap = {}
       for (const s of seasons) {
         if (s.id) seasonLabelMap[s.id] = s.label || ''
       }
 
-      // Stamp seasonLabel onto every match so helpers can use it without a join
       const enrichedMatches = matches.map(m => ({
         ...m,
         seasonLabel: seasonLabelMap[m.seasonId] || m.seasonLabel || '',
@@ -84,12 +83,10 @@ export default function UCL() {
     })
   }, [activeClub])
 
-  // ── Derived data (memoised implicitly by derivation at render) ───────────
-  // These are cheap pure functions — no useEffect needed; they run synchronously.
+  // ── Derived data ─────────────────────────────────────────────────────────
   const uclMatches  = getUclMatches(allMatches)
   const uclSeasons  = getUclSeasons(allSeasons)
 
-  // Add LP match docs into season summaries (used by UclSeasons detail view)
   const baseSummaries = deriveUclSeasonSummaries(uclSeasons, uclMatches)
   const summaries = baseSummaries.map(s => ({
     ...s,
@@ -119,6 +116,7 @@ export default function UCL() {
 
       {/* Top bar */}
       <div className={styles.topBar}>
+        <img src={uclNavIcon} alt="" className={styles.topBarIcon} />
         <span className={styles.topLabel}>UEFA Champions League</span>
       </div>
 
