@@ -107,10 +107,10 @@ export default function UclOverview({ overview, uclSeasons, opponents, loading }
         <p className={styles.ovSectionTitle}>Campaign Results</p>
         <div className={styles.ovStageGrid}>
           {[
-            { label: 'Titles',      value: titles },
-            { label: 'Finals',      value: finals },
-            { label: 'Semi-Finals', value: semis + finals },
-            { label: 'Quarters',    value: quarters + semis + finals },
+            { label: 'Titles',       value: titles },
+            { label: 'Finals',       value: finals },
+            { label: 'SF or Further', value: semis + finals },
+            { label: 'QF or Further', value: quarters + semis + finals },
           ].map(({ label, value }) => (
             <div key={label} className={styles.ovStageItem}>
               <span className={styles.ovStageVal} style={value > 0 ? { color: 'var(--en-gold)' } : undefined}>

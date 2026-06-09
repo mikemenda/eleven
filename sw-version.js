@@ -47,4 +47,5 @@
 //   47 — Remove Sporting Director: page, route, nav entry, CSS module deleted; shared services untouched
 //   49 — History patch: remove Dynasties, add Back-to-Back UCL detection, fix country ecosystem filter (England/Spain/Italy/Germany/France), extend historyUtils for all future canonical cup/UEL/UECL fields + leagueTop5, replace Dynasties summary card with UCL Finals count
 //   50 — UCL section: /ucl route, hamburger nav entry, tab shell (Overview/Seasons/Knockouts live; Players/Records/Rivals placeholder for v51); src/utils/uclUtils.js with shared derivation helpers; NATION_TO_LEAGUE mapping for 20+ countries
-const SW_VERSION = 50;
+//   51 — UCL complete: Players tab (sortable UCL stats, GK-aware, player face thumbnails, tap-to-profile); Records tab (UCL player records matching Records→Champions League scope, same min-5-apps rule); Rivals tab (UCL-only opponents, tap-through detail, league/nation records sub-section, deterministic narratives); patch buildUclRivalNarrative club name hardcode; patch Overview "Semi-Finals" label → "SF or Further"
+const SW_VERSION = 51;

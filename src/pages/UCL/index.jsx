@@ -18,6 +18,9 @@ import {
 import UclOverview   from './UclOverview'
 import UclSeasons    from './UclSeasons'
 import UclKnockouts  from './UclKnockouts'
+import UclPlayers    from './UclPlayers'
+import UclRecords    from './UclRecords'
+import UclRivals     from './UclRivals'
 import styles from './UCL.module.css'
 
 // ─── Tab definitions ─────────────────────────────────────────────────────────
@@ -31,18 +34,6 @@ const TABS = [
 ]
 
 const VALID_TABS = TABS.map(t => t.key)
-const COMING_SOON = new Set(['players', 'records', 'rivals'])
-
-// ─── Placeholder for v51 tabs ────────────────────────────────────────────────
-function ComingSoonTab({ label }) {
-  return (
-    <div className={styles.comingSoon}>
-      <span className={styles.comingSoonIcon}>🏗️</span>
-      <p className={styles.comingSoonTitle}>{label}</p>
-      <p className={styles.comingSoonText}>Coming in the next build.</p>
-    </div>
-  )
-}
 
 // ─── UCL page entry point ─────────────────────────────────────────────────────
 export default function UCL() {
@@ -153,9 +144,7 @@ export default function UCL() {
 
       {/* Tab content */}
       <div className={styles.inner}>
-        {COMING_SOON.has(tab) ? (
-          <ComingSoonTab label={TABS.find(t => t.key === tab)?.label || tab} />
-        ) : tab === 'overview' ? (
+        {tab === 'overview' ? (
           <UclOverview
             overview={overview}
             uclSeasons={uclSeasons}
@@ -173,6 +162,23 @@ export default function UCL() {
             knockoutData={knockoutData}
             finals={finals}
             opponents={opponents}
+            loading={loading}
+          />
+        ) : tab === 'players' ? (
+          <UclPlayers
+            players={players}
+            loading={loading}
+          />
+        ) : tab === 'records' ? (
+          <UclRecords
+            players={players}
+            loading={loading}
+          />
+        ) : tab === 'rivals' ? (
+          <UclRivals
+            uclMatches={uclMatches}
+            opponents={opponents}
+            clubName={activeClub?.name || ''}
             loading={loading}
           />
         ) : null}

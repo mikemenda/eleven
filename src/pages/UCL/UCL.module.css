@@ -834,3 +834,640 @@
   font-size: 13px;
   color: var(--en-text-1);
 }
+
+/* ─── PLAYERS TAB ────────────────────────────────────────────────────────── */
+
+.plWrap { padding: 0 0 24px; }
+
+.plFilterBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plFilterBar::-webkit-scrollbar { display: none; }
+
+.plFilterBtn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 0.5px solid var(--en-rule);
+  background: transparent;
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.plFilterBtn:hover { color: var(--en-text-2); }
+.plFilterActive {
+  background: var(--en-surface);
+  color: var(--en-text-1);
+  border-color: var(--en-text-4);
+}
+
+.plCount {
+  margin-left: auto;
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+  white-space: nowrap;
+}
+
+/* Sticky table */
+.plTable {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.plTable::-webkit-scrollbar { display: none; }
+
+.plHead,
+.plRow {
+  display: grid;
+  /* Identity column + 6 stat columns */
+  grid-template-columns: 1fr repeat(6, 48px);
+  align-items: center;
+  padding: 0 16px;
+  min-width: 360px;
+}
+
+.plHead {
+  border-bottom: 0.5px solid var(--en-rule);
+  background: var(--en-surface);
+  padding-top: 6px;
+  padding-bottom: 6px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.plThName {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  text-align: left;
+}
+.plTh {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  text-align: right;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  transition: color 0.15s;
+}
+.plTh:hover { color: var(--en-text-2); }
+.plThActive { color: var(--en-text-1); }
+.plSortArrow { font-size: 9px; }
+
+/* Data rows */
+.plRow {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--en-rule);
+  cursor: pointer;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  text-align: left;
+  transition: background 0.12s;
+}
+.plRow:hover { background: var(--en-surface); }
+.plRow:last-child { border-bottom: none; }
+
+.plTdName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.plNameInner {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.plName {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plPos {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  color: var(--en-text-4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plTd {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-2);
+  text-align: right;
+}
+.plTdActive { color: var(--en-text-1); font-weight: 600; }
+
+/* ─── RECORDS TAB ────────────────────────────────────────────────────────── */
+
+.rWrap { padding: 0 0 24px; }
+
+.rSection { padding: 20px 16px 0; }
+
+.rSectionTitle {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  margin-bottom: 10px;
+}
+
+/* Record card — mirrors Records.jsx RecordCard layout exactly */
+.rCard {
+  background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  overflow: hidden;
+}
+
+.rLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rPlayerBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+.rPlayerBtn:hover { opacity: 0.8; }
+.rPlayerBtn:disabled { cursor: default; opacity: 1; }
+
+.rMetaBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  flex-direction: column;
+}
+.rMetaBtn:hover { opacity: 0.75; }
+.rMetaBtn:disabled { cursor: default; opacity: 1; }
+
+.rHolder {
+  font-family: var(--font-playfair);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rCtx {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-3);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 14px;
+  border-left: 0.5px solid var(--en-rule);
+  min-width: 110px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.rLabel {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  text-align: right;
+}
+
+.rValue {
+  font-family: var(--font-plex);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--en-text-2);
+  text-align: right;
+}
+
+.rQualNote {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-4);
+  font-style: italic;
+  padding: 16px 16px 0;
+  margin: 0;
+}
+
+/* ─── RIVALS TAB ─────────────────────────────────────────────────────────── */
+
+.rvWrap { padding: 0 0 24px; }
+
+/* Toggle bar */
+.rvToggleBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.rvToggleBtn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 0.5px solid var(--en-rule);
+  background: transparent;
+  font-family: var(--font-plex);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.rvToggleBtn:hover { color: var(--en-text-2); }
+.rvToggleActive {
+  background: var(--en-surface);
+  color: var(--en-text-1);
+  border-color: var(--en-text-4);
+}
+.rvCount {
+  margin-left: auto;
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+}
+
+/* Rivals table header */
+.rvTableHead {
+  display: grid;
+  grid-template-columns: 1fr 32px 32px 32px 32px 36px;
+  padding: 8px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  background: var(--en-surface);
+}
+.rvThOpp {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+.rvThStat {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  text-align: right;
+}
+
+/* Rival row */
+.rvRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 32px 32px 32px 32px 36px;
+  align-items: center;
+  padding: 11px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  position: relative;
+}
+.rvRow:hover { background: var(--en-surface); }
+.rvRow:last-child { border-bottom: none; }
+
+.rvOpp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-right: 8px;
+}
+.rvCrest {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.rvOppText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rvOppName {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rvOppLeague {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  color: var(--en-text-4);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rvFinalBadge {
+  font-family: var(--font-plex);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-gold);
+  border: 0.5px solid var(--en-gold);
+  border-radius: 3px;
+  padding: 1px 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.rvStat {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-1);
+  text-align: right;
+}
+.rvChevron {
+  position: absolute;
+  right: 8px;
+  color: var(--en-text-4);
+}
+
+/* ── Rival Detail ─────────────────────────────────────────────────────────── */
+.rvDetail { display: flex; flex-direction: column; }
+
+.rvDetailHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.rvDetailCrest {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.rvDetailTitle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rvDetailName {
+  font-family: var(--font-playfair);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--en-text-1);
+}
+.rvDetailLeague {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+  letter-spacing: 0.04em;
+}
+
+/* H2H bar */
+.rvH2H {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.rvH2HItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 8px;
+  gap: 3px;
+  border-right: 0.5px solid var(--en-rule);
+}
+.rvH2HItem:last-child { border-right: none; }
+.rvH2HVal {
+  font-family: var(--font-plex);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  line-height: 1;
+}
+.rvH2HKey {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+}
+
+/* Narrative */
+.rvNarrative {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-2);
+  line-height: 1.55;
+  padding: 14px 16px;
+  margin: 0;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+/* Finals note */
+.rvFinalsNote {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-gold);
+  letter-spacing: 0.04em;
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+
+/* Match log */
+.rvMatchLog {
+  padding: 8px 0;
+}
+.rvSeasonDivider {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  padding: 8px 16px 4px;
+}
+.rvMatchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.rvMatchRow:last-child { border-bottom: none; }
+.rvMatchRes {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  font-weight: 700;
+  width: 16px;
+  flex-shrink: 0;
+}
+.rvMatchInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.rvMatchComp {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  color: var(--en-text-3);
+  letter-spacing: 0.06em;
+}
+.rvMatchLeg {
+  font-family: var(--font-plex);
+  font-size: 10px;
+  color: var(--en-text-4);
+}
+.rvMatchScore {
+  font-family: var(--font-plex);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.rvMatchVenue {
+  font-family: var(--font-plex);
+  font-size: 11px;
+  min-width: 18px;
+  text-align: right;
+}
+
+/* ── League/Nation Records ───────────────────────────────────────────────── */
+.rvLeagueWrap { padding: 16px 0 24px; }
+
+.rvLeagueTitle {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+  padding: 0 16px 12px;
+  margin: 0;
+}
+
+.rvLeagueHead,
+.rvLeagueRow {
+  display: grid;
+  grid-template-columns: 1fr 36px 36px 36px 36px 44px;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.rvLeagueHead {
+  background: var(--en-surface);
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
+}
+.rvLeagueRow {
+  border-bottom: 0.5px solid var(--en-rule);
+}
+.rvLeagueRow:last-child { border-bottom: none; }
+
+.rvLgLeague {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rvLgName {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rvLgNation {
+  font-family: var(--font-plex);
+  font-size: 9px;
+  color: var(--en-text-4);
+  letter-spacing: 0.04em;
+}
+.rvLgStat {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  color: var(--en-text-1);
+  text-align: right;
+}
+
+/* Clubs subscript list */
+.rvLgClubs {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-4);
+  padding: 4px 16px;
+  line-height: 1.5;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.rvLgClubs:last-child { border-bottom: none; }
+.rvLgClubsLabel {
+  color: var(--en-text-3);
+  font-weight: 500;
+}

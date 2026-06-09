@@ -501,19 +501,21 @@ export function deriveUclLeagueRecords(uclMatches, opponents) {
 // ─── DETERMINISTIC RIVAL NARRATIVE ───────────────────────────────────────────
 // Generates a data-grounded summary sentence from UCL match history.
 // No AI, no invented facts. All statements derived directly from match docs.
-export function buildUclRivalNarrative(rival) {
+// clubName: pass activeClub.name — never hardcode a club name here.
+export function buildUclRivalNarrative(rival, clubName) {
   const { displayName, matches, played, w, d, l, gf, ga, finals, koMatches } = rival
+  const club = clubName || 'Your club'
   if (!played) return null
 
   const parts = []
 
   // Base record description
   if (w > l) {
-    parts.push(`FC Richport have a positive record against ${displayName}, winning ${w} of ${played} UCL meetings.`)
+    parts.push(`${club} have a positive record against ${displayName}, winning ${w} of ${played} UCL meetings.`)
   } else if (l > w) {
-    parts.push(`${displayName} have had the upper hand against FC Richport, winning ${l} of ${played} UCL encounters.`)
+    parts.push(`${displayName} have had the upper hand against ${club}, winning ${l} of ${played} UCL encounters.`)
   } else {
-    parts.push(`FC Richport and ${displayName} are evenly matched in the UCL, sharing ${played} meetings ${w === 0 ? 'with no wins for either side' : `with ${w} wins each`}.`)
+    parts.push(`${club} and ${displayName} are evenly matched in the UCL, sharing ${played} meetings ${w === 0 ? 'with no wins for either side' : `with ${w} wins each`}.`)
   }
 
   // Finals
@@ -525,7 +527,7 @@ export function buildUclRivalNarrative(rival) {
       .join(', ')
     const finalWins = finalMatches.filter(m => m.score_for > m.score_against).length
     if (finalWins === finals) {
-      parts.push(`FC Richport won ${finals === 1 ? 'the' : 'both'} final${finals > 1 ? 's' : ''} between the sides${finalSeasons ? ` (${finalSeasons})` : ''}.`)
+      parts.push(`${club} won ${finals === 1 ? 'the' : 'both'} final${finals > 1 ? 's' : ''} between the sides${finalSeasons ? ` (${finalSeasons})` : ''}.`)
     } else if (finalWins === 0) {
       parts.push(`${displayName} won ${finals === 1 ? 'the' : 'both'} final${finals > 1 ? 's' : ''} between the sides${finalSeasons ? ` (${finalSeasons})` : ''}.`)
     } else {
