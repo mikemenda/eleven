@@ -3,187 +3,247 @@
   min-height: calc(100dvh - 56px);
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
 }
-.inner { max-width: 640px; margin: 0 auto; animation: fadeUp 0.35s ease both; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+  animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ── MUSEUM HEADER ── */
 .museumHeader {
-  position: relative; overflow: hidden;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(160deg, var(--en-gold-dim) 0%, var(--en-bg) 60%);
   border-bottom: 0.5px solid rgba(224,194,122,0.15);
-  max-width: 640px; margin: 0 auto;
+  max-width: 640px;
+  margin: 0 auto;
 }
 .museumGlow {
-  position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
-  width: 300px; height: 150px;
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 150px;
   background: radial-gradient(ellipse, rgba(224,194,122,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 .headerInner {
-  position: relative; padding: 28px 20px 24px;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  position: relative;
+  padding: 28px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 .headerLabel {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.22em; text-transform: uppercase; color: var(--en-gold);
+  font-family: var(--font-plex);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--en-gold);
   opacity: 0.7;
 }
 .headerTitle {
-  font-family: var(--font-playfair); font-size: 28px; font-weight: 700;
-  color: var(--en-text-1); text-align: center;
+  font-family: var(--font-playfair);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  text-align: center;
 }
 .headerCount {
-  display: flex; align-items: baseline; gap: 6px; margin-top: 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
 }
 .countNum {
-  font-family: var(--font-plex); font-size: 32px; font-weight: 500; line-height: 1;
+  font-family: var(--font-plex);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
   color: var(--en-gold);
 }
 .countLabel {
-  font-family: var(--font-plex); font-size: 11px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-plex);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
 }
 
-/* ── TROPHY SHELF ── */
-.shelf {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1px; padding: 0;
+/* ── HONOURS LIST ── */
+.honoursList {
+  padding: 8px 0 0;
+}
+
+/* Each trophy entry — wraps row header + optional accordion body */
+.honourItem {
   border-bottom: 0.5px solid var(--en-rule);
 }
-
-.trophyCard {
-  background: var(--en-surface); border: none;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 20px 12px 16px;
-  cursor: pointer; text-align: center; position: relative;
-  transition: background 0.15s;
-  border-right: 0.5px solid var(--en-rule);
-  border-bottom: 0.5px solid var(--en-rule);
+.honourItemLast {
+  border-bottom: none;
 }
-.trophyCard:hover { background: var(--en-surface-2); }
 
-.trophyVis { position: relative; width: 64px; height: 72px; }
-.trophyImg { width: 100%; height: 100%; object-fit: contain; }
+/* ── HONOUR ROW (tap target) ── */
+.honourRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.honourRow:hover,
+.honourRowOpen {
+  background: rgba(224, 194, 122, 0.04);
+}
+
+/* Left: trophy image container */
+.rowTrophyVis {
+  flex-shrink: 0;
+  width: 44px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rowTrophyImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 .trophyFallback {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 32px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
 }
-.trophyWon { filter: drop-shadow(0 0 8px rgba(224,194,122,0.35)); }
+.trophyWon {
+  filter: drop-shadow(0 0 6px rgba(224,194,122,0.3));
+}
 
-.trophyGlow {
-  position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-  width: 40px; height: 16px;
-  background: radial-gradient(ellipse, rgba(224,194,122,0.3) 0%, transparent 70%);
+/* Middle: name + region + count */
+.rowMeta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rowName {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  line-height: 1.2;
+}
+.rowRegion {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* Improved from en-text-4 — visibly readable, stays secondary */
+  color: var(--en-text-3);
+}
+.rowCount {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-gold);
+  margin-top: 1px;
 }
 
-.trophyName {
-  font-family: var(--font-inter); font-size: 11px; font-weight: 600;
-  color: var(--en-text-1); line-height: 1.3; text-align: center;
+/* Right: chevron */
+.rowChevron {
+  flex-shrink: 0;
+  color: var(--en-text-3);
+  transition: transform 0.15s ease;
+  display: flex;
+  align-items: center;
 }
-.trophyRegion {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; color: var(--en-text-4); text-transform: uppercase;
+.rowChevronOpen {
+  transform: rotate(180deg);
 }
-.trophyCount {
-  font-family: var(--font-plex); font-size: 18px; font-weight: 500;
-  color: var(--en-gold); line-height: 1;
+
+/* ── ACCORDION BODY ── */
+/* No max-height — renders fully, zero clipping risk */
+.accordionBody {
+  padding: 0 20px 18px;
+}
+.accordionRule {
+  height: 0.5px;
+  background: var(--en-rule);
+  margin-bottom: 14px;
+}
+
+/* Win list — one row per title */
+.winList {
+  display: flex;
+  flex-direction: column;
+}
+.winRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.winRow:last-child {
+  border-bottom: none;
+}
+
+.winSeason {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-gold);
+  min-width: 28px;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.winDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.winSub {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-2);
+}
+.winSubMuted {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-3);
+  font-style: italic;
 }
 
 /* ── LOAD ── */
-.loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
+.loadWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+}
 .spinner {
-  width: 24px; height: 24px;
-  border: 1.5px solid var(--en-rule); border-top-color: var(--en-gold);
-  border-radius: 50%; animation: spin 0.7s linear infinite;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--en-rule);
+  border-top-color: var(--en-gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── TROPHY DETAIL MODAL ── */
-/* Backdrop */
-.modalBackdrop {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  animation: fadeIn 0.15s ease;
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* Bottom sheet */
-.modal {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 201;
-  background: var(--en-surface);
-  border-top: 0.5px solid rgba(224,194,122,0.2);
-  border-radius: 16px 16px 0 0;
-  padding: 12px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
-  max-width: 640px; margin: 0 auto;
-  animation: slideUp 0.22s cubic-bezier(0.32, 0.72, 0, 1);
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-.modalHandle {
-  width: 36px; height: 4px; border-radius: 2px;
-  background: var(--en-rule); margin: 0 auto 20px;
-}
-
-.modalHeader {
-  display: flex; align-items: center; gap: 16px;
-  margin-bottom: 16px;
-}
-.modalTrophyVis {
-  width: 52px; height: 60px; flex-shrink: 0;
-}
-.modalTitleGroup {
-  display: flex; flex-direction: column; gap: 3px;
-}
-.modalRegion {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--en-text-4);
-}
-.modalTitle {
-  font-family: var(--font-playfair); font-size: 20px; font-weight: 700;
-  color: var(--en-text-1); line-height: 1.2;
-}
-.modalWinCount {
-  font-family: var(--font-plex); font-size: 13px; font-weight: 500;
-  color: var(--en-gold); letter-spacing: 0.04em;
-}
-
-.modalRule {
-  height: 0.5px; background: var(--en-rule); margin-bottom: 16px;
-}
-
-/* Win rows */
-.modalWins { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
-.modalWinRow {
-  display: flex; align-items: baseline; gap: 14px;
-  padding: 11px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
-}
-.modalWinRow:last-child { border-bottom: none; }
-
-.modalWinSeason {
-  font-family: var(--font-plex); font-size: 13px; font-weight: 600;
-  color: var(--en-gold); min-width: 28px; letter-spacing: 0.04em;
-}
-.modalWinDetail { display: flex; flex-direction: column; gap: 2px; }
-.modalWinSub {
-  font-family: var(--font-inter); font-size: 13px;
-  color: var(--en-text-2);
-}
-.modalWinSubMuted {
-  font-family: var(--font-inter); font-size: 12px;
-  color: var(--en-text-4); font-style: italic;
-}
-
-/* Close button */
-.modalClose {
-  display: block; width: 100%;
-  background: var(--en-surface-2); border: 0.5px solid var(--en-rule);
-  border-radius: 8px; padding: 12px;
-  font-family: var(--font-inter); font-size: 14px; font-weight: 500;
-  color: var(--en-text-2); cursor: pointer;
-  transition: background 0.15s;
-}
-.modalClose:hover { background: var(--en-surface-3); }

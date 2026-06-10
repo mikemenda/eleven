@@ -5,93 +5,68 @@ import { TROPHY_REGISTRY, TIER_ORDER, deriveTrophiesFromSeasons } from '../utils
 import { TROPHY_PNG_MAP } from '../utils/trophyAssets'
 import styles from './Museum.module.css'
 
-// TrophyImage renders the real PNG if available, emoji fallback otherwise.
-// Used for both shelf cards and the detail modal.
+// ─── TROPHY IMAGE ─────────────────────────────────────────────────────────────
 function TrophyImage({ competition, className }) {
   const src = TROPHY_PNG_MAP[competition]
   if (src) return (
     <img src={src} alt={competition} className={`${className} ${styles.trophyWon}`} />
   )
-  // Fallback for competitions with no PNG (Championship, Europa League, Conference League)
   return (
     <div className={`${styles.trophyFallback} ${styles.trophyWon}`}>🏆</div>
   )
 }
 
-// ─── TROPHY DETAIL MODAL ─────────────────────────────────────────────────────
-function TrophyDetail({ competition, wins, onClose }) {
-  if (!competition) return null
-
-  const reg = TROPHY_REGISTRY.find(t => t.key === competition)
-
+// ─── ACCORDION WIN ROWS ───────────────────────────────────────────────────────
+function WinRows({ competition, wins }) {
   return (
-    <>
-      <div className={styles.modalBackdrop} onClick={onClose} aria-hidden="true" />
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={competition}>
-        <div className={styles.modalHandle} />
-
-        <div className={styles.modalHeader}>
-          <div className={styles.modalTrophyVis}>
-            <TrophyImage competition={competition} className={styles.trophyImg} />
-          </div>
-          <div className={styles.modalTitleGroup}>
-            <div className={styles.modalRegion}>{reg?.region}</div>
-            <div className={styles.modalTitle}>{competition}</div>
-            <div className={styles.modalWinCount}>×{wins.length} {wins.length === 1 ? 'title' : 'titles'}</div>
-          </div>
-        </div>
-
-        <div className={styles.modalRule} />
-
-        <div className={styles.modalWins}>
-          {wins.map((w, i) => {
-            const s = w.season
-            return (
-              <div key={i} className={styles.modalWinRow}>
-                <span className={styles.modalWinSeason}>{w.seasonLabel}</span>
-                <div className={styles.modalWinDetail}>
-                  {competition === 'UEFA Champions League' && (
-                    s.uclFinalOpponent && s.uclFinalScore
-                      ? <span className={styles.modalWinSub}>Final vs {s.uclFinalOpponent} · {s.uclFinalScore}</span>
-                      : <span className={styles.modalWinSubMuted}>Final details not recorded</span>
-                  )}
-                  {['Premier League','English Championship','La Liga','Bundesliga'].includes(competition) && (
-                    s.leaguePts
-                      ? <span className={styles.modalWinSub}>
-                          {s.leaguePts} pts
-                          {s.leagueW != null ? ` · ${s.leagueW}W ${s.leagueD ?? 0}D ${s.leagueL ?? 0}L` : ''}
-                          {s.leagueGF != null ? ` · ${s.leagueGF} GF` : ''}
-                        </span>
-                      : <span className={styles.modalWinSubMuted}>League record not recorded</span>
-                  )}
-                  {competition === 'FA Cup' && (
-                    s.faCupFinalOpponent
-                      ? <span className={styles.modalWinSub}>Final vs {s.faCupFinalOpponent}</span>
-                      : <span className={styles.modalWinSubMuted}>Final details not recorded</span>
-                  )}
-                  {competition === 'Carabao Cup' && (
-                    s.carabaoCupFinalOpponent
-                      ? <span className={styles.modalWinSub}>Final vs {s.carabaoCupFinalOpponent}</span>
-                      : <span className={styles.modalWinSubMuted}>Final details not recorded</span>
-                  )}
-                </div>
+    <div className={styles.accordionBody}>
+      <div className={styles.accordionRule} />
+      <div className={styles.winList}>
+        {wins.map((w, i) => {
+          const s = w.season
+          return (
+            <div key={i} className={styles.winRow}>
+              <span className={styles.winSeason}>{w.seasonLabel}</span>
+              <div className={styles.winDetail}>
+                {competition === 'UEFA Champions League' && (
+                  s.uclFinalOpponent && s.uclFinalScore
+                    ? <span className={styles.winSub}>Final vs {s.uclFinalOpponent} · {s.uclFinalScore}</span>
+                    : <span className={styles.winSubMuted}>Final details not recorded</span>
+                )}
+                {['Premier League', 'English Championship', 'La Liga', 'Bundesliga'].includes(competition) && (
+                  s.leaguePts
+                    ? <span className={styles.winSub}>
+                        {s.leaguePts} pts
+                        {s.leagueW != null ? ` · ${s.leagueW}W ${s.leagueD ?? 0}D ${s.leagueL ?? 0}L` : ''}
+                        {s.leagueGF != null ? ` · ${s.leagueGF} GF` : ''}
+                      </span>
+                    : <span className={styles.winSubMuted}>League record not recorded</span>
+                )}
+                {competition === 'FA Cup' && (
+                  s.faCupFinalOpponent
+                    ? <span className={styles.winSub}>Final vs {s.faCupFinalOpponent}</span>
+                    : <span className={styles.winSubMuted}>Final details not recorded</span>
+                )}
+                {competition === 'Carabao Cup' && (
+                  s.carabaoCupFinalOpponent
+                    ? <span className={styles.winSub}>Final vs {s.carabaoCupFinalOpponent}</span>
+                    : <span className={styles.winSubMuted}>Final details not recorded</span>
+                )}
               </div>
-            )
-          })}
-        </div>
-
-        <button className={styles.modalClose} onClick={onClose}>Done</button>
+            </div>
+          )
+        })}
       </div>
-    </>
+    </div>
   )
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function Museum() {
   const { activeClub } = useApp()
-  const [seasons, setSeasons] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null)
+  const [seasons, setSeasons]   = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [expanded, setExpanded] = useState(null)
 
   useEffect(() => {
     if (!activeClub) return
@@ -115,10 +90,15 @@ export default function Museum() {
     (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)
   )
 
-  const selectedWins = selected ? (byComp[selected] || []) : []
+  const wonTrophies = sorted.filter(trophy => (byComp[trophy.key] || []).length > 0)
+
+  function handleRowTap(key) {
+    setExpanded(prev => (prev === key ? null : key))
+  }
 
   return (
     <div className={styles.page}>
+      {/* ── HERO ── */}
       <div className={styles.museumHeader}>
         <div className={styles.museumGlow} />
         <div className={styles.headerInner}>
@@ -131,44 +111,61 @@ export default function Museum() {
         </div>
       </div>
 
+      {/* ── HONOURS LIST ── */}
       <div className={styles.inner}>
         {loading ? (
           <div className={styles.loadWrap}><div className={styles.spinner} /></div>
         ) : (
-          <div className={styles.shelf}>
-            {sorted
-              .filter(trophy => (byComp[trophy.key] || []).length > 0)
-              .map(trophy => {
-                const wins = byComp[trophy.key]
-                return (
+          <div className={styles.honoursList}>
+            {wonTrophies.map((trophy, idx) => {
+              const wins      = byComp[trophy.key]
+              const isOpen    = expanded === trophy.key
+              const isLast    = idx === wonTrophies.length - 1
+
+              return (
+                <div
+                  key={trophy.key}
+                  className={`${styles.honourItem} ${isLast ? styles.honourItemLast : ''}`}
+                >
+                  {/* ── ROW HEADER (tap target) ── */}
                   <button
-                    key={trophy.key}
-                    className={styles.trophyCard}
-                    onClick={() => setSelected(trophy.key)}
+                    className={`${styles.honourRow} ${isOpen ? styles.honourRowOpen : ''}`}
+                    onClick={() => handleRowTap(trophy.key)}
+                    aria-expanded={isOpen}
                     aria-label={`${trophy.key} — ${wins.length} title${wins.length !== 1 ? 's' : ''}`}
                   >
-                    <div className={styles.trophyVis}>
-                      <TrophyImage competition={trophy.key} className={styles.trophyImg} />
-                      <div className={styles.trophyGlow} />
+                    {/* Left: trophy PNG */}
+                    <div className={styles.rowTrophyVis}>
+                      <TrophyImage competition={trophy.key} className={styles.rowTrophyImg} />
                     </div>
-                    <div className={styles.trophyName}>{trophy.key}</div>
-                    <div className={styles.trophyRegion}>{trophy.region}</div>
-                    <div className={styles.trophyCount}>×{wins.length}</div>
+
+                    {/* Middle: name + region + count */}
+                    <div className={styles.rowMeta}>
+                      <div className={styles.rowName}>{trophy.key}</div>
+                      <div className={styles.rowRegion}>{trophy.region}</div>
+                      <div className={styles.rowCount}>
+                        ×{wins.length} {wins.length === 1 ? 'title' : 'titles'}
+                      </div>
+                    </div>
+
+                    {/* Right: chevron */}
+                    <div className={`${styles.rowChevron} ${isOpen ? styles.rowChevronOpen : ''}`}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
                   </button>
-                )
-              })
-            }
+
+                  {/* ── ACCORDION BODY (inline, no clipping) ── */}
+                  {isOpen && (
+                    <WinRows competition={trophy.key} wins={wins} />
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
-
-      {selected && (
-        <TrophyDetail
-          competition={selected}
-          wins={selectedWins}
-          onClose={() => setSelected(null)}
-        />
-      )}
     </div>
   )
 }

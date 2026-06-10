@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 61
+// Current: 62
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -58,4 +58,5 @@
 //   59 — UCL full design system pass: starball branding in topBar; tab bar Inter fonts; Rivals tab renamed Opponents; mono fonts replaced with Inter except scores; section labels, record titles, filter chips, player positions upgraded to readable #8899aa; Overview stat grid neutral; Results labels with plural logic; Notable rows redesigned; Seasons — Finalist label, gold finals emphasis, Career KO table with short round labels; Players — A/G column, default sort G+A, gold sorted-column, gold active chips; Records — label readability, consistent 120px right panel, units in Top5 modal; Opponents — renamed from Rivals, Inter typography
 //   60 — UCL refinement patch: NavBar UCL icon active filter corrected to match #E0C27A; UCL title Inter 800; European Record hero Inter 800 + UCL trophy PNG right-side; WDL hero line removed; Results cards add inline SVG icons; Season card result label back inline-right; Career KO Final row full gold; KO path leg typography improved (sznKOLegRes class, H/A contrast); Players column reorder App G A G+A G/G A/G C/G + App abbreviation; Records — all values gold, cleaned labels (no UCL prefix), reordered career/season, club records with crest + G/G averages, Finals Record removed, season CS/Game added; Opponents — sortable P/W/D/L/GD with gold column highlight, count label readable, league detail GD stat + redesigned match row, tighter club block spacing
 //   61 — Records visual alignment: standalone Records page migrated to v60 UCL Records design system; Inter tabs/labels, all values gold, 120px right panel, createPortal modal, OppCrest+RichportMark on Club tab, resolveClubIdentity transfer crests, label/ordering cleanup, acSeason+uclSeason bestCspg added
-const SW_VERSION = 61;
+//   62 — Museum accordion: replaced trophy grid + bottom sheet modal with one-trophy-per-line accordion list; inline expand/collapse with no clipping; trophy PNG left, name/region/count middle, chevron right; region label readability improved (en-text-3); Done button removed
+const SW_VERSION = 62;
