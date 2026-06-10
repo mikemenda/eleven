@@ -9,6 +9,7 @@ import {
   getMatches,
   getOpponents,
 } from '../firebase/services'
+import { TROPHY_PNG_MAP, TrophySVG, GenericTrophySVG } from '../utils/trophyAssets'
 import styles from './SeasonDetail.module.css'
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -25,6 +26,14 @@ const MD_ORDER = ['MD1','MD2','MD3','MD4','MD5','MD6','MD7','MD8']
 
 // Knockout competition codes as stored in match docs
 const KO_COMPS = ['UCL_R16', 'UCL_QF', 'UCL_SF', 'UCL_Final']
+
+// Human-readable round labels for KO display
+const KO_ROUND_LABEL = {
+  R16:   'Round of 16',
+  QF:    'Quarter-final',
+  SF:    'Semi-final',
+  Final: 'Final',
+}
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -197,22 +206,7 @@ const TrophyPrompt = ({ competition, onConfirm, onSkip }) => (
   </div>
 )
 
-// ─── TROPHY SVG ───────────────────────────────────────────────────────────────
-
-const TrophySvg = ({ className }) => (
-  <svg className={className} viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 38c-8 0-14-7-14-16V8h28v14c0 9-6 16-14 16z"
-          stroke="currentColor" strokeWidth="1.5" fill="none"/>
-    <path d="M8 12H4a3 3 0 0 0 0 6h4M36 12h4a3 3 0 0 1 0 6h-4"
-          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M22 38v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M14 46h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M12 50h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <circle cx="22" cy="20" r="4" stroke="currentColor" strokeWidth="1.2" fill="none" opacity="0.4"/>
-  </svg>
-)
-
-// ─── TROPHY SHELF — won trophies only ─────────────────────────────────────────
+// ─── TROPHY SHELF — won trophies only, using real PNGs ───────────────────────
 
 function TrophyShelf({ s }) {
   const items = []
@@ -225,15 +219,23 @@ function TrophyShelf({ s }) {
   if (s.carabaoCupResult === 'Winner')
     items.push({ key: 'cc',  label: 'Carabao Cup' })
   if (!items.length) return null
+
   return (
     <div className={styles.trophyShelf}>
       <div className={styles.trophyShelfItems}>
-        {items.map(t => (
-          <div key={t.key} className={styles.trophyItem}>
-            <TrophySvg className={styles.trophySvgWon} />
-            <span className={styles.trophyName}>{t.label}</span>
-          </div>
-        ))}
+        {items.map(t => {
+          const png = TROPHY_PNG_MAP[t.label]
+          const SvgComp = TrophySVG[t.label] || GenericTrophySVG
+          return (
+            <div key={t.key} className={styles.trophyItem}>
+              {png
+                ? <img src={png} alt={t.label} className={styles.trophyPng} />
+                : <SvgComp className={styles.trophySvgWon} />
+              }
+              <span className={styles.trophyName}>{t.label}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -241,7 +243,6 @@ function TrophyShelf({ s }) {
 
 // ─── UCL SECTION — major section, match-doc-powered ──────────────────────────
 
-// Derive result letter from scores
 function matchResult(sf, sa) {
   if (sf == null || sa == null) return null
   if (sf > sa) return 'W'
@@ -249,12 +250,9 @@ function matchResult(sf, sa) {
   return 'D'
 }
 
-// Build League Phase rows from match documents (MD1–MD8)
-// Falls back gracefully if no LP match docs exist
 function buildLPRows(matches) {
   const lpMatches = matches.filter(m => m.competition === 'UCL_LP')
   if (!lpMatches.length) return []
-  // Sort by round label (MD1, MD2, …)
   return [...lpMatches].sort((a, b) => {
     const ai = MD_ORDER.indexOf(a.round)
     const bi = MD_ORDER.indexOf(b.round)
@@ -262,16 +260,12 @@ function buildLPRows(matches) {
   })
 }
 
-// Build per-leg knockout rows from match documents for a given competition code
-// Returns array of leg objects { leg, opponent, score_for, score_against, home_away }
 function buildKOLegs(matches, compCode) {
-  const legs = matches
+  return matches
     .filter(m => m.competition === compCode)
     .sort((a, b) => (a.leg ?? 0) - (b.leg ?? 0))
-  return legs
 }
 
-// Compute aggregate from two leg documents
 function legAggregate(legs) {
   if (!legs.length) return null
   const totalFor     = legs.reduce((s, m) => s + (m.score_for     ?? 0), 0)
@@ -279,10 +273,6 @@ function legAggregate(legs) {
   return { totalFor, totalAgainst }
 }
 
-// ─── Opponent lookup helpers ──────────────────────────────────────────────────
-// oppName: returns the best display name for a raw opponent string,
-//   preferring the canonical displayName from the opponents map when a
-//   match doc carries an opponentKey.
 function oppDisplay(matchDoc, opponents) {
   if (!matchDoc) return null
   const key = matchDoc.opponentKey
@@ -292,14 +282,18 @@ function oppDisplay(matchDoc, opponents) {
   return matchDoc.opponent || null
 }
 
-// oppCrest: returns crestUrl from the opponents map for a given opponentKey
 function oppCrest(opponentKey, opponents) {
   if (!opponentKey || !opponents) return null
-  const rec = opponents.get(opponentKey)
-  return rec?.crestUrl || null
+  return opponents.get(opponentKey)?.crestUrl || null
 }
 
-// oppAbbr: returns abbreviation from opponents map, falls back to abbrev()
+function abbrev(name) {
+  if (!name) return '—'
+  const words = name.trim().split(/\s+/)
+  if (words.length === 1) return name.slice(0, 3).toUpperCase()
+  return words.map(w => w[0]).join('').toUpperCase().slice(0, 3)
+}
+
 function oppAbbr(opponentKey, rawName, opponents) {
   if (opponentKey && opponents && opponents.has(opponentKey)) {
     return opponents.get(opponentKey).abbreviation || abbrev(rawName)
@@ -309,9 +303,9 @@ function oppAbbr(opponentKey, rawName, opponents) {
 
 function UclSection({ s, matches, opponents }) {
   const isChampion = s.uclResult === 'Champions'
-  const isRunnerUp = s.uclResult === 'Runners-Up'
+  const isFinalist = s.uclResult === 'Runners-Up'
 
-  // Opener sentence
+  // Opener sentence — "Finalist" not "Runner-Up"
   let opener = null
   if (isChampion) {
     opener = `Champions of Europe.${
@@ -319,23 +313,27 @@ function UclSection({ s, matches, opponents }) {
         ? ` ${s.uclFinalOpponent} defeated in the final${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
         : ''
     }`
-  } else if (isRunnerUp) {
-    opener = `Reached the final — beaten${
+  } else if (isFinalist) {
+    opener = `Reached the final — defeated${
       s.uclFinalOpponent ? ` by ${s.uclFinalOpponent}` : ''
     }${s.uclFinalScore ? ` ${s.uclFinalScore}` : ''}.`
   } else if (s.uclResult) {
-    opener = `Exited at the ${s.uclResult} stage.`
+    const resultMap = {
+      SF: 'the semi-finals',
+      QF: 'the quarter-finals',
+      R16: 'the Round of 16',
+      Playoff: 'the playoff round',
+      'LP Only': 'the league phase',
+    }
+    const stage = resultMap[s.uclResult] || s.uclResult
+    opener = `Exited at ${stage}.`
   }
 
-  // ── League Phase rows from match docs ──
   const lpRows = buildLPRows(matches)
   const hasLPMatchDocs = lpRows.length > 0
-  // LP summary record from season doc
   const hasLPRecord = s.uclLPP != null
   const lpGD = gd(s.uclLPGF, s.uclLPGA)
 
-  // ── Knockout rounds ──
-  // For each round: prefer match docs (leg detail), fall back to season-doc aggregate
   const rounds = [
     { label: 'R16',   comp: 'UCL_R16',   opp: s.uclR16Opponent, aggDoc: s.uclR16Score },
     { label: 'QF',    comp: 'UCL_QF',    opp: s.uclQFOpponent,  aggDoc: s.uclQFScore  },
@@ -354,7 +352,6 @@ function UclSection({ s, matches, opponents }) {
         else if (agg.totalFor < agg.totalAgainst) roundResult = 'L'
         else roundResult = 'D'
       }
-      // Resolve opponent name: prefer canonical from opponents map via leg docs, then season doc
       const legKey    = hasLegs ? (legs[0]?.opponentKey || null) : null
       const rawOppName= hasLegs ? (legs[0]?.opponent ?? r.opp) : r.opp
       const oppKey    = legKey || null
@@ -365,6 +362,7 @@ function UclSection({ s, matches, opponents }) {
 
       return {
         label:  r.label,
+        displayLabel: KO_ROUND_LABEL[r.label] || r.label,
         comp:   r.comp,
         opponent:     canonName,
         opponentRaw:  rawOppName,
@@ -381,7 +379,6 @@ function UclSection({ s, matches, opponents }) {
     <div className={styles.section}>
       <p className={styles.sectionLabel}>UCL journey</p>
 
-      {/* Opener */}
       {opener && <p className={styles.uclOpener}>{opener}</p>}
 
       {/* ── League Phase ── */}
@@ -389,7 +386,6 @@ function UclSection({ s, matches, opponents }) {
         <div className={styles.uclBlock}>
           <p className={styles.uclBlockLabel}>League Phase</p>
 
-          {/* LP finish position from season doc */}
           {s.uclLeaguePhasePosition != null && (
             <p className={styles.uclLPPosition}>
               Finished {s.uclLeaguePhasePosition}
@@ -397,7 +393,6 @@ function UclSection({ s, matches, opponents }) {
             </p>
           )}
 
-          {/* Individual matchday rows from match docs */}
           {hasLPMatchDocs && (
             <div className={styles.matchTable}>
               <div className={styles.matchTableHead}>
@@ -429,7 +424,7 @@ function UclSection({ s, matches, opponents }) {
                     </span>
                     <span
                       className={styles.mtColVenue}
-                      style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}
+                      style={{ color: m.home_away === 'H' ? 'var(--en-text-3)' : 'var(--en-text-4)' }}
                     >
                       {m.home_away || '—'}
                     </span>
@@ -451,14 +446,13 @@ function UclSection({ s, matches, opponents }) {
             </div>
           )}
 
-          {/* LP record grid from season doc */}
           {hasLPRecord && (
             <div className={styles.recordGrid} style={{ marginTop: hasLPMatchDocs ? 16 : 0 }}>
               {[
                 [s.uclLPP, 'P'], [s.uclLPW, 'W'], [s.uclLPD, 'D'], [s.uclLPL, 'L'],
                 [s.uclLPGF, 'GF'], [s.uclLPGA, 'GA'], [fmtGD(lpGD), 'GD'], [s.uclLPPts, 'Pts'],
               ].map(([val, lbl]) => (
-                <div key={lbl} className={styles.recordCell}>
+                <div key={lbl} className={`${styles.recordCell} ${lbl === 'Pts' ? styles.recordCellHighlight : ''}`}>
                   <div className={styles.rcVal}>{val ?? '—'}</div>
                   <div className={styles.rcLbl}>{lbl}</div>
                 </div>
@@ -475,12 +469,14 @@ function UclSection({ s, matches, opponents }) {
           <div className={styles.koRounds}>
             {koRounds.map(r => {
               const isFinalWon  = r.label === 'Final' && isChampion
-              const isFinalLost = r.label === 'Final' && isRunnerUp
+              const isFinalLost = r.label === 'Final' && isFinalist
               return (
-                <div key={r.label} className={styles.koRound}>
-                  {/* Round header */}
+                <div
+                  key={r.label}
+                  className={`${styles.koRound} ${isFinalWon ? styles.koRoundFinal : ''}`}
+                >
                   <div className={styles.koRoundHeader}>
-                    <span className={styles.koRoundLabel}>{r.label}</span>
+                    <span className={styles.koRoundLabel}>{r.displayLabel}</span>
                     {r.opponent && (
                       <span className={styles.koOpponent}>
                         {r.crest && (
@@ -491,10 +487,9 @@ function UclSection({ s, matches, opponents }) {
                             onError={e => { e.currentTarget.style.display = 'none' }}
                           />
                         )}
-                        vs {r.opponent}
+                        {r.opponent}
                       </span>
                     )}
-                    {/* Aggregate badge */}
                     {r.aggStr && (
                       <span
                         className={`${styles.koAgg} ${
@@ -509,7 +504,6 @@ function UclSection({ s, matches, opponents }) {
                     )}
                   </div>
 
-                  {/* Per-leg breakdown from match docs */}
                   {r.legs && r.legs.length > 0 && (
                     <div className={styles.koLegs}>
                       {r.legs.map((leg, li) => {
@@ -523,7 +517,7 @@ function UclSection({ s, matches, opponents }) {
                               className={styles.koLegVenue}
                               style={{
                                 color: leg.home_away === 'H'
-                                  ? 'var(--en-blue)'
+                                  ? 'var(--en-text-3)'
                                   : 'var(--en-text-4)',
                               }}
                             >
@@ -553,7 +547,6 @@ function UclSection({ s, matches, opponents }) {
         </div>
       )}
 
-      {/* No UCL data at all */}
       {!opener && !hasLPMatchDocs && !hasLPRecord && koRounds.length === 0 && (
         <p className={styles.dimText}>No UCL data recorded.</p>
       )}
@@ -767,7 +760,7 @@ const SeasonDetail = () => {
           <div className={styles.topRight}>
             {s.isComplete
               ? <span className={styles.badgeComplete}>Complete</span>
-              : <span className={styles.badgeLive}>Live</span>
+              : <span className={styles.badgeLive}>In progress</span>
             }
           </div>
         </div>
@@ -825,8 +818,6 @@ const SeasonDetail = () => {
 
         {/* ════════════════════════════════════════════════════════════
             READ-ONLY STORY VIEW
-            Hero → Trophy shelf → Story → Key moments →
-            League → UCL journey → Cups → Dynasty verdict
         ════════════════════════════════════════════════════════════ */}
         {!editing && (
           <>
@@ -876,7 +867,7 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* 5. THE LEAGUE — record always visible */}
+            {/* 5. THE LEAGUE */}
             {s.leaguePosition != null && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>The league</p>
@@ -890,10 +881,10 @@ const SeasonDetail = () => {
                 {s.leagueP != null && (
                   <div className={styles.recordGrid}>
                     {[
-                      [s.leagueP, 'P'], [s.leagueW, 'W'], [s.leagueD, 'D'], [s.leagueL, 'L'],
-                      [s.leagueGF, 'GF'], [s.leagueGA, 'GA'], [fmtGD(lGD), 'GD'], [s.leaguePts, 'Pts'],
-                    ].map(([val, lbl]) => (
-                      <div key={lbl} className={styles.recordCell}>
+                      [s.leagueP, 'P', false], [s.leagueW, 'W', false], [s.leagueD, 'D', false], [s.leagueL, 'L', false],
+                      [s.leagueGF, 'GF', false], [s.leagueGA, 'GA', false], [fmtGD(lGD), 'GD', false], [s.leaguePts, 'Pts', true],
+                    ].map(([val, lbl, highlight]) => (
+                      <div key={lbl} className={`${styles.recordCell} ${highlight ? styles.recordCellHighlight : ''}`}>
                         <div className={styles.rcVal}>{val ?? '—'}</div>
                         <div className={styles.rcLbl}>{lbl}</div>
                       </div>
@@ -903,7 +894,7 @@ const SeasonDetail = () => {
               </div>
             )}
 
-            {/* 6. UCL JOURNEY — major section, match-doc-powered */}
+            {/* 6. UCL JOURNEY */}
             {uclActive && <UclSection s={s} matches={matches} opponents={opponents} />}
 
             {/* 7. CUPS */}
@@ -946,8 +937,6 @@ const SeasonDetail = () => {
 
         {/* ════════════════════════════════════════════════════════════
             EDIT FORM
-            Identity → Story & moments → League record →
-            UCL → Cup results → Dynasty verdict
         ════════════════════════════════════════════════════════════ */}
         {editing && f && (
           <div className={styles.editForm}>
@@ -1318,15 +1307,23 @@ export default SeasonDetail
 
 function CupRow({ label, result, opponent, winner }) {
   if (!result) return null
+  const png = TROPHY_PNG_MAP[label]
+  const SvgComp = TrophySVG[label] || GenericTrophySVG
   return (
     <div className={styles.cupRow}>
-      <span className={styles.cupLabel}>{label}</span>
+      <div className={styles.cupLeft}>
+        {png
+          ? <img src={png} alt={label} className={styles.cupTrophyImg} />
+          : <SvgComp className={styles.cupTrophySvg} />
+        }
+        <span className={styles.cupLabel}>{label}</span>
+      </div>
       <div className={styles.cupRight}>
         <span className={`${styles.cupBadge} ${
           result === 'Winner' ? styles.cupWon :
           result === 'Final'  ? styles.cupFinal : styles.cupDefault
         }`}>
-          {result}
+          {result === 'Winner' ? 'Winner' : result === 'Final' ? 'Finalist' : result}
         </span>
         {opponent && <span className={styles.dimText}>vs {opponent}</span>}
         {winner && result !== 'Winner' && (

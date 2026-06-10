@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { getSeasons } from '../firebase/services'
 import { CreateSeasonModal } from '../components/CreateSeasonModal'
+import { TROPHY_PNG_MAP, TrophySVG, GenericTrophySVG } from '../utils/trophyAssets'
 import styles from './Seasons.module.css'
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -26,21 +27,30 @@ function buildDeck(season) {
   return null
 }
 
-function getHardware(season) {
-  const trophies = []
-  const ucl = []
-  if (season.leaguePosition === 1 && season.leagueCompetition)
-    trophies.push({ key: 'lg', label: season.leagueCompetition, type: 'league' })
-  if (season.uclResult === 'Champions')
-    ucl.push({ key: 'ucl', label: 'UCL', type: 'ucl' })
-  if (season.faCupResult === 'Winner')
-    trophies.push({ key: 'fa', label: 'FA Cup', type: 'cup' })
-  if (season.carabaoCupResult === 'Winner')
-    trophies.push({ key: 'cc', label: 'Carabao', type: 'cup' })
-  return { trophies, ucl }
+// Map a competition key to its trophy PNG or SVG fallback
+function TrophyIcon({ competitionKey, className, imgClassName }) {
+  const png = TROPHY_PNG_MAP[competitionKey]
+  if (png) {
+    return <img src={png} alt={competitionKey} className={imgClassName || className} />
+  }
+  const SvgComp = TrophySVG[competitionKey] || GenericTrophySVG
+  return <SvgComp className={className} />
 }
 
-function getRunnerUp(season) {
+function getHardware(season) {
+  const honours = []
+  if (season.leaguePosition === 1 && season.leagueCompetition)
+    honours.push({ key: 'lg', label: season.leagueCompetition, type: 'league' })
+  if (season.uclResult === 'Champions')
+    honours.push({ key: 'ucl', label: 'UEFA Champions League', type: 'ucl' })
+  if (season.faCupResult === 'Winner')
+    honours.push({ key: 'fa', label: 'FA Cup', type: 'cup' })
+  if (season.carabaoCupResult === 'Winner')
+    honours.push({ key: 'cc', label: 'Carabao Cup', type: 'cup' })
+  return honours
+}
+
+function getFinalist(season) {
   if (season.uclResult === 'Runners-Up') {
     const opp = season.uclFinalOpponent || season.uclTournamentWinner || ''
     return { opponent: opp }
@@ -77,7 +87,8 @@ function DynastyArc({ seasons, onNavigate }) {
       <div className={styles.arcBaseline}>
         <div className={styles.arcRow}>
           {sorted.map(s => {
-            const { trophies, ucl } = getHardware(s)
+            const honours = getHardware(s)
+            const finalist = getFinalist(s)
             return (
               <div
                 key={s.id}
@@ -88,8 +99,8 @@ function DynastyArc({ seasons, onNavigate }) {
                 onKeyDown={e => e.key === 'Enter' && onNavigate(s.id)}
               >
                 <div className={styles.arcPips}>
-                  {ucl.map(t => <span key={t.key} className={styles.pipGold} />)}
-                  {trophies.map(t => <span key={t.key} className={styles.pipGreen} />)}
+                  {honours.map(h => <span key={h.key} className={styles.pipGold} />)}
+                  {finalist && <span className={styles.pipSlate} />}
                 </div>
                 <span className={`${styles.arcScore} ${scoreClass(s)}`}>
                   {s.dynastyScore ?? '—'}
@@ -109,11 +120,10 @@ function DynastyArc({ seasons, onNavigate }) {
 function SeasonRow({ season, onClick }) {
   const headline = buildHeadline(season)
   const deck = buildDeck(season)
-  const { trophies, ucl } = getHardware(season)
-  const runnerUp = getRunnerUp(season)
+  const honours = getHardware(season)
+  const finalist = getFinalist(season)
   const peak = isPeak(season)
   const dip = season.dynastyScore != null && season.dynastyScore < 60 && !peak
-  const allTrophies = [...ucl, ...trophies]
 
   return (
     <button className={styles.seasonRow} onClick={onClick}>
@@ -135,19 +145,19 @@ function SeasonRow({ season, onClick }) {
         {deck && <div className={styles.rowDeck}>{deck}</div>}
         <div className={styles.rowFooter}>
           <div className={styles.rowHardware}>
-            {allTrophies.map(t => (
-              <span
-                key={t.key}
-                className={
-                  t.type === 'league' ? styles.hwLeague : styles.hwTrophy
-                }
-              >
-                {t.label}
+            {honours.map(h => (
+              <span key={h.key} className={styles.hwHonour}>
+                <TrophyIcon
+                  competitionKey={h.label}
+                  imgClassName={styles.hwTrophyImg}
+                  className={styles.hwTrophySvg}
+                />
+                <span className={styles.hwLabel}>{h.label}</span>
               </span>
             ))}
-            {runnerUp && (
-              <span className={styles.hwRu}>
-                UCL R-U{runnerUp.opponent ? ` · ${runnerUp.opponent}` : ''}
+            {finalist && (
+              <span className={styles.hwFinalist}>
+                UCL Finalist · lost to {finalist.opponent || '…'}
               </span>
             )}
           </div>

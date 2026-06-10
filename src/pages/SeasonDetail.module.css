@@ -41,41 +41,48 @@
 }
 .backBtn:hover { color: var(--en-text-1); }
 .topCenter { flex: 1; display: flex; align-items: center; gap: 8px; }
+
+/* Inter labels — no mono tracking */
 .topLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--en-text-2);
 }
 .topYear {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  color: var(--en-text-4);
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 400;
+  color: #8899aa;
 }
 .topRight { display: flex; align-items: center; gap: 8px; }
+
+/* Complete badge — quiet slate pill */
 .badgeComplete {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 2px;
+  border-radius: 3px;
   background: transparent;
-  color: var(--en-text-4);
-  border: 0.5px solid var(--en-rule);
+  color: #8899aa;
+  border: 0.5px solid rgba(136,153,170,0.35);
 }
+/* In progress badge — gold tint */
 .badgeLive {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 2px;
-  background: var(--en-blue-dim);
-  color: var(--en-blue);
-  border: 0.5px solid var(--en-blue);
+  border-radius: 3px;
+  background: rgba(224,194,122,0.1);
+  color: var(--en-gold);
+  border: 0.5px solid rgba(224,194,122,0.35);
 }
 
 /* ─── STATUS BARS ────────────────────────────────────────────────── */
@@ -87,7 +94,8 @@
   font-size: 13px;
   border-bottom: 0.5px solid var(--en-rule);
 }
-.editBar   { background: var(--en-blue-dim); border-bottom-color: var(--en-blue); }
+/* Edit bar — gold tint background */
+.editBar   { background: rgba(224,194,122,0.06); border-bottom-color: rgba(224,194,122,0.25); }
 .lockedBar { background: transparent; }
 .toolbar   { background: transparent; }
 
@@ -96,61 +104,80 @@
   color: var(--en-text-2);
   font-family: var(--font-inter); font-size: 12px;
 }
+/* Gold pulsing dot for edit state */
 .editDot {
   width: 5px; height: 5px;
   border-radius: 50%;
-  background: var(--en-blue);
+  background: var(--en-gold);
   animation: pulse 1.5s infinite;
 }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .editActions { display: flex; gap: 8px; }
 .cancelEditBtn {
   font-family: var(--font-inter); font-size: 12px;
-  padding: 5px 12px; border-radius: 2px;
+  padding: 5px 12px; border-radius: 4px;
   border: 0.5px solid var(--en-rule);
   background: transparent; color: var(--en-text-3); cursor: pointer;
+  transition: color 0.15s;
 }
+.cancelEditBtn:hover { color: var(--en-text-2); }
+/* Save button — gold */
 .saveBtn {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-inter); font-size: 12px;
-  padding: 5px 14px; border-radius: 2px;
-  border: 0.5px solid var(--en-blue);
-  background: var(--en-blue-dim); color: var(--en-text-2); cursor: pointer;
+  font-family: var(--font-inter); font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 4px;
+  border: 0.5px solid rgba(224,194,122,0.5);
+  background: rgba(224,194,122,0.1); color: var(--en-gold); cursor: pointer;
+  transition: background 0.15s;
 }
+.saveBtn:hover { background: rgba(224,194,122,0.15); }
 .saveBtn:disabled { opacity: 0.5; }
 .spinnerSm {
   width: 11px; height: 11px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(224,194,122,0.25);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Locked bar — Inter, slate */
 .lockedText {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--en-text-4);
+  font-family: var(--font-inter); font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: #8899aa;
 }
+/* Unlock button — gold */
 .unlockBtn {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--en-blue); background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-inter); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--en-gold); background: transparent; border: none; cursor: pointer;
+  transition: opacity 0.15s;
 }
+.unlockBtn:hover { opacity: 0.75; }
+
+/* Edit button — Inter, slate */
 .editBtn {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--en-text-3); background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-inter); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: #8899aa; background: transparent; border: none; cursor: pointer;
   transition: color 0.15s;
 }
-.editBtn:hover { color: var(--en-text-1); }
+.editBtn:hover { color: var(--en-text-2); }
+
+/* Complete button — gold */
 .completeBtn {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--en-blue); background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-inter); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--en-gold); background: transparent; border: none; cursor: pointer;
+  transition: opacity 0.15s;
 }
+.completeBtn:hover { opacity: 0.75; }
+
 .saveErr {
   font-family: var(--font-inter); font-size: 12px; color: var(--danger);
   padding: 10px 20px;
@@ -158,46 +185,53 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   HERO
+   HERO — reduced size for mobile usability
 ═══════════════════════════════════════════════════════════════════ */
 .hero {
-  padding: 32px 20px 28px;
+  padding: 24px 20px 20px;
   border-bottom: 0.5px solid var(--en-rule);
 }
+/* Gold eyebrow — Inter, matches Seasons list */
 .heroEyebrow {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.2em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--en-text-4);
-  margin-bottom: 12px;
+  color: var(--en-gold);
+  opacity: 0.85;
+  margin-bottom: 10px;
 }
+/* Reduced headline — still Playfair editorial, tighter clamp */
 .heroHeadline {
   font-family: var(--font-playfair);
   font-weight: 700;
-  font-size: clamp(24px, 7vw, 32px);
+  font-size: clamp(20px, 5.5vw, 26px);
   color: var(--en-text-1);
-  line-height: 1.15;
-  letter-spacing: -0.3px;
-  margin-bottom: 14px;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+  margin-bottom: 12px;
 }
+/* Gold gradient rule — matches Seasons list */
 .heroIdentityRule {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, var(--en-blue) 0%, transparent 55%);
-  margin-bottom: 14px;
+  background: linear-gradient(90deg, var(--en-gold) 0%, transparent 55%);
+  opacity: 0.5;
+  margin-bottom: 12px;
 }
+/* Lede — slightly smaller, better breathing room */
 .heroLede {
   font-family: var(--font-inter);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 400;
-  color: var(--en-text-2);
+  color: var(--en-text-3);
   line-height: 1.75;
   margin: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TROPHY CABINET
+   TROPHY SHELF — real PNGs, premium spacing
 ═══════════════════════════════════════════════════════════════════ */
 .trophyShelf {
   padding: 0 20px;
@@ -210,7 +244,6 @@
   padding: 20px 0;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  border-top: 0.5px solid var(--en-rule);
 }
 .trophyShelfItems::-webkit-scrollbar { display: none; }
 .trophyItem {
@@ -218,39 +251,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
+/* Real PNG — generous size */
+.trophyPng {
+  width: 52px;
+  height: 68px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+/* SVG fallback */
 .trophySvgWon {
-  width: 44px; height: 58px;
+  width: 40px; height: 54px;
   color: var(--en-gold);
   flex-shrink: 0;
 }
+/* Trophy name — Inter, readable slate */
 .trophyName {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.07em;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--en-text-3);
+  color: #8899aa;
   text-align: center;
-  max-width: 56px;
-  line-height: 1.3;
+  max-width: 64px;
+  line-height: 1.4;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    SHARED SECTION WRAPPER
 ═══════════════════════════════════════════════════════════════════ */
 .section {
-  padding: 28px 20px 24px;
+  padding: 24px 20px 20px;
   border-bottom: 0.5px solid var(--en-rule);
 }
+/* Unified section label — Inter 700, readable slate, minimal tracking */
 .sectionLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--en-text-4);
-  margin-bottom: 16px;
+  color: #8899aa;
+  margin-bottom: 14px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -279,21 +323,21 @@
 .moment {
   display: flex;
   gap: 14px;
-  padding: 14px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  padding: 13px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
   align-items: flex-start;
 }
 .moment:last-child { border-bottom: none; }
+/* Gold number — editorial pull-out feel */
 .momentIndex {
-  font-family: var(--font-playfair);
-  font-weight: 900;
-  font-size: 16px;
-  color: var(--en-text-5);
-  line-height: 1.3;
+  font-family: var(--font-inter);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--en-gold);
+  line-height: 1.6;
   flex-shrink: 0;
   min-width: 18px;
   text-align: right;
-  margin-top: 1px;
 }
 .momentText {
   font-family: var(--font-inter);
@@ -305,76 +349,89 @@
 /* ═══════════════════════════════════════════════════════════════════
    THE LEAGUE
 ═══════════════════════════════════════════════════════════════════ */
+/* Keep Playfair for the editorial statement */
 .leagueStatement {
   font-family: var(--font-playfair);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 17px;
   color: var(--en-text-2);
   line-height: 1.4;
   letter-spacing: -0.2px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
-/* Shared record grid */
+/* Record grid — restrained ivory values, gold only for Pts highlight */
 .recordGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 0.5px solid var(--en-rule);
-  border-bottom: 0.5px solid var(--en-rule);
+  border: 0.5px solid rgba(255,255,255,0.07);
+  border-radius: 4px;
+  overflow: hidden;
 }
 .recordCell {
-  padding: 14px 8px;
+  padding: 12px 8px;
   text-align: center;
-  border-right: 0.5px solid var(--en-rule);
+  border-right: 0.5px solid rgba(255,255,255,0.06);
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
 }
-.recordCell:last-child { border-right: none; }
-.recordCell:nth-child(n+5) { border-top: 0.5px solid var(--en-rule); }
+.recordCell:nth-child(4n) { border-right: none; }
+.recordCell:nth-last-child(-n+4) { border-bottom: none; }
+/* Gold highlight cell — for Pts */
+.recordCellHighlight .rcVal { color: var(--en-gold) !important; }
+
+/* Stat values — Inter 700, ivory */
 .rcVal {
-  font-family: var(--font-plex);
-  font-weight: 500;
+  font-family: var(--font-inter);
+  font-weight: 700;
   font-size: 17px;
   color: var(--en-text-2);
   line-height: 1;
   margin-bottom: 4px;
 }
+/* Stat labels — Inter, readable slate */
 .rcLbl {
-  font-family: var(--font-plex);
-  font-size: 8px;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--en-text-4);
+  letter-spacing: 0.06em;
+  color: #8899aa;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    UCL JOURNEY — major section
 ═══════════════════════════════════════════════════════════════════ */
+/* Gold left border for the opener — not blue */
 .uclOpener {
   font-family: var(--font-inter);
   font-size: 14px;
   line-height: 1.75;
   color: var(--en-text-2);
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   padding-left: 14px;
-  border-left: 1px solid var(--en-blue);
+  border-left: 2px solid rgba(224,194,122,0.45);
 }
 
-/* Sub-block within UCL section (League Phase / Knockout) */
 .uclBlock {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 .uclBlock:last-child { margin-bottom: 0; }
 .uclBlock + .uclBlock {
-  padding-top: 20px;
-  border-top: 0.5px solid var(--en-rule-faint);
+  padding-top: 18px;
+  border-top: 0.5px solid rgba(255,255,255,0.05);
 }
+
+/* Sub-block label — Inter, readable slate */
 .uclBlockLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--en-text-4);
-  margin-bottom: 12px;
+  color: #8899aa;
+  margin-bottom: 10px;
 }
+
 .uclLPPosition {
   font-family: var(--font-inter);
   font-size: 13px;
@@ -385,8 +442,8 @@
 /* ── Match table (LP matchdays) ── */
 .matchTable {
   width: 100%;
-  border-top: 0.5px solid var(--en-rule);
-  border-bottom: 0.5px solid var(--en-rule);
+  border-top: 0.5px solid rgba(255,255,255,0.07);
+  border-bottom: 0.5px solid rgba(255,255,255,0.07);
   margin-bottom: 0;
 }
 .matchTableHead {
@@ -394,29 +451,33 @@
   grid-template-columns: 28px 1fr 32px 52px 24px;
   gap: 0;
   padding: 6px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
 }
+/* Inter table headers — readable slate */
 .matchTableHead span {
-  font-family: var(--font-plex);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-5);
+  color: #8899aa;
 }
 .matchRow {
   display: grid;
   grid-template-columns: 28px 1fr 32px 52px 24px;
   gap: 0;
   padding: 9px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
   align-items: center;
 }
 .matchRow:last-child { border-bottom: none; }
+/* Round col — Inter, slate */
 .mtColRound {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  color: var(--en-text-4);
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: #8899aa;
+  letter-spacing: 0.02em;
 }
 .mtColOpponent {
   font-family: var(--font-inter);
@@ -430,37 +491,39 @@
   align-items: center;
   gap: 6px;
 }
-/* Club crest in LP matchday table */
 .mtCrest {
   width: 16px;
   height: 16px;
   object-fit: contain;
   flex-shrink: 0;
 }
+/* H/A — Inter, colour applied inline */
 .mtColVenue {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-align: center;
 }
+/* Score — Inter for alignment context */
 .mtColScore {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--en-text-2);
   letter-spacing: 0.02em;
   text-align: center;
 }
 .mtColResult {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-align: center;
 }
 
-/* Result colours — shared by LP table and KO legs */
-.resW { color: var(--en-green); }
+/* Result colours — semantic W/D/L only inside match tables */
+.resW { color: #4ade80; }
 .resD { color: var(--en-text-3); }
 .resL { color: #f87171; }
 
@@ -471,35 +534,42 @@
   gap: 0;
 }
 .koRound {
-  padding: 14px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  padding: 12px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
 }
-.koRound:first-child { border-top: 0.5px solid var(--en-rule-faint); }
+.koRound:first-child { border-top: 0.5px solid rgba(255,255,255,0.05); }
 .koRound:last-child  { border-bottom: none; }
+/* Final row — gold left accent when won */
+.koRoundFinal {
+  border-left: 2px solid var(--en-gold);
+  padding-left: 12px;
+  background: rgba(224,194,122,0.03);
+  border-top-color: transparent;
+}
 
 .koRoundHeader {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 0;
 }
+/* Round label — Inter, readable slate */
 .koRoundLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   flex-shrink: 0;
-  min-width: 40px;
+  min-width: 80px;
 }
-/* Club crest in KO round header */
 .koCrest {
   width: 18px;
   height: 18px;
   object-fit: contain;
   flex-shrink: 0;
   vertical-align: middle;
-  margin-right: 4px;
+  margin-right: 2px;
 }
 .koOpponent {
   font-family: var(--font-inter);
@@ -513,19 +583,21 @@
   align-items: center;
   gap: 6px;
 }
-/* Aggregate score badge */
+
+/* Aggregate score badge — gold for W, rust for L */
 .koAgg {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 2px 8px;
-  border-radius: 2px;
+  border-radius: 3px;
   flex-shrink: 0;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
-.koAggWon     { background: rgba(74,222,128,0.1); color: var(--en-green); border: 0.5px solid rgba(74,222,128,0.25); }
+/* Gold win badge — not neon green */
+.koAggWon     { background: rgba(224,194,122,0.1); color: var(--en-gold); border: 0.5px solid rgba(224,194,122,0.3); }
 .koAggLost    { background: rgba(248,113,113,0.08); color: #f87171; border: 0.5px solid rgba(248,113,113,0.25); }
-.koAggNeutral { background: var(--en-surface-2); color: var(--en-text-2); border: 0.5px solid var(--en-rule); }
+.koAggNeutral { background: rgba(255,255,255,0.04); color: var(--en-text-2); border: 0.5px solid rgba(255,255,255,0.08); }
 
 /* Per-leg detail rows */
 .koLegs {
@@ -533,42 +605,45 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-left: 40px;
+  padding-left: 80px;
 }
 .koLeg {
   display: grid;
   grid-template-columns: 48px 32px 52px 24px;
   gap: 0;
-  padding: 6px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  padding: 5px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
   align-items: center;
 }
 .koLeg:last-child { border-bottom: none; }
+/* Inter for all leg cells */
 .koLegNum {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  color: var(--en-text-4);
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  color: #8899aa;
+  letter-spacing: 0.02em;
 }
 .koLegVenue {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-align: center;
 }
 .koLegScore {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--en-text-2);
   text-align: center;
   letter-spacing: 0.02em;
 }
 .koLegResult {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-align: center;
 }
 
@@ -579,7 +654,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CUPS
+   CUPS — with trophy PNG icons
 ═══════════════════════════════════════════════════════════════════ */
 .cupRows { display: flex; flex-direction: column; }
 .cupRow {
@@ -587,66 +662,103 @@
   align-items: center;
   justify-content: space-between;
   padding: 13px 0;
-  border-bottom: 0.5px solid var(--en-rule-faint);
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
 }
 .cupRow:last-child { border-bottom: none; }
-.cupLabel { font-family: var(--font-inter); font-size: 13px; color: var(--en-text-2); }
+
+/* Left side — trophy icon + label */
+.cupLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Cup trophy PNG — small but present */
+.cupTrophyImg {
+  width: 24px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+/* SVG fallback for cup rows */
+.cupTrophySvg {
+  width: 20px;
+  height: 26px;
+  color: var(--en-gold);
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.cupLabel {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--en-text-2);
+}
+
 .cupRight { display: flex; align-items: center; gap: 10px; }
+
+/* Cup badge — Inter, no mono */
 .cupBadge {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 2px;
+  border-radius: 3px;
 }
-.cupWon     { background: var(--en-gold-dim); color: var(--en-gold); border: 0.5px solid rgba(212,175,55,0.3); }
-.cupFinal   { background: var(--en-blue-dim); color: var(--en-text-3); border: 0.5px solid var(--en-rule); }
-.cupDefault { background: transparent; color: var(--en-text-4); border: 0.5px solid var(--en-rule); }
+.cupWon     { background: rgba(224,194,122,0.12); color: var(--en-gold); border: 0.5px solid rgba(224,194,122,0.35); }
+.cupFinal   { background: transparent; color: #8899aa; border: 0.5px solid rgba(136,153,170,0.3); }
+.cupDefault { background: transparent; color: var(--en-text-4); border: 0.5px solid rgba(255,255,255,0.08); }
 
 /* ═══════════════════════════════════════════════════════════════════
    DYNASTY VERDICT
 ═══════════════════════════════════════════════════════════════════ */
-.dynastyVerdictBlock { padding: 28px 20px 32px; }
+.dynastyVerdictBlock { padding: 24px 20px 32px; }
+
+/* Gold left border — not blue */
 .dynastyVerdictText {
   font-family: var(--font-playfair);
   font-weight: 400;
   font-style: italic;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--en-text-2);
-  line-height: 1.75;
+  line-height: 1.8;
   padding-left: 14px;
-  border-left: 1px solid var(--en-blue);
+  border-left: 2px solid rgba(224,194,122,0.45);
   margin-bottom: 20px;
   quotes: "\201C" "\201D";
 }
 .dynastyVerdictText::before { content: open-quote; }
 .dynastyVerdictText::after  { content: close-quote; }
+
 .dynastyScoreRow {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
+/* Keep large gold score number — it's the reveal moment */
 .dynastyNum {
-  font-family: var(--font-playfair);
-  font-weight: 700;
+  font-family: var(--font-inter);
+  font-weight: 800;
   font-size: 48px;
   color: var(--en-gold);
   line-height: 1;
-  letter-spacing: -1px;
+  letter-spacing: -2px;
 }
+/* /100 — Inter, readable slate (no mono tracking) */
 .dynastyOf {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--en-text-4);
-  text-transform: uppercase;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #8899aa;
 }
 .scoreBarTrack {
   width: 100%;
   height: 3px;
-  background: var(--en-surface-2);
+  background: rgba(255,255,255,0.06);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -663,13 +775,14 @@
   border-bottom: 0.5px solid var(--en-rule);
 }
 .editSection:last-child { border-bottom: none; }
+/* Edit section heads — Inter, readable slate */
 .editSectionHead {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin-bottom: 16px;
 }
 .fieldGroup  { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
@@ -679,7 +792,7 @@
 .input {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
-  border-radius: 2px;
+  border-radius: 4px;
   color: var(--en-text-1);
   font-family: var(--font-inter);
   font-size: 14px;
@@ -689,11 +802,11 @@
   -webkit-appearance: none;
   transition: border-color 0.15s;
 }
-.input:focus { border-color: var(--en-blue); }
+.input:focus { border-color: rgba(224,194,122,0.5); }
 .select {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
-  border-radius: 2px;
+  border-radius: 4px;
   color: var(--en-text-1);
   font-family: var(--font-inter);
   font-size: 14px;
@@ -703,11 +816,11 @@
   -webkit-appearance: none;
   cursor: pointer;
 }
-.select:focus { border-color: var(--en-blue); }
+.select:focus { border-color: rgba(224,194,122,0.5); }
 .textarea {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
-  border-radius: 2px;
+  border-radius: 4px;
   color: var(--en-text-1);
   font-family: var(--font-inter);
   font-size: 14px;
@@ -717,11 +830,11 @@
   resize: vertical;
   line-height: 1.65;
 }
-.textarea:focus { border-color: var(--en-blue); }
+.textarea:focus { border-color: rgba(224,194,122,0.5); }
 .derivedField {
   background: var(--en-surface-2);
   border: 0.5px solid var(--en-rule);
-  border-radius: 2px;
+  border-radius: 4px;
   color: var(--en-text-3);
   font-family: var(--font-inter);
   font-size: 14px;
@@ -733,25 +846,29 @@
   color: var(--warning);
   background: rgba(251,191,36,0.06);
   border: 0.5px solid rgba(251,191,36,0.2);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 7px 10px;
   margin-top: 4px;
 }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 .row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+/* Sub-headings in edit form — Inter, readable slate */
 .subHeading {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin: 14px 0 8px;
 }
 .toggleRow {
   display: flex; align-items: center; justify-content: space-between;
   padding: 4px 0 12px; cursor: pointer;
 }
+/* Toggle — gold active state */
 .toggle {
   width: 36px; height: 20px;
   background: var(--en-surface-2);
@@ -761,7 +878,7 @@
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
-.toggleOn { background: var(--en-blue-dim); border-color: var(--en-blue); }
+.toggleOn { background: rgba(224,194,122,0.15); border-color: rgba(224,194,122,0.5); }
 .toggleThumb {
   position: absolute;
   top: 3px; left: 3px;
@@ -770,28 +887,32 @@
   background: var(--en-text-4);
   transition: transform 0.2s, background 0.2s;
 }
-.toggleOn .toggleThumb { transform: translateX(16px); background: var(--en-blue); }
+.toggleOn .toggleThumb { transform: translateX(16px); background: var(--en-gold); }
+
 .momentsHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.momentsCount  { font-family: var(--font-plex); font-size: 9px; color: var(--en-text-4); letter-spacing: 0.06em; }
+/* Moments count — Inter, slate */
+.momentsCount  { font-family: var(--font-inter); font-size: 10px; color: #8899aa; letter-spacing: 0.04em; }
 .momentsList_edit { display: flex; flex-direction: column; gap: 6px; }
 .momentRow   { display: flex; align-items: center; gap: 8px; }
-.momentNum   { font-family: var(--font-plex); font-size: 10px; color: var(--en-text-4); min-width: 14px; text-align: right; }
+.momentNum   { font-family: var(--font-inter); font-size: 10px; font-weight: 600; color: #8899aa; min-width: 14px; text-align: right; }
 .momentRemove {
   width: 26px; height: 26px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   background: transparent; border: 0.5px solid var(--en-rule);
-  border-radius: 2px; color: var(--en-text-4); cursor: pointer;
+  border-radius: 4px; color: var(--en-text-4); cursor: pointer;
 }
 .momentRemove:hover { color: var(--danger); border-color: rgba(248,113,113,0.3); }
+/* Add moment — Inter, gold dashed */
 .addMoment {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--en-blue);
-  background: transparent; border: 0.5px dashed var(--en-blue);
-  border-radius: 2px; padding: 8px 12px; cursor: pointer;
+  font-family: var(--font-inter); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--en-gold);
+  background: transparent; border: 0.5px dashed rgba(224,194,122,0.4);
+  border-radius: 4px; padding: 8px 12px; cursor: pointer;
   transition: background 0.15s;
 }
-.addMoment:hover { background: var(--en-blue-dim); }
+.addMoment:hover { background: rgba(224,194,122,0.06); }
 
 /* ─── DIALOGS ────────────────────────────────────────────────────── */
 .dialogBackdrop {
@@ -813,14 +934,15 @@
 .dialogBody   { font-family: var(--font-inter); font-size: 13px; color: var(--en-text-3); line-height: 1.6; margin-bottom: 20px; }
 .dialogActions{ display: flex; gap: 10px; }
 .dialogCancel {
-  flex: 1; padding: 11px; border-radius: 2px;
+  flex: 1; padding: 11px; border-radius: 4px;
   border: 0.5px solid var(--en-rule); background: transparent;
   font-family: var(--font-inter); font-size: 13px; color: var(--en-text-3); cursor: pointer;
 }
+/* Confirm — gold */
 .dialogConfirm {
-  flex: 1; padding: 11px; border-radius: 2px;
-  border: 0.5px solid var(--en-blue); background: var(--en-blue-dim);
-  font-family: var(--font-inter); font-size: 13px; color: var(--en-text-2); cursor: pointer;
+  flex: 1; padding: 11px; border-radius: 4px;
+  border: 0.5px solid rgba(224,194,122,0.5); background: rgba(224,194,122,0.1);
+  font-family: var(--font-inter); font-size: 13px; font-weight: 600; color: var(--en-gold); cursor: pointer;
 }
 .dialogConfirmDanger {
   border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08);
@@ -834,8 +956,8 @@
 }
 .spinner {
   width: 24px; height: 24px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

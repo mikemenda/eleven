@@ -19,13 +19,14 @@
   padding: 28px 20px 24px;
   border-bottom: 0.5px solid var(--en-rule);
 }
+/* Gold eyebrow — matches Home heroEyebrow */
 .eyebrow {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: var(--en-gold);
   margin-bottom: 10px;
 }
 .pageTitle {
@@ -37,32 +38,35 @@
   letter-spacing: -0.02em;
   margin-bottom: 10px;
 }
+/* Gold gradient rule — matches Season Detail hero rule */
 .heroIdentityRule {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, var(--en-blue) 0%, transparent 55%);
+  background: linear-gradient(90deg, var(--en-gold) 0%, transparent 55%);
+  opacity: 0.6;
   margin-bottom: 12px;
 }
 .identityMeta {
   font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 400;
-  color: var(--en-text-2);
+  color: var(--en-text-3);
   line-height: 1.5;
 }
 
 /* ─── DYNASTY ARC ────────────────────────────────────────────────── */
 .arc {
-  padding: 28px 20px 24px;
+  padding: 24px 20px 20px;
   border-bottom: 0.5px solid var(--en-rule);
 }
+/* Inter label — matches all other section labels in v68 */
 .arcLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.18em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin-bottom: 16px;
 }
 .arcBaseline {
@@ -84,8 +88,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 14px 12px;
+  gap: 5px;
+  padding: 8px 14px 10px;
   min-height: 44px;
   cursor: pointer;
   border-right: 0.5px solid var(--en-rule-faint);
@@ -95,30 +99,37 @@
 .arcGroup:first-child { padding-left: 0; }
 .arcGroup:last-child  { border-right: none; }
 .arcGroup:hover       { opacity: 0.7; }
+
+/* Inter season label — readable, not buried */
 .arcSeasonLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   line-height: 1;
 }
+
+/* Score — Inter 800, size-scaled by tier */
 .arcScore {
-  font-family: var(--font-playfair);
-  font-weight: 700;
+  font-family: var(--font-inter);
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.03em;
 }
-.arcScore_peak { font-size: 28px; color: var(--en-text-1); }
-.arcScore_mid  { font-size: 22px; color: var(--en-text-2); }
-.arcScore_dip  { font-size: 17px; color: var(--en-text-3); }
-.arcScore_none { font-size: 20px; color: var(--en-text-4); }
+.arcScore_peak { font-size: 26px; color: var(--en-gold); }
+.arcScore_mid  { font-size: 20px; color: var(--en-text-2); }
+.arcScore_dip  { font-size: 16px; color: var(--en-text-4); }
+.arcScore_none { font-size: 18px; color: var(--en-text-4); }
+
 .arcPips {
   display: flex;
   gap: 3px;
   min-height: 6px;
   align-items: center;
 }
+/* All honours = gold pip; finalist = slate pip */
 .pipGold {
   display: inline-block;
   width: 5px; height: 5px;
@@ -126,11 +137,12 @@
   background: var(--en-gold);
   flex-shrink: 0;
 }
-.pipGreen {
+.pipSlate {
   display: inline-block;
   width: 5px; height: 5px;
   border-radius: 50%;
-  background: var(--en-green);
+  background: #8899aa;
+  opacity: 0.55;
   flex-shrink: 0;
 }
 
@@ -164,35 +176,40 @@
   background: transparent;
   transition: background 0.15s;
 }
-.seasonRow:hover .seasonRowAccent { background: var(--en-blue); }
+.seasonRow:hover .seasonRowAccent { background: rgba(224,194,122,0.4); }
 .seasonRowAccentPeak { background: var(--en-gold) !important; }
 
 .seasonRowBody {
   flex: 1;
-  padding: 18px 20px 18px 16px;
+  padding: 16px 20px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
+
+/* Season label/year — Inter, readable slate */
 .rowMeta {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .rowLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
 }
 .rowYear {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.06em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 400;
   color: var(--en-text-4);
 }
+
+/* Headline — keep Playfair for editorial feel */
 .rowHeadline {
   font-family: var(--font-playfair);
   font-weight: 700;
@@ -203,6 +220,7 @@
 }
 .rowHeadlinePeak { color: var(--en-text-1); }
 .rowHeadlineDip  { color: var(--en-text-3); }
+
 .rowDeck {
   font-family: var(--font-inter);
   font-size: 12px;
@@ -213,60 +231,80 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
+
 .rowFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .rowHardware {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
   flex: 1;
+  flex-wrap: wrap;
 }
-/* League titles — green */
-.hwLeague {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--en-green);
+
+/* Trophy honour chip — small PNG or SVG + label */
+.hwHonour {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
 }
-/* UCL / cup trophies — gold */
-.hwTrophy {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Small trophy PNG in season card */
+.hwTrophyImg {
+  width: 16px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+/* SVG fallback at same size */
+.hwTrophySvg {
+  width: 14px;
+  height: 18px;
   color: var(--en-gold);
   flex-shrink: 0;
 }
-/* UCL R-U — muted, truncated */
-.hwRu {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  color: var(--en-text-4);
+/* Honour label — gold, Inter 600 */
+.hwLabel {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--en-gold);
+  white-space: nowrap;
+}
+
+/* UCL Finalist tag — muted slate italic */
+.hwFinalist {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #8899aa;
   font-style: italic;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 140px;
+  max-width: 180px;
 }
+
+/* Dynasty score — Inter 700 */
 .rowScore {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-weight: 700;
   font-size: 15px;
-  color: var(--en-text-3);
+  color: var(--en-text-4);
   line-height: 1;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
   flex-shrink: 0;
 }
-.rowScorePeak { color: var(--en-text-1); }
+.rowScorePeak { color: var(--en-gold); }
 
 /* ─── LOADING / EMPTY ────────────────────────────────────────────── */
 .loadWrap {
@@ -278,7 +316,7 @@
 .spinner {
   width: 24px; height: 24px;
   border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -292,7 +330,7 @@
   align-items: center;
 }
 .emptyTitle {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-size: 16px;
   font-weight: 700;
   color: var(--en-text-2);
