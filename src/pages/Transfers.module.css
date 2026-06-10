@@ -1,99 +1,213 @@
+/* ─── PAGE SHELL ─────────────────────────────────────────────────── */
 .page {
   background: var(--en-bg);
   min-height: calc(100dvh - 56px);
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 24px);
 }
-.inner { max-width: 640px; margin: 0 auto; animation: fadeUp 0.35s ease both; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.inner {
+  max-width: 640px;
+  margin: 0 auto;
+  animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+/* ─── TOP BAR ────────────────────────────────────────────────────── */
 .topBar {
-  max-width: 640px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px 20px;
-  position: sticky; top: 56px; background: var(--en-bg); z-index: 10;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px 10px;
+  position: sticky;
+  top: 56px;
+  background: var(--en-bg);
+  z-index: 10;
   border-bottom: 0.5px solid var(--en-rule);
 }
+
+/* Matches Records page .topLabel — Inter 800, premium archive heading */
 .topLabel {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
-}
-.seasonPicker {
-  background: var(--en-surface); border: 0.5px solid var(--en-rule);
-  color: var(--en-text-2); border-radius: 5px;
-  font-family: var(--font-plex); font-size: 11px;
-  padding: 5px 8px; outline: none; cursor: pointer;
+  font-family: var(--font-inter);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--en-text-1);
+  letter-spacing: -0.01em;
 }
 
+/* Season picker — dark surface, gold focus, Inter */
+.seasonPicker {
+  background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 6px;
+  color: var(--en-text-2);
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Minimal custom arrow via background image */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238899aa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px 6px;
+  padding-right: 26px;
+}
+.seasonPicker:focus {
+  border-color: var(--en-gold);
+  color: var(--en-text-1);
+}
+
+/* ─── SUMMARY BAR ────────────────────────────────────────────────── */
 .summaryBar {
-  max-width: 640px; margin: 0 auto;
-  display: flex; border-bottom: 0.5px solid var(--en-rule);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  border-bottom: 0.5px solid var(--en-rule);
 }
 .summaryItem {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 16px 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
   border-right: 0.5px solid var(--en-rule);
 }
 .summaryItem:last-child { border-right: none; }
+
 .summaryVal {
-  font-family: var(--font-plex); font-size: 18px; font-weight: 500; line-height: 1;
+  font-family: var(--font-inter);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
 }
 .summaryKey {
-  font-family: var(--font-plex); font-size: 8px;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8899aa;
 }
 
+/* ─── DIRECTION TABS ─────────────────────────────────────────────── */
 .dirTabs {
-  max-width: 640px; margin: 0 auto;
-  display: flex; border-bottom: 0.5px solid var(--en-rule);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  border-bottom: 0.5px solid var(--en-rule);
 }
 .dirTab {
-  flex: 1; padding: 12px 8px;
-  background: transparent; border: none; border-bottom: 2px solid transparent;
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--en-text-3); cursor: pointer; transition: color 0.15s;
+  flex: 1;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
-.dirActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
+.dirTab:hover { color: var(--en-text-2); }
+/* Gold active underline — matches Records/UCL/Players tab system */
+.dirActive {
+  color: var(--en-text-1);
+  border-bottom-color: var(--en-gold);
+}
 
+/* ─── WINDOW GROUP ───────────────────────────────────────────────── */
 .windowGroup {
-  margin: 20px 20px 0;
+  margin: 16px 16px 0;
   border: 0.5px solid var(--en-rule);
   border-radius: 8px;
   overflow: hidden;
 }
+.windowGroup:last-child {
+  margin-bottom: 0;
+}
+
 .windowHeader {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
   background: var(--en-surface);
   border-bottom: 0.5px solid var(--en-rule);
 }
-.windowSeason {
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--en-text-3);
-}
-.windowName {
-  font-family: var(--font-plex); font-size: 11px; font-weight: 500;
-  color: var(--en-text-1); flex: 1;
-}
-.windowNet { font-family: var(--font-plex); font-size: 11px; font-weight: 500; }
 
-/* ── Transfer row ─────────────────────────────────────────────────────────── */
+/* Season label — gold, Inter 700 */
+.windowSeason {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--en-gold);
+}
+/* Dot separator */
+.windowDot {
+  font-size: 12px;
+  color: var(--en-text-4);
+  line-height: 1;
+}
+/* Window name — ivory, Inter 500 */
+.windowName {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--en-text-2);
+  flex: 1;
+}
+/* Net value — Inter 600, restrained color */
+.windowNet {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── TRANSFER ROW WRAPPER ───────────────────────────────────────── */
+.transferRowWrap {
+  /* Contains main row + optional detail reveal */
+}
+
+/* ─── TRANSFER ROW ───────────────────────────────────────────────── */
 .transferRow {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 9px 12px 9px 0;
   border-bottom: 0.5px solid var(--en-rule-faint);
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+  /* Left border stripe space */
+  padding-left: 16px;
 }
 .transferRow:last-child { border-bottom: none; }
+.transferRow:hover { background: rgba(255,255,255,0.02); }
+.transferRow:active { background: rgba(255,255,255,0.04); }
 
-/* Direction arrow — fixed width, left edge */
-.transferArrow {
-  font-size: 12px; font-weight: 700;
-  width: 14px; flex-shrink: 0; text-align: center;
+/* Slim directional left stripe via left border */
+.rowIn {
+  border-left: 3px solid rgba(224,194,122,0.45); /* gold-tinted — arrivals */
+}
+.rowOut {
+  border-left: 3px solid rgba(136,153,170,0.35); /* slate — departures */
 }
 
-/* Player face — 36×36, rounded, flush left of name */
+/* ─── FACE ───────────────────────────────────────────────────────── */
 .faceWrap {
   flex-shrink: 0;
   width: 36px;
@@ -102,7 +216,6 @@
   overflow: hidden;
   background: var(--en-surface);
 }
-/* Silhouette renders inside .thumb in Silhouette component — match faceWrap style */
 .thumb {
   display: flex;
   align-items: flex-end;
@@ -122,35 +235,84 @@
   display: block;
 }
 
-/* Name + meta — takes all remaining space */
-.transferInfo { flex: 1; min-width: 0; }
+/* ─── PLAYER INFO ────────────────────────────────────────────────── */
+.transferInfo {
+  flex: 1;
+  min-width: 0;
+}
 .transferName {
-  font-family: var(--font-inter); font-size: 14px; font-weight: 600;
-  color: var(--en-text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .transferMeta {
-  display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
+/* Position — readable slate */
 .transferPos {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8899aa;
+  flex-shrink: 0;
 }
-.transferClubs {
-  font-family: var(--font-inter); font-size: 12px; color: var(--en-text-2);
+/* Rule dot — compact indicator, replaces full text label */
+.ruleDot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  top: 0px;
 }
-.transferRule {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.08em; text-transform: uppercase;
+/* Club name */
+.transferClub {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--en-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Crest image */
+/* ─── FEE ────────────────────────────────────────────────────────── */
+.transferFee {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--en-gold);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ─── CREST ──────────────────────────────────────────────────────── */
+.crestCol {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .crestImg {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   display: block;
 }
-/* Shield fallback wrapper */
 .crestWrap {
   display: flex;
   align-items: center;
@@ -158,30 +320,80 @@
   color: var(--en-text-4);
 }
 
-/* Fee — sits between name area and crest */
-.transferFee {
-  font-family: var(--font-plex); font-size: 13px;
-  color: var(--en-gold); font-weight: 500; flex-shrink: 0;
+/* ─── INLINE DETAIL REVEAL ───────────────────────────────────────── */
+.transferDetail {
+  background: var(--en-surface);
+  border-top: 0.5px solid var(--en-rule-faint);
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  padding: 10px 16px 10px 19px; /* 19px = matches row left padding + stripe */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: detailIn 0.15s ease both;
+}
+@keyframes detailIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Club crest — true right edge */
-.crestCol {
+.detailRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.detailKey {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8899aa;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+}
+.detailVal {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--en-text-2);
+  text-align: right;
+}
+
+/* ─── LOADING / EMPTY ────────────────────────────────────────────── */
+.loadWrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 80px 0;
 }
-
-/* ── Loading / empty states ───────────────────────────────────────────────── */
-.loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
 .spinner {
-  width: 24px; height: 24px;
-  border: 1.5px solid var(--en-rule); border-top-color: var(--en-blue);
-  border-radius: 50%; animation: spin 0.7s linear infinite;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 80px 20px; text-align: center; }
-.emptyIcon { font-size: 36px; }
-.emptyText { font-family: var(--font-inter); font-size: 15px; font-weight: 600; color: var(--en-text-2); }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 80px 20px;
+  text-align: center;
+}
+.emptyText {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--en-text-2);
+  margin: 0;
+}
+.emptyHint {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-3);
+  margin: 0;
+}

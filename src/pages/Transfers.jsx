@@ -12,13 +12,25 @@ function fmt(n) {
   return `€${(n/1e3).toFixed(0)}K`
 }
 
-const RULE_COLOR = {
-  'Mandatory':        'var(--en-green)',
-  'Forced-List':      'var(--danger)',
-  'Emergency Credit': 'var(--en-gold)',
-  'Optional':         'var(--en-text-3)',
-  'Exchange':         '#a78bfa',
-  'Swap':             '#60a5fa',
+// Compact dot indicator config — no full labels in main row
+// dot: CSS color string, or null for no dot
+const RULE_DOT = {
+  'Mandatory':        '#8899aa',       // slate — neutral
+  'Optional':         '#8899aa',       // slate — neutral
+  'Exchange':         '#9d85d4',       // restrained purple
+  'Emergency Credit': 'var(--en-gold)',// gold
+  'Forced-List':      '#b06050',       // muted rust
+  'Swap':             '#5b9fdc',       // muted blue
+}
+
+// Cleaned display labels for the detail reveal only
+const RULE_LABEL = {
+  'Mandatory':        'Mandatory',
+  'Optional':         'Optional',
+  'Exchange':         'Exchange',
+  'Emergency Credit': 'Emergency Credit',
+  'Forced-List':      'Forced List',
+  'Swap':             'Swap',
 }
 
 // Sort season labels newest-first: S7 > S6 > ... > S1
@@ -31,8 +43,6 @@ function compareSeasonLabels(a, b) {
 const WINDOW_ORDER = { Summer: 0, January: 1 }
 
 // Resolve club identity from the static transfer-clubs map.
-// Returns { displayName, sofifaTeamId } if found, null otherwise.
-// Keys in the JSON are lowercase+trimmed — covers aliases and typos (e.g. "brentform").
 function resolveClubIdentity(clubName) {
   if (!clubName) return null
   const key = clubName.trim().toLowerCase()
@@ -43,7 +53,7 @@ function resolveClubIdentity(clubName) {
 
 const WORKER_BASE = 'https://fifa-img.michaelmenda92.workers.dev'
 
-// ─── Inline face components (36×36, mirrors Players.jsx pattern) ──────────────
+// ─── Player face ──────────────────────────────────────────────────────────────
 
 function Silhouette({ size = 36 }) {
   return (
@@ -70,7 +80,7 @@ function PlayerFace({ sofifaId, name, size = 36 }) {
   )
 }
 
-// ─── Club crest component ─────────────────────────────────────────────────────
+// ─── Club crest ───────────────────────────────────────────────────────────────
 
 function ShieldFallback({ size = 36 }) {
   return (
@@ -88,7 +98,6 @@ function ShieldFallback({ size = 36 }) {
 
 function ClubCrest({ teamId, clubName, size = 36 }) {
   const [err, setErr] = useState(false)
-
   if (!teamId || err) return <ShieldFallback size={size} />
   return (
     <img
@@ -107,10 +116,10 @@ export default function Transfers() {
   const { activeClub } = useApp()
   const [transfers, setTransfers] = useState([])
   const [seasons,   setSeasons]   = useState([])
-  const [playerMap, setPlayerMap] = useState(new Map()) // playerId → player doc
+  const [playerMap, setPlayerMap] = useState(new Map())
   const [loading,   setLoading]   = useState(true)
   const [selectedSeason, setSelectedSeason] = useState('all')
-  const [dir, setDir] = useState('all') // all | IN | OUT
+  const [dir, setDir] = useState('all')
 
   useEffect(() => {
     if (!activeClub) return
@@ -123,7 +132,6 @@ export default function Transfers() {
       .then(([t, s, p]) => {
         setTransfers(t)
         setSeasons(s)
-        // Build playerId → player map for O(1) face lookup per row
         const map = new Map()
         p.forEach(player => map.set(player.id, player))
         setPlayerMap(map)
@@ -132,18 +140,14 @@ export default function Transfers() {
       .finally(() => setLoading(false))
   }, [activeClub])
 
-  // Build seasonId → label lookup from seasons collection
   const seasonLabelById = Object.fromEntries(seasons.map(s => [s.id, s.label]))
 
-  // Resolve the display label for a transfer doc.
-  // Priority: snapshot on doc → seasons collection lookup → raw ID (last resort)
   const resolveLabel = t =>
     t.season ||
     (t.seasonId && seasonLabelById[t.seasonId]) ||
     t.seasonId ||
     '?'
 
-  // Filter — canonical key is seasonId; season label fallback for legacy docs
   const filtered = transfers
     .filter(t =>
       selectedSeason === 'all' ||
@@ -168,14 +172,12 @@ export default function Transfers() {
     if (t.direction === 'OUT') grouped[key].outs.push(t)
   }
 
-  // Sort groups: newest season first, Summer before January within each season
   const sortedGroups = Object.values(grouped).sort((a, b) => {
     const seasonDiff = compareSeasonLabels(a.season, b.season)
     if (seasonDiff !== 0) return seasonDiff
     return (WINDOW_ORDER[a.window] ?? 99) - (WINDOW_ORDER[b.window] ?? 99)
   })
 
-  // Build season filter options — never shows raw Firestore IDs
   const seasonOptions = (() => {
     const seen = new Set()
     const opts = []
@@ -192,26 +194,27 @@ export default function Transfers() {
     return opts.sort((a, b) => compareSeasonLabels(a.label, b.label))
   })()
 
-  // Summary bar: labels and values change based on active direction tab
+  // Summary strip — muted rust for spent/negative, gold for received/positive
+  const MUTED_RUST = '#b06050'
   const summaryConfig = {
     all: [
-      { val: fmt(totalIn),  color: 'var(--danger)',    key: 'Spent' },
-      { val: fmt(totalOut), color: 'var(--en-green)',  key: 'Received' },
+      { val: fmt(totalIn),  color: MUTED_RUST,            key: 'Spent' },
+      { val: fmt(totalOut), color: 'var(--en-gold)',       key: 'Received' },
       {
         val: netSpend > 0 ? `-${fmt(netSpend)}` : netSpend < 0 ? `+${fmt(Math.abs(netSpend))}` : '—',
-        color: netSpend > 0 ? 'var(--danger)' : netSpend < 0 ? 'var(--en-green)' : 'var(--en-text-3)',
+        color: netSpend > 0 ? MUTED_RUST : netSpend < 0 ? 'var(--en-gold)' : 'var(--en-text-3)',
         key: netSpend > 0 ? 'Net spend' : netSpend < 0 ? 'Net profit' : 'Net',
       },
     ],
     IN: [
-      { val: fmt(totalIn),                                              color: 'var(--danger)',    key: 'Spent' },
-      { val: String(ins.length),                                        color: 'var(--en-text-1)', key: 'Arrivals' },
-      { val: ins.length ? fmt(Math.round(totalIn / ins.length)) : '—', color: 'var(--en-gold)',   key: 'Avg fee' },
+      { val: fmt(totalIn),                                              color: MUTED_RUST,            key: 'Spent' },
+      { val: String(ins.length),                                        color: 'var(--en-text-1)',    key: 'Arrivals' },
+      { val: ins.length ? fmt(Math.round(totalIn / ins.length)) : '—', color: 'var(--en-gold)',      key: 'Avg fee' },
     ],
     OUT: [
-      { val: fmt(totalOut),                                               color: 'var(--en-green)',  key: 'Received' },
-      { val: String(outs.length),                                         color: 'var(--en-text-1)', key: 'Departures' },
-      { val: outs.length ? fmt(Math.round(totalOut / outs.length)) : '—', color: 'var(--en-gold)',   key: 'Avg fee' },
+      { val: fmt(totalOut),                                               color: 'var(--en-gold)',     key: 'Received' },
+      { val: String(outs.length),                                         color: 'var(--en-text-1)',   key: 'Departures' },
+      { val: outs.length ? fmt(Math.round(totalOut / outs.length)) : '—', color: 'var(--en-gold)',    key: 'Avg fee' },
     ],
   }
   const summaryItems = summaryConfig[dir]
@@ -251,7 +254,7 @@ export default function Transfers() {
             className={`${styles.dirTab} ${dir === d ? styles.dirActive : ''}`}
             onClick={() => setDir(d)}
           >
-            {d === 'all' ? 'All' : d === 'IN' ? '▼ Arrivals' : '▲ Departures'}
+            {d === 'all' ? 'All' : d === 'IN' ? 'Arrivals' : 'Departures'}
           </button>
         ))}
       </div>
@@ -262,32 +265,18 @@ export default function Transfers() {
           <div className={styles.loadWrap}><div className={styles.spinner} /></div>
         ) : filtered.length === 0 ? (
           <div className={styles.empty}>
-            <span className={styles.emptyIcon}>🔄</span>
             <p className={styles.emptyText}>No transfers found</p>
+            <p className={styles.emptyHint}>Try a different season or filter</p>
           </div>
         ) : (
           sortedGroups.map((g, gi) => (
-            <div key={gi} className={styles.windowGroup}>
-              <div className={styles.windowHeader}>
-                <span className={styles.windowSeason}>{g.season}</span>
-                <span className={styles.windowName}>{g.window} Window</span>
-                <div className={styles.windowNet}>
-                  {(() => {
-                    const i = g.ins.reduce((s, t)  => s + (t.fee_eur || 0), 0)
-                    const o = g.outs.reduce((s, t) => s + (t.fee_eur || 0), 0)
-                    const n = i - o
-                    if (n === 0) return <span style={{ color: 'var(--en-text-3)' }}>— net</span>
-                    return (
-                      <span style={{ color: n > 0 ? 'var(--danger)' : 'var(--en-green)' }}>
-                        {n > 0 ? `-${fmt(n)}` : `+${fmt(Math.abs(n))}`} net
-                      </span>
-                    )
-                  })()}
-                </div>
-              </div>
-              {(dir === 'all' || dir === 'IN')  && g.ins.map((t, i)  => <TransferRow key={`in-${i}`}  t={t} playerMap={playerMap} />)}
-              {(dir === 'all' || dir === 'OUT') && g.outs.map((t, i) => <TransferRow key={`out-${i}`} t={t} playerMap={playerMap} />)}
-            </div>
+            <WindowGroup
+              key={gi}
+              group={g}
+              groupIndex={gi}
+              dir={dir}
+              playerMap={playerMap}
+            />
           ))
         )}
       </div>
@@ -295,73 +284,160 @@ export default function Transfers() {
   )
 }
 
+// ─── Window group ─────────────────────────────────────────────────────────────
+
+function WindowGroup({ group: g, groupIndex: gi, dir, playerMap }) {
+  const [expandedKey, setExpandedKey] = useState(null)
+
+  const MUTED_RUST = '#b06050'
+  const totalIn  = g.ins.reduce((s, t)  => s + (t.fee_eur || 0), 0)
+  const totalOut = g.outs.reduce((s, t) => s + (t.fee_eur || 0), 0)
+  const net = totalIn - totalOut
+
+  const netEl = net === 0
+    ? <span style={{ color: 'var(--en-text-3)' }}>—</span>
+    : <span style={{ color: net > 0 ? MUTED_RUST : 'var(--en-gold)' }}>
+        {net > 0 ? `−${fmt(net)}` : `+${fmt(Math.abs(net))}`}
+      </span>
+
+  const handleToggle = (key) => {
+    setExpandedKey(prev => prev === key ? null : key)
+  }
+
+  return (
+    <div className={styles.windowGroup}>
+      <div className={styles.windowHeader}>
+        <span className={styles.windowSeason}>{g.season}</span>
+        <span className={styles.windowDot}>·</span>
+        <span className={styles.windowName}>{g.window} Window</span>
+        <div className={styles.windowNet}>{netEl}</div>
+      </div>
+      {(dir === 'all' || dir === 'IN')  && g.ins.map((t, i) => (
+        <TransferRow
+          key={`in-${i}`}
+          t={t}
+          rowKey={`${gi}-in-${i}`}
+          isExpanded={expandedKey === `${gi}-in-${i}`}
+          onToggle={handleToggle}
+          playerMap={playerMap}
+        />
+      ))}
+      {(dir === 'all' || dir === 'OUT') && g.outs.map((t, i) => (
+        <TransferRow
+          key={`out-${i}`}
+          t={t}
+          rowKey={`${gi}-out-${i}`}
+          isExpanded={expandedKey === `${gi}-out-${i}`}
+          onToggle={handleToggle}
+          playerMap={playerMap}
+        />
+      ))}
+    </div>
+  )
+}
+
 // ─── Transfer row ─────────────────────────────────────────────────────────────
 
-function TransferRow({ t, playerMap }) {
+function TransferRow({ t, rowKey, isExpanded, onToggle, playerMap }) {
   const navigate   = useNavigate()
   const isIn       = t.direction === 'IN'
   const isLinkable = !!t.playerId
 
-  // Resolve player doc for face thumbnail (null if no playerId or not in map)
   const player    = t.playerId ? (playerMap.get(t.playerId) ?? null) : null
   const sofifaId  = player?.sofifaId ?? null
 
-  // The "other club" for this transfer (the one we're dealing with, not FC Richport)
   const rawClub    = isIn ? t.from_club : t.to_club
-  // Resolve against transfer-clubs.json for canonical displayName + sofifaTeamId
   const clubIdent  = resolveClubIdentity(rawClub)
-  const clubLabel  = clubIdent?.displayName ?? rawClub   // resolved name, else raw fallback
-  const clubTeamId = clubIdent?.sofifaTeamId ?? null     // null → shield fallback in ClubCrest
+  const clubLabel  = clubIdent?.displayName ?? rawClub
+  const clubTeamId = clubIdent?.sofifaTeamId ?? null
 
-  const handleClick = () => {
-    if (isLinkable) navigate(`/players/${t.playerId}`)
+  const dotColor = t.rule ? (RULE_DOT[t.rule] ?? '#8899aa') : null
+  const ruleLabel = t.rule ? (RULE_LABEL[t.rule] ?? t.rule) : null
+
+  // Click on the player identity area → navigate to profile (if linkable)
+  const handleIdentityClick = (e) => {
+    if (isLinkable) {
+      e.stopPropagation()
+      navigate(`/players/${t.playerId}`)
+    }
+  }
+
+  // Click on anywhere else in the row → toggle detail
+  const handleRowClick = () => {
+    onToggle(rowKey)
   }
 
   return (
-    <div
-      className={styles.transferRow}
-      onClick={isLinkable ? handleClick : undefined}
-      style={{ cursor: isLinkable ? 'pointer' : 'default' }}
-    >
-      {/* Direction arrow */}
+    <div className={styles.transferRowWrap}>
+      {/* Main row */}
       <div
-        className={styles.transferArrow}
-        style={{ color: isIn ? 'var(--en-green)' : 'var(--danger)' }}
+        className={`${styles.transferRow} ${isIn ? styles.rowIn : styles.rowOut}`}
+        onClick={handleRowClick}
       >
-        {isIn ? '▼' : '▲'}
-      </div>
+        {/* Slim directional stripe — rendered via CSS left-border on rowIn/rowOut */}
 
-      {/* Player face */}
-      <div className={styles.faceWrap}>
-        <PlayerFace sofifaId={sofifaId} name={t.player} size={36} />
-      </div>
+        {/* Player face — tap navigates to profile */}
+        <div
+          className={styles.faceWrap}
+          onClick={handleIdentityClick}
+          style={{ cursor: isLinkable ? 'pointer' : 'default' }}
+        >
+          <PlayerFace sofifaId={sofifaId} name={t.player} size={36} />
+        </div>
 
-      {/* Player name + metadata */}
-      <div className={styles.transferInfo}>
-        <div className={styles.transferName}>{t.player}</div>
-        <div className={styles.transferMeta}>
-          {t.position && <span className={styles.transferPos}>{t.position}</span>}
-          {clubLabel && (
-            <span className={styles.transferClubs}>{clubLabel}</span>
-          )}
-          {t.rule && (
-            <span
-              className={styles.transferRule}
-              style={{ color: RULE_COLOR[t.rule] || 'var(--en-text-3)' }}
-            >
-              {t.rule}
-            </span>
-          )}
+        {/* Player name + metadata */}
+        <div
+          className={styles.transferInfo}
+          onClick={handleIdentityClick}
+          style={{ cursor: isLinkable ? 'pointer' : 'default' }}
+        >
+          <div className={styles.transferName}>{t.player}</div>
+          <div className={styles.transferMeta}>
+            {t.position && <span className={styles.transferPos}>{t.position}</span>}
+            {dotColor && (
+              <span
+                className={styles.ruleDot}
+                style={{ background: dotColor }}
+                title={ruleLabel ?? ''}
+              />
+            )}
+            {clubLabel && <span className={styles.transferClub}>{clubLabel}</span>}
+          </div>
+        </div>
+
+        {/* Fee */}
+        <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
+
+        {/* Club crest */}
+        <div className={styles.crestCol}>
+          <ClubCrest teamId={clubTeamId} clubName={clubLabel} size={32} />
         </div>
       </div>
 
-      {/* Fee */}
-      <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
-
-      {/* Club crest — far right, uses resolved teamId */}
-      <div className={styles.crestCol}>
-        <ClubCrest teamId={clubTeamId} clubName={clubLabel} size={36} />
-      </div>
+      {/* Inline detail reveal */}
+      {isExpanded && (
+        <div className={styles.transferDetail}>
+          <div className={styles.detailRow}>
+            <span className={styles.detailKey}>{isIn ? 'Arrived from' : 'Departed to'}</span>
+            <span className={styles.detailVal}>{clubLabel || '—'}</span>
+          </div>
+          {ruleLabel && (
+            <div className={styles.detailRow}>
+              <span className={styles.detailKey}>Transfer type</span>
+              <span
+                className={styles.detailVal}
+                style={{ color: dotColor || 'var(--en-text-2)' }}
+              >
+                {ruleLabel}
+              </span>
+            </div>
+          )}
+          <div className={styles.detailRow}>
+            <span className={styles.detailKey}>Fee</span>
+            <span className={styles.detailVal} style={{ color: 'var(--en-gold)' }}>{fmt(t.fee_eur)}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
