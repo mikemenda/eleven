@@ -41,11 +41,11 @@
 }
 
 .topLabel {
-  font-family: var(--font-playfair);
-  font-size: 20px;
-  font-weight: 700;
+  font-family: var(--font-inter);
+  font-size: 18px;
+  font-weight: 800;
   color: var(--en-text-1);
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
 }
 
 /* ─── TAB BAR ────────────────────────────────────────────────────────────── */
@@ -137,38 +137,41 @@
 
 /* Hero */
 .ovHero {
-  padding: 24px 20px 20px;
+  padding: 20px 20px 18px;
   border-bottom: 0.5px solid var(--en-rule);
   background: linear-gradient(180deg, var(--en-blue-dim) 0%, transparent 100%);
 }
-.ovHeroName {
-  font-family: var(--font-playfair);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--en-text-1);
-  line-height: 1.15;
-  margin-bottom: 10px;
-}
-.ovHeroRecord {
+/* Flex row: title left, trophy right */
+.ovHeroInner {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
 }
-.ovWDL {
-  font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--en-text-2);
+.ovHeroText {
+  flex: 1;
+  min-width: 0;
 }
-.ovHeroDivider {
-  color: var(--en-text-4);
+.ovHeroName {
   font-family: var(--font-inter);
-  font-size: 14px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--en-text-1);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
-.ovHeroGoals {
-  font-family: var(--font-inter);
-  font-size: 13px;
-  color: var(--en-text-3);
+/* UCL trophy PNG — right side of hero, restrained size */
+.ovHeroTrophy {
+  width: 48px;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.85;
+  /* subtle drop shadow for depth */
+  filter: drop-shadow(0 2px 8px rgba(224,194,122,0.18));
+}
+@media (max-width: 360px) {
+  .ovHeroTrophy { width: 36px; }
 }
 
 /* Stat grid */
@@ -230,12 +233,20 @@
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
   border-radius: 8px;
-  padding: 14px 8px;
-  gap: 5px;
+  padding: 12px 8px;
+  gap: 4px;
+}
+/* Small icon above value */
+.ovStageIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--en-text-3);
+  line-height: 1;
 }
 .ovStageVal {
   font-family: var(--font-inter);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--en-text-3);
   line-height: 1;
@@ -345,16 +356,13 @@
   color: var(--en-text-3);
 }
 
-/* Result badge — own line */
-.sznResultRow {
-  display: flex;
-  align-items: center;
-}
+/* Result — inline right in .sznCardHead */
 .sznResult {
   font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 600;
   color: var(--en-text-2);
+  flex-shrink: 0;
 }
 .sznStar {
   color: var(--en-gold);
@@ -626,7 +634,8 @@
 .sznKOLegLabel {
   font-family: var(--font-inter);
   font-size: 10px;
-  color: var(--en-text-3);
+  font-weight: 600;
+  color: var(--en-text-2);
   min-width: 36px;
 }
 .sznKOLegScore {
@@ -636,9 +645,16 @@
   color: var(--en-text-1);
   min-width: 36px;
 }
+/* W/D/L marker — Inter to match page typography */
+.sznKOLegRes {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+}
 .sznKOLegVenue {
   font-family: var(--font-inter);
   font-size: 10px;
+  font-weight: 500;
 }
 
 /* ── Career Knockout Record table (new v59 classes) ────────────────────────── */
@@ -694,6 +710,10 @@
   font-size: 13px;
   color: var(--en-text-1);
   text-align: right;
+}
+/* Entire Final row — gold border top for emphasis */
+.sznKOTableRowFinal {
+  border-top: 0.5px solid var(--en-rule) !important;
 }
 
 /* ─── PLAYERS TAB ────────────────────────────────────────────────────────── */
@@ -1128,8 +1148,9 @@
 .rvCount {
   margin-left: auto;
   font-family: var(--font-inter);
-  font-size: 10px;
-  color: var(--en-text-4);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--en-text-3);
 }
 
 /* Opponents table header */
@@ -1372,7 +1393,7 @@
 .rvMatchLeg {
   font-family: var(--font-inter);
   font-size: 10px;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
 }
 /* Score — mono allowed for score alignment */
 .rvMatchScore {
@@ -1630,4 +1651,91 @@
   font-size: 13px;
   color: var(--en-text-3);
   text-align: center;
+}
+
+/* ─── v60 ADDITIONS ──────────────────────────────────────────────────────── */
+
+/* Sorted column gold highlight — opponents + league tables */
+.rvThSortActive {
+  color: var(--en-gold) !important;
+}
+.rvTdSortActive {
+  color: var(--en-gold) !important;
+}
+
+/* League detail — tighter club block spacing */
+.rvLeagueClubBlock {
+  border-bottom: 0.5px solid var(--en-rule);
+  padding-bottom: 4px;
+  margin-bottom: 0;
+}
+.rvLeagueClubBlock:last-child { border-bottom: none; }
+.rvLeagueClubHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 6px;
+}
+
+/* League detail match row — redesigned layout */
+/* Left: stage · season [· Leg N] / Right: W/D/L score H/A */
+.rvLeagueMatchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 16px;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+}
+.rvLeagueMatchRow:last-child { border-bottom: none; }
+
+.rvLeagueMatchLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.rvLeagueMatchStage {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  color: var(--en-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rvLeagueMatchLeg {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--en-text-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rvLeagueMatchRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.rvLeagueMatchRes {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  width: 14px;
+  text-align: center;
+}
+.rvLeagueMatchScore {
+  font-family: var(--font-plex);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.rvLeagueMatchVenue {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  min-width: 14px;
+  text-align: right;
 }

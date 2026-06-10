@@ -50,34 +50,29 @@ function CampaignCard({ summary, opponents, onSelect }) {
   const finishLabel = FINISH_DISPLAY[finish] || finish || '—'
   const finishColor = FINISH_COLOR[finish]   || 'var(--en-text-3)'
   const isChampion  = finish === 'Champions'
-  const isFinalResult = finish === 'Champions' || finish === 'Runners-Up'
 
   return (
     <button className={styles.sznCard} onClick={() => onSelect(summary)}>
-      {/* Row 1: Season label + year */}
+      {/* Row 1: season label + year (left) + result (right) — back to same line */}
       <div className={styles.sznCardHead}>
         <div className={styles.sznCardLeft}>
           <span className={styles.sznLabel}>{season.label}</span>
           <span className={styles.sznYear}>· {season.year}</span>
         </div>
-      </div>
-
-      {/* Row 2: Result badge on its own line */}
-      <div className={styles.sznResultRow}>
         <span className={styles.sznResult} style={{ color: finishColor }}>
           {isChampion && <span className={styles.sznStar}>★ </span>}
           {finishLabel}
         </span>
       </div>
 
-      {/* Row 3: Campaign record */}
+      {/* Row 2: Campaign record */}
       {matchRecord.p > 0 && (
         <div className={styles.sznCardRecord}>
           {[
-            { k: 'P',  v: matchRecord.p  },
-            { k: 'W',  v: matchRecord.w  },
-            { k: 'D',  v: matchRecord.d  },
-            { k: 'L',  v: matchRecord.l  },
+            { k: 'P', v: matchRecord.p },
+            { k: 'W', v: matchRecord.w },
+            { k: 'D', v: matchRecord.d },
+            { k: 'L', v: matchRecord.l },
           ].map(({ k, v }) => (
             <span key={k} className={styles.sznRecordItem}>
               <span className={styles.sznRecordVal}>{v}</span>
@@ -96,15 +91,15 @@ function CampaignCard({ summary, opponents, onSelect }) {
         </div>
       )}
 
-      {/* Row 4: KO path */}
+      {/* Row 3: KO path */}
       {koPath.length > 0 && (
         <div className={styles.sznKOStrip}>
           {koPath.map(ko => {
             const name  = ko.oppKey && opponents?.has(ko.oppKey)
               ? opponents.get(ko.oppKey).displayName
               : ko.opp || '?'
-            const crest = matchCrest(ko.oppKey, opponents)
-            const agg   = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
+            const crest   = matchCrest(ko.oppKey, opponents)
+            const agg     = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
             const isFinal = ko.comp === 'UCL_Final'
             const aggColor = isFinal
               ? 'var(--en-gold)'
@@ -251,7 +246,7 @@ function CampaignDetail({ summary, opponents, onBack }) {
                       {name}
                     </span>
                     <span className={styles.sznMVen}
-                      style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
+                      style={{ color: m.home_away === 'H' ? 'var(--en-text-2)' : 'var(--en-text-3)' }}>
                       {m.home_away || '—'}
                     </span>
                     <span className={styles.sznMScore}>{fmtScore(m.score_for, m.score_against) ?? '—'}</span>
@@ -272,8 +267,8 @@ function CampaignDetail({ summary, opponents, onBack }) {
             const name   = ko.oppKey && opponents?.has(ko.oppKey)
               ? opponents.get(ko.oppKey).displayName
               : ko.opp || '?'
-            const crest  = matchCrest(ko.oppKey, opponents)
-            const agg    = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
+            const crest   = matchCrest(ko.oppKey, opponents)
+            const agg     = ko.agg ? fmtScore(ko.agg.totalFor, ko.agg.totalAgainst) : null
             const isFinal = ko.comp === 'UCL_Final'
             const aggColor = isFinal
               ? 'var(--en-gold)'
@@ -313,11 +308,17 @@ function CampaignDetail({ summary, opponents, onBack }) {
                       const lc = lr === 'W' ? 'var(--en-green)' : lr === 'L' ? 'var(--danger)' : 'var(--en-text-3)'
                       return (
                         <span key={li} className={styles.sznKOLeg}>
+                          {/* Leg label — clearly readable */}
                           <span className={styles.sznKOLegLabel}>Leg {leg.leg ?? li + 1}</span>
+                          {/* Score */}
                           <span className={styles.sznKOLegScore}>{fmtScore(leg.score_for, leg.score_against)}</span>
-                          <span style={{ color: lc }}>{lr}</span>
-                          <span className={styles.sznKOLegVenue}
-                            style={{ color: leg.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
+                          {/* W/D/L — Inter, matches page typography */}
+                          <span className={styles.sznKOLegRes} style={{ color: lc }}>{lr}</span>
+                          {/* H/A — improved contrast */}
+                          <span
+                            className={styles.sznKOLegVenue}
+                            style={{ color: leg.home_away === 'H' ? 'var(--en-text-2)' : 'var(--en-text-3)' }}
+                          >
                             {leg.home_away || ''}
                           </span>
                         </span>
@@ -370,28 +371,21 @@ function CareerKnockoutSection({ knockoutData }) {
         const row = legRecord[comp]
         if (!row || row.p === 0) return null
         const isFinal = comp === 'UCL_Final'
+        // Entire Final row is gold
+        const goldStyle = isFinal ? { color: 'var(--en-gold)' } : undefined
         return (
           <div
             key={comp}
-            className={styles.sznKOTableRow}
-            style={isFinal ? { borderTop: '0.5px solid var(--en-rule)' } : undefined}
+            className={`${styles.sznKOTableRow} ${isFinal ? styles.sznKOTableRowFinal : ''}`}
           >
-            <span
-              className={styles.sznKOTdRound}
-              style={isFinal ? { color: 'var(--en-gold)', fontWeight: 700 } : undefined}
-            >
+            <span className={styles.sznKOTdRound} style={goldStyle}>
               {ROUND_SHORT[comp] || comp}
             </span>
-            <span className={styles.sznKOTdStat}>{row.p}</span>
-            <span className={styles.sznKOTdStat}>{row.w}</span>
-            <span className={styles.sznKOTdStat}>{row.d}</span>
-            <span className={styles.sznKOTdStat}>{row.l}</span>
-            <span
-              className={styles.sznKOTdStat}
-              style={isFinal ? { color: 'var(--en-gold)' } : undefined}
-            >
-              {fmtGD(row.gf, row.ga)}
-            </span>
+            <span className={styles.sznKOTdStat} style={goldStyle}>{row.p}</span>
+            <span className={styles.sznKOTdStat} style={goldStyle}>{row.w}</span>
+            <span className={styles.sznKOTdStat} style={goldStyle}>{row.d}</span>
+            <span className={styles.sznKOTdStat} style={goldStyle}>{row.l}</span>
+            <span className={styles.sznKOTdStat} style={goldStyle}>{fmtGD(row.gf, row.ga)}</span>
           </div>
         )
       })}

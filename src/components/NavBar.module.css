@@ -157,7 +157,7 @@
   transition: filter 0.15s ease;
 }
 
-/* Active: shift white starball to gold (#E0C27A) */
+/* Active: shift white starball to brand gold #E0C27A */
 .uclIconActive {
-  filter: brightness(0) saturate(100%) invert(82%) sepia(28%) saturate(600%) hue-rotate(10deg) brightness(1.0);
+  filter: brightness(0) saturate(100%) invert(83%) sepia(35%) saturate(500%) hue-rotate(3deg) brightness(1.05);
 }

@@ -88,19 +88,19 @@ function Silhouette({ size = 28 }) {
   )
 }
 
-// ─── Column definitions — A/G added after A ──────────────────────────────────
+// ─── Column definitions — order: App G A G+A G/G A/G C/G ─────────────────────
 const OUTFIELD_COLS = [
-  { key: 'uclApps',    label: 'Apps', title: 'UCL Appearances',        isRate: false },
-  { key: 'uclGoals',   label: 'G',    title: 'UCL Goals',              isRate: false },
-  { key: 'uclAssists', label: 'A',    title: 'UCL Assists',            isRate: false },
-  { key: 'uclApg',     label: 'A/G',  title: 'UCL Assists per Game',   isRate: true  },
-  { key: 'uclContrib', label: 'G+A',  title: 'UCL Contributions',      isRate: false },
-  { key: 'uclGpg',     label: 'G/G',  title: 'UCL Goals per Game',     isRate: true  },
-  { key: 'uclCpg',     label: 'C/G',  title: 'UCL Contributions/Game', isRate: true  },
+  { key: 'uclApps',    label: 'App', title: 'UCL Appearances',        isRate: false },
+  { key: 'uclGoals',   label: 'G',   title: 'UCL Goals',              isRate: false },
+  { key: 'uclAssists', label: 'A',   title: 'UCL Assists',            isRate: false },
+  { key: 'uclContrib', label: 'G+A', title: 'UCL Contributions',      isRate: false },
+  { key: 'uclGpg',     label: 'G/G', title: 'UCL Goals per Game',     isRate: true  },
+  { key: 'uclApg',     label: 'A/G', title: 'UCL Assists per Game',   isRate: true  },
+  { key: 'uclCpg',     label: 'C/G', title: 'UCL Contributions/Game', isRate: true  },
 ]
 
 const GK_COLS = [
-  { key: 'uclApps',        label: 'Apps', title: 'UCL Appearances',           isRate: false },
+  { key: 'uclApps',        label: 'App',  title: 'UCL Appearances',           isRate: false },
   { key: 'uclCleanSheets', label: 'CS',   title: 'UCL Clean Sheets',          isRate: false },
   { key: 'uclCspg',        label: 'CS/G', title: 'UCL Clean Sheets per Game', isRate: true  },
   { key: 'uclGoals',       label: 'G',    title: 'UCL Goals',                 isRate: false },

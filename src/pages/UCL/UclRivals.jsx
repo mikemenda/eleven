@@ -43,16 +43,15 @@ function OpponentDetail({ rival, clubName, onBack }) {
         </div>
       </div>
 
-      {/* H2H stat bar */}
       <div className={styles.rvH2H}>
         {[
-          { k: 'Won',   v: rival.w,  c: 'var(--en-text-1)'  },
-          { k: 'Drawn', v: rival.d,  c: 'var(--en-text-3)' },
-          { k: 'Lost',  v: rival.l,  c: 'var(--en-text-1)'  },
+          { k: 'Won',   v: rival.w  },
+          { k: 'Drawn', v: rival.d  },
+          { k: 'Lost',  v: rival.l  },
           { k: 'Goals', v: `${rival.gf}–${rival.ga}` },
-        ].map(({ k, v, c }) => (
+        ].map(({ k, v }) => (
           <div key={k} className={styles.rvH2HItem}>
-            <span className={styles.rvH2HVal} style={c ? { color: c } : undefined}>{v}</span>
+            <span className={styles.rvH2HVal}>{v}</span>
             <span className={styles.rvH2HKey}>{k}</span>
           </div>
         ))}
@@ -88,7 +87,7 @@ function OpponentDetail({ rival, clubName, onBack }) {
                   </div>
                   <span className={styles.rvMatchScore}>{fmtScore(m.score_for, m.score_against)}</span>
                   <span className={styles.rvMatchVenue}
-                    style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
+                    style={{ color: m.home_away === 'H' ? 'var(--en-text-2)' : 'var(--en-text-3)' }}>
                     {m.home_away || '—'}
                   </span>
                 </div>
@@ -122,6 +121,9 @@ function LeagueDetail({ group, opponents, onBack }) {
 
   const clubs = Object.values(byOpp).sort((a, b) => b.matches.length - a.matches.length)
 
+  // GD stat for the H2H bar
+  const gd = group.gf - group.ga
+
   return (
     <div className={styles.rvDetail}>
       <div className={styles.rvDetailHead}>
@@ -136,15 +138,16 @@ function LeagueDetail({ group, opponents, onBack }) {
         </div>
       </div>
 
+      {/* H2H bar — GD instead of raw Goals */}
       <div className={styles.rvH2H}>
         {[
-          { k: 'Won',   v: group.w,  c: 'var(--en-text-1)'  },
-          { k: 'Drawn', v: group.d,  c: 'var(--en-text-3)' },
-          { k: 'Lost',  v: group.l,  c: 'var(--en-text-1)'  },
-          { k: 'Goals', v: `${group.gf}–${group.ga}` },
-        ].map(({ k, v, c }) => (
+          { k: 'Won',   v: group.w },
+          { k: 'Drawn', v: group.d },
+          { k: 'Lost',  v: group.l },
+          { k: 'GD',    v: gd > 0 ? `+${gd}` : gd },
+        ].map(({ k, v }) => (
           <div key={k} className={styles.rvH2HItem}>
-            <span className={styles.rvH2HVal} style={c ? { color: c } : undefined}>{v}</span>
+            <span className={styles.rvH2HVal}>{v}</span>
             <span className={styles.rvH2HKey}>{k}</span>
           </div>
         ))}
@@ -187,21 +190,31 @@ function LeagueDetail({ group, opponents, onBack }) {
                     const res  = win ? 'W' : draw ? 'D' : 'L'
                     const col  = win ? 'var(--en-green)' : draw ? 'var(--en-text-3)' : 'var(--danger)'
                     const isFinal = m.competition === 'UCL_Final'
+                    const scoreStr = fmtScore(m.score_for, m.score_against)
                     return (
-                      <div key={i} className={styles.rvMatchRow}>
-                        <span className={styles.rvMatchRes} style={{ color: col }}>{res}</span>
-                        <div className={styles.rvMatchInfo}>
-                          <span className={styles.rvMatchComp}
-                            style={isFinal ? { color: 'var(--en-gold)' } : undefined}>
-                            {ROUND_LABELS[m.competition] || m.competition || '—'}
+                      // Redesigned match row: left = stage · season [· Leg N], right = W/D/L score H/A
+                      <div key={i} className={styles.rvLeagueMatchRow}>
+                        <div className={styles.rvLeagueMatchLeft}>
+                          <span
+                            className={styles.rvLeagueMatchStage}
+                            style={isFinal ? { color: 'var(--en-gold)' } : undefined}
+                          >
+                            {g.label} · {ROUND_LABELS[m.competition] || m.competition || '—'}
                           </span>
-                          {m.leg != null && <span className={styles.rvMatchLeg}>· Leg {m.leg}</span>}
+                          {m.leg != null && (
+                            <span className={styles.rvLeagueMatchLeg}>Leg {m.leg}</span>
+                          )}
                         </div>
-                        <span className={styles.rvMatchScore}>{fmtScore(m.score_for, m.score_against)}</span>
-                        <span className={styles.rvMatchVenue}
-                          style={{ color: m.home_away === 'H' ? 'var(--en-blue)' : 'var(--en-text-4)' }}>
-                          {m.home_away || '—'}
-                        </span>
+                        <div className={styles.rvLeagueMatchRight}>
+                          <span className={styles.rvLeagueMatchRes} style={{ color: col }}>{res}</span>
+                          <span className={styles.rvLeagueMatchScore}>{scoreStr}</span>
+                          <span
+                            className={styles.rvLeagueMatchVenue}
+                            style={{ color: m.home_away === 'H' ? 'var(--en-text-2)' : 'var(--en-text-3)' }}
+                          >
+                            {m.home_away || '—'}
+                          </span>
+                        </div>
                       </div>
                     )
                   })}
@@ -215,11 +228,36 @@ function LeagueDetail({ group, opponents, onBack }) {
   )
 }
 
+// ─── Sortable column header button ────────────────────────────────────────────
+function SortTh({ label, colKey, sortKey, sortDir, onSort, className }) {
+  const active = sortKey === colKey
+  return (
+    <button
+      className={`${className} ${active ? styles.rvThSortActive : ''}`}
+      onClick={() => onSort(colKey)}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+               display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2,
+               width: '100%', font: 'inherit' }}
+    >
+      {label}
+      {active && <span style={{ fontSize: 9 }}>{sortDir === 'desc' ? '↓' : '↑'}</span>}
+    </button>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function UclRivals({ uclMatches, opponents, clubName, loading }) {
   const [selected,       setSelected]       = useState(null)
   const [selectedLeague, setSelectedLeague] = useState(null)
   const [view,           setView]           = useState('rivals')
+
+  // Opponents sort state — default: Played desc
+  const [oppSortKey, setOppSortKey] = useState('played')
+  const [oppSortDir, setOppSortDir] = useState('desc')
+
+  // League sort state — default: Played desc
+  const [lgSortKey, setLgSortKey] = useState('p')
+  const [lgSortDir, setLgSortDir] = useState('desc')
 
   if (loading) {
     return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
@@ -247,9 +285,42 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
     )
   }
 
+  // Sort helpers
+  function handleOppSort(key) {
+    if (key === oppSortKey) setOppSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    else { setOppSortKey(key); setOppSortDir('desc') }
+  }
+  function handleLgSort(key) {
+    if (key === lgSortKey) setLgSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    else { setLgSortKey(key); setLgSortDir('desc') }
+  }
+
+  // Sort opponents
+  const sortedRivals = [...rivals].sort((a, b) => {
+    const getVal = (r, k) => {
+      if (k === 'played') return r.played
+      if (k === 'gd')     return r.gd
+      return r[k] ?? 0
+    }
+    const av = getVal(a, oppSortKey)
+    const bv = getVal(b, oppSortKey)
+    return oppSortDir === 'desc' ? bv - av : av - bv
+  })
+
+  // Sort leagues
+  const sortedLeagues = [...leagueGroups].sort((a, b) => {
+    const getVal = (g, k) => {
+      if (k === 'gd') return g.gf - g.ga
+      return g[k] ?? 0
+    }
+    const av = getVal(a, lgSortKey)
+    const bv = getVal(b, lgSortKey)
+    return lgSortDir === 'desc' ? bv - av : av - bv
+  })
+
   return (
     <div className={styles.rvWrap}>
-      {/* View toggle */}
+      {/* Toggle — count label inline, improved readability */}
       <div className={styles.rvToggleBar}>
         <button className={`${styles.rvToggleBtn} ${view === 'rivals' ? styles.rvToggleActive : ''}`}
           onClick={() => setView('rivals')}>
@@ -259,52 +330,62 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
           onClick={() => setView('leagues')}>
           By League
         </button>
-        <span className={styles.rvCount}>{rivals.length} clubs</span>
+        <span className={styles.rvCount}>
+          {view === 'rivals'
+            ? `${rivals.length} club${rivals.length !== 1 ? 's' : ''}`
+            : `${leagueGroups.length} league${leagueGroups.length !== 1 ? 's' : ''}`
+          }
+        </span>
       </div>
 
       {view === 'leagues' ? (
         <div>
+          {/* Sortable league table header */}
           <div className={styles.rvLeagueTableHead}>
             <span className={styles.rvLgThLeague}>League</span>
             <span className={styles.rvLgThNation}>Nation</span>
-            <span className={styles.rvLgThStat}>P</span>
-            <span className={styles.rvLgThStat}>W</span>
-            <span className={styles.rvLgThStat}>D</span>
-            <span className={styles.rvLgThStat}>L</span>
-            <span className={styles.rvLgThStat}>GD</span>
+            <SortTh label="P"  colKey="p"  sortKey={lgSortKey} sortDir={lgSortDir} onSort={handleLgSort} className={styles.rvLgThStat} />
+            <SortTh label="W"  colKey="w"  sortKey={lgSortKey} sortDir={lgSortDir} onSort={handleLgSort} className={styles.rvLgThStat} />
+            <SortTh label="D"  colKey="d"  sortKey={lgSortKey} sortDir={lgSortDir} onSort={handleLgSort} className={styles.rvLgThStat} />
+            <SortTh label="L"  colKey="l"  sortKey={lgSortKey} sortDir={lgSortDir} onSort={handleLgSort} className={styles.rvLgThStat} />
+            <SortTh label="GD" colKey="gd" sortKey={lgSortKey} sortDir={lgSortDir} onSort={handleLgSort} className={styles.rvLgThStat} />
           </div>
 
-          {leagueGroups.map(g => (
-            <button key={g.country} className={styles.rvLeagueRow53}
-              onClick={() => setSelectedLeague(g)}>
-              <span className={styles.rvLgTdLeague}>
-                {g.league !== 'Unknown' ? g.league : g.country}
-              </span>
-              <span className={styles.rvLgTdNation}>
-                {g.country !== 'Unknown' ? g.country : '—'}
-              </span>
-              <span className={styles.rvLgTdStat}>{g.p}</span>
-              <span className={styles.rvLgTdStat}>{g.w}</span>
-              <span className={styles.rvLgTdStat}>{g.d}</span>
-              <span className={styles.rvLgTdStat}>{g.l}</span>
-              <span className={styles.rvLgTdStat}>{fmtGD(g.gf, g.ga)}</span>
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
-                <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-          ))}
+          {sortedLeagues.map(g => {
+            const gdVal = g.gf - g.ga
+            return (
+              <button key={g.country} className={styles.rvLeagueRow53}
+                onClick={() => setSelectedLeague(g)}>
+                <span className={`${styles.rvLgTdLeague} ${lgSortKey === 'p' || lgSortKey === 'w' || lgSortKey === 'd' || lgSortKey === 'l' || lgSortKey === 'gd' ? '' : ''}`}>
+                  {g.league !== 'Unknown' ? g.league : g.country}
+                </span>
+                <span className={styles.rvLgTdNation}>
+                  {g.country !== 'Unknown' ? g.country : '—'}
+                </span>
+                <span className={`${styles.rvLgTdStat} ${lgSortKey === 'p'  ? styles.rvTdSortActive : ''}`}>{g.p}</span>
+                <span className={`${styles.rvLgTdStat} ${lgSortKey === 'w'  ? styles.rvTdSortActive : ''}`}>{g.w}</span>
+                <span className={`${styles.rvLgTdStat} ${lgSortKey === 'd'  ? styles.rvTdSortActive : ''}`}>{g.d}</span>
+                <span className={`${styles.rvLgTdStat} ${lgSortKey === 'l'  ? styles.rvTdSortActive : ''}`}>{g.l}</span>
+                <span className={`${styles.rvLgTdStat} ${lgSortKey === 'gd' ? styles.rvTdSortActive : ''}`}>{gdVal > 0 ? `+${gdVal}` : gdVal}</span>
+                <svg width="10" height="10" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
+                  <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            )
+          })}
         </div>
       ) : (
         <>
+          {/* Sortable opponents table header */}
           <div className={styles.rvTableHead}>
             <span className={styles.rvThOpp}>Opponent</span>
-            <span className={styles.rvThStat}>P</span>
-            <span className={styles.rvThStat}>W</span>
-            <span className={styles.rvThStat}>D</span>
-            <span className={styles.rvThStat}>L</span>
-            <span className={styles.rvThStat}>GD</span>
+            <SortTh label="P"  colKey="played" sortKey={oppSortKey} sortDir={oppSortDir} onSort={handleOppSort} className={styles.rvThStat} />
+            <SortTh label="W"  colKey="w"      sortKey={oppSortKey} sortDir={oppSortDir} onSort={handleOppSort} className={styles.rvThStat} />
+            <SortTh label="D"  colKey="d"      sortKey={oppSortKey} sortDir={oppSortDir} onSort={handleOppSort} className={styles.rvThStat} />
+            <SortTh label="L"  colKey="l"      sortKey={oppSortKey} sortDir={oppSortDir} onSort={handleOppSort} className={styles.rvThStat} />
+            <SortTh label="GD" colKey="gd"     sortKey={oppSortKey} sortDir={oppSortDir} onSort={handleOppSort} className={styles.rvThStat} />
           </div>
-          {rivals.map(r => (
+          {sortedRivals.map(r => (
             <button key={r.opponentKey} className={styles.rvRow}
               onClick={() => setSelected(r.opponentKey)}>
               <div className={styles.rvOpp}>
@@ -319,11 +400,13 @@ export default function UclRivals({ uclMatches, opponents, clubName, loading }) 
                   )}
                 </div>
               </div>
-              <span className={styles.rvStat}>{r.played}</span>
-              <span className={styles.rvStat}>{r.w}</span>
-              <span className={styles.rvStat}>{r.d}</span>
-              <span className={styles.rvStat}>{r.l}</span>
-              <span className={styles.rvStat}>{r.gd > 0 ? `+${r.gd}` : r.gd}</span>
+              <span className={`${styles.rvStat} ${oppSortKey === 'played' ? styles.rvTdSortActive : ''}`}>{r.played}</span>
+              <span className={`${styles.rvStat} ${oppSortKey === 'w'      ? styles.rvTdSortActive : ''}`}>{r.w}</span>
+              <span className={`${styles.rvStat} ${oppSortKey === 'd'      ? styles.rvTdSortActive : ''}`}>{r.d}</span>
+              <span className={`${styles.rvStat} ${oppSortKey === 'l'      ? styles.rvTdSortActive : ''}`}>{r.l}</span>
+              <span className={`${styles.rvStat} ${oppSortKey === 'gd'     ? styles.rvTdSortActive : ''}`}>
+                {r.gd > 0 ? `+${r.gd}` : r.gd}
+              </span>
               <svg width="12" height="12" viewBox="0 0 20 20" fill="none" className={styles.rvChevron}>
                 <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
