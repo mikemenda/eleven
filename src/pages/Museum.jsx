@@ -79,6 +79,7 @@ export default function Museum() {
 
   const allTrophies = deriveTrophiesFromSeasons(seasons)
   const totalWins   = allTrophies.length
+  const totalSeasons = seasons.length
 
   const byComp = {}
   for (const t of allTrophies) {
@@ -104,9 +105,13 @@ export default function Museum() {
         <div className={styles.headerInner}>
           <span className={styles.headerLabel}>Club Museum</span>
           <div className={styles.headerTitle}>Trophy Cabinet</div>
-          <div className={styles.headerCount}>
-            <span className={styles.countNum}>{totalWins}</span>
-            <span className={styles.countLabel}>trophies</span>
+          {/* Archive-style stat line — Inter, no mono tracking */}
+          <div className={styles.headerStat}>
+            <span className={styles.statGold}>{totalWins}</span>
+            <span className={styles.statUnit}>{totalWins === 1 ? 'trophy' : 'trophies'}</span>
+            <span className={styles.statSep}>·</span>
+            <span className={styles.statSecondary}>{totalSeasons}</span>
+            <span className={styles.statUnit}>{totalSeasons === 1 ? 'season' : 'seasons'}</span>
           </div>
         </div>
       </div>
@@ -118,9 +123,9 @@ export default function Museum() {
         ) : (
           <div className={styles.honoursList}>
             {wonTrophies.map((trophy, idx) => {
-              const wins      = byComp[trophy.key]
-              const isOpen    = expanded === trophy.key
-              const isLast    = idx === wonTrophies.length - 1
+              const wins   = byComp[trophy.key]
+              const isOpen = expanded === trophy.key
+              const isLast = idx === wonTrophies.length - 1
 
               return (
                 <div

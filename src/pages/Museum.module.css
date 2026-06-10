@@ -55,25 +55,39 @@
   color: var(--en-text-1);
   text-align: center;
 }
-.headerCount {
+
+/* Archive stat line — replaces old mono countNum/countLabel */
+.headerStat {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 4px;
+  margin-top: 6px;
 }
-.countNum {
-  font-family: var(--font-plex);
-  font-size: 32px;
-  font-weight: 500;
-  line-height: 1;
+.statGold {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 700;
   color: var(--en-gold);
+  line-height: 1;
 }
-.countLabel {
-  font-family: var(--font-plex);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
+.statUnit {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--en-text-2);
+}
+.statSep {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--en-text-4);
+  margin: 0 3px;
+}
+.statSecondary {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--en-text-2);
+  line-height: 1;
 }
 
 /* ── HONOURS LIST ── */
@@ -94,8 +108,9 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 20px;
+  gap: 18px;
+  /* Increased padding to give the larger trophy vertical breathing room */
+  padding: 16px 20px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -108,11 +123,12 @@
   background: rgba(224, 194, 122, 0.04);
 }
 
-/* Left: trophy image container */
+/* Left: trophy image container — ~2.2x larger than v62 (44×62 → 76×120) */
 .rowTrophyVis {
   flex-shrink: 0;
-  width: 44px;
-  height: 62px;
+  /* Wide enough for Carabao Cup and other broad trophies */
+  width: 76px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,10 +144,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 48px;
 }
+/* Slightly stronger glow to match larger visual presence */
 .trophyWon {
-  filter: drop-shadow(0 0 6px rgba(224,194,122,0.3));
+  filter: drop-shadow(0 2px 10px rgba(224,194,122,0.38));
 }
 
 /* Middle: name + region + count */
@@ -140,7 +157,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 .rowName {
   font-family: var(--font-inter);
@@ -155,7 +172,6 @@
   font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  /* Improved from en-text-4 — visibly readable, stays secondary */
   color: var(--en-text-3);
 }
 .rowCount {
@@ -163,7 +179,7 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--en-gold);
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* Right: chevron */
@@ -179,7 +195,7 @@
 }
 
 /* ── ACCORDION BODY ── */
-/* No max-height — renders fully, zero clipping risk */
+/* No max-height — renders fully, zero clipping risk regardless of title count */
 .accordionBody {
   padding: 0 20px 18px;
 }
@@ -204,7 +220,6 @@
 .winRow:last-child {
   border-bottom: none;
 }
-
 .winSeason {
   font-family: var(--font-inter);
   font-size: 13px;

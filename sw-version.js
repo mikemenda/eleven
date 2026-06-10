@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 62
+// Current: 63
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -59,4 +59,5 @@
 //   60 — UCL refinement patch: NavBar UCL icon active filter corrected to match #E0C27A; UCL title Inter 800; European Record hero Inter 800 + UCL trophy PNG right-side; WDL hero line removed; Results cards add inline SVG icons; Season card result label back inline-right; Career KO Final row full gold; KO path leg typography improved (sznKOLegRes class, H/A contrast); Players column reorder App G A G+A G/G A/G C/G + App abbreviation; Records — all values gold, cleaned labels (no UCL prefix), reordered career/season, club records with crest + G/G averages, Finals Record removed, season CS/Game added; Opponents — sortable P/W/D/L/GD with gold column highlight, count label readable, league detail GD stat + redesigned match row, tighter club block spacing
 //   61 — Records visual alignment: standalone Records page migrated to v60 UCL Records design system; Inter tabs/labels, all values gold, 120px right panel, createPortal modal, OppCrest+RichportMark on Club tab, resolveClubIdentity transfer crests, label/ordering cleanup, acSeason+uclSeason bestCspg added
 //   62 — Museum accordion: replaced trophy grid + bottom sheet modal with one-trophy-per-line accordion list; inline expand/collapse with no clipping; trophy PNG left, name/region/count middle, chevron right; region label readability improved (en-text-3); Done button removed
-const SW_VERSION = 62;
+//   63 — Museum refinement: trophy image 2.2x larger (76×120px container); row padding increased for breathing room; hero count line replaced with archive stat line (Inter, no mono tracking) showing "N trophies · N seasons" with derived season count and singular/plural
+const SW_VERSION = 63;
