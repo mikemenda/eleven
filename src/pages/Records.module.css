@@ -28,18 +28,17 @@
 }
 
 .topLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--en-text-1);
+  letter-spacing: -0.01em;
 }
 
 .topHint {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  color: var(--en-text-4);
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
 }
 
 /* ── Tabs ────────────────────────────────────────────────────────────────── */
@@ -61,9 +60,10 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
@@ -76,23 +76,27 @@
   border-bottom-color: var(--en-gold);
 }
 
+/* ── Record wrap ─────────────────────────────────────────────────────────── */
+
+.rWrap { padding: 0 0 24px; }
+
 /* ── Section ─────────────────────────────────────────────────────────────── */
 
-.section { padding: 20px 16px 0; }
+.rSection { padding: 20px 16px 0; }
 
-.sectionTitle {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.18em;
+.rSectionTitle {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   margin-bottom: 10px;
 }
 
-/* ── Player Record Card ──────────────────────────────────────────────────── */
-/* Layout: [photo + name/ctx] | [label + value (tappable)] */
+/* ── Record card — shared shell ──────────────────────────────────────────── */
 
-.recordCard {
+.rCard {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
   border-radius: 8px;
@@ -103,7 +107,22 @@
   overflow: hidden;
 }
 
-.recordLeft {
+/* Club tab card variant — button reset */
+.rCardClub {
+  background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 8px;
+  cursor: default;
+}
+.rCardTappable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rCardTappable:hover { background: rgba(255,255,255,0.03); }
+
+/* ── Left side ───────────────────────────────────────────────────────────── */
+
+.rLeft {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -112,7 +131,7 @@
   min-width: 0;
 }
 
-.recordPlayerBtn {
+.rPlayerBtn {
   background: none;
   border: none;
   padding: 0;
@@ -124,32 +143,10 @@
   justify-content: center;
   transition: opacity 0.15s;
 }
-.recordPlayerBtn:hover { opacity: 0.8; }
-.recordPlayerBtn:disabled { cursor: default; opacity: 1; }
+.rPlayerBtn:hover { opacity: 0.8; }
+.rPlayerBtn:disabled { cursor: default; opacity: 1; }
 
-.recordImgPlaceholder {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-}
-
-.silhouette {
-  border-radius: 50%;
-  background: var(--en-surface-2, #1a2a40);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--en-text-4);
-  flex-shrink: 0;
-}
-
-.playerImg {
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-.recordMetaBtn {
+.rMetaBtn {
   background: none;
   border: none;
   padding: 0;
@@ -157,11 +154,13 @@
   cursor: pointer;
   min-width: 0;
   transition: opacity 0.15s;
+  display: flex;
+  flex-direction: column;
 }
-.recordMetaBtn:hover { opacity: 0.75; }
-.recordMetaBtn:disabled { cursor: default; opacity: 1; }
+.rMetaBtn:hover { opacity: 0.75; }
+.rMetaBtn:disabled { cursor: default; opacity: 1; }
 
-.recordHolder {
+.rHolder {
   font-family: var(--font-playfair);
   font-size: 15px;
   font-weight: 700;
@@ -171,9 +170,9 @@
   text-overflow: ellipsis;
 }
 
-.recordCtx {
-  font-family: var(--font-plex);
-  font-size: 10px;
+.rCtx {
+  font-family: var(--font-inter);
+  font-size: 11px;
   color: var(--en-text-3);
   margin-top: 2px;
   white-space: nowrap;
@@ -181,109 +180,60 @@
   text-overflow: ellipsis;
 }
 
-/* Right side: label + value — full-height tappable button */
-.recordRight {
+/* ── Right side — fixed width for consistent alignment ───────────────────── */
+
+.rRight {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   padding: 10px 14px;
   background: none;
   border: none;
   border-left: 0.5px solid var(--en-rule);
   cursor: pointer;
-  min-width: 110px;
+  width: 120px;
+  flex-shrink: 0;
   align-self: stretch;
   transition: background 0.15s;
-  flex-shrink: 0;
 }
-.recordRight:hover { background: rgba(255,255,255,0.03); }
+.rRight:hover { background: rgba(255,255,255,0.03); }
 
-.recordLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+/* Record label — readable #8899aa, Inter */
+.rLabel {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   text-align: right;
   line-height: 1.3;
 }
 
-.recordValue {
-  font-family: var(--font-plex);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--en-text-2);
-  text-align: right;
-}
-
-/* ── Club Record Card ────────────────────────────────────────────────────── */
-
-.clubRecordCard {
-  background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 8px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  width: 100%;
-  text-align: left;
-  cursor: default;
-  gap: 12px;
-}
-
-.clubRecordCardTappable {
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.clubRecordCardTappable:hover { background: rgba(255,255,255,0.03); }
-
-.clubRecordLeft { flex: 1; min-width: 0; }
-
-.clubRecordHolder {
-  font-family: var(--font-playfair);
-  font-size: 16px;
+/* Record value — always gold, Inter */
+.rValue {
+  font-family: var(--font-inter);
+  font-size: 15px;
   font-weight: 700;
-  color: var(--en-text-1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.clubRecordCtx {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  color: var(--en-text-3);
-  margin-top: 3px;
-}
-
-.clubRecordRight {
+  color: var(--en-gold);
   text-align: right;
-  flex-shrink: 0;
 }
 
-.clubRecordLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-text-4);
-  margin-bottom: 3px;
+/* Qualification note */
+.rQualNote {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  font-style: italic;
+  padding: 12px 16px 0;
+  margin: 0 0 4px;
 }
 
-.clubRecordValue {
-  font-family: var(--font-plex);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--en-text-2);
-}
+/* ── Modal ───────────────────────────────────────────────────────────────── */
 
-/* ── Modal overlay ───────────────────────────────────────────────────────── */
-
-.modalOverlay {
+.rModalOverlay {
   position: fixed;
   inset: 0;
   background: rgba(8, 13, 26, 0.85);
@@ -292,16 +242,15 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0;
-  animation: overlayIn 0.2s ease both;
+  animation: rOverlayIn 0.2s ease both;
 }
 
-@keyframes overlayIn {
+@keyframes rOverlayIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-.modal {
+.rModal {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
   border-radius: 16px 16px 0 0;
@@ -310,16 +259,16 @@
   max-height: 75dvh;
   display: flex;
   flex-direction: column;
-  animation: sheetUp 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: rSheetUp 0.25s cubic-bezier(0.32, 0.72, 0, 1) both;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-@keyframes sheetUp {
+@keyframes rSheetUp {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
 
-.modalHeader {
+.rModalHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -328,42 +277,41 @@
   flex-shrink: 0;
 }
 
-.modalTitle {
+.rModalTitle {
   font-family: var(--font-playfair);
   font-size: 16px;
   font-weight: 700;
   color: var(--en-text-1);
 }
 
-.modalClose {
+.rModalClose {
   background: none;
   border: none;
-  font-size: 14px;
-  color: var(--en-text-3);
+  font-size: 13px;
+  font-family: var(--font-inter);
+  color: var(--en-text-2);
   cursor: pointer;
   padding: 4px 8px;
   transition: color 0.15s;
 }
-.modalClose:hover { color: var(--en-text-1); }
+.rModalClose:hover { color: var(--en-text-1); }
 
-.modalList {
+.rModalList {
   overflow-y: auto;
   flex: 1;
   padding: 8px 0 16px;
 }
 
-.modalRow {
+.rModalRow {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
 }
-.modalRow:not(:last-child) {
-  border-bottom: 0.5px solid var(--en-rule);
-}
+.rModalRow:not(:last-child) { border-bottom: 0.5px solid var(--en-rule); }
 
-.modalRank {
-  font-family: var(--font-plex);
+.rModalRank {
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-4);
   width: 16px;
@@ -371,7 +319,7 @@
   text-align: center;
 }
 
-.modalPlayerBtn {
+.rModalPlayerBtn {
   background: none;
   border: none;
   padding: 0;
@@ -380,10 +328,10 @@
   border-radius: 50%;
   transition: opacity 0.15s;
 }
-.modalPlayerBtn:hover { opacity: 0.8; }
-.modalPlayerBtn:disabled { cursor: default; }
+.rModalPlayerBtn:hover { opacity: 0.8; }
+.rModalPlayerBtn:disabled { cursor: default; }
 
-.modalInfoBtn {
+.rModalInfoBtn {
   background: none;
   border: none;
   padding: 0;
@@ -393,10 +341,10 @@
   min-width: 0;
   transition: opacity 0.15s;
 }
-.modalInfoBtn:hover { opacity: 0.75; }
-.modalInfoBtn:disabled { cursor: default; opacity: 1; }
+.rModalInfoBtn:hover { opacity: 0.75; }
+.rModalInfoBtn:disabled { cursor: default; opacity: 1; }
 
-.modalName {
+.rModalName {
   font-family: var(--font-inter);
   font-size: 14px;
   font-weight: 600;
@@ -407,23 +355,27 @@
   text-overflow: ellipsis;
 }
 
-.modalCtx {
-  font-family: var(--font-plex);
-  font-size: 10px;
+.rModalCtx {
+  font-family: var(--font-inter);
+  font-size: 11px;
   color: var(--en-text-3);
   display: block;
   margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.modalValue {
-  font-family: var(--font-plex);
-  font-size: 15px;
-  font-weight: 600;
+.rModalValue {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 700;
   color: var(--en-gold);
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.modalEmpty {
+.rModalEmpty {
   font-family: var(--font-inter);
   font-size: 13px;
   color: var(--en-text-3);
@@ -431,7 +383,7 @@
   padding: 32px 20px;
 }
 
-/* ── Loading / empty ──────────────────────────────────────────────────────── */
+/* ── Loading / empty ─────────────────────────────────────────────────────── */
 
 .loadWrap {
   display: flex;
@@ -443,8 +395,8 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

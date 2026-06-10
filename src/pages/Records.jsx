@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getPlayers, getSeasons, getTransfers, getMatchesByClub } from '../firebase/services'
+import { getPlayers, getSeasons, getTransfers, getMatchesByClub, getOpponents } from '../firebase/services'
+import TRANSFER_CLUBS from '../../data/transfer-clubs.json'
 import styles from './Records.module.css'
 
-// ─── Competition label map (shared with SeasonDetail) ─────────────────────────
+// ─── Competition label map ────────────────────────────────────────────────────
 const COMP_LABELS = {
   UCL_LP:    'UCL League Phase',
   UCL_R16:   'UCL Round of 16',
@@ -25,25 +27,46 @@ function fmt(n) {
   return `€${(n / 1e3).toFixed(0)}K`
 }
 
-// ─── Player photo (Cloudflare Worker, same pattern as Transfers/Players) ──────
+// ─── Rate formatter ───────────────────────────────────────────────────────────
+function fmtRate(n) {
+  return n != null ? Number(n).toFixed(2) : '—'
+}
+
+// ─── Transfer-clubs identity lookup (mirrors Transfers.jsx exactly) ───────────
+const WORKER_BASE = 'https://fifa-img.michaelmenda92.workers.dev'
+
+function resolveClubIdentity(clubName) {
+  if (!clubName) return null
+  const key = clubName.trim().toLowerCase()
+  const entry = TRANSFER_CLUBS[key]
+  if (!entry) return null
+  return { displayName: entry.displayName, sofifaTeamId: entry.sofifaTeamId }
+}
+
+// ─── Player photo ─────────────────────────────────────────────────────────────
 function PlayerImg({ sofifaId, name, size = 36 }) {
   const [err, setErr] = useState(false)
-  if (!sofifaId || err) return <Silhouette size={size} />
+  if (!sofifaId || err) return <PlayerSilhouette size={size} />
   return (
     <img
-      src={`https://fifa-img.michaelmenda92.workers.dev/${sofifaId}`}
+      src={`${WORKER_BASE}/${sofifaId}`}
       alt={name}
-      className={styles.playerImg}
-      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}
+      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover',
+               flexShrink: 0, display: 'block' }}
       onError={() => setErr(true)}
     />
   )
 }
 
-function Silhouette({ size = 36 }) {
+function PlayerSilhouette({ size = 36 }) {
   return (
-    <div className={styles.silhouette} style={{ width: size, height: size }}>
-      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
+    <div style={{
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      background: 'var(--en-surface-2, #1a2a40)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: 'var(--en-text-4)',
+    }}>
+      <svg viewBox="0 0 44 44" fill="none" width={size} height={size}>
         <circle cx="22" cy="15" r="7" fill="currentColor" opacity="0.35" />
         <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity="0.25" />
       </svg>
@@ -51,36 +74,94 @@ function Silhouette({ size = 36 }) {
   )
 }
 
-// ─── Records computation ──────────────────────────────────────────────────────
-// All rates computed live from raw counts. Stored rate fields never trusted.
-// isHistoricalStub filtered out everywhere.
-// Contributions = goals + assists (never from stored field).
+// ─── Club / opponent crest ────────────────────────────────────────────────────
+function OppCrest({ crestUrl, size = 36 }) {
+  const [err, setErr] = useState(false)
+  if (!crestUrl || err) return <CrestFallback size={size} />
+  return (
+    <img
+      src={crestUrl}
+      alt=""
+      style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0, display: 'block' }}
+      onError={() => setErr(true)}
+    />
+  )
+}
 
+// Generic shield fallback — used when no opponent or club identity is available
+function CrestFallback({ size = 36 }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: 6, flexShrink: 0,
+      background: 'var(--en-surface-2, #1a2a40)',
+      border: '0.5px solid var(--en-rule)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <svg viewBox="0 0 24 24" fill="none" width={size * 0.55} height={size * 0.55}>
+        <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2Z"
+          stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"
+          style={{ color: 'var(--en-text-4)' }} />
+      </svg>
+    </div>
+  )
+}
+
+// FC Richport monogram fallback — used for club-only records (no opponent)
+function RichportMark({ size = 36 }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: 6, flexShrink: 0,
+      background: 'var(--en-surface-2, #1a2a40)',
+      border: '0.5px solid rgba(224,194,122,0.25)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <span style={{
+        fontFamily: 'var(--font-inter)',
+        fontSize: Math.round(size * 0.38) + 'px',
+        fontWeight: 800,
+        color: 'var(--en-gold)',
+        letterSpacing: '-0.03em',
+        lineHeight: 1,
+        userSelect: 'none',
+      }}>XI</span>
+    </div>
+  )
+}
+
+// ─── GK helper ────────────────────────────────────────────────────────────────
+function isGK(p) {
+  if (!p.position) return false
+  return p.position.split(/[,\/]+/).map(x => x.trim()).includes('GK')
+}
+
+// ─── Records computation ──────────────────────────────────────────────────────
 function computeAllRecords({ players, seasons, transfers, matches }) {
-  const active = players.filter(p => !p.isHistoricalStub)
+  const active   = players.filter(p => !p.isHistoricalStub)
   const outfield = active.filter(p => !isGK(p))
-  const gks = active.filter(p => isGK(p))
+  const gks      = active.filter(p => isGK(p))
 
   // ── All Comps career ──────────────────────────────────────────────────────
+  // Rate threshold: 20 apps (all comps career)
   const acCareer = {
     topGoals:   maxBy(active,  p => p.goals || 0),
     topAssists: maxBy(active,  p => p.assists || 0),
     topContrib: maxBy(active,  p => (p.goals || 0) + (p.assists || 0)),
-    topApps:    maxBy(outfield,p => p.apps || 0),
     bestGpg:    maxByRate(active,  p => p.apps >= 20 ? (p.goals || 0) / p.apps : null),
     bestApg:    maxByRate(active,  p => p.apps >= 20 ? (p.assists || 0) / p.apps : null),
     bestCpg:    maxByRate(active,  p => p.apps >= 20 ? ((p.goals || 0) + (p.assists || 0)) / p.apps : null),
     bestCspg:   maxByRate(gks,     p => p.apps >= 20 ? (p.cleanSheets || 0) / p.apps : null),
+    topApps:    maxBy(outfield, p => p.apps || 0),
   }
 
   // ── All Comps single season ───────────────────────────────────────────────
-  // Flatten all players' embedded seasonStats[] into records with player ref
+  // Rate threshold: 20 apps (all comps single season)
   const allSeasonEntries = []
   for (const p of active) {
     for (const ss of p.seasonStats || []) {
       allSeasonEntries.push({ player: p, ss })
     }
   }
+  const gkSeasonEntries = allSeasonEntries.filter(e => isGK(e.player))
 
   const acSeason = {
     topGoals:   maxByEntry(allSeasonEntries, e => e.ss.goals || 0),
@@ -92,17 +173,20 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
       (e.ss.apps || 0) >= 20 ? (e.ss.assists || 0) / e.ss.apps : null),
     bestCpg:    maxByEntryRate(allSeasonEntries, e =>
       (e.ss.apps || 0) >= 20 ? ((e.ss.goals || 0) + (e.ss.assists || 0)) / e.ss.apps : null),
+    // GK single-season CS/Game — same 20-app threshold as other single-season rates
+    bestCspg:   maxByEntryRate(gkSeasonEntries, e =>
+      (e.ss.apps || 0) >= 20 ? (e.ss.cleanSheets || 0) / e.ss.apps : null),
   }
 
   // ── Champions League career ───────────────────────────────────────────────
-  // Sum UCL fields from embedded seasonStats[]
+  // Rate threshold: 5 UCL apps (career)
   const withUCL = active.map(p => {
     let uclApps = 0, uclGoals = 0, uclAssists = 0, uclCleanSheets = 0
     for (const ss of p.seasonStats || []) {
-      uclApps       += ss.uclApps       || 0
-      uclGoals      += ss.uclGoals      || 0
-      uclAssists    += ss.uclAssists    || 0
-      uclCleanSheets+= ss.uclCleanSheets|| 0
+      uclApps        += ss.uclApps        || 0
+      uclGoals       += ss.uclGoals       || 0
+      uclAssists     += ss.uclAssists     || 0
+      uclCleanSheets += ss.uclCleanSheets || 0
     }
     return { ...p, uclApps, uclGoals, uclAssists, uclCleanSheets }
   })
@@ -110,17 +194,18 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
   const withUCLGks      = withUCL.filter(p => isGK(p))
 
   const uclCareer = {
-    topGoals:   maxBy(withUCL,        p => p.uclGoals),
-    topAssists: maxBy(withUCL,        p => p.uclAssists),
-    topContrib: maxBy(withUCL,        p => p.uclGoals + p.uclAssists),
-    topApps:    maxBy(withUCLOutfield,p => p.uclApps),
-    bestGpg:    maxByRate(withUCL,    p => p.uclApps >= 5 ? p.uclGoals / p.uclApps : null),
-    bestApg:    maxByRate(withUCL,    p => p.uclApps >= 5 ? p.uclAssists / p.uclApps : null),
-    bestCpg:    maxByRate(withUCL,    p => p.uclApps >= 5 ? (p.uclGoals + p.uclAssists) / p.uclApps : null),
-    bestCspg:   maxByRate(withUCLGks, p => p.uclApps >= 5 ? p.uclCleanSheets / p.uclApps : null),
+    topGoals:   maxBy(withUCL,         p => p.uclGoals),
+    topAssists: maxBy(withUCL,         p => p.uclAssists),
+    topContrib: maxBy(withUCL,         p => p.uclGoals + p.uclAssists),
+    bestGpg:    maxByRate(withUCL,     p => p.uclApps >= 5 ? p.uclGoals / p.uclApps : null),
+    bestApg:    maxByRate(withUCL,     p => p.uclApps >= 5 ? p.uclAssists / p.uclApps : null),
+    bestCpg:    maxByRate(withUCL,     p => p.uclApps >= 5 ? (p.uclGoals + p.uclAssists) / p.uclApps : null),
+    bestCspg:   maxByRate(withUCLGks,  p => p.uclApps >= 5 ? p.uclCleanSheets / p.uclApps : null),
+    topApps:    maxBy(withUCLOutfield, p => p.uclApps),
   }
 
   // ── Champions League single season ────────────────────────────────────────
+  // Rate threshold: 5 UCL apps (single season)
   const uclSeasonEntries = []
   for (const p of active) {
     for (const ss of p.seasonStats || []) {
@@ -138,70 +223,123 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
       (e.ss.uclApps || 0) >= 5 ? (e.ss.uclAssists || 0) / e.ss.uclApps : null),
     bestCpg:    maxByEntryRate(uclSeasonEntries, e =>
       (e.ss.uclApps || 0) >= 5 ? ((e.ss.uclGoals || 0) + (e.ss.uclAssists || 0)) / e.ss.uclApps : null),
+    // GK single-season CS/Game — same 5 UCL app threshold
+    bestCspg:   maxByEntryRate(uclSeasonEntries.filter(e => isGK(e.player)), e =>
+      (e.ss.uclApps || 0) >= 5 ? (e.ss.uclCleanSheets || 0) / e.ss.uclApps : null),
   }
 
-  // ── Top 5 lists (for popup) ───────────────────────────────────────────────
+  // ── Top 5 lists ───────────────────────────────────────────────────────────
+
   const top5 = {
+    // All Comps — Career
     ac_career_goals:   top5By(active, p => p.goals || 0,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.goals || 0, ctx: `${p.apps || 0} apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.goals || 0, ctx: `${p.apps || 0} apps`, fmt: v => `${v} goals` })),
     ac_career_assists: top5By(active, p => p.assists || 0,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.assists || 0, ctx: `${p.apps || 0} apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.assists || 0, ctx: `${p.apps || 0} apps`, fmt: v => `${v} assists` })),
     ac_career_contrib: top5By(active, p => (p.goals||0)+(p.assists||0),
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: (p.goals||0)+(p.assists||0), ctx: `${p.apps||0} apps`, fmt: v => `${v} G+A` })),
-    ac_career_apps:    top5By(outfield, p => p.apps || 0,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.apps || 0, ctx: p.position })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: (p.goals||0)+(p.assists||0), ctx: `${p.apps||0} apps`, fmt: v => `${v} G+A` })),
     ac_career_gpg:     top5ByRate(active.filter(p=>p.apps>=20), p => (p.goals||0)/p.apps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: ((p.goals||0)/p.apps).toFixed(2), ctx: `${p.goals||0}G · ${p.apps} apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: ((p.goals||0)/p.apps).toFixed(2), ctx: `${p.goals||0}G · ${p.apps} apps`, fmt: v => `${v} G/G` })),
     ac_career_apg:     top5ByRate(active.filter(p=>p.apps>=20), p => (p.assists||0)/p.apps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: ((p.assists||0)/p.apps).toFixed(2), ctx: `${p.assists||0}A · ${p.apps} apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: ((p.assists||0)/p.apps).toFixed(2), ctx: `${p.assists||0}A · ${p.apps} apps`, fmt: v => `${v} A/G` })),
     ac_career_cpg:     top5ByRate(active.filter(p=>p.apps>=20), p => ((p.goals||0)+(p.assists||0))/p.apps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: (((p.goals||0)+(p.assists||0))/p.apps).toFixed(2), ctx: `${(p.goals||0)+(p.assists||0)} G+A · ${p.apps} apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: (((p.goals||0)+(p.assists||0))/p.apps).toFixed(2),
+              ctx: `${(p.goals||0)+(p.assists||0)} G+A · ${p.apps} apps`, fmt: v => `${v} C/G` })),
     ac_career_cspg:    top5ByRate(gks.filter(p=>p.apps>=20), p => (p.cleanSheets||0)/p.apps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: ((p.cleanSheets||0)/p.apps).toFixed(2), ctx: `${p.cleanSheets||0} CS · ${p.apps} apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: ((p.cleanSheets||0)/p.apps).toFixed(2),
+              ctx: `${p.cleanSheets||0} CS · ${p.apps} apps`, fmt: v => `${v} CS/G` })),
+    ac_career_apps:    top5By(outfield, p => p.apps || 0,
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.apps || 0, ctx: p.position, fmt: v => `${v} apps` })),
 
+    // All Comps — Single Season
     ac_season_goals:   top5ByEntry(allSeasonEntries, e => e.ss.goals||0,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: e.ss.goals||0, ctx: `${e.ss.label} · ${e.ss.apps||0} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: e.ss.goals||0, ctx: `${e.ss.label} · ${e.ss.apps||0} apps`, fmt: v => `${v} goals` })),
     ac_season_assists: top5ByEntry(allSeasonEntries, e => e.ss.assists||0,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: e.ss.assists||0, ctx: `${e.ss.label} · ${e.ss.apps||0} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: e.ss.assists||0, ctx: `${e.ss.label} · ${e.ss.apps||0} apps`, fmt: v => `${v} assists` })),
     ac_season_contrib: top5ByEntry(allSeasonEntries, e => (e.ss.goals||0)+(e.ss.assists||0),
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: (e.ss.goals||0)+(e.ss.assists||0), ctx: `${e.ss.label} · ${e.ss.apps||0} apps`, fmt: v=>`${v} G+A` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: (e.ss.goals||0)+(e.ss.assists||0), ctx: `${e.ss.label} · ${e.ss.apps||0} apps`, fmt: v => `${v} G+A` })),
     ac_season_gpg:     top5ByEntryRate(allSeasonEntries.filter(e=>(e.ss.apps||0)>=20), e=>(e.ss.goals||0)/e.ss.apps,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: ((e.ss.goals||0)/e.ss.apps).toFixed(2), ctx: `${e.ss.label} · ${e.ss.goals||0}G · ${e.ss.apps} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: ((e.ss.goals||0)/e.ss.apps).toFixed(2), ctx: `${e.ss.label} · ${e.ss.goals||0}G · ${e.ss.apps} apps`, fmt: v => `${v} G/G` })),
     ac_season_apg:     top5ByEntryRate(allSeasonEntries.filter(e=>(e.ss.apps||0)>=20), e=>(e.ss.assists||0)/e.ss.apps,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: ((e.ss.assists||0)/e.ss.apps).toFixed(2), ctx: `${e.ss.label} · ${e.ss.assists||0}A · ${e.ss.apps} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: ((e.ss.assists||0)/e.ss.apps).toFixed(2), ctx: `${e.ss.label} · ${e.ss.assists||0}A · ${e.ss.apps} apps`, fmt: v => `${v} A/G` })),
     ac_season_cpg:     top5ByEntryRate(allSeasonEntries.filter(e=>(e.ss.apps||0)>=20), e=>((e.ss.goals||0)+(e.ss.assists||0))/e.ss.apps,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: (((e.ss.goals||0)+(e.ss.assists||0))/e.ss.apps).toFixed(2), ctx: `${e.ss.label} · ${(e.ss.goals||0)+(e.ss.assists||0)} G+A · ${e.ss.apps} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: (((e.ss.goals||0)+(e.ss.assists||0))/e.ss.apps).toFixed(2),
+              ctx: `${e.ss.label} · ${(e.ss.goals||0)+(e.ss.assists||0)} G+A · ${e.ss.apps} apps`, fmt: v => `${v} C/G` })),
+    ac_season_cspg:    top5ByEntryRate(gkSeasonEntries.filter(e=>(e.ss.apps||0)>=20), e=>(e.ss.cleanSheets||0)/e.ss.apps,
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: ((e.ss.cleanSheets||0)/e.ss.apps).toFixed(2),
+              ctx: `${e.ss.label} · ${e.ss.cleanSheets||0} CS · ${e.ss.apps} apps`, fmt: v => `${v} CS/G` })),
 
+    // UCL — Career
     ucl_career_goals:   top5By(withUCL, p=>p.uclGoals,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.uclGoals, ctx: `${p.uclApps} UCL apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.uclGoals, ctx: `${p.uclApps} apps`, fmt: v => `${v} goals` })),
     ucl_career_assists: top5By(withUCL, p=>p.uclAssists,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.uclAssists, ctx: `${p.uclApps} UCL apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.uclAssists, ctx: `${p.uclApps} apps`, fmt: v => `${v} assists` })),
     ucl_career_contrib: top5By(withUCL, p=>p.uclGoals+p.uclAssists,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.uclGoals+p.uclAssists, ctx: `${p.uclApps} UCL apps`, fmt: v=>`${v} G+A` })),
-    ucl_career_apps:    top5By(withUCLOutfield, p=>p.uclApps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: p.uclApps, ctx: p.position })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.uclGoals+p.uclAssists, ctx: `${p.uclApps} apps`, fmt: v => `${v} G+A` })),
     ucl_career_gpg:     top5ByRate(withUCL.filter(p=>p.uclApps>=5), p=>p.uclGoals/p.uclApps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: (p.uclGoals/p.uclApps).toFixed(2), ctx: `${p.uclGoals}G · ${p.uclApps} UCL apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: (p.uclGoals/p.uclApps).toFixed(2), ctx: `${p.uclGoals}G · ${p.uclApps} apps`, fmt: v => `${v} G/G` })),
     ucl_career_apg:     top5ByRate(withUCL.filter(p=>p.uclApps>=5), p=>p.uclAssists/p.uclApps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: (p.uclAssists/p.uclApps).toFixed(2), ctx: `${p.uclAssists}A · ${p.uclApps} UCL apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: (p.uclAssists/p.uclApps).toFixed(2), ctx: `${p.uclAssists}A · ${p.uclApps} apps`, fmt: v => `${v} A/G` })),
     ucl_career_cpg:     top5ByRate(withUCL.filter(p=>p.uclApps>=5), p=>(p.uclGoals+p.uclAssists)/p.uclApps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: ((p.uclGoals+p.uclAssists)/p.uclApps).toFixed(2), ctx: `${p.uclGoals+p.uclAssists} G+A · ${p.uclApps} UCL apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: ((p.uclGoals+p.uclAssists)/p.uclApps).toFixed(2),
+              ctx: `${p.uclGoals+p.uclAssists} G+A · ${p.uclApps} apps`, fmt: v => `${v} C/G` })),
     ucl_career_cspg:    top5ByRate(withUCLGks.filter(p=>p.uclApps>=5), p=>p.uclCleanSheets/p.uclApps,
-      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id, value: (p.uclCleanSheets/p.uclApps).toFixed(2), ctx: `${p.uclCleanSheets} CS · ${p.uclApps} UCL apps` })),
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: (p.uclCleanSheets/p.uclApps).toFixed(2),
+              ctx: `${p.uclCleanSheets} CS · ${p.uclApps} apps`, fmt: v => `${v} CS/G` })),
+    ucl_career_apps:    top5By(withUCLOutfield, p=>p.uclApps,
+      p => ({ name: p.name, sofifaId: p.sofifaId, id: p.id,
+              value: p.uclApps, ctx: p.position, fmt: v => `${v} apps` })),
 
+    // UCL — Single Season
     ucl_season_goals:   top5ByEntry(uclSeasonEntries, e=>e.ss.uclGoals||0,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: e.ss.uclGoals||0, ctx: `${e.ss.label} · ${e.ss.uclApps||0} UCL apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: e.ss.uclGoals||0, ctx: `${e.ss.label} · ${e.ss.uclApps||0} apps`, fmt: v => `${v} goals` })),
     ucl_season_assists: top5ByEntry(uclSeasonEntries, e=>e.ss.uclAssists||0,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: e.ss.uclAssists||0, ctx: `${e.ss.label} · ${e.ss.uclApps||0} UCL apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: e.ss.uclAssists||0, ctx: `${e.ss.label} · ${e.ss.uclApps||0} apps`, fmt: v => `${v} assists` })),
     ucl_season_contrib: top5ByEntry(uclSeasonEntries, e=>(e.ss.uclGoals||0)+(e.ss.uclAssists||0),
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: (e.ss.uclGoals||0)+(e.ss.uclAssists||0), ctx: `${e.ss.label} · ${e.ss.uclApps||0} UCL apps`, fmt: v=>`${v} G+A` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: (e.ss.uclGoals||0)+(e.ss.uclAssists||0), ctx: `${e.ss.label} · ${e.ss.uclApps||0} apps`, fmt: v => `${v} G+A` })),
     ucl_season_gpg:     top5ByEntryRate(uclSeasonEntries.filter(e=>(e.ss.uclApps||0)>=5), e=>(e.ss.uclGoals||0)/e.ss.uclApps,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: ((e.ss.uclGoals||0)/e.ss.uclApps).toFixed(2), ctx: `${e.ss.label} · ${e.ss.uclGoals||0}G · ${e.ss.uclApps} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: ((e.ss.uclGoals||0)/e.ss.uclApps).toFixed(2),
+              ctx: `${e.ss.label} · ${e.ss.uclGoals||0}G · ${e.ss.uclApps} apps`, fmt: v => `${v} G/G` })),
     ucl_season_apg:     top5ByEntryRate(uclSeasonEntries.filter(e=>(e.ss.uclApps||0)>=5), e=>(e.ss.uclAssists||0)/e.ss.uclApps,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: ((e.ss.uclAssists||0)/e.ss.uclApps).toFixed(2), ctx: `${e.ss.label} · ${e.ss.uclAssists||0}A · ${e.ss.uclApps} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: ((e.ss.uclAssists||0)/e.ss.uclApps).toFixed(2),
+              ctx: `${e.ss.label} · ${e.ss.uclAssists||0}A · ${e.ss.uclApps} apps`, fmt: v => `${v} A/G` })),
     ucl_season_cpg:     top5ByEntryRate(uclSeasonEntries.filter(e=>(e.ss.uclApps||0)>=5), e=>((e.ss.uclGoals||0)+(e.ss.uclAssists||0))/e.ss.uclApps,
-      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id, value: (((e.ss.uclGoals||0)+(e.ss.uclAssists||0))/e.ss.uclApps).toFixed(2), ctx: `${e.ss.label} · ${(e.ss.uclGoals||0)+(e.ss.uclAssists||0)} G+A · ${e.ss.uclApps} apps` })),
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: (((e.ss.uclGoals||0)+(e.ss.uclAssists||0))/e.ss.uclApps).toFixed(2),
+              ctx: `${e.ss.label} · ${(e.ss.uclGoals||0)+(e.ss.uclAssists||0)} G+A · ${e.ss.uclApps} apps`, fmt: v => `${v} C/G` })),
+    ucl_season_cspg:    top5ByEntryRate(uclSeasonEntries.filter(e=>isGK(e.player)&&(e.ss.uclApps||0)>=5), e=>(e.ss.uclCleanSheets||0)/e.ss.uclApps,
+      e => ({ name: e.player.name, sofifaId: e.player.sofifaId, id: e.player.id,
+              value: ((e.ss.uclCleanSheets||0)/e.ss.uclApps).toFixed(2),
+              ctx: `${e.ss.label} · ${e.ss.uclCleanSheets||0} CS · ${e.ss.uclApps} apps`, fmt: v => `${v} CS/G` })),
 
+    // Club tab
     club_pts:       top5By(seasons, s=>s.leaguePts||0,
       s => ({ name: s.label, value: s.leaguePts||0, ctx: `${s.leagueW}W ${s.leagueD}D ${s.leagueL}L`, fmt: v=>`${v} pts`, isClub: true })),
     club_goals:     top5By(seasons, s=>s.leagueGF||0,
@@ -214,28 +352,32 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
       s => ({ name: s.label, value: s.dynastyScore||0, ctx: s.year||'', fmt: v=>`${v} pts`, isClub: true })),
     club_win:       buildBiggestWinTop5(matches),
     transfers_in:   top5By(transfers.filter(t=>t.direction==='IN'), t=>t.fee_eur||0,
-      t => ({ name: t.player||'Unknown', value: t.fee_eur||0, ctx: `${seasons.find(s=>s.id===t.seasonId)?.label||t.season||'?'} · from ${t.from_club||'?'}`, fmt: fmt, isClub: true })),
+      t => ({ name: t.player||'Unknown', value: t.fee_eur||0,
+              ctx: `${seasons.find(s=>s.id===t.seasonId)?.label||t.season||'?'} · from ${t.from_club||'?'}`,
+              fmt: fmt, isClub: true })),
     transfers_out:  top5By(transfers.filter(t=>t.direction==='OUT'), t=>t.fee_eur||0,
-      t => ({ name: t.player||'Unknown', value: t.fee_eur||0, ctx: `${seasons.find(s=>s.id===t.seasonId)?.label||t.season||'?'} · to ${t.to_club||'?'}`, fmt: fmt, isClub: true })),
+      t => ({ name: t.player||'Unknown', value: t.fee_eur||0,
+              ctx: `${seasons.find(s=>s.id===t.seasonId)?.label||t.season||'?'} · to ${t.to_club||'?'}`,
+              fmt: fmt, isClub: true })),
   }
 
   // ── Club season records ───────────────────────────────────────────────────
   const resolveLabel = t => t.season || seasons.find(s => s.id === t.seasonId)?.label || '?'
-  const ins  = transfers.filter(t => t.direction === 'IN')
-  const outs = transfers.filter(t => t.direction === 'OUT')
+  const ins      = transfers.filter(t => t.direction === 'IN')
+  const outs     = transfers.filter(t => t.direction === 'OUT')
   const highestIn  = [...ins].sort((a,b)=>(b.fee_eur||0)-(a.fee_eur||0))[0] || null
   const highestOut = [...outs].sort((a,b)=>(b.fee_eur||0)-(a.fee_eur||0))[0] || null
   if (highestIn)  highestIn._seasonLabel  = resolveLabel(highestIn)
   if (highestOut) highestOut._seasonLabel = resolveLabel(highestOut)
 
-  const wins = matches.filter(m => m.score_for > m.score_against)
+  const wins      = matches.filter(m => m.score_for > m.score_against)
   const biggestWin = [...wins].sort((a,b)=>(b.score_for-b.score_against)-(a.score_for-a.score_against))[0]||null
 
-  const byPts    = [...seasons].sort((a,b)=>(b.leaguePts||0)-(a.leaguePts||0))[0]||null
-  const byGoals  = [...seasons].sort((a,b)=>(b.leagueGF||0)-(a.leagueGF||0))[0]||null
-  const byGpg    = seasons.filter(s=>s.leagueP>0).map(s=>({...s,gpg:s.leagueGF/s.leagueP})).sort((a,b)=>b.gpg-a.gpg)[0]||null
-  const byGA     = [...seasons].filter(s=>s.leagueP>0).sort((a,b)=>(a.leagueGA||999)-(b.leagueGA||999))[0]||null
-  const byDynasty= [...seasons].sort((a,b)=>(b.dynastyScore||0)-(a.dynastyScore||0))[0]||null
+  const byPts     = [...seasons].sort((a,b)=>(b.leaguePts||0)-(a.leaguePts||0))[0]||null
+  const byGoals   = [...seasons].sort((a,b)=>(b.leagueGF||0)-(a.leagueGF||0))[0]||null
+  const byGpg     = seasons.filter(s=>s.leagueP>0).map(s=>({...s,gpg:s.leagueGF/s.leagueP})).sort((a,b)=>b.gpg-a.gpg)[0]||null
+  const byGA      = [...seasons].filter(s=>s.leagueP>0).sort((a,b)=>(a.leagueGA||999)-(b.leagueGA||999))[0]||null
+  const byDynasty = [...seasons].sort((a,b)=>(b.dynastyScore||0)-(a.dynastyScore||0))[0]||null
 
   return {
     acCareer, acSeason,
@@ -247,61 +389,47 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function isGK(p) {
-  if (!p.position) return false
-  const positions = p.position.split(/[,\/]+/).map(x => x.trim())
-  return positions.includes('GK')
-}
-
 function maxBy(arr, fn) {
   if (!arr.length) return null
   return arr.reduce((best, x) => fn(x) > fn(best) ? x : best, arr[0])
 }
-
 function maxByRate(arr, fn) {
   const eligible = arr.filter(x => fn(x) !== null)
   if (!eligible.length) return null
   return eligible.reduce((best, x) => fn(x) > fn(best) ? x : best, eligible[0])
 }
-
 function maxByEntry(entries, fn) {
   if (!entries.length) return null
   return entries.reduce((best, e) => fn(e) > fn(best) ? e : best, entries[0])
 }
-
 function maxByEntryRate(entries, fn) {
   const eligible = entries.filter(e => fn(e) !== null)
   if (!eligible.length) return null
   return eligible.reduce((best, e) => fn(e) > fn(best) ? e : best, eligible[0])
 }
-
 function top5By(arr, scoreFn, mapFn) {
   return [...arr].sort((a,b)=>scoreFn(b)-scoreFn(a)).slice(0,5).map(mapFn)
 }
-
 function top5ByRate(arr, scoreFn, mapFn) {
   return [...arr].sort((a,b)=>scoreFn(b)-scoreFn(a)).slice(0,5).map(mapFn)
 }
-
 function top5ByEntry(entries, scoreFn, mapFn) {
   return [...entries].sort((a,b)=>scoreFn(b)-scoreFn(a)).slice(0,5).map(mapFn)
 }
-
 function top5ByEntryRate(entries, scoreFn, mapFn) {
   return [...entries].sort((a,b)=>scoreFn(b)-scoreFn(a)).slice(0,5).map(mapFn)
 }
 
 function buildBiggestWinTop5(matches) {
-  const wins = matches.filter(m=>m.score_for>m.score_against)
+  const wins = matches.filter(m => m.score_for > m.score_against)
   return [...wins]
-    .sort((a,b)=>(b.score_for-b.score_against)-(a.score_for-a.score_against))
+    .sort((a,b) => (b.score_for-b.score_against)-(a.score_for-a.score_against))
     .slice(0,5)
     .map(m => ({
       name: `vs ${m.opponent}`,
       value: `${m.score_for}–${m.score_against}`,
       ctx: `${compLabel(m.competition)} · ${m.home_away==='H'?'Home':m.home_away==='A'?'Away':'Neutral'}`,
       isClub: true,
-      raw: m.score_for - m.score_against,
     }))
 }
 
@@ -309,23 +437,23 @@ function buildBiggestWinTop5(matches) {
 
 function Top5Modal({ title, items, onClose, onPlayerClick }) {
   if (!items) return null
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <span className={styles.modalTitle}>{title}</span>
-          <button className={styles.modalClose} onClick={onClose}>✕</button>
+  const modal = (
+    <div className={styles.rModalOverlay} onClick={onClose}>
+      <div className={styles.rModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.rModalHeader}>
+          <span className={styles.rModalTitle}>{title}</span>
+          <button className={styles.rModalClose} onClick={onClose}>✕</button>
         </div>
         {items.length === 0 ? (
-          <div className={styles.modalEmpty}>No eligible entries yet</div>
+          <div className={styles.rModalEmpty}>No eligible entries yet</div>
         ) : (
-          <div className={styles.modalList}>
+          <div className={styles.rModalList}>
             {items.map((item, i) => (
-              <div key={i} className={styles.modalRow}>
-                <span className={styles.modalRank}>{i + 1}</span>
+              <div key={i} className={styles.rModalRow}>
+                <span className={styles.rModalRank}>{i + 1}</span>
                 {!item.isClub && (
                   <button
-                    className={styles.modalPlayerBtn}
+                    className={styles.rModalPlayerBtn}
                     onClick={() => item.id && onPlayerClick(item.id)}
                     disabled={!item.id}
                   >
@@ -333,14 +461,14 @@ function Top5Modal({ title, items, onClose, onPlayerClick }) {
                   </button>
                 )}
                 <button
-                  className={styles.modalInfoBtn}
+                  className={styles.rModalInfoBtn}
                   onClick={() => item.id && !item.isClub && onPlayerClick(item.id)}
                   disabled={!item.id || item.isClub}
                 >
-                  <span className={styles.modalName}>{item.name}</span>
-                  {item.ctx && <span className={styles.modalCtx}>{item.ctx}</span>}
+                  <span className={styles.rModalName}>{item.name}</span>
+                  {item.ctx && <span className={styles.rModalCtx}>{item.ctx}</span>}
                 </button>
-                <span className={styles.modalValue}>
+                <span className={styles.rModalValue}>
                   {item.fmt ? item.fmt(item.value) : item.value}
                 </span>
               </div>
@@ -350,60 +478,60 @@ function Top5Modal({ title, items, onClose, onPlayerClick }) {
       </div>
     </div>
   )
+  return createPortal(modal, document.body)
 }
 
-// ─── Record card ──────────────────────────────────────────────────────────────
+// ─── Player record card ───────────────────────────────────────────────────────
+// All record values are gold — no highlight prop needed.
 
-function RecordCard({ label, player, value, ctx, highlight, onCardClick, onPlayerClick }) {
+function RecordCard({ label, player, value, ctx, onCardClick, onPlayerClick }) {
+  function handlePlayer() {
+    if (player?.id && onPlayerClick) onPlayerClick(player.id)
+  }
   return (
-    <div className={styles.recordCard}>
-      {/* Left: photo + player info — clickable for PlayerProfile */}
-      <div className={styles.recordLeft}>
-        {player ? (
-          <button
-            className={styles.recordPlayerBtn}
-            onClick={() => player.id && onPlayerClick && onPlayerClick(player.id)}
-            disabled={!player.id}
-            title={player.name}
-          >
-            <PlayerImg sofifaId={player.sofifaId} name={player.name} size={36} />
-          </button>
-        ) : (
-          <div className={styles.recordImgPlaceholder} />
-        )}
-        <button
-          className={styles.recordMetaBtn}
-          onClick={() => player?.id && onPlayerClick && onPlayerClick(player.id)}
-          disabled={!player?.id}
-        >
-          <div className={styles.recordHolder}>{player?.name || '—'}</div>
-          {ctx && <div className={styles.recordCtx}>{ctx}</div>}
+    <div className={styles.rCard}>
+      <div className={styles.rLeft}>
+        <button className={styles.rPlayerBtn} onClick={handlePlayer} disabled={!player?.id} title={player?.name}>
+          <PlayerImg sofifaId={player?.sofifaId} name={player?.name || ''} size={36} />
+        </button>
+        <button className={styles.rMetaBtn} onClick={handlePlayer} disabled={!player?.id}>
+          <span className={styles.rHolder}>{player?.name || '—'}</span>
+          {ctx && <span className={styles.rCtx}>{ctx}</span>}
         </button>
       </div>
-      {/* Right: label + value — clickable for Top 5 */}
-      <button className={styles.recordRight} onClick={onCardClick}>
-        <div className={styles.recordLabel}>{label}</div>
-        <div className={styles.recordValue} style={highlight ? { color: 'var(--en-gold)' } : {}}>
-          {value}
-        </div>
+      <button className={styles.rRight} onClick={onCardClick}>
+        <span className={styles.rLabel}>{label}</span>
+        <span className={styles.rValue} style={{ color: 'var(--en-gold)' }}>{value}</span>
       </button>
     </div>
   )
 }
 
-// Club-level record card (no player photo, just season/transfer data)
-function ClubRecordCard({ label, holder, value, ctx, highlight, onCardClick }) {
+// ─── Club record card — crest on left ────────────────────────────────────────
+
+function ClubRecordCard({ label, holder, value, ctx, crestUrl, crestType, onCardClick }) {
+  // crestType: 'opp' = opponent crest, 'richport' = XI monogram, undefined = generic fallback
+  const crestEl = crestType === 'richport'
+    ? <RichportMark size={36} />
+    : <OppCrest crestUrl={crestUrl || null} size={36} />
+
   return (
-    <button className={`${styles.clubRecordCard} ${onCardClick ? styles.clubRecordCardTappable : ''}`} onClick={onCardClick}>
-      <div className={styles.clubRecordLeft}>
-        <div className={styles.clubRecordHolder}>{holder || '—'}</div>
-        {ctx && <div className={styles.clubRecordCtx}>{ctx}</div>}
-      </div>
-      <div className={styles.clubRecordRight}>
-        <div className={styles.clubRecordLabel}>{label}</div>
-        <div className={styles.clubRecordValue} style={highlight ? { color: 'var(--en-gold)' } : {}}>
-          {value}
+    <button
+      className={`${styles.rCard} ${styles.rCardClub} ${onCardClick ? styles.rCardTappable : ''}`}
+      onClick={onCardClick}
+      disabled={!onCardClick}
+      style={{ width: '100%', textAlign: 'left' }}
+    >
+      <div className={styles.rLeft}>
+        <div style={{ flexShrink: 0 }}>{crestEl}</div>
+        <div className={styles.rMetaBtn} style={{ cursor: 'inherit', pointerEvents: 'none' }}>
+          <span className={styles.rHolder}>{holder || '—'}</span>
+          {ctx && <span className={styles.rCtx}>{ctx}</span>}
         </div>
+      </div>
+      <div className={styles.rRight} style={{ cursor: 'inherit', pointerEvents: 'none' }}>
+        <span className={styles.rLabel}>{label}</span>
+        <span className={styles.rValue} style={{ color: 'var(--en-gold)' }}>{value}</span>
       </div>
     </button>
   )
@@ -411,8 +539,8 @@ function ClubRecordCard({ label, holder, value, ctx, highlight, onCardClick }) {
 
 function Section({ title, children }) {
   return (
-    <div className={styles.section}>
-      <div className={styles.sectionTitle}>{title}</div>
+    <div className={styles.rSection}>
+      <div className={styles.rSectionTitle}>{title}</div>
       {children}
     </div>
   )
@@ -420,232 +548,272 @@ function Section({ title, children }) {
 
 // ─── Tab panels ───────────────────────────────────────────────────────────────
 
-function AllCompsTab({ r, top5, onCardClick, onPlayerClick }) {
+function AllCompsTab({ r, onCardClick, onPlayerClick }) {
   const { acCareer: c, acSeason: s } = r
-
-  // Helpers to build player ref for RecordCard
-  const fromPlayer = (p) => p ? { id: p.id, name: p.name, sofifaId: p.sofifaId } : null
-  const fromEntry  = (e) => e ? { id: e.player.id, name: e.player.name, sofifaId: e.player.sofifaId } : null
+  const fromPlayer = p => p ? { id: p.id, name: p.name, sofifaId: p.sofifaId } : null
+  const fromEntry  = e => e ? { id: e.player.id, name: e.player.name, sofifaId: e.player.sofifaId } : null
 
   return (
-    <div>
+    <div className={styles.rWrap}>
+      {/* Career — order: Goals · Assists · G+A · G/G · A/G · C/G · CS/G · Appearances */}
       <Section title="Career">
-        <RecordCard label="Most career goals"
+        <RecordCard label="Most Goals"
           player={fromPlayer(c.topGoals)}
           value={c.topGoals ? `${c.topGoals.goals} goals` : '—'}
           ctx={c.topGoals ? `${c.topGoals.apps} apps` : null}
-          highlight onCardClick={()=>onCardClick('ac_career_goals','Most Career Goals')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most career assists"
+          onCardClick={()=>onCardClick('ac_career_goals','Most Goals')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most Assists"
           player={fromPlayer(c.topAssists)}
           value={c.topAssists ? `${c.topAssists.assists} assists` : '—'}
           ctx={c.topAssists ? `${c.topAssists.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_career_assists','Most Career Assists')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most career contributions"
+          onCardClick={()=>onCardClick('ac_career_assists','Most Assists')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most G+A"
           player={fromPlayer(c.topContrib)}
           value={c.topContrib ? `${(c.topContrib.goals||0)+(c.topContrib.assists||0)} G+A` : '—'}
           ctx={c.topContrib ? `${c.topContrib.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_career_contrib','Most Career Contributions')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most appearances (outfield)"
-          player={fromPlayer(c.topApps)}
-          value={c.topApps ? `${c.topApps.apps} apps` : '—'}
-          ctx={c.topApps?.position}
-          onCardClick={()=>onCardClick('ac_career_apps','Most Appearances')} onPlayerClick={onPlayerClick} />
+          onCardClick={()=>onCardClick('ac_career_contrib','Most G+A')} onPlayerClick={onPlayerClick} />
         <RecordCard label="Best G/Game"
           player={fromPlayer(c.bestGpg)}
-          value={c.bestGpg ? `${((c.bestGpg.goals||0)/c.bestGpg.apps).toFixed(2)}` : '—'}
+          value={c.bestGpg ? `${fmtRate((c.bestGpg.goals||0)/c.bestGpg.apps)} G/G` : '—'}
           ctx={c.bestGpg ? `${c.bestGpg.goals||0}G · ${c.bestGpg.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_career_gpg','Best Career G/Game')} onPlayerClick={onPlayerClick} />
+          onCardClick={()=>onCardClick('ac_career_gpg','Best G/Game')} onPlayerClick={onPlayerClick} />
         <RecordCard label="Best A/Game"
           player={fromPlayer(c.bestApg)}
-          value={c.bestApg ? `${((c.bestApg.assists||0)/c.bestApg.apps).toFixed(2)}` : '—'}
+          value={c.bestApg ? `${fmtRate((c.bestApg.assists||0)/c.bestApg.apps)} A/G` : '—'}
           ctx={c.bestApg ? `${c.bestApg.assists||0}A · ${c.bestApg.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_career_apg','Best Career A/Game')} onPlayerClick={onPlayerClick} />
+          onCardClick={()=>onCardClick('ac_career_apg','Best A/Game')} onPlayerClick={onPlayerClick} />
         <RecordCard label="Best C/Game"
           player={fromPlayer(c.bestCpg)}
-          value={c.bestCpg ? `${(((c.bestCpg.goals||0)+(c.bestCpg.assists||0))/c.bestCpg.apps).toFixed(2)}` : '—'}
+          value={c.bestCpg ? `${fmtRate(((c.bestCpg.goals||0)+(c.bestCpg.assists||0))/c.bestCpg.apps)} C/G` : '—'}
           ctx={c.bestCpg ? `${(c.bestCpg.goals||0)+(c.bestCpg.assists||0)} G+A · ${c.bestCpg.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_career_cpg','Best Career C/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best CS/Game (GK)"
+          onCardClick={()=>onCardClick('ac_career_cpg','Best C/Game')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best CS/Game"
           player={fromPlayer(c.bestCspg)}
-          value={c.bestCspg ? `${((c.bestCspg.cleanSheets||0)/c.bestCspg.apps).toFixed(2)}` : '—'}
+          value={c.bestCspg ? `${fmtRate((c.bestCspg.cleanSheets||0)/c.bestCspg.apps)} CS/G` : '—'}
           ctx={c.bestCspg ? `${c.bestCspg.cleanSheets||0} CS · ${c.bestCspg.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_career_cspg','Best Career CS/Game')} onPlayerClick={onPlayerClick} />
+          onCardClick={()=>onCardClick('ac_career_cspg','Best CS/Game')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most Appearances"
+          player={fromPlayer(c.topApps)}
+          value={c.topApps ? `${c.topApps.apps} apps` : '—'}
+          ctx={c.topApps?.position || null}
+          onCardClick={()=>onCardClick('ac_career_apps','Most Appearances')} onPlayerClick={onPlayerClick} />
       </Section>
+      <p className={styles.rQualNote}>Rate records require a minimum of 20 appearances.</p>
 
+      {/* Single Season — order: Goals · Assists · G+A · G/G · A/G · C/G · CS/G */}
       <Section title="Single Season">
-        <RecordCard label="Single-season goals"
+        <RecordCard label="Most Goals"
           player={fromEntry(s.topGoals)}
           value={s.topGoals ? `${s.topGoals.ss.goals} goals` : '—'}
           ctx={s.topGoals ? `${s.topGoals.ss.label} · ${s.topGoals.ss.apps} apps` : null}
-          highlight onCardClick={()=>onCardClick('ac_season_goals','Single-Season Goals')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Single-season assists"
+          onCardClick={()=>onCardClick('ac_season_goals','Most Goals — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most Assists"
           player={fromEntry(s.topAssists)}
           value={s.topAssists ? `${s.topAssists.ss.assists} assists` : '—'}
           ctx={s.topAssists ? `${s.topAssists.ss.label} · ${s.topAssists.ss.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_season_assists','Single-Season Assists')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Single-season contributions"
+          onCardClick={()=>onCardClick('ac_season_assists','Most Assists — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most G+A"
           player={fromEntry(s.topContrib)}
           value={s.topContrib ? `${(s.topContrib.ss.goals||0)+(s.topContrib.ss.assists||0)} G+A` : '—'}
           ctx={s.topContrib ? `${s.topContrib.ss.label} · ${s.topContrib.ss.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_season_contrib','Single-Season Contributions')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best G/Game (season)"
+          onCardClick={()=>onCardClick('ac_season_contrib','Most G+A — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best G/Game"
           player={fromEntry(s.bestGpg)}
-          value={s.bestGpg ? `${((s.bestGpg.ss.goals||0)/s.bestGpg.ss.apps).toFixed(2)}` : '—'}
+          value={s.bestGpg ? `${fmtRate((s.bestGpg.ss.goals||0)/s.bestGpg.ss.apps)} G/G` : '—'}
           ctx={s.bestGpg ? `${s.bestGpg.ss.label} · ${s.bestGpg.ss.goals||0}G · ${s.bestGpg.ss.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_season_gpg','Best Single-Season G/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best A/Game (season)"
+          onCardClick={()=>onCardClick('ac_season_gpg','Best G/Game — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best A/Game"
           player={fromEntry(s.bestApg)}
-          value={s.bestApg ? `${((s.bestApg.ss.assists||0)/s.bestApg.ss.apps).toFixed(2)}` : '—'}
+          value={s.bestApg ? `${fmtRate((s.bestApg.ss.assists||0)/s.bestApg.ss.apps)} A/G` : '—'}
           ctx={s.bestApg ? `${s.bestApg.ss.label} · ${s.bestApg.ss.assists||0}A · ${s.bestApg.ss.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_season_apg','Best Single-Season A/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best C/Game (season)"
+          onCardClick={()=>onCardClick('ac_season_apg','Best A/Game — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best C/Game"
           player={fromEntry(s.bestCpg)}
-          value={s.bestCpg ? `${(((s.bestCpg.ss.goals||0)+(s.bestCpg.ss.assists||0))/s.bestCpg.ss.apps).toFixed(2)}` : '—'}
+          value={s.bestCpg ? `${fmtRate(((s.bestCpg.ss.goals||0)+(s.bestCpg.ss.assists||0))/s.bestCpg.ss.apps)} C/G` : '—'}
           ctx={s.bestCpg ? `${s.bestCpg.ss.label} · ${(s.bestCpg.ss.goals||0)+(s.bestCpg.ss.assists||0)} G+A · ${s.bestCpg.ss.apps} apps` : null}
-          onCardClick={()=>onCardClick('ac_season_cpg','Best Single-Season C/Game')} onPlayerClick={onPlayerClick} />
+          onCardClick={()=>onCardClick('ac_season_cpg','Best C/Game — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best CS/Game"
+          player={fromEntry(s.bestCspg)}
+          value={s.bestCspg ? `${fmtRate((s.bestCspg.ss.cleanSheets||0)/s.bestCspg.ss.apps)} CS/G` : '—'}
+          ctx={s.bestCspg ? `${s.bestCspg.ss.label} · ${s.bestCspg.ss.cleanSheets||0} CS · ${s.bestCspg.ss.apps} apps` : null}
+          onCardClick={()=>onCardClick('ac_season_cspg','Best CS/Game — Single Season')} onPlayerClick={onPlayerClick} />
       </Section>
+      <p className={styles.rQualNote}>Rate records require a minimum of 20 appearances.</p>
     </div>
   )
 }
 
-function UCLTab({ r, top5, onCardClick, onPlayerClick }) {
+function UCLTab({ r, onCardClick, onPlayerClick }) {
   const { uclCareer: c, uclSeason: s } = r
-  const fromCareer = (p) => p ? { id: p.id, name: p.name, sofifaId: p.sofifaId } : null
-  const fromEntry  = (e) => e ? { id: e.player.id, name: e.player.name, sofifaId: e.player.sofifaId } : null
+  const fromCareer = p => p ? { id: p.id, name: p.name, sofifaId: p.sofifaId } : null
+  const fromEntry  = e => e ? { id: e.player.id, name: e.player.name, sofifaId: e.player.sofifaId } : null
 
   return (
-    <div>
+    <div className={styles.rWrap}>
+      {/* Career — order: Goals · Assists · G+A · G/G · A/G · C/G · CS/G · Appearances */}
       <Section title="Career">
-        <RecordCard label="Most UCL career goals"
+        <RecordCard label="Most Goals"
           player={fromCareer(c.topGoals)}
           value={c.topGoals ? `${c.topGoals.uclGoals} goals` : '—'}
-          ctx={c.topGoals ? `${c.topGoals.uclApps} UCL apps` : null}
-          highlight onCardClick={()=>onCardClick('ucl_career_goals','Most UCL Career Goals')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL career assists"
+          ctx={c.topGoals ? `${c.topGoals.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_goals','Most Goals')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most Assists"
           player={fromCareer(c.topAssists)}
           value={c.topAssists ? `${c.topAssists.uclAssists} assists` : '—'}
-          ctx={c.topAssists ? `${c.topAssists.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_career_assists','Most UCL Career Assists')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL career contributions"
+          ctx={c.topAssists ? `${c.topAssists.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_assists','Most Assists')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most G+A"
           player={fromCareer(c.topContrib)}
           value={c.topContrib ? `${c.topContrib.uclGoals+c.topContrib.uclAssists} G+A` : '—'}
-          ctx={c.topContrib ? `${c.topContrib.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_career_contrib','Most UCL Career Contributions')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Most UCL appearances (outfield)"
+          ctx={c.topContrib ? `${c.topContrib.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_contrib','Most G+A')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best G/Game"
+          player={fromCareer(c.bestGpg)}
+          value={c.bestGpg ? `${fmtRate(c.bestGpg.uclGoals/c.bestGpg.uclApps)} G/G` : '—'}
+          ctx={c.bestGpg ? `${c.bestGpg.uclGoals}G · ${c.bestGpg.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_gpg','Best G/Game')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best A/Game"
+          player={fromCareer(c.bestApg)}
+          value={c.bestApg ? `${fmtRate(c.bestApg.uclAssists/c.bestApg.uclApps)} A/G` : '—'}
+          ctx={c.bestApg ? `${c.bestApg.uclAssists}A · ${c.bestApg.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_apg','Best A/Game')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best C/Game"
+          player={fromCareer(c.bestCpg)}
+          value={c.bestCpg ? `${fmtRate((c.bestCpg.uclGoals+c.bestCpg.uclAssists)/c.bestCpg.uclApps)} C/G` : '—'}
+          ctx={c.bestCpg ? `${c.bestCpg.uclGoals+c.bestCpg.uclAssists} G+A · ${c.bestCpg.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_cpg','Best C/Game')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best CS/Game"
+          player={fromCareer(c.bestCspg)}
+          value={c.bestCspg ? `${fmtRate(c.bestCspg.uclCleanSheets/c.bestCspg.uclApps)} CS/G` : '—'}
+          ctx={c.bestCspg ? `${c.bestCspg.uclCleanSheets} CS · ${c.bestCspg.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_career_cspg','Best CS/Game')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most Appearances"
           player={fromCareer(c.topApps)}
           value={c.topApps ? `${c.topApps.uclApps} apps` : '—'}
-          ctx={c.topApps?.position}
-          onCardClick={()=>onCardClick('ucl_career_apps','Most UCL Appearances')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL G/Game"
-          player={fromCareer(c.bestGpg)}
-          value={c.bestGpg ? `${(c.bestGpg.uclGoals/c.bestGpg.uclApps).toFixed(2)}` : '—'}
-          ctx={c.bestGpg ? `${c.bestGpg.uclGoals}G · ${c.bestGpg.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_career_gpg','Best UCL Career G/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL A/Game"
-          player={fromCareer(c.bestApg)}
-          value={c.bestApg ? `${(c.bestApg.uclAssists/c.bestApg.uclApps).toFixed(2)}` : '—'}
-          ctx={c.bestApg ? `${c.bestApg.uclAssists}A · ${c.bestApg.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_career_apg','Best UCL Career A/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL C/Game"
-          player={fromCareer(c.bestCpg)}
-          value={c.bestCpg ? `${((c.bestCpg.uclGoals+c.bestCpg.uclAssists)/c.bestCpg.uclApps).toFixed(2)}` : '—'}
-          ctx={c.bestCpg ? `${c.bestCpg.uclGoals+c.bestCpg.uclAssists} G+A · ${c.bestCpg.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_career_cpg','Best UCL Career C/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL CS/Game (GK)"
-          player={fromCareer(c.bestCspg)}
-          value={c.bestCspg ? `${(c.bestCspg.uclCleanSheets/c.bestCspg.uclApps).toFixed(2)}` : '—'}
-          ctx={c.bestCspg ? `${c.bestCspg.uclCleanSheets} CS · ${c.bestCspg.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_career_cspg','Best UCL Career CS/Game')} onPlayerClick={onPlayerClick} />
+          ctx={c.topApps?.position || null}
+          onCardClick={()=>onCardClick('ucl_career_apps','Most Appearances')} onPlayerClick={onPlayerClick} />
       </Section>
+      <p className={styles.rQualNote}>Rate records require a minimum of 5 UCL appearances.</p>
 
+      {/* Single Season — order: Goals · Assists · G+A · G/G · A/G · C/G · CS/G */}
       <Section title="Single Season">
-        <RecordCard label="Single-season UCL goals"
+        <RecordCard label="Most Goals"
           player={fromEntry(s.topGoals)}
           value={s.topGoals ? `${s.topGoals.ss.uclGoals} goals` : '—'}
-          ctx={s.topGoals ? `${s.topGoals.ss.label} · ${s.topGoals.ss.uclApps} UCL apps` : null}
-          highlight onCardClick={()=>onCardClick('ucl_season_goals','Single-Season UCL Goals')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Single-season UCL assists"
+          ctx={s.topGoals ? `${s.topGoals.ss.label} · ${s.topGoals.ss.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_season_goals','Most Goals — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most Assists"
           player={fromEntry(s.topAssists)}
           value={s.topAssists ? `${s.topAssists.ss.uclAssists} assists` : '—'}
-          ctx={s.topAssists ? `${s.topAssists.ss.label} · ${s.topAssists.ss.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_season_assists','Single-Season UCL Assists')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Single-season UCL contributions"
+          ctx={s.topAssists ? `${s.topAssists.ss.label} · ${s.topAssists.ss.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_season_assists','Most Assists — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Most G+A"
           player={fromEntry(s.topContrib)}
           value={s.topContrib ? `${(s.topContrib.ss.uclGoals||0)+(s.topContrib.ss.uclAssists||0)} G+A` : '—'}
-          ctx={s.topContrib ? `${s.topContrib.ss.label} · ${s.topContrib.ss.uclApps} UCL apps` : null}
-          onCardClick={()=>onCardClick('ucl_season_contrib','Single-Season UCL Contributions')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL G/Game (season)"
+          ctx={s.topContrib ? `${s.topContrib.ss.label} · ${s.topContrib.ss.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_season_contrib','Most G+A — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best G/Game"
           player={fromEntry(s.bestGpg)}
-          value={s.bestGpg ? `${((s.bestGpg.ss.uclGoals||0)/s.bestGpg.ss.uclApps).toFixed(2)}` : '—'}
+          value={s.bestGpg ? `${fmtRate((s.bestGpg.ss.uclGoals||0)/s.bestGpg.ss.uclApps)} G/G` : '—'}
           ctx={s.bestGpg ? `${s.bestGpg.ss.label} · ${s.bestGpg.ss.uclGoals||0}G · ${s.bestGpg.ss.uclApps} apps` : null}
-          onCardClick={()=>onCardClick('ucl_season_gpg','Best Single-Season UCL G/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL A/Game (season)"
+          onCardClick={()=>onCardClick('ucl_season_gpg','Best G/Game — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best A/Game"
           player={fromEntry(s.bestApg)}
-          value={s.bestApg ? `${((s.bestApg.ss.uclAssists||0)/s.bestApg.ss.uclApps).toFixed(2)}` : '—'}
+          value={s.bestApg ? `${fmtRate((s.bestApg.ss.uclAssists||0)/s.bestApg.ss.uclApps)} A/G` : '—'}
           ctx={s.bestApg ? `${s.bestApg.ss.label} · ${s.bestApg.ss.uclAssists||0}A · ${s.bestApg.ss.uclApps} apps` : null}
-          onCardClick={()=>onCardClick('ucl_season_apg','Best Single-Season UCL A/Game')} onPlayerClick={onPlayerClick} />
-        <RecordCard label="Best UCL C/Game (season)"
+          onCardClick={()=>onCardClick('ucl_season_apg','Best A/Game — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best C/Game"
           player={fromEntry(s.bestCpg)}
-          value={s.bestCpg ? `${(((s.bestCpg.ss.uclGoals||0)+(s.bestCpg.ss.uclAssists||0))/s.bestCpg.ss.uclApps).toFixed(2)}` : '—'}
+          value={s.bestCpg ? `${fmtRate(((s.bestCpg.ss.uclGoals||0)+(s.bestCpg.ss.uclAssists||0))/s.bestCpg.ss.uclApps)} C/G` : '—'}
           ctx={s.bestCpg ? `${s.bestCpg.ss.label} · ${(s.bestCpg.ss.uclGoals||0)+(s.bestCpg.ss.uclAssists||0)} G+A · ${s.bestCpg.ss.uclApps} apps` : null}
-          onCardClick={()=>onCardClick('ucl_season_cpg','Best Single-Season UCL C/Game')} onPlayerClick={onPlayerClick} />
+          onCardClick={()=>onCardClick('ucl_season_cpg','Best C/Game — Single Season')} onPlayerClick={onPlayerClick} />
+        <RecordCard label="Best CS/Game"
+          player={fromEntry(s.bestCspg)}
+          value={s.bestCspg ? `${fmtRate((s.bestCspg.ss.uclCleanSheets||0)/s.bestCspg.ss.uclApps)} CS/G` : '—'}
+          ctx={s.bestCspg ? `${s.bestCspg.ss.label} · ${s.bestCspg.ss.uclCleanSheets||0} CS · ${s.bestCspg.ss.uclApps} apps` : null}
+          onCardClick={()=>onCardClick('ucl_season_cspg','Best CS/Game — Single Season')} onPlayerClick={onPlayerClick} />
       </Section>
+      <p className={styles.rQualNote}>Rate records require a minimum of 5 UCL appearances.</p>
     </div>
   )
 }
 
-function ClubTab({ r, onCardClick }) {
+function ClubTab({ r, opponents, onCardClick }) {
   const { club: c } = r
 
+  // Resolve opponent crest URL from opponents map (same pattern as UCL Records)
+  function oppCrest(oppName) {
+    if (!oppName || !opponents) return null
+    for (const [, rec] of opponents) {
+      if (rec.displayName === oppName || rec.opponentRaw === oppName) return rec.crestUrl || null
+    }
+    return null
+  }
+
+  // Resolve transfer club crest via transfer-clubs.json (exact same as Transfers.jsx)
+  function transferCrest(clubName) {
+    const ident = resolveClubIdentity(clubName)
+    if (!ident?.sofifaTeamId) return null
+    return `${WORKER_BASE}/team/${ident.sofifaTeamId}`
+  }
+
   return (
-    <div>
+    <div className={styles.rWrap}>
       <Section title="Season Records">
-        <ClubRecordCard label="Most league points"
+        <ClubRecordCard label="Most League Points"
           holder={c.byPts?.label}
           value={c.byPts ? `${c.byPts.leaguePts} pts` : '—'}
           ctx={c.byPts ? `${c.byPts.leagueW}W ${c.byPts.leagueD}D ${c.byPts.leagueL}L` : null}
-          highlight onCardClick={()=>onCardClick('club_pts','Most League Points')} />
-        <ClubRecordCard label="Most league goals"
+          crestType="richport"
+          onCardClick={()=>onCardClick('club_pts','Most League Points')} />
+        <ClubRecordCard label="Most League Goals"
           holder={c.byGoals?.label}
           value={c.byGoals ? `${c.byGoals.leagueGF} goals` : '—'}
           ctx={c.byGoals?.leagueP > 0 ? `${(c.byGoals.leagueGF/c.byGoals.leagueP).toFixed(2)} G/game` : null}
+          crestType="richport"
           onCardClick={()=>onCardClick('club_goals','Most League Goals')} />
-        <ClubRecordCard label="Best goals/game"
+        <ClubRecordCard label="Best Goals/Game"
           holder={c.byGpg?.label}
           value={c.byGpg ? `${c.byGpg.gpg.toFixed(2)} G/game` : '—'}
           ctx={c.byGpg ? `${c.byGpg.leagueGF} goals · ${c.byGpg.leagueP} games` : null}
+          crestType="richport"
           onCardClick={()=>onCardClick('club_gpg','Best Goals/Game')} />
-        <ClubRecordCard label="Fewest goals conceded"
+        <ClubRecordCard label="Fewest Goals Conceded"
           holder={c.byGA?.label}
           value={c.byGA ? `${c.byGA.leagueGA} conceded` : '—'}
           ctx={c.byGA ? `${c.byGA.leagueP} games` : null}
+          crestType="richport"
           onCardClick={()=>onCardClick('club_ga','Fewest Goals Conceded')} />
-        <ClubRecordCard label="Best dynasty score"
+        <ClubRecordCard label="Best Dynasty Score"
           holder={c.byDynasty?.label}
           value={c.byDynasty ? `${c.byDynasty.dynastyScore} pts` : '—'}
           ctx={c.byDynasty?.year}
-          highlight onCardClick={()=>onCardClick('club_dynasty','Best Dynasty Score')} />
+          crestType="richport"
+          onCardClick={()=>onCardClick('club_dynasty','Best Dynasty Score')} />
         {c.biggestWin ? (
-          <ClubRecordCard label="Biggest win"
+          <ClubRecordCard label="Biggest Win"
             holder={`vs ${c.biggestWin.opponent}`}
             value={`${c.biggestWin.score_for}–${c.biggestWin.score_against}`}
             ctx={`${compLabel(c.biggestWin.competition)} · ${c.biggestWin.home_away==='H'?'Home':c.biggestWin.home_away==='A'?'Away':'Neutral'}`}
-            highlight onCardClick={()=>onCardClick('club_win','Biggest Win')} />
+            crestUrl={oppCrest(c.biggestWin.opponent)}
+            onCardClick={()=>onCardClick('club_win','Biggest Win')} />
         ) : (
-          <ClubRecordCard label="Biggest win" holder="No match data yet" value="—" />
+          <ClubRecordCard label="Biggest Win" holder="No match data yet" value="—" crestType="richport" />
         )}
       </Section>
 
       <Section title="Transfers">
-        <ClubRecordCard label="Highest fee received"
-          holder={c.highestOut ? `${c.highestOut.player}` : 'No data'}
+        <ClubRecordCard label="Highest Fee Received"
+          holder={c.highestOut ? c.highestOut.player : 'No data'}
           value={c.highestOut ? fmt(c.highestOut.fee_eur) : '—'}
           ctx={c.highestOut ? `${c.highestOut._seasonLabel} · to ${c.highestOut.to_club||'?'}` : null}
-          highlight onCardClick={c.highestOut ? ()=>onCardClick('transfers_out','Highest Fee Received') : null} />
-        <ClubRecordCard label="Highest fee paid"
-          holder={c.highestIn ? `${c.highestIn.player}` : 'No data'}
+          crestUrl={c.highestOut ? transferCrest(c.highestOut.to_club) : null}
+          onCardClick={c.highestOut ? ()=>onCardClick('transfers_out','Highest Fee Received') : null} />
+        <ClubRecordCard label="Highest Fee Paid"
+          holder={c.highestIn ? c.highestIn.player : 'No data'}
           value={c.highestIn ? fmt(c.highestIn.fee_eur) : '—'}
           ctx={c.highestIn ? `${c.highestIn._seasonLabel} · from ${c.highestIn.from_club||'?'}` : null}
+          crestUrl={c.highestIn ? transferCrest(c.highestIn.from_club) : null}
           onCardClick={c.highestIn ? ()=>onCardClick('transfers_in','Highest Fee Paid') : null} />
       </Section>
     </div>
@@ -655,7 +823,6 @@ function ClubTab({ r, onCardClick }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const VALID_TABS = ['allcomps', 'champions', 'club']
-
 const TABS = [
   { key: 'allcomps',  label: 'All Comps' },
   { key: 'champions', label: 'Champions League' },
@@ -667,17 +834,16 @@ export default function Records() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // Tab is driven by ?tab= query param. Default to allcomps if absent or invalid.
   const rawTab = searchParams.get('tab')
-  const tab = VALID_TABS.includes(rawTab) ? rawTab : 'allcomps'
-
+  const tab    = VALID_TABS.includes(rawTab) ? rawTab : 'allcomps'
   const setTab = useCallback((key) => {
     setSearchParams({ tab: key }, { replace: true })
   }, [setSearchParams])
 
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(null) // { key, title }
+  const [data,      setData]      = useState(null)
+  const [opponents, setOpponents] = useState(null)
+  const [loading,   setLoading]   = useState(true)
+  const [modal,     setModal]     = useState(null)
 
   useEffect(() => {
     if (!activeClub) return
@@ -687,8 +853,10 @@ export default function Records() {
       getSeasons(activeClub.id),
       getTransfers(activeClub.id),
       getMatchesByClub(activeClub.id),
-    ]).then(([players, seasons, transfers, matches]) => {
+      getOpponents(),
+    ]).then(([players, seasons, transfers, matches, opps]) => {
       setData(computeAllRecords({ players, seasons, transfers, matches }))
+      setOpponents(opps)
       setLoading(false)
     }).catch(err => {
       console.error('[Records] load error:', err)
@@ -704,15 +872,14 @@ export default function Records() {
     setModal({ key, title })
   }, [])
 
-  const closeModal = useCallback(() => setModal(null), [])
-
-  const modalItems = modal && data ? data.top5[modal.key] || [] : null
+  const closeModal  = useCallback(() => setModal(null), [])
+  const modalItems  = modal && data ? data.top5[modal.key] || [] : null
 
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
         <span className={styles.topLabel}>Club Records</span>
-        <span className={styles.topHint}>Rate records require 20 apps in all comps or 5 UCL apps</span>
+        <span className={styles.topHint}>Rate records: 20 apps (all comps) · 5 UCL apps</span>
       </div>
 
       <div className={styles.tabs}>
@@ -729,11 +896,11 @@ export default function Records() {
         {loading ? (
           <div className={styles.loadWrap}><div className={styles.spinner} /></div>
         ) : !data ? null : tab === 'allcomps' ? (
-          <AllCompsTab r={data} top5={data.top5} onCardClick={handleCardClick} onPlayerClick={handlePlayerClick} />
+          <AllCompsTab r={data} onCardClick={handleCardClick} onPlayerClick={handlePlayerClick} />
         ) : tab === 'champions' ? (
-          <UCLTab r={data} top5={data.top5} onCardClick={handleCardClick} onPlayerClick={handlePlayerClick} />
+          <UCLTab r={data} onCardClick={handleCardClick} onPlayerClick={handlePlayerClick} />
         ) : (
-          <ClubTab r={data} onCardClick={handleCardClick} />
+          <ClubTab r={data} opponents={opponents} onCardClick={handleCardClick} />
         )}
       </div>
 
