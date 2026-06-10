@@ -21,7 +21,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(160deg, var(--en-blue-dim) 0%, var(--en-bg) 60%);
-  border-bottom: 0.5px solid rgba(30, 58, 138, 0.25);
+  border-bottom: 0.5px solid rgba(30, 58, 138, 0.2);
   max-width: 640px;
   margin: 0 auto;
 }
@@ -33,7 +33,7 @@
   transform: translateX(-50%);
   width: 320px;
   height: 160px;
-  background: radial-gradient(ellipse, rgba(30, 58, 138, 0.25) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(30, 58, 138, 0.2) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -47,12 +47,12 @@
 }
 
 .headerEyebrow {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.22em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--en-blue);
-  opacity: 0.8;
+  color: var(--en-text-3);
 }
 
 .headerTitle {
@@ -70,7 +70,7 @@
   text-align: center;
 }
 
-/* ── SUMMARY GRID ────────────────────────────────────────────────────────── */
+/* ── SUMMARY STRIP ───────────────────────────────────────────────────────── */
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -91,9 +91,9 @@
 }
 
 .summaryNum {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--en-text-1);
   line-height: 1;
 }
@@ -117,7 +117,7 @@
   width: 28px;
   height: 28px;
   border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -126,43 +126,49 @@
 
 /* ── FILTERS ─────────────────────────────────────────────────────────────── */
 .filtersWrap {
-  padding: 14px 16px 12px;
+  padding: 12px 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   border-bottom: 0.5px solid var(--en-rule);
 }
 
+/* Club-only toggle — gold active, matches filter chip language */
 .fcToggle {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--en-rule);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 0.5px solid var(--en-rule);
   background: transparent;
-  color: var(--en-text-2);
+  color: var(--en-text-3);
   font-family: var(--font-inter);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
   align-self: flex-start;
+  white-space: nowrap;
 }
 
-.fcToggle:hover { border-color: var(--en-green); color: var(--en-green); }
+.fcToggle:hover {
+  border-color: rgba(224, 194, 122, 0.4);
+  color: var(--en-text-2);
+}
 
 .fcToggleOn {
-  background: var(--accent-dim);
-  border-color: var(--en-green);
-  color: var(--en-green);
+  background: rgba(224, 194, 122, 0.1);
+  border-color: rgba(224, 194, 122, 0.4);
+  color: var(--en-gold);
 }
 
 .fcToggleDot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: currentColor;
+  flex-shrink: 0;
   transition: background 0.15s;
 }
 
@@ -182,27 +188,30 @@
   flex-wrap: wrap;
 }
 
+/* Filter pill — matches UCL plFilterBtn exactly */
 .pill {
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 20px;
-  border: 1px solid var(--en-rule);
+  border: 0.5px solid var(--en-rule);
   background: transparent;
   color: var(--en-text-3);
   font-family: var(--font-inter);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s;
   flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.pill:hover { border-color: var(--en-text-3); color: var(--en-text-2); }
+.pill:hover { color: var(--en-text-2); }
 
+/* Active pill — gold treatment, matches UCL plFilterActive */
 .pillActive {
-  background: var(--en-blue);
-  border-color: var(--en-blue);
-  color: #fff;
+  background: rgba(224, 194, 122, 0.1);
+  border-color: rgba(224, 194, 122, 0.4);
+  color: var(--en-gold);
 }
 
 /* ── ARCHIVE LIST ─────────────────────────────────────────────────────────── */
@@ -225,18 +234,16 @@
 }
 
 .seasonCardLabel {
-  font-family: var(--font-display);
+  font-family: var(--font-playfair);
   font-size: 20px;
   font-weight: 700;
-  letter-spacing: 0.04em;
   color: var(--en-text-1);
 }
 
 .seasonCardYear {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-3);
-  letter-spacing: 0.05em;
 }
 
 .seasonEntries {
@@ -261,15 +268,14 @@
 }
 
 .entryRow:hover { background: rgba(255,255,255,0.02); }
-
 .entryRow:last-child { border-bottom: none; }
 
+/* Subtle gold tint for user club rows */
 .entryRowFC {
-  background: rgba(74, 222, 128, 0.04);
+  background: rgba(224, 194, 122, 0.03);
 }
-
 .entryRowFC:hover {
-  background: rgba(74, 222, 128, 0.07);
+  background: rgba(224, 194, 122, 0.055);
 }
 
 .entryContent {
@@ -280,8 +286,9 @@
 .entryCompName {
   font-family: var(--font-inter);
   font-size: 11px;
+  font-weight: 500;
   color: var(--en-text-3);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   margin-bottom: 3px;
 }
@@ -304,23 +311,22 @@
   font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-4);
-  font-style: italic;
 }
 
 .entryPts {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-3);
 }
 
 .entryFinish {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-3);
 }
 
 .entryScore {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-2);
 }
@@ -340,75 +346,72 @@
   flex-shrink: 0;
 }
 
-/* ── FC RICHPORT BADGES ──────────────────────────────────────────────────── */
-.fcBadgePill {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--en-green);
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  border-radius: 4px;
-  padding: 2px 6px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.ruBadgePill {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+/* ── STATUS BADGES ───────────────────────────────────────────────────────── */
+/* Won badge — gold fill */
+.wonBadge {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-gold);
-  border: 1px solid rgba(224, 194, 122, 0.3);
+  border: 0.5px solid rgba(224, 194, 122, 0.4);
   border-radius: 4px;
-  padding: 2px 6px;
+  padding: 2px 7px;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* ── FC GREEN TEXT ───────────────────────────────────────────────────────── */
-.fcGreen {
-  color: var(--en-green) !important;
+/* Finalist badge — ivory/slate, subtle */
+.finalistBadge {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--en-text-2);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 4px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* ── FC HIGHLIGHT ROW ────────────────────────────────────────────────────── */
-.fcHighlightRow {
-  background: rgba(74, 222, 128, 0.04);
-}
-
-/* ── CLUB BADGES ─────────────────────────────────────────────────────────── */
-.clubBadge {
-  border-radius: 50%;
+/* ── USER CLUB IDENTITY ───────────────────────────────────────────────────── */
+/* Matches Records.jsx RichportMark — Inter 800 "XI", gold border, dark surface */
+.richportMark {
+  border-radius: 4px;
+  background: var(--en-surface-2, #1a2a40);
+  border: 0.5px solid rgba(224, 194, 122, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
+/* ── GOLD TEXT — user club emphasis ──────────────────────────────────────── */
+.fcGold {
+  color: var(--en-gold) !important;
+}
+
+/* ── FC HIGHLIGHT ROW — subtle gold surface tint ─────────────────────────── */
+.fcHighlightRow {
+  background: rgba(224, 194, 122, 0.03);
+}
+
+/* ── CLUB BADGES ─────────────────────────────────────────────────────────── */
 .clubBadgeImg {
   object-fit: contain;
   flex-shrink: 0;
   border-radius: 2px;
 }
 
-.clubBadgeHighlight {
-  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.4));
-}
-
-.clubBadgeFallback {
+/* Shield fallback for unknown opponent clubs */
+.shieldFallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--en-text-4);
   flex-shrink: 0;
-}
-
-.fcRichportBadge {
-  background: rgba(74, 222, 128, 0.08);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  color: var(--en-text-4);
 }
 
 /* ── COMPETITION ICON ────────────────────────────────────────────────────── */
@@ -422,7 +425,7 @@
   line-height: 1;
 }
 
-/* ── SECTIONS (Era, Dynasties, Trebles) ──────────────────────────────────── */
+/* ── SECTIONS (Era Leaders, Trebles, Back-to-Back UCL) ───────────────────── */
 .section {
   margin-top: 0;
   border-top: 0.5px solid var(--en-rule);
@@ -451,10 +454,9 @@
   font-family: var(--font-inter);
   font-size: 13px;
   color: var(--en-text-3);
-  font-style: italic;
 }
 
-/* ── ERA LEADERS ──────────────────────────────────────────────────────────── */
+/* ── ERA LEADERS ─────────────────────────────────────────────────────────── */
 .eraList {
   display: flex;
   flex-direction: column;
@@ -470,7 +472,7 @@
 }
 
 .eraRank {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-4);
   width: 24px;
@@ -492,10 +494,10 @@
 }
 
 .eraTotal {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 20px;
-  font-weight: 500;
-  color: var(--en-text-1);
+  font-weight: 700;
+  color: var(--en-gold);
   line-height: 1;
 }
 
@@ -536,19 +538,19 @@
 }
 
 .b2bSeasons {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-3);
 }
 
 .b2bBadge {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-gold);
-  border: 1px solid rgba(224, 194, 122, 0.3);
+  border: 0.5px solid rgba(224, 194, 122, 0.4);
   border-radius: 4px;
   padding: 3px 7px;
   white-space: nowrap;
@@ -573,24 +575,22 @@
 }
 
 .top5Pos {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-4);
   width: 16px;
   flex-shrink: 0;
 }
 
-.top5Club {
-  flex: 1;
-}
+.top5Club { flex: 1; }
 
 .top5Pts {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-3);
 }
 
-/* ── TREBLES ──────────────────────────────────────────────────────────────── */
+/* ── TREBLES ─────────────────────────────────────────────────────────────── */
 .trebleList {
   display: flex;
   flex-direction: column;
@@ -615,14 +615,14 @@
 }
 
 .trebleSeason {
-  font-family: var(--font-display);
+  font-family: var(--font-inter);
   font-size: 14px;
   font-weight: 700;
   color: var(--en-text-1);
 }
 
 .trebleYear {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
   color: var(--en-text-4);
 }
@@ -650,13 +650,13 @@
 }
 
 .trebleBadge {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-gold);
-  border: 1px solid rgba(224, 194, 122, 0.3);
+  border: 0.5px solid rgba(224, 194, 122, 0.4);
   border-radius: 4px;
   padding: 3px 7px;
   white-space: nowrap;
@@ -692,7 +692,7 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(8, 13, 26, 0.8);
   backdrop-filter: blur(4px);
 }
 
@@ -703,7 +703,7 @@
   right: 0;
   z-index: 201;
   background: var(--en-surface);
-  border-top: 0.5px solid var(--en-rule);
+  border: 0.5px solid var(--en-rule);
   border-radius: 16px 16px 0 0;
   max-height: 80dvh;
   overflow-y: auto;
@@ -728,7 +728,7 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 16px 20px 16px;
+  padding: 16px 20px;
 }
 
 .modalTitleGroup {
@@ -736,11 +736,12 @@
 }
 
 .modalRegion {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 10px;
-  letter-spacing: 0.15em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: var(--en-text-3);
   margin-bottom: 4px;
 }
 
@@ -761,19 +762,20 @@
 .modalRule {
   height: 0.5px;
   background: var(--en-rule);
-  margin: 0;
 }
 
 .modalSection {
   padding: 14px 0;
 }
 
+/* Section label — matches Records rSectionTitle */
 .modalSectionLabel {
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   padding: 0 20px 10px;
 }
 
@@ -782,7 +784,6 @@
   font-family: var(--font-inter);
   font-size: 13px;
   color: var(--en-text-3);
-  font-style: italic;
 }
 
 /* Modal top winners row */
@@ -794,7 +795,7 @@
 }
 
 .modalRank {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-4);
   width: 24px;
@@ -810,10 +811,10 @@
 }
 
 .modalTitleCount {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 16px;
+  font-weight: 700;
   color: var(--en-gold);
-  font-weight: 500;
 }
 
 /* Modal season rows */
@@ -828,8 +829,8 @@
 .modalSeasonRow:last-child { border-bottom: none; }
 
 .modalSeasonLabel {
-  font-family: var(--font-display);
-  font-size: 15px;
+  font-family: var(--font-inter);
+  font-size: 14px;
   font-weight: 700;
   color: var(--en-text-2);
   width: 28px;
@@ -846,7 +847,6 @@
   font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-4);
-  font-style: italic;
 }
 
 .modalLeagueDetail {
@@ -862,13 +862,13 @@
 }
 
 .leaguePts {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-3);
 }
 
 .leagueRecord {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
   color: var(--en-text-4);
 }
@@ -876,8 +876,8 @@
 .fcFinish {
   font-family: var(--font-inter);
   font-size: 11px;
-  color: var(--en-green);
-  opacity: 0.7;
+  color: var(--en-gold);
+  opacity: 0.75;
 }
 
 .modalFinalDetail {
@@ -893,7 +893,7 @@
 }
 
 .finalScore {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 13px;
   font-weight: 500;
   color: var(--en-text-2);

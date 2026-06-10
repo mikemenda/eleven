@@ -18,12 +18,9 @@ import TRANSFER_CLUBS from '../../data/transfer-clubs.json'
 import styles from './History.module.css'
 
 // Trophy PNG assets — shared map from trophyAssets.jsx (12 competitions)
-// Covers: UCL, Premier League, FA Cup, Carabao Cup, La Liga, Copa del Rey,
-//         Bundesliga, DFB-Pokal, Serie A, Coppa Italia, Ligue 1, Coupe de France
 import { TROPHY_PNG_MAP } from '../utils/trophyAssets'
 
 // Emoji fallback for competitions with no PNG asset yet
-// (English Championship, Europa League, Conference League handled here)
 const COMP_EMOJI = {
   'English Championship':   '🏆',
   'UEFA Europa League':     '🏆',
@@ -52,50 +49,83 @@ function ordinal(n) {
 // ─── SMALL COMPONENTS ─────────────────────────────────────────────────────────
 
 function TrophyIcon({ competition, size = 26 }) {
-  // Use real PNG if available (12 competitions covered by TROPHY_PNG_MAP)
   const src = TROPHY_PNG_MAP[competition]
   if (src) return <img src={src} alt="" className={styles.compIcon} style={{ width: size, height: size }} />
-  // Emoji fallback for all other competitions
   const emoji = COMP_EMOJI[competition]
   return <span className={styles.compIconEmoji} style={{ fontSize: size * 0.72 }}>{emoji || '🏆'}</span>
 }
 
-function ClubBadge({ clubName, size = 30 }) {
-  const [err, setErr] = useState(false)
-  const teamId = resolveTeamId(clubName)
+// ─── CLUB BADGE ───────────────────────────────────────────────────────────────
+// For the active/user club, uses the same RichportMark pattern as Records.jsx:
+// Inter 800, var(--en-gold) "XI" mark, gold border, dark surface.
+// This is the shared identity used across Records, UCL, and now History.
+// When a future global crestUrl is added to activeClub, this component is the
+// single place to update — History will automatically reflect it.
+//
+// For opponent clubs: resolves sofifaTeamId via transfer-clubs.json → CF Worker.
+// Falls back to a neutral shield if no crest is available.
 
-  if (clubName === 'FC Richport') {
+function ClubBadge({ clubName, size = 30, isUserClub = false, crestUrl = null }) {
+  const [err, setErr] = useState(false)
+
+  // User club identity — matches RichportMark in Records.jsx
+  // Future: if crestUrl is passed in (from activeClub.crestUrl), use that first
+  if (isUserClub) {
+    if (crestUrl && !err) {
+      return (
+        <img
+          src={crestUrl}
+          alt={clubName}
+          style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0,
+                   borderRadius: 4, display: 'block' }}
+          onError={() => setErr(true)}
+        />
+      )
+    }
+    // Monogram fallback — matches Records.jsx RichportMark exactly
     return (
-      <div className={styles.fcBadge} style={{ width: size, height: size }} title="FC Richport">
-        <svg viewBox="0 0 32 32" fill="none" width={size * 0.65} height={size * 0.65}>
-          <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle"
-            fill="var(--en-green)" fontFamily="var(--font-display)" fontSize="15" fontWeight="700">XI</text>
-        </svg>
+      <div className={styles.richportMark} style={{ width: size, height: size }}>
+        <span style={{
+          fontFamily: 'var(--font-inter)',
+          fontSize: Math.round(size * 0.38) + 'px',
+          fontWeight: 800,
+          color: 'var(--en-gold)',
+          letterSpacing: '-0.03em',
+          lineHeight: 1,
+          userSelect: 'none',
+        }}>XI</span>
       </div>
     )
   }
 
+  // Opponent / external club
+  const teamId = resolveTeamId(clubName)
   if (!teamId || err) {
     return (
       <div className={styles.shieldFallback} style={{ width: size, height: size }}>
-        <svg viewBox="0 0 32 32" fill="none" width={size} height={size}>
-          <path d="M16 2L3 7v9c0 7 5.2 12.3 13 14 7.8-1.7 13-7 13-14V7L16 2z"
-            fill="currentColor" opacity="0.09" stroke="currentColor" strokeWidth="1" strokeOpacity="0.18" />
+        <svg viewBox="0 0 24 24" fill="none" width={size * 0.6} height={size * 0.6}>
+          <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2Z"
+            stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"
+            style={{ color: 'var(--en-text-4)' }} />
         </svg>
       </div>
     )
   }
 
   return (
-    <img src={`${WORKER_BASE}/team/${teamId}`} alt={clubName}
-      className={styles.clubBadgeImg} style={{ width: size, height: size }}
-      onError={() => setErr(true)} />
+    <img
+      src={`${WORKER_BASE}/team/${teamId}`}
+      alt={clubName}
+      className={styles.clubBadgeImg}
+      style={{ width: size, height: size }}
+      onError={() => setErr(true)}
+    />
   )
 }
 
 // ─── COMPETITION DETAIL MODAL ─────────────────────────────────────────────────
 
-function CompetitionModal({ competition, historyEntries, clubName, onClose }) {
+function CompetitionModal({ competition, historyEntries, clubName, activeClub, onClose }) {
   const compHistory = getCompetitionHistory(historyEntries, competition.key)
   const compInfo    = HISTORY_COMPETITIONS.find(c => c.key === competition.key)
   const isLeague    = LEAGUE_KEYS.has(competition.key)
@@ -105,11 +135,15 @@ function CompetitionModal({ competition, historyEntries, clubName, onClose }) {
   for (const e of compHistory) {
     if (e.winner && e.hasData) titleMap[e.winner] = (titleMap[e.winner] || 0) + 1
   }
+  // Show up to 5 winners, stable sort by count desc then name asc
   const topWinners = Object.entries(titleMap)
-    .sort(([, a], [, b]) => b - a)
+    .sort(([nameA, a], [nameB, b]) => b - a || nameA.localeCompare(nameB))
     .slice(0, 5)
 
   const totalRecorded = compHistory.filter(e => e.hasData).length
+
+  const isUserClub = (club) => club === clubName
+  const userCrestUrl = activeClub?.crestUrl || null
 
   return (
     <>
@@ -130,15 +164,20 @@ function CompetitionModal({ competition, historyEntries, clubName, onClose }) {
 
         <div className={styles.modalRule} />
 
-        {/* Top winners */}
+        {/* Top Winners */}
         {topWinners.length > 0 && (
           <div className={styles.modalSection}>
             <div className={styles.modalSectionLabel}>Top Winners</div>
             {topWinners.map(([club, count], i) => (
-              <div key={club} className={`${styles.modalTopRow} ${club === clubName ? styles.fcHighlightRow : ''}`}>
+              <div key={club} className={`${styles.modalTopRow} ${isUserClub(club) ? styles.fcHighlightRow : ''}`}>
                 <span className={styles.modalRank}>#{i + 1}</span>
-                <ClubBadge clubName={club} size={22} />
-                <span className={`${styles.modalClubName} ${club === clubName ? styles.fcGreen : ''}`}>{club}</span>
+                <ClubBadge
+                  clubName={club}
+                  size={22}
+                  isUserClub={isUserClub(club)}
+                  crestUrl={isUserClub(club) ? userCrestUrl : null}
+                />
+                <span className={`${styles.modalClubName} ${isUserClub(club) ? styles.fcGold : ''}`}>{club}</span>
                 <span className={styles.modalTitleCount}>×{count}</span>
               </div>
             ))}
@@ -161,16 +200,20 @@ function CompetitionModal({ competition, historyEntries, clubName, onClose }) {
                 ) : isLeague ? (
                   <div className={styles.modalLeagueDetail}>
                     <div className={styles.modalLeagueWinner}>
-                      <ClubBadge clubName={e.winner} size={18} />
-                      <span className={`${styles.modalClubName} ${e.fcRichportWon ? styles.fcGreen : ''}`}>{e.winner}</span>
+                      <ClubBadge
+                        clubName={e.winner}
+                        size={18}
+                        isUserClub={isUserClub(e.winner)}
+                        crestUrl={isUserClub(e.winner) ? userCrestUrl : null}
+                      />
+                      <span className={`${styles.modalClubName} ${e.fcRichportWon ? styles.fcGold : ''}`}>{e.winner}</span>
                       {e.leaguePts != null && <span className={styles.leaguePts}>{e.leaguePts} pts</span>}
                     </div>
                     {e.leagueRecord && <span className={styles.leagueRecord}>{e.leagueRecord}</span>}
-                    {/* Top 5 table — rendered when leagueTop5 is present (future upload) */}
                     {e.leagueTop5 && (
                       <div className={styles.top5Table}>
                         {e.leagueTop5.map((row, ri) => (
-                          <div key={ri} className={`${styles.top5Row} ${row.club === clubName ? styles.fcGreen : ''}`}>
+                          <div key={ri} className={`${styles.top5Row} ${row.club === clubName ? styles.fcGold : ''}`}>
                             <span className={styles.top5Pos}>{row.position}</span>
                             <span className={styles.top5Club}>{row.club}</span>
                             <span className={styles.top5Pts}>{row.pts}pts</span>
@@ -179,22 +222,27 @@ function CompetitionModal({ competition, historyEntries, clubName, onClose }) {
                       </div>
                     )}
                     {!e.fcRichportWon && e.fcRichportPosition != null && (
-                      <span className={styles.fcFinish}>FC Richport — {ordinal(e.fcRichportPosition)}</span>
+                      <span className={styles.fcFinish}>{clubName} — {ordinal(e.fcRichportPosition)}</span>
                     )}
                   </div>
                 ) : (
                   <div className={styles.modalFinalDetail}>
                     <div className={styles.modalFinalWinner}>
-                      <ClubBadge clubName={e.winner} size={18} />
-                      <span className={`${styles.modalClubName} ${e.fcRichportWon ? styles.fcGreen : ''}`}>{e.winner}</span>
+                      <ClubBadge
+                        clubName={e.winner}
+                        size={18}
+                        isUserClub={isUserClub(e.winner)}
+                        crestUrl={isUserClub(e.winner) ? userCrestUrl : null}
+                      />
+                      <span className={`${styles.modalClubName} ${e.fcRichportWon ? styles.fcGold : ''}`}>{e.winner}</span>
                       {e.finalScore && <span className={styles.finalScore}>{e.finalScore}</span>}
                     </div>
                     {e.runnerUp && <span className={styles.runnerUp}>vs {e.runnerUp}</span>}
                   </div>
                 )}
               </div>
-              {e.fcRichportWon      && <span className={styles.fcBadgePill}>Won</span>}
-              {e.fcRichportRunnerUp && !e.fcRichportWon && <span className={styles.ruBadgePill}>RU</span>}
+              {e.fcRichportWon      && <span className={styles.wonBadge}>Won</span>}
+              {e.fcRichportRunnerUp && !e.fcRichportWon && <span className={styles.finalistBadge}>Finalist</span>}
             </div>
           ))}
         </div>
@@ -205,7 +253,10 @@ function CompetitionModal({ competition, historyEntries, clubName, onClose }) {
 
 // ─── SEASON CARD ──────────────────────────────────────────────────────────────
 
-function SeasonCard({ seasonLabel, seasonYear, entries, clubName, onCompClick }) {
+function SeasonCard({ seasonLabel, seasonYear, entries, clubName, activeClub, onCompClick }) {
+  const isUserClub = (club) => club === clubName
+  const userCrestUrl = activeClub?.crestUrl || null
+
   return (
     <div className={styles.seasonCard}>
       <div className={styles.seasonCardHeader}>
@@ -229,24 +280,34 @@ function SeasonCard({ seasonLabel, seasonYear, entries, clubName, onCompClick })
                   <div className={styles.entryMuted}>Not recorded</div>
                 ) : isLeague ? (
                   <div className={styles.entryWinnerLine}>
-                    <ClubBadge clubName={e.winner} size={20} />
-                    <span className={`${styles.entryWinnerName} ${e.fcRichportWon ? styles.fcGreen : ''}`}>{e.winner}</span>
+                    <ClubBadge
+                      clubName={e.winner}
+                      size={20}
+                      isUserClub={isUserClub(e.winner)}
+                      crestUrl={isUserClub(e.winner) ? userCrestUrl : null}
+                    />
+                    <span className={`${styles.entryWinnerName} ${e.fcRichportWon ? styles.fcGold : ''}`}>{e.winner}</span>
                     {e.leaguePts != null && <span className={styles.entryPts}>{e.leaguePts}pts</span>}
                     {!e.fcRichportWon && e.fcRichportPosition != null && (
-                      <span className={styles.entryFinish}>· FCR {ordinal(e.fcRichportPosition)}</span>
+                      <span className={styles.entryFinish}>· {ordinal(e.fcRichportPosition)}</span>
                     )}
                   </div>
                 ) : (
                   <div className={styles.entryWinnerLine}>
-                    <ClubBadge clubName={e.winner} size={20} />
-                    <span className={`${styles.entryWinnerName} ${e.fcRichportWon ? styles.fcGreen : ''}`}>{e.winner}</span>
+                    <ClubBadge
+                      clubName={e.winner}
+                      size={20}
+                      isUserClub={isUserClub(e.winner)}
+                      crestUrl={isUserClub(e.winner) ? userCrestUrl : null}
+                    />
+                    <span className={`${styles.entryWinnerName} ${e.fcRichportWon ? styles.fcGold : ''}`}>{e.winner}</span>
                     {e.finalScore && <span className={styles.entryScore}>{e.finalScore}</span>}
                     {e.runnerUp && <span className={styles.entryRU}>· {e.runnerUp}</span>}
                   </div>
                 )}
               </div>
-              {e.fcRichportWon      && <span className={styles.fcBadgePill}>Won</span>}
-              {e.fcRichportRunnerUp && !e.fcRichportWon && <span className={styles.ruBadgePill}>RU</span>}
+              {e.fcRichportWon      && <span className={styles.wonBadge}>Won</span>}
+              {e.fcRichportRunnerUp && !e.fcRichportWon && <span className={styles.finalistBadge}>Finalist</span>}
               <svg className={styles.entryChevron} width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -267,8 +328,8 @@ export default function History() {
   const [seasons,      setSeasons]      = useState([])
   const [loading,      setLoading]      = useState(true)
   const [filterSeason, setFilterSeason] = useState('all')
-  const [filterComp,   setFilterComp]   = useState('all')    // 'all' | 'european' | 'league' | 'cup'
-  const [filterGroup,  setFilterGroup]  = useState('all')    // 'all' | 'england' | 'spain' | 'italy' | 'germany' | 'france'
+  const [filterComp,   setFilterComp]   = useState('all')
+  const [filterGroup,  setFilterGroup]  = useState('all')
   const [fcOnly,       setFcOnly]       = useState(false)
   const [modalComp,    setModalComp]    = useState(null)
 
@@ -280,29 +341,18 @@ export default function History() {
 
   const allHistory = deriveHistoryFromSeasons(seasons, clubName)
 
-  // ── FILTER LOGIC (AND) ─────────────────────────────────────────────────────
-  // Step 1: FC Richport toggle
-  // Step 2: Season filter
-  // Step 3: Competition type + country group combined via resolveCompetitionKeys
-  // When a country group is selected, European competitions are excluded automatically
-  // because they carry group='european', not the country's group.
   const filteredHistory = (() => {
     let list = fcOnly ? filterFCRichportInvolvement(allHistory) : allHistory
-
     if (filterSeason !== 'all') {
       list = list.filter(e => e.seasonLabel === filterSeason)
     }
-
-    // Resolve allowed competition keys from group + comp type (AND logic)
     const allowedKeys = resolveCompetitionKeys(filterGroup, filterComp)
     if (filterGroup !== 'all' || filterComp !== 'all') {
       list = list.filter(e => allowedKeys.includes(e.competition))
     }
-
     return list
   })()
 
-  // Group by season for display
   const seasonLabels = getSeasonLabels(allHistory)
   const bySeason = {}
   for (const e of filteredHistory) {
@@ -311,17 +361,16 @@ export default function History() {
   }
   const displaySeasons = seasonLabels.filter(label => bySeason[label]?.length > 0)
 
-  // ── SUMMARY STATS ──────────────────────────────────────────────────────────
-  const totalSeasons  = seasons.length
-  const tracked       = new Set(allHistory.map(e => e.competition)).size
-  const fcTitles      = allHistory.filter(e => e.fcRichportWon).length
-  const uclFinals     = allHistory.filter(e =>
+  const totalSeasons = seasons.length
+  const tracked      = new Set(allHistory.map(e => e.competition)).size
+  const fcTitles     = allHistory.filter(e => e.fcRichportWon).length
+  const uclFinals    = allHistory.filter(e =>
     e.competition === 'UEFA Champions League' && (e.fcRichportWon || e.fcRichportRunnerUp)
   ).length
 
-  const eraLeaders    = computeEraLeaders(allHistory, 5)
-  const trebles       = detectTrebles(allHistory)
-  const backToBack    = detectBackToBackUCL(allHistory)
+  const eraLeaders = computeEraLeaders(allHistory, 5)
+  const trebles    = detectTrebles(allHistory)
+  const backToBack = detectBackToBackUCL(allHistory)
 
   const handleCompClick = useCallback(comp => setModalComp(comp), [])
 
@@ -332,7 +381,6 @@ export default function History() {
     { value: 'cup',      label: 'Cups' },
   ]
 
-  // Country filter only visible when not in pure-European mode
   const showCountryFilter = filterComp !== 'european'
 
   return (
@@ -344,13 +392,13 @@ export default function History() {
         <div className={styles.headerInner}>
           <span className={styles.headerEyebrow}>Competition Archive</span>
           <div className={styles.headerTitle}>History</div>
-          <div className={styles.headerSubtitle}>All recorded winners across every season</div>
+          <div className={styles.headerSubtitle}>Winners, finalists, and era records across the save</div>
         </div>
       </div>
 
       <div className={styles.inner}>
 
-        {/* ── SUMMARY CARDS ── */}
+        {/* ── SUMMARY STRIP ── */}
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryNum}>{totalSeasons}</div>
@@ -362,7 +410,7 @@ export default function History() {
           </div>
           <div className={styles.summaryCard}>
             <div className={styles.summaryNum}>{fcTitles}</div>
-            <div className={styles.summaryLabel}>{clubName} Titles</div>
+            <div className={styles.summaryLabel}>Richport Titles</div>
           </div>
           <div className={styles.summaryCard}>
             <div className={styles.summaryNum}>{uclFinals}</div>
@@ -377,7 +425,7 @@ export default function History() {
             {/* ── FILTERS ── */}
             <div className={styles.filtersWrap}>
 
-              {/* FC Richport toggle */}
+              {/* Club toggle */}
               <button
                 className={`${styles.fcToggle} ${fcOnly ? styles.fcToggleOn : ''}`}
                 onClick={() => { setFcOnly(v => !v); setFilterGroup('all') }}
@@ -394,7 +442,6 @@ export default function History() {
                     className={`${styles.pill} ${filterComp === o.value ? styles.pillActive : ''}`}
                     onClick={() => {
                       setFilterComp(o.value)
-                      // Reset country filter when switching to European-only
                       if (o.value === 'european') setFilterGroup('all')
                     }}
                   >
@@ -403,7 +450,7 @@ export default function History() {
                 ))}
               </div>
 
-              {/* Country ecosystem filter — hidden when European-only selected */}
+              {/* Country ecosystem — hidden when European-only */}
               {showCountryFilter && (
                 <div className={styles.pillRow}>
                   {COUNTRY_ECOSYSTEM.map(({ label, group }) => (
@@ -450,6 +497,7 @@ export default function History() {
                     seasonYear={bySeason[label][0]?.seasonYear}
                     entries={bySeason[label]}
                     clubName={clubName}
+                    activeClub={activeClub}
                     onCompClick={handleCompClick}
                   />
                 ))}
@@ -467,8 +515,13 @@ export default function History() {
                   {eraLeaders.map((leader, i) => (
                     <div key={leader.club} className={`${styles.eraRow} ${leader.club === clubName ? styles.fcHighlightRow : ''}`}>
                       <span className={styles.eraRank}>#{i + 1}</span>
-                      <ClubBadge clubName={leader.club} size={28} />
-                      <span className={`${styles.eraClub} ${leader.club === clubName ? styles.fcGreen : ''}`}>{leader.club}</span>
+                      <ClubBadge
+                        clubName={leader.club}
+                        size={28}
+                        isUserClub={leader.club === clubName}
+                        crestUrl={leader.club === clubName ? (activeClub?.crestUrl || null) : null}
+                      />
+                      <span className={`${styles.eraClub} ${leader.club === clubName ? styles.fcGold : ''}`}>{leader.club}</span>
                       <div className={styles.eraRight}>
                         <span className={styles.eraTotal}>{leader.total}</span>
                         <span className={styles.eraTotalLabel}>title{leader.total !== 1 ? 's' : ''}</span>
@@ -496,9 +549,14 @@ export default function History() {
                           <span className={styles.trebleSeason}>{t.seasonLabel}</span>
                           {t.seasonYear && <span className={styles.trebleYear}>{t.seasonYear}</span>}
                         </div>
-                        <ClubBadge clubName={t.club} size={28} />
+                        <ClubBadge
+                          clubName={t.club}
+                          size={28}
+                          isUserClub={t.club === clubName}
+                          crestUrl={t.club === clubName ? (activeClub?.crestUrl || null) : null}
+                        />
                         <div className={styles.trebleContent}>
-                          <div className={`${styles.trebleClub} ${t.club === clubName ? styles.fcGreen : ''}`}>{t.club}</div>
+                          <div className={`${styles.trebleClub} ${t.club === clubName ? styles.fcGold : ''}`}>{t.club}</div>
                           <div className={styles.trebleComps}>{t.competitions.join(' · ')}</div>
                         </div>
                         <span className={styles.trebleBadge}>Treble</span>
@@ -523,9 +581,14 @@ export default function History() {
                     {backToBack.map((b, i) => (
                       <div key={i} className={`${styles.b2bRow} ${b.club === clubName ? styles.fcHighlightRow : ''}`}>
                         <TrophyIcon competition="UEFA Champions League" size={28} />
-                        <ClubBadge clubName={b.club} size={28} />
+                        <ClubBadge
+                          clubName={b.club}
+                          size={28}
+                          isUserClub={b.club === clubName}
+                          crestUrl={b.club === clubName ? (activeClub?.crestUrl || null) : null}
+                        />
                         <div className={styles.b2bContent}>
-                          <div className={`${styles.b2bClub} ${b.club === clubName ? styles.fcGreen : ''}`}>{b.club}</div>
+                          <div className={`${styles.b2bClub} ${b.club === clubName ? styles.fcGold : ''}`}>{b.club}</div>
                           <div className={styles.b2bSeasons}>{b.seasons.join(' · ')}</div>
                         </div>
                         <span className={styles.b2bBadge}>
@@ -547,6 +610,7 @@ export default function History() {
           competition={modalComp}
           historyEntries={allHistory}
           clubName={clubName}
+          activeClub={activeClub}
           onClose={() => setModalComp(null)}
         />
       )}

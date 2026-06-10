@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 63
+// Current: 64
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -60,4 +60,5 @@
 //   61 — Records visual alignment: standalone Records page migrated to v60 UCL Records design system; Inter tabs/labels, all values gold, 120px right panel, createPortal modal, OppCrest+RichportMark on Club tab, resolveClubIdentity transfer crests, label/ordering cleanup, acSeason+uclSeason bestCspg added
 //   62 — Museum accordion: replaced trophy grid + bottom sheet modal with one-trophy-per-line accordion list; inline expand/collapse with no clipping; trophy PNG left, name/region/count middle, chevron right; region label readability improved (en-text-3); Done button removed
 //   63 — Museum refinement: trophy image 2.2x larger (76×120px container); row padding increased for breathing room; hero count line replaced with archive stat line (Inter, no mono tracking) showing "N trophies · N seasons" with derived season count and singular/plural
-const SW_VERSION = 63;
+//   64 — History visual system pass: gold/ivory brand treatment throughout; Inter typography (mono removed); gold active filter chips; FC Richport uses shared RichportMark identity (matches Records.jsx, auto-upgrades with future crestUrl); Finalist badge replaces RU; Won badge gold/Inter; highlight rows gold tint not green; Era Leaders gold title counts; Treble/Back-to-Back UCL badges Inter; spinner gold; header eyebrow Inter; summary stats Inter 700
+const SW_VERSION = 64;
