@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ReactDOM from 'react-dom'
 import { useApp } from '../context/AppContext'
 import { getTransfers, getSeasons, getPlayers } from '../firebase/services'
 import TRANSFER_CLUBS from '../../data/transfer-clubs.json'
@@ -12,18 +13,17 @@ function fmt(n) {
   return `€${(n/1e3).toFixed(0)}K`
 }
 
-// Compact dot indicator config — no full labels in main row
-// dot: CSS color string, or null for no dot
+// Compact dot indicator config
 const RULE_DOT = {
-  'Mandatory':        '#8899aa',       // slate — neutral
-  'Optional':         '#8899aa',       // slate — neutral
-  'Exchange':         '#9d85d4',       // restrained purple
-  'Emergency Credit': 'var(--en-gold)',// gold
-  'Forced-List':      '#b06050',       // muted rust
-  'Swap':             '#5b9fdc',       // muted blue
+  'Mandatory':        '#8899aa',
+  'Optional':         '#8899aa',
+  'Exchange':         '#9d85d4',
+  'Emergency Credit': 'var(--en-gold)',
+  'Forced-List':      '#b06050',
+  'Swap':             '#5b9fdc',
 }
 
-// Cleaned display labels for the detail reveal only
+// Cleaned display labels — used in detail reveal and Types sheet
 const RULE_LABEL = {
   'Mandatory':        'Mandatory',
   'Optional':         'Optional',
@@ -33,16 +33,24 @@ const RULE_LABEL = {
   'Swap':             'Swap',
 }
 
-// Sort season labels newest-first: S7 > S6 > ... > S1
+// All known types in display order for the sheet
+const RULE_TYPES = [
+  'Emergency Credit',
+  'Exchange',
+  'Mandatory',
+  'Optional',
+  'Forced-List',
+  'Swap',
+]
+
+// Sort season labels newest-first
 function compareSeasonLabels(a, b) {
   const num = s => { const m = s.match(/^S(\d+)$/); return m ? parseInt(m[1], 10) : 0 }
   return num(b) - num(a)
 }
 
-// Window sort: Summer before January within a season
 const WINDOW_ORDER = { Summer: 0, January: 1 }
 
-// Resolve club identity from the static transfer-clubs map.
 function resolveClubIdentity(clubName) {
   if (!clubName) return null
   const key = clubName.trim().toLowerCase()
@@ -110,16 +118,69 @@ function ClubCrest({ teamId, clubName, size = 36 }) {
   )
 }
 
+// ─── Types sheet (portal) ─────────────────────────────────────────────────────
+
+function TypesSheet({ activeRule, onSelect, onClose, availableRules }) {
+  return ReactDOM.createPortal(
+    <div className={styles.sheetBackdrop} onClick={onClose}>
+      <div
+        className={styles.sheet}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className={styles.sheetHeader}>
+          <span className={styles.sheetTitle}>Transfer Types</span>
+          <button className={styles.sheetClose} onClick={onClose}>Done</button>
+        </div>
+        <div className={styles.sheetList}>
+          {/* All Types row */}
+          <button
+            className={`${styles.sheetRow} ${!activeRule ? styles.sheetRowActive : ''}`}
+            onClick={() => { onSelect(null); onClose() }}
+          >
+            <span className={styles.sheetDotEmpty} />
+            <span className={styles.sheetRowLabel}>All Types</span>
+            {!activeRule && <span className={styles.sheetCheck}>✓</span>}
+          </button>
+
+          {/* Individual type rows — only show types present in current data */}
+          {RULE_TYPES.filter(r => availableRules.has(r)).map(rule => {
+            const dotColor = RULE_DOT[rule] ?? '#8899aa'
+            const label = RULE_LABEL[rule] ?? rule
+            const isActive = activeRule === rule
+            return (
+              <button
+                key={rule}
+                className={`${styles.sheetRow} ${isActive ? styles.sheetRowActive : ''}`}
+                onClick={() => { onSelect(rule); onClose() }}
+              >
+                <span
+                  className={styles.sheetDot}
+                  style={{ background: dotColor }}
+                />
+                <span className={styles.sheetRowLabel}>{label}</span>
+                {isActive && <span className={styles.sheetCheck}>✓</span>}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Transfers() {
   const { activeClub } = useApp()
-  const [transfers, setTransfers] = useState([])
-  const [seasons,   setSeasons]   = useState([])
-  const [playerMap, setPlayerMap] = useState(new Map())
-  const [loading,   setLoading]   = useState(true)
+  const [transfers, setTransfers]       = useState([])
+  const [seasons,   setSeasons]         = useState([])
+  const [playerMap, setPlayerMap]       = useState(new Map())
+  const [loading,   setLoading]         = useState(true)
   const [selectedSeason, setSelectedSeason] = useState('all')
-  const [dir, setDir] = useState('all')
+  const [dir,       setDir]             = useState('all')
+  const [activeRule, setActiveRule]     = useState(null)   // null = all types
+  const [sheetOpen, setSheetOpen]       = useState(false)
 
   useEffect(() => {
     if (!activeClub) return
@@ -148,6 +209,7 @@ export default function Transfers() {
     t.seasonId ||
     '?'
 
+  // All three filters compose together
   const filtered = transfers
     .filter(t =>
       selectedSeason === 'all' ||
@@ -155,6 +217,10 @@ export default function Transfers() {
       t.season === selectedSeason
     )
     .filter(t => dir === 'all' || t.direction === dir)
+    .filter(t => !activeRule || t.rule === activeRule)
+
+  // Available rule types across all transfers (for the sheet — don't show types not in data)
+  const availableRules = new Set(transfers.map(t => t.rule).filter(Boolean))
 
   const ins      = filtered.filter(t => t.direction === 'IN')
   const outs     = filtered.filter(t => t.direction === 'OUT')
@@ -162,7 +228,6 @@ export default function Transfers() {
   const totalOut = outs.reduce((s, t) => s + (t.fee_eur || 0), 0)
   const netSpend = totalIn - totalOut
 
-  // Group by season + window
   const grouped = {}
   for (const t of filtered) {
     const displayLabel = resolveLabel(t)
@@ -194,7 +259,6 @@ export default function Transfers() {
     return opts.sort((a, b) => compareSeasonLabels(a.label, b.label))
   })()
 
-  // Summary strip — muted rust for spent/negative, gold for received/positive
   const MUTED_RUST = '#b06050'
   const summaryConfig = {
     all: [
@@ -207,33 +271,45 @@ export default function Transfers() {
       },
     ],
     IN: [
-      { val: fmt(totalIn),                                              color: MUTED_RUST,            key: 'Spent' },
-      { val: String(ins.length),                                        color: 'var(--en-text-1)',    key: 'Arrivals' },
-      { val: ins.length ? fmt(Math.round(totalIn / ins.length)) : '—', color: 'var(--en-gold)',      key: 'Avg fee' },
+      { val: fmt(totalIn),                                              color: MUTED_RUST,          key: 'Spent' },
+      { val: String(ins.length),                                        color: 'var(--en-text-1)',  key: 'Arrivals' },
+      { val: ins.length ? fmt(Math.round(totalIn / ins.length)) : '—', color: 'var(--en-gold)',    key: 'Avg fee' },
     ],
     OUT: [
-      { val: fmt(totalOut),                                               color: 'var(--en-gold)',     key: 'Received' },
-      { val: String(outs.length),                                         color: 'var(--en-text-1)',   key: 'Departures' },
-      { val: outs.length ? fmt(Math.round(totalOut / outs.length)) : '—', color: 'var(--en-gold)',    key: 'Avg fee' },
+      { val: fmt(totalOut),                                               color: 'var(--en-gold)',   key: 'Received' },
+      { val: String(outs.length),                                         color: 'var(--en-text-1)', key: 'Departures' },
+      { val: outs.length ? fmt(Math.round(totalOut / outs.length)) : '—', color: 'var(--en-gold)',  key: 'Avg fee' },
     ],
   }
   const summaryItems = summaryConfig[dir]
+
+  // Active type chip label
+  const activeRuleLabel = activeRule ? (RULE_LABEL[activeRule] ?? activeRule) : null
+  const activeDotColor  = activeRule ? (RULE_DOT[activeRule] ?? '#8899aa') : null
 
   return (
     <div className={styles.page}>
       {/* ── TOP BAR ── */}
       <div className={styles.topBar}>
         <span className={styles.topLabel}>Transfer Record</span>
-        <select
-          className={styles.seasonPicker}
-          value={selectedSeason}
-          onChange={e => setSelectedSeason(e.target.value)}
-        >
-          <option value="all">All Seasons</option>
-          {seasonOptions.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        <div className={styles.topControls}>
+          <select
+            className={styles.seasonPicker}
+            value={selectedSeason}
+            onChange={e => setSelectedSeason(e.target.value)}
+          >
+            <option value="all">All Seasons</option>
+            {seasonOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <button
+            className={`${styles.typesBtn} ${activeRule ? styles.typesBtnActive : ''}`}
+            onClick={() => setSheetOpen(true)}
+          >
+            Types
+          </button>
+        </div>
       </div>
 
       {/* ── SUMMARY BAR ── */}
@@ -259,6 +335,26 @@ export default function Transfers() {
         ))}
       </div>
 
+      {/* ── ACTIVE TYPE CHIP ── */}
+      {activeRuleLabel && (
+        <div className={styles.activeFilterBar}>
+          <div className={styles.activeFilterChip}>
+            <span
+              className={styles.activeFilterDot}
+              style={{ background: activeDotColor }}
+            />
+            <span className={styles.activeFilterLabel}>Type: {activeRuleLabel}</span>
+            <button
+              className={styles.activeFilterClear}
+              onClick={() => setActiveRule(null)}
+              aria-label="Clear type filter"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── CONTENT ── */}
       <div className={styles.inner}>
         {loading ? (
@@ -280,6 +376,16 @@ export default function Transfers() {
           ))
         )}
       </div>
+
+      {/* ── TYPES SHEET ── */}
+      {sheetOpen && (
+        <TypesSheet
+          activeRule={activeRule}
+          onSelect={setActiveRule}
+          onClose={() => setSheetOpen(false)}
+          availableRules={availableRules}
+        />
+      )}
     </div>
   )
 }
@@ -351,10 +457,9 @@ function TransferRow({ t, rowKey, isExpanded, onToggle, playerMap }) {
   const clubLabel  = clubIdent?.displayName ?? rawClub
   const clubTeamId = clubIdent?.sofifaTeamId ?? null
 
-  const dotColor = t.rule ? (RULE_DOT[t.rule] ?? '#8899aa') : null
+  const dotColor  = t.rule ? (RULE_DOT[t.rule] ?? '#8899aa') : null
   const ruleLabel = t.rule ? (RULE_LABEL[t.rule] ?? t.rule) : null
 
-  // Click on the player identity area → navigate to profile (if linkable)
   const handleIdentityClick = (e) => {
     if (isLinkable) {
       e.stopPropagation()
@@ -362,21 +467,16 @@ function TransferRow({ t, rowKey, isExpanded, onToggle, playerMap }) {
     }
   }
 
-  // Click on anywhere else in the row → toggle detail
   const handleRowClick = () => {
     onToggle(rowKey)
   }
 
   return (
     <div className={styles.transferRowWrap}>
-      {/* Main row */}
       <div
         className={`${styles.transferRow} ${isIn ? styles.rowIn : styles.rowOut}`}
         onClick={handleRowClick}
       >
-        {/* Slim directional stripe — rendered via CSS left-border on rowIn/rowOut */}
-
-        {/* Player face — tap navigates to profile */}
         <div
           className={styles.faceWrap}
           onClick={handleIdentityClick}
@@ -385,7 +485,6 @@ function TransferRow({ t, rowKey, isExpanded, onToggle, playerMap }) {
           <PlayerFace sofifaId={sofifaId} name={t.player} size={36} />
         </div>
 
-        {/* Player name + metadata */}
         <div
           className={styles.transferInfo}
           onClick={handleIdentityClick}
@@ -405,16 +504,13 @@ function TransferRow({ t, rowKey, isExpanded, onToggle, playerMap }) {
           </div>
         </div>
 
-        {/* Fee */}
         <div className={styles.transferFee}>{fmt(t.fee_eur)}</div>
 
-        {/* Club crest */}
         <div className={styles.crestCol}>
           <ClubCrest teamId={clubTeamId} clubName={clubLabel} size={32} />
         </div>
       </div>
 
-      {/* Inline detail reveal */}
       {isExpanded && (
         <div className={styles.transferDetail}>
           <div className={styles.detailRow}>

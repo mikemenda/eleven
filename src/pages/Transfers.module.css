@@ -30,7 +30,6 @@
   border-bottom: 0.5px solid var(--en-rule);
 }
 
-/* Matches Records page .topLabel — Inter 800, premium archive heading */
 .topLabel {
   font-family: var(--font-inter);
   font-size: 18px;
@@ -39,7 +38,14 @@
   letter-spacing: -0.01em;
 }
 
-/* Season picker — dark surface, gold focus, Inter */
+/* Groups the season picker and Types button on the right */
+.topControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .seasonPicker {
   background: var(--en-surface);
   border: 0.5px solid var(--en-rule);
@@ -54,7 +60,6 @@
   transition: border-color 0.15s;
   -webkit-appearance: none;
   appearance: none;
-  /* Minimal custom arrow via background image */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238899aa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
@@ -64,6 +69,28 @@
 .seasonPicker:focus {
   border-color: var(--en-gold);
   color: var(--en-text-1);
+}
+
+/* Types button — matches filter chip style from Players/UCL */
+.typesBtn {
+  background: transparent;
+  border: 0.5px solid var(--en-rule);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--en-text-3);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.typesBtn:hover { color: var(--en-text-2); }
+/* Active: gold outline when a type filter is set */
+.typesBtnActive {
+  color: var(--en-gold);
+  border-color: var(--en-gold);
 }
 
 /* ─── SUMMARY BAR ────────────────────────────────────────────────── */
@@ -123,11 +150,59 @@
   white-space: nowrap;
 }
 .dirTab:hover { color: var(--en-text-2); }
-/* Gold active underline — matches Records/UCL/Players tab system */
 .dirActive {
   color: var(--en-text-1);
   border-bottom-color: var(--en-gold);
 }
+
+/* ─── ACTIVE TYPE FILTER CHIP ────────────────────────────────────── */
+.activeFilterBar {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  animation: fadeUp 0.15s ease both;
+}
+.activeFilterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 0.5px solid var(--en-gold);
+  border-radius: 12px;
+  padding: 3px 10px 3px 8px;
+}
+.activeFilterDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.activeFilterLabel {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--en-gold);
+  white-space: nowrap;
+}
+.activeFilterClear {
+  background: transparent;
+  border: none;
+  padding: 0 0 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--en-gold);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.activeFilterClear:hover { opacity: 1; }
 
 /* ─── WINDOW GROUP ───────────────────────────────────────────────── */
 .windowGroup {
@@ -148,21 +223,17 @@
   background: var(--en-surface);
   border-bottom: 0.5px solid var(--en-rule);
 }
-
-/* Season label — gold, Inter 700 */
 .windowSeason {
   font-family: var(--font-inter);
   font-size: 12px;
   font-weight: 700;
   color: var(--en-gold);
 }
-/* Dot separator */
 .windowDot {
   font-size: 12px;
   color: var(--en-text-4);
   line-height: 1;
 }
-/* Window name — ivory, Inter 500 */
 .windowName {
   font-family: var(--font-inter);
   font-size: 12px;
@@ -170,7 +241,6 @@
   color: var(--en-text-2);
   flex: 1;
 }
-/* Net value — Inter 600, restrained color */
 .windowNet {
   font-family: var(--font-inter);
   font-size: 12px;
@@ -192,20 +262,15 @@
   cursor: pointer;
   transition: background 0.12s;
   position: relative;
-  /* Left border stripe space */
   padding-left: 16px;
 }
 .transferRow:last-child { border-bottom: none; }
 .transferRow:hover { background: rgba(255,255,255,0.02); }
 .transferRow:active { background: rgba(255,255,255,0.04); }
 
-/* Slim directional left stripe via left border */
-.rowIn {
-  border-left: 3px solid rgba(224,194,122,0.45); /* gold-tinted — arrivals */
-}
-.rowOut {
-  border-left: 3px solid rgba(136,153,170,0.35); /* slate — departures */
-}
+/* Slim directional stripe via left border */
+.rowIn  { border-left: 3px solid rgba(224,194,122,0.45); }
+.rowOut { border-left: 3px solid rgba(136,153,170,0.35); }
 
 /* ─── FACE ───────────────────────────────────────────────────────── */
 .faceWrap {
@@ -257,7 +322,6 @@
   flex-wrap: nowrap;
   overflow: hidden;
 }
-/* Position — readable slate */
 .transferPos {
   font-family: var(--font-inter);
   font-size: 9px;
@@ -267,17 +331,13 @@
   color: #8899aa;
   flex-shrink: 0;
 }
-/* Rule dot — compact indicator, replaces full text label */
 .ruleDot {
   display: inline-block;
   width: 5px;
   height: 5px;
   border-radius: 50%;
   flex-shrink: 0;
-  position: relative;
-  top: 0px;
 }
-/* Club name */
 .transferClub {
   font-family: var(--font-inter);
   font-size: 11px;
@@ -325,7 +385,7 @@
   background: var(--en-surface);
   border-top: 0.5px solid var(--en-rule-faint);
   border-bottom: 0.5px solid var(--en-rule-faint);
-  padding: 10px 16px 10px 19px; /* 19px = matches row left padding + stripe */
+  padding: 10px 16px 10px 19px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -357,6 +417,135 @@
   font-weight: 500;
   color: var(--en-text-2);
   text-align: right;
+}
+
+/* ─── TYPES BOTTOM SHEET ─────────────────────────────────────────── */
+.sheetBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  animation: backdropIn 0.18s ease both;
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 201;
+  background: var(--en-surface);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 16px 16px 0 0;
+  max-height: 60dvh;
+  display: flex;
+  flex-direction: column;
+  animation: sheetUp 0.22s cubic-bezier(0.32, 0.72, 0, 1) both;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  max-width: 640px;
+  margin: 0 auto;
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
+}
+.sheetTitle {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
+}
+.sheetClose {
+  background: none;
+  border: none;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-2);
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.sheetClose:hover { color: var(--en-text-1); }
+
+.sheetList {
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Each type row in the sheet */
+.sheetRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--en-rule-faint);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+.sheetRow:last-child { border-bottom: none; }
+.sheetRow:hover { background: var(--en-bg); }
+
+/* Subtle gold tint on active row */
+.sheetRowActive {
+  background: color-mix(in srgb, var(--en-gold) 5%, var(--en-surface));
+}
+.sheetRowActive:hover {
+  background: color-mix(in srgb, var(--en-gold) 8%, var(--en-surface));
+}
+
+/* Dot in the sheet — matches transfer row dot, slightly larger for readability */
+.sheetDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+/* Empty dot placeholder for "All Types" row — keeps label alignment consistent */
+.sheetDotEmpty {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--en-rule);
+  flex-shrink: 0;
+}
+
+.sheetRowLabel {
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--en-text-1);
+  flex: 1;
+}
+
+/* Gold checkmark for selected type */
+.sheetCheck {
+  font-size: 13px;
+  color: var(--en-gold);
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 /* ─── LOADING / EMPTY ────────────────────────────────────────────── */
