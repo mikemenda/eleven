@@ -28,15 +28,15 @@
   flex-shrink: 0;
 }
 .topLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--en-text-2);
 }
 .topCount {
-  font-family: var(--font-plex);
-  font-size: 9px;
+  font-family: var(--font-inter);
+  font-size: 11px;
   color: var(--en-text-4);
 }
 .searchWrap {
@@ -65,46 +65,47 @@
   transition: border-color 0.15s;
 }
 .search::placeholder { color: var(--en-text-3); }
-.search:focus { border-color: var(--en-blue); }
+.search:focus { border-color: var(--en-gold); }
 
 /* ─── STATUS FILTER ──────────────────────────────────────────────── */
 .filterBar {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   padding: 6px 16px;
   border-bottom: 0.5px solid var(--en-rule-faint);
   position: sticky;
-  top: calc(56px + 45px); /* below topBar */
+  top: calc(56px + 45px);
   background: var(--en-bg);
   z-index: 29;
   flex-shrink: 0;
 }
 .filterBtn {
   background: transparent;
-  border: none;
-  padding: 4px 10px;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  border: 0.5px solid transparent;
+  padding: 3px 10px;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 12px;
   white-space: nowrap;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, border-color 0.15s;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 .filterBtn:hover { color: var(--en-text-2); }
 .filterActive {
-  color: var(--en-text-1);
-  background: var(--en-surface);
+  color: var(--en-gold);
+  border-color: var(--en-gold);
 }
 .filterCount {
   font-size: 9px;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 /* ─── POSITION FILTER ────────────────────────────────────────────── */
@@ -117,7 +118,7 @@
   scrollbar-width: none;
   border-bottom: 0.5px solid var(--en-rule);
   position: sticky;
-  top: calc(56px + 45px + 35px + 37px); /* below filterBar + seasonBar */
+  top: calc(56px + 45px + 35px + 37px);
   background: var(--en-bg);
   z-index: 27;
   flex-shrink: 0;
@@ -127,31 +128,25 @@
   background: transparent;
   border: 0.5px solid transparent;
   padding: 3px 9px;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
   border-radius: 12px;
   white-space: nowrap;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
 .posBtn:hover { color: var(--en-text-2); }
+/* All position chips use same active style — gold pill, no background */
 .posActive {
-  color: var(--en-text-1);
-  background: var(--en-surface);
-  border-color: var(--en-rule);
+  color: var(--en-gold);
+  border-color: var(--en-gold);
 }
-/* Role groups get a slightly distinct visual to separate them from individual positions */
-.posGroup {
-  font-weight: 500;
-}
-.posGroup.posActive {
-  color: var(--en-green);
-  border-color: var(--en-green);
-  background: transparent;
-}
+/* Role group chips are visually identical to individual position chips */
+.posGroup { font-weight: 600; }
 
 /* ─── TABLE WRAPPER ──────────────────────────────────────────────── */
 .tableWrap {
@@ -165,7 +160,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* The inner scroll container — only this scrolls horizontally */
 .tableScroll {
   overflow-x: auto;
   overflow-y: visible;
@@ -199,8 +193,8 @@
 /* Frozen identity column */
 .thIdentity {
   left: 0;
-  z-index: 21; /* above scrolling stat headers */
-  min-width: 160px;
+  z-index: 21;
+  min-width: 170px;
   max-width: 200px;
 }
 .tdIdentity {
@@ -208,10 +202,9 @@
   left: 0;
   background: var(--en-bg);
   z-index: 10;
-  min-width: 160px;
+  min-width: 170px;
   max-width: 200px;
 }
-/* Hairline right border to visually separate frozen column from scrolling content */
 .thIdentity,
 .tdIdentity {
   border-right: 0.5px solid var(--en-rule);
@@ -222,7 +215,7 @@
   text-align: center;
 }
 
-/* Sort header buttons (inside <th>) */
+/* Sort header buttons */
 .sortHeader {
   display: flex;
   align-items: center;
@@ -232,9 +225,10 @@
   padding: 8px 6px;
   background: transparent;
   border: none;
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
@@ -242,7 +236,9 @@
   transition: color 0.15s;
 }
 .sortHeader:hover { color: var(--en-text-2); }
-.sortActive { color: var(--en-green) !important; }
+/* Gold for active sorted column header */
+.sortActive { color: var(--en-gold) !important; }
+
 /* Identity column sort header left-aligned */
 .thIdentity .sortHeader {
   justify-content: flex-start;
@@ -261,9 +257,6 @@
 }
 .tr:hover .tdIdentity,
 .tr:hover .tdStat {
-  background: var(--en-surface);
-}
-.tr:hover .tdIdentity {
   background: var(--en-surface);
 }
 .tr:active .tdIdentity,
@@ -323,32 +316,34 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  max-width: 120px;
 }
 .playerPos {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.06em;
-  color: var(--en-text-4);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #8899aa;
   text-transform: uppercase;
   flex-shrink: 0;
 }
 
 /* Stat cells */
 .tdStat {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 12px;
+  font-weight: 500;
   color: var(--en-text-2);
   text-align: center;
   padding: 0 6px;
-  height: 46px; /* matches thumb 32px + 7px top/bottom padding */
+  height: 46px;
   transition: background 0.1s;
   white-space: nowrap;
   vertical-align: middle;
 }
-/* Subtle highlight on the active sort column */
+/* Gold text on active sorted column values */
 .tdSortActive {
-  color: var(--en-text-1);
+  color: var(--en-gold);
 }
 
 /* ─── LOADING + EMPTY ─────────────────────────────────────────────── */
@@ -361,8 +356,8 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -395,52 +390,56 @@
 .compareBtn {
   flex-shrink: 0;
   background: transparent;
-  border: none;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  border: 0.5px solid transparent;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: color 0.15s;
+  padding: 4px 10px;
+  border-radius: 12px;
+  transition: color 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
 .compareBtn:hover { color: var(--en-text-2); }
-.compareBtnActive { color: var(--en-green) !important; }
+/* Active state: gold outline pill — matches filter chip system */
+.compareBtnActive {
+  color: var(--en-gold) !important;
+  border-color: var(--en-gold) !important;
+}
 
 /* Hint bar shown in compare mode */
 .compareHint {
   padding: 7px 16px;
-  font-family: var(--font-plex);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--en-text-4);
   background: var(--en-bg);
   border-bottom: 0.5px solid var(--en-rule-faint);
   position: sticky;
-  /* below topBar — same offset as filterBar */
   top: calc(56px + 45px);
   z-index: 27;
   flex-shrink: 0;
 }
 
-
-/* Selected row highlight */
+/* Selected row: subtle gold tint */
 .trSelected .tdIdentity,
 .trSelected .tdStat {
-  background: color-mix(in srgb, var(--en-green) 6%, var(--en-bg)) !important;
+  background: color-mix(in srgb, var(--en-gold) 6%, var(--en-bg)) !important;
 }
 
-/* Disabled rows (max 2 already selected, this one isn't) */
+/* Disabled rows */
 .trDisabled {
   opacity: 0.35;
   pointer-events: none;
 }
 
-/* Selection ring indicator */
+/* Selection ring */
 .selectRing {
   width: 18px;
   height: 18px;
@@ -453,10 +452,11 @@
   transition: border-color 0.15s, background 0.15s;
   background: transparent;
 }
+/* Active: gold border + very faint gold tint background; checkmark uses gold */
 .selectRingActive {
-  border-color: var(--en-green);
-  background: var(--en-green);
-  color: var(--en-bg);
+  border-color: var(--en-gold);
+  background: rgba(224, 194, 122, 0.12);
+  color: var(--en-gold);
 }
 
 /* ── COMPARE CTA BAR ── */
@@ -501,26 +501,29 @@
   text-overflow: ellipsis;
 }
 .compareCtaVs {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--en-text-4);
   margin-right: 2px;
+  flex-shrink: 0;
 }
 
+/* Gold CTA button — dark text on gold background */
 .compareCtaBtn {
   flex-shrink: 0;
-  background: var(--en-green);
+  background: var(--en-gold);
   border: none;
   border-radius: 7px;
   padding: 9px 18px;
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--en-bg);
+  color: #080d1a;
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -537,7 +540,6 @@
   scrollbar-width: none;
   border-bottom: 0.5px solid var(--en-rule-faint);
   position: sticky;
-  /* below topBar(45) + filterBar/compareHint(35) */
   top: calc(56px + 45px + 35px);
   background: var(--en-bg);
   z-index: 28;
@@ -547,11 +549,12 @@
 .seasonBar::-webkit-scrollbar { display: none; }
 
 .seasonBarLabel {
-  font-family: var(--font-plex);
+  font-family: var(--font-inter);
   font-size: 9px;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--en-text-4);
+  color: #8899aa;
   flex-shrink: 0;
   padding-right: 4px;
 }
@@ -560,21 +563,21 @@
   background: transparent;
   border: 0.5px solid transparent;
   padding: 3px 9px;
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-text-3);
   cursor: pointer;
   border-radius: 12px;
   white-space: nowrap;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
 .seasonBtn:hover { color: var(--en-text-2); }
 .seasonActive {
   color: var(--en-gold);
-  background: transparent;
   border-color: var(--en-gold);
 }
 
@@ -594,8 +597,6 @@
 .seasonClear:hover { color: var(--en-text-2); }
 
 /* ─── SCOPE LABEL BAR ────────────────────────────────────────────── */
-/* Appears below season filter when a season is active.              */
-/* Not sticky — scrolls with content.                                */
 .scopeBar {
   display: flex;
   align-items: center;
@@ -606,14 +607,15 @@
   animation: fadeUp 0.2s ease both;
 }
 .scopeLabel {
-  font-family: var(--font-plex);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--en-gold);
 }
 .scopeCount {
-  font-family: var(--font-plex);
-  font-size: 9px;
+  font-family: var(--font-inter);
+  font-size: 10px;
   color: var(--en-text-4);
 }

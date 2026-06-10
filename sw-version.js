@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 64
+// Current: 65
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -61,4 +61,5 @@
 //   62 — Museum accordion: replaced trophy grid + bottom sheet modal with one-trophy-per-line accordion list; inline expand/collapse with no clipping; trophy PNG left, name/region/count middle, chevron right; region label readability improved (en-text-3); Done button removed
 //   63 — Museum refinement: trophy image 2.2x larger (76×120px container); row padding increased for breathing room; hero count line replaced with archive stat line (Inter, no mono tracking) showing "N trophies · N seasons" with derived season count and singular/plural
 //   64 — History visual system pass: gold/ivory brand treatment throughout; Inter typography (mono removed); gold active filter chips; FC Richport uses shared RichportMark identity (matches Records.jsx, auto-upgrades with future crestUrl); Finalist badge replaces RU; Won badge gold/Inter; highlight rows gold tint not green; Era Leaders gold title counts; Treble/Back-to-Back UCL badges Inter; spinner gold; header eyebrow Inter; summary stats Inter 700
-const SW_VERSION = 64;
+//   65 — Players visual system pass: green removed throughout (gold/ivory system); Inter typography replaces mono on all labels; filter chips match UCL pill design (gold outline active state, no background fill); sortActive gold; posGroup active unified with posActive; compare ring gold outline + faint gold tint; compare selected row gold tint; compare CTA gold button (dark text); PlayerProfile tab underline gold, status Active gold, transfer IN gold, compare hover gold, labels/grid Inter; PlayerCompare winner stats gold, tab underline gold, season winner gold, all labels Inter; App column (no s); fmtRate parseFloat leading-zero guard in Players/Profile/Compare; spinner gold throughout
+const SW_VERSION = 65;

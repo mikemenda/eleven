@@ -35,7 +35,8 @@ function SofifaImg({ sofifaId, name, size = 56 }) {
 
 function fmtRate(val) {
   if (val === null || val === undefined) return '—'
-  return typeof val === 'number' ? val.toFixed(2) : '—'
+  const n = typeof val === 'string' ? parseFloat(val) : val
+  return typeof n === 'number' && !isNaN(n) ? n.toFixed(2) : '—'
 }
 
 function isGK(player) {

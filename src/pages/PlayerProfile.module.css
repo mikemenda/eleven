@@ -8,8 +8,8 @@
 .loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
 .spinner {
   width: 24px; height: 24px;
-  border: 1.5px solid var(--en-rule);
-  border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -32,20 +32,32 @@
 }
 .backBtn:hover { color: var(--en-text-1); }
 .topLabel {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--en-text-2);
   flex: 1;
 }
 .compareBtn {
   flex-shrink: 0;
-  background: transparent; border: none;
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--en-text-3); cursor: pointer;
-  padding: 4px 0 4px 8px;
-  transition: color 0.15s;
+  background: transparent;
+  border: 0.5px solid transparent;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--en-text-3);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 12px;
+  transition: color 0.15s, border-color 0.15s;
 }
-.compareBtn:hover { color: var(--en-green); }
+.compareBtn:hover {
+  color: var(--en-gold);
+  border-color: var(--en-gold);
+}
 
 /* ── HERO ── */
 .hero {
@@ -69,20 +81,44 @@
   overflow: hidden;
 }
 .heroInfo { flex: 1; }
-.heroMeta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-.heroPos {
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--en-text-3);
+.heroMeta {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px; flex-wrap: wrap;
 }
-.heroNat { font-family: var(--font-plex); font-size: 10px; color: var(--en-text-4); }
-.heroStatus { font-family: var(--font-plex); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+.heroPos {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
+}
+.heroNat {
+  font-family: var(--font-inter);
+  font-size: 10px;
+  color: var(--en-text-4);
+}
+.heroStatus {
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .heroName {
-  font-family: var(--font-playfair); font-size: 24px; font-weight: 700;
-  color: var(--en-text-1); line-height: 1.1; margin: 0 0 4px;
+  font-family: var(--font-playfair);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  line-height: 1.1;
+  margin: 0 0 4px;
 }
 .heroSeasons {
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--en-text-4);
 }
 
@@ -94,17 +130,21 @@
 .tab {
   flex: 1; padding: 12px 8px;
   background: transparent; border: none; border-bottom: 2px solid transparent;
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.12em; text-transform: uppercase;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--en-text-3); cursor: pointer; transition: color 0.15s, border-color 0.15s;
 }
 .tab:hover { color: var(--en-text-2); }
-.tabActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
+/* Gold active underline — matches Records/UCL tab system */
+.tabActive { color: var(--en-text-1); border-bottom-color: var(--en-gold); }
 
-/* ── SECTION wrapper — contains grid + table ── */
+/* ── SECTION wrapper ── */
 .section { padding: 0; }
 
-/* ── STAT GRID (inside section, at top of each stats tab) ── */
+/* ── STAT GRID ── */
 .totalsGrid {
   max-width: 640px;
   margin: 0 auto;
@@ -123,19 +163,26 @@
 }
 .totalCard:last-child { border-right: none; }
 .totalVal {
-  font-family: var(--font-plex); font-size: 20px; font-weight: 500;
-  color: var(--en-text-1); line-height: 1;
+  font-family: var(--font-inter);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--en-text-1);
+  line-height: 1;
 }
 /* Rate-stat row (row 2) slightly smaller */
 .totalsRow:nth-child(2) .totalVal { font-size: 16px; }
 .totalKey {
-  font-family: var(--font-plex); font-size: 8px;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--en-text-3); white-space: nowrap;
+  font-family: var(--font-inter);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8899aa;
+  white-space: nowrap;
 }
 
 /* ── DIVIDER between grid and table ── */
-.tableDivider { height: 0; }   /* border already on totalsGrid bottom — no extra space needed */
+.tableDivider { height: 0; }
 
 /* ── NO DATA state ── */
 .noData {
@@ -146,20 +193,26 @@
 /* ── SEASON TABLE ── */
 .table { width: 100%; border-collapse: collapse; padding: 0 20px; }
 .table th {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--en-text-3); font-weight: 400;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
+  font-weight: 600;
   padding: 12px 8px 10px; text-align: center;
 }
 .table th:first-child { text-align: left; padding-left: 20px; }
 .table td {
-  font-family: var(--font-plex); font-size: 13px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--en-text-2); padding: 10px 8px;
   border-top: 0.5px solid var(--en-rule-faint);
   text-align: center;
 }
 .table td:first-child { text-align: left; padding-left: 20px; }
-.seasonLabel { color: var(--en-text-1) !important; font-weight: 500; }
+.seasonLabel { color: var(--en-text-1) !important; font-weight: 600; }
 
 /* ── TRANSFER HISTORY ── */
 .transferList { display: flex; flex-direction: column; padding: 0 20px; }
@@ -169,10 +222,28 @@
   border-bottom: 0.5px solid var(--en-rule-faint);
 }
 .transferDir {
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.1em; font-weight: 500; min-width: 40px;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  min-width: 44px;
 }
 .transferDetails { flex: 1; }
-.transferClubs { font-family: var(--font-inter); font-size: 13px; font-weight: 500; color: var(--en-text-1); }
-.transferMeta { font-family: var(--font-plex); font-size: 10px; color: var(--en-text-3); margin-top: 2px; }
-.transferFee { font-family: var(--font-plex); font-size: 13px; color: var(--en-gold); font-weight: 500; }
+.transferClubs {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--en-text-1);
+}
+.transferMeta {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: var(--en-text-3);
+  margin-top: 2px;
+}
+.transferFee {
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--en-gold);
+}

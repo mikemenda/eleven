@@ -39,7 +39,8 @@ function fmt(n) {
 
 function fmtRate(val) {
   if (val === null || val === undefined) return '—'
-  return typeof val === 'number' ? val.toFixed(2) : '—'
+  const n = typeof val === 'string' ? parseFloat(val) : val
+  return typeof n === 'number' && !isNaN(n) ? n.toFixed(2) : '—'
 }
 
 function fmtOpt(val, dp = 1) {
@@ -322,7 +323,7 @@ export default function PlayerProfile() {
   )
 
   const status       = player.status || 'Active'
-  const statusColors = { Active: 'var(--en-green)', Sold: 'var(--en-text-3)', Loaned: 'var(--en-gold)' }
+  const statusColors = { Active: 'var(--en-gold)', Sold: 'var(--en-text-3)', Loaned: 'var(--en-gold)' }
   const seasonsCount = allStats.length
 
   const allCompsGrid = buildAllCompsGrid(player)
@@ -424,7 +425,7 @@ export default function PlayerProfile() {
                 {transfers.map((t, i) => (
                   <div key={i} className={styles.transferItem}>
                     <div className={styles.transferDir}
-                      style={{ color: t.direction === 'IN' ? 'var(--en-green)' : 'var(--danger, #ef4444)' }}>
+                      style={{ color: t.direction === 'IN' ? 'var(--en-gold)' : 'var(--en-text-3)' }}>
                       {t.direction === 'IN' ? '▼ IN' : '▲ OUT'}
                     </div>
                     <div className={styles.transferDetails}>

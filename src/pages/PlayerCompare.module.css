@@ -21,8 +21,11 @@
 }
 .backBtn:hover { color: var(--en-text-1); }
 .topLabel {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--en-text-2);
 }
 
 /* ─── HERO ROW ───────────────────────────────────────────────────── */
@@ -67,15 +70,17 @@
   word-break: break-word;
 }
 .heroMeta {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--en-text-3); margin: 0;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8899aa; margin: 0;
 }
 
-/* Clear (×) button — top-right corner of the populated slot */
+/* Clear (×) button */
 .heroClearBtn {
   position: absolute; top: 8px;
-  /* left for side=a, right for side=b — handled by :first-child rule below */
   right: 8px;
   width: 20px; height: 20px;
   display: flex; align-items: center; justify-content: center;
@@ -84,7 +89,6 @@
   transition: color 0.15s, border-color 0.15s;
 }
 .heroClearBtn:hover { color: var(--en-text-1); border-color: var(--en-text-3); }
-/* Right column: move clear button to left so it doesn't overlap text */
 .heroColRight .heroClearBtn { right: auto; left: 8px; }
 
 /* Empty hero col (button) */
@@ -105,8 +109,12 @@
   color: var(--en-text-4);
 }
 .heroEmptyLabel {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--en-text-4);
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--en-text-4);
 }
 
 /* ─── TABS ───────────────────────────────────────────────────────── */
@@ -117,12 +125,16 @@
 .tab {
   flex: 1; padding: 12px 8px;
   background: transparent; border: none; border-bottom: 2px solid transparent;
-  font-family: var(--font-plex); font-size: 10px;
-  letter-spacing: 0.12em; text-transform: uppercase;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--en-text-3); cursor: pointer; transition: color 0.15s, border-color 0.15s;
 }
 .tab:hover { color: var(--en-text-2); }
-.tabActive { color: var(--en-text-1); border-bottom-color: var(--en-green); }
+/* Gold active underline — matches Records/UCL/PlayerProfile */
+.tabActive { color: var(--en-text-1); border-bottom-color: var(--en-gold); }
 
 /* ─── COLUMN LABELS ──────────────────────────────────────────────── */
 .colLabels {
@@ -131,17 +143,24 @@
   padding: 8px 20px 4px;
   border-bottom: 0.5px solid var(--en-rule-faint);
 }
+/* Gold player name labels — identify each column */
 .colLabelA {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--en-green); text-align: left;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--en-gold); text-align: left;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .colLabelCenter { min-width: 80px; }
 .colLabelB {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--en-green); text-align: right;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--en-gold); text-align: right;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
@@ -163,22 +182,28 @@
 .statRow:last-child { border-bottom: none; }
 
 .statVal {
-  font-family: var(--font-plex); font-size: 18px; font-weight: 500;
+  font-family: var(--font-inter);
+  font-size: 18px;
+  font-weight: 700;
   line-height: 1;
 }
 .statValLeft  { text-align: left; }
 .statValRight { text-align: right; }
 
-.statWin     { color: var(--en-green); }
+/* Gold for winner values (was green) */
+.statWin     { color: var(--en-gold); }
 .statEqual   { color: var(--en-text-1); }
 .statLose    { color: var(--en-text-3); }
-/* Single player present — no winner logic, show value at mid brightness */
+/* Single player present — mid brightness */
 .statNeutral { color: var(--en-text-2); }
 
 .statLabel {
-  font-family: var(--font-plex); font-size: 8px;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--en-text-4); text-align: center;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8899aa; text-align: center;
 }
 
 /* ─── SECTION DIVIDER ────────────────────────────────────────────── */
@@ -186,9 +211,12 @@
   padding: 16px 20px 8px;
 }
 .sectionDividerLabel {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--en-text-4);
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
 }
 
 /* ─── SEASON TABLE ───────────────────────────────────────────────── */
@@ -203,36 +231,43 @@
 .seasonTable { width: 100%; border-collapse: collapse; min-width: 360px; }
 
 .sthSeason {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--en-text-3); font-weight: 400;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
   padding: 10px 8px 8px 20px; text-align: left; white-space: nowrap;
 }
 .sth {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--en-text-3); font-weight: 400;
+  font-family: var(--font-inter);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
   padding: 10px 8px 8px; text-align: center; white-space: nowrap;
 }
 .sthDivider { width: 1px; background: var(--en-rule); padding: 0; }
 
 .str { border-top: 0.5px solid var(--en-rule-faint); }
 .stdSeason {
-  font-family: var(--font-plex); font-size: 12px; font-weight: 500;
+  font-family: var(--font-inter); font-size: 12px; font-weight: 600;
   color: var(--en-text-1);
   padding: 9px 8px 9px 20px; text-align: left; white-space: nowrap;
 }
 .std {
-  font-family: var(--font-plex); font-size: 12px;
+  font-family: var(--font-inter); font-size: 12px; font-weight: 500;
   color: var(--en-text-2);
   padding: 9px 8px; text-align: center; white-space: nowrap;
 }
-.stdWin  { color: var(--en-green); }
+/* Gold for winner season values (was green) */
+.stdWin  { color: var(--en-gold); font-weight: 700; }
 .stdDivider { width: 1px; background: var(--en-rule); padding: 0; }
 
 /* ─── NOTES ──────────────────────────────────────────────────────── */
 .uclNote {
-  font-family: var(--font-plex); font-size: 10px; letter-spacing: 0.08em;
+  font-family: var(--font-inter); font-size: 11px;
   color: var(--en-text-4); padding: 12px 20px 4px; margin: 0;
 }
 .pendingNote {
@@ -249,7 +284,8 @@
 .loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px 0; }
 .spinner {
   width: 24px; height: 24px;
-  border: 1.5px solid var(--en-rule); border-top-color: var(--en-blue);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-top-color: var(--en-gold);
   border-radius: 50%; animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -270,11 +306,9 @@
   background: var(--en-surface);
   border-top: 0.5px solid var(--en-rule);
   border-radius: 16px 16px 0 0;
-  /* Height: tall enough to show ~6 players without being full screen */
   max-height: 72dvh;
   display: flex; flex-direction: column;
   animation: slideUp 0.22s ease both;
-  /* Respect safe area at bottom */
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 @keyframes slideUp {
@@ -289,8 +323,12 @@
   flex-shrink: 0;
 }
 .pickerTitle {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--en-text-3);
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8899aa;
 }
 .pickerClose {
   width: 28px; height: 28px;
@@ -313,11 +351,11 @@
   width: 100%;
   background: var(--en-bg); border: 0.5px solid var(--en-rule);
   border-radius: 6px; padding: 8px 10px 8px 32px;
-  font-family: var(--font-inter); font-size: 16px; /* prevent iOS zoom */
+  font-family: var(--font-inter); font-size: 16px;
   color: var(--en-text-1); outline: none;
 }
 .pickerSearch::placeholder { color: var(--en-text-3); }
-.pickerSearch:focus { border-color: var(--en-blue); }
+.pickerSearch:focus { border-color: var(--en-gold); }
 
 .pickerList {
   overflow-y: auto; flex: 1;
@@ -346,7 +384,10 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pickerRowMeta {
-  font-family: var(--font-plex); font-size: 9px;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--en-text-3); display: block; margin-top: 2px;
+  font-family: var(--font-inter);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8899aa; display: block; margin-top: 2px;
 }
