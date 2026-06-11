@@ -113,26 +113,50 @@ export const updatePlayer = async (playerId, data) => {
 }
 
 // Returns all seasonStats documents for a given player across all seasons and scopes.
-// Queries by playerId only. No clubId filter — either in Firestore or client-side.
+// Queries by playerId only. No clubId filter.
 //
-// Why playerId-only is safe here:
-// playerId is a Firestore document ID pointing to a specific player record that is
-// already scoped to one club save. Two players at two different clubs are two separate
-// Firestore documents with different playerIds. So filtering by playerId is already
-// club-specific — there is no cross-club contamination risk.
+// Why playerId-only is safe:
+// playerId is a Firestore document ID already scoped to one club save. Two players at
+// two different clubs have two separate playerIds — filtering by playerId is inherently
+// club-specific with no cross-club contamination risk.
 //
-// Why the previous clubId filter was wrong:
-// S2/S3 seasonStats docs were written during a seeding era where clubId values were
-// corrupted (letter O vs digit 0 mismatch). The repair script that later fixed other
-// collections did not include seasonStats, so those docs still carry wrong clubId values.
-// Any filter on clubId — whether in Firestore or client-side — will silently exclude
-// those docs. Only removing the filter entirely makes all seasons visible.
+// Historical note (resolved pre-Phase-1):
+// S2/S3 UCL seasonStats docs were written with corrupted clubId values (letter O vs
+// digit 0 mismatch). This was fully repaired by fixSeasonStatsClubId.mjs and verified
+// clean: 0 wrong-clubId docs remain. The playerId-only pattern is retained because it
+// remains correct and safe regardless.
 //
-// NOTE: docs do NOT have a label field. Join to seasons by seasonId to get "S1" etc.
+// NOTE: scope:'UCL' docs do not carry a label field — join to seasons by seasonId to
+// get the display label ("S1", "S2", etc.). scope:'ALL' docs carry label as a
+// convenience cache, but the seasons collection is always authoritative.
 export const getSeasonStatsByPlayer = async (playerId) => {
   const q = query(
     collection(db, 'seasonStats'),
     where('playerId', '==', playerId)
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
+// Returns ALL seasonStats documents for a given club across all players, seasons,
+// and scopes in a single Firestore query.
+//
+// This is the club-level companion to getSeasonStatsByPlayer. It loads the full
+// canonical stat set (99 docs for S1–S3: 66 scope:'ALL' + 33 scope:'UCL') in one
+// round-trip. Pages that need to display or compute across multiple players and
+// seasons — Records, Players season filter, UCL tabs — use this instead of making
+// per-player calls.
+//
+// The returned array is intentionally unfiltered and unsorted. Each calling page
+// filters client-side by scope, playerId, or seasonId as needed. This avoids
+// composite Firestore indexes and keeps all grouping/sorting logic co-located with
+// the UI that needs it.
+//
+// Safe to use now that the pre-Phase-1 clubId repair is verified complete.
+export const getSeasonStatsByClub = async (clubId) => {
+  const q = query(
+    collection(db, 'seasonStats'),
+    where('clubId', '==', clubId)
   )
   const snap = await getDocs(q)
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
