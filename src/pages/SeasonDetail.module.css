@@ -199,6 +199,15 @@
   letter-spacing: -0.2px;
   margin-bottom: 12px;
 }
+/* Season code inside the Playfair headline — Inter 800 so the numeral
+   sits on the same baseline as the S, no Playfair drop behavior */
+.heroSeasonCode {
+  font-family: var(--font-inter);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 0.92em;
+  vertical-align: baseline;
+}
 .heroIdentityRule {
   width: 100%;
   height: 1px;
@@ -734,7 +743,9 @@
   background: var(--en-bg);
   border: 0.5px solid var(--en-rule);
   border-radius: 14px 14px 0 0;
+  /* Use height instead of max-height so flex children have a real bounded box */
   max-height: 82dvh;
+  height: 82dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -813,31 +824,37 @@
   color: #8899aa;
 }
 
-/* Narrative */
+/* Narrative — inside scroll body */
 .oppNarrative {
   font-family: var(--font-inter);
   font-size: 13px; color: var(--en-text-2); line-height: 1.55;
   padding: 14px 16px; margin: 0;
   border-bottom: 0.5px solid var(--en-rule);
-  flex-shrink: 0;
 }
 
-/* Finals note */
+/* Finals note — inside scroll body */
 .oppFinalsNote {
   font-family: var(--font-inter);
   font-size: 11px; font-weight: 600;
   color: var(--en-gold); letter-spacing: 0.03em;
   padding: 10px 16px;
   border-bottom: 0.5px solid var(--en-rule);
-  flex-shrink: 0;
 }
 
-/* Match log — scrollable area */
-.oppMatchLog {
-  overflow-y: auto;
+/* Scroll body — wraps narrative, finals note, and match log */
+/* min-height: 0 is critical: without it a flex child cannot shrink
+   below its natural content size, so the card overflows instead of scrolling */
+.oppScrollBody {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 8px 0;
+  overscroll-behavior: contain;
+}
+
+/* Match log — inside scroll body, no independent scroll */
+.oppMatchLog {
+  padding: 8px 0 calc(env(safe-area-inset-bottom, 0px) + 32px);
 }
 .oppSeasonDivider {
   font-family: var(--font-inter);

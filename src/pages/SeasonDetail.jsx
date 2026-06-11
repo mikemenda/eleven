@@ -363,6 +363,9 @@ function UclOpponentDetail({ opponentKey, allMatches, opponents, clubName, onClo
           ))}
         </div>
 
+        {/* Scrollable body — narrative + finals note + full match log */}
+        <div className={styles.oppScrollBody}>
+
         {/* Narrative */}
         {narrative && <p className={styles.oppNarrative}>{narrative}</p>}
 
@@ -409,6 +412,8 @@ function UclOpponentDetail({ opponentKey, allMatches, opponents, clubName, onClo
             </div>
           ))}
         </div>
+
+        </div>{/* end oppScrollBody */}
 
       </div>
     </div>
@@ -900,10 +905,28 @@ const SeasonDetail = () => {
   const dynastyScoreOutOfRange =
     dynastyScoreNum != null && (dynastyScoreNum < 0 || dynastyScoreNum > 100)
 
-  const headline = s.seasonHeadline ||
+  // Build headline JSX: keep Playfair for the editorial text, but wrap the
+  // trailing season code (S1–S9, S10+) in a separate Inter 800 span so Playfair
+  // numerals don't make the number sit awkwardly below the S.
+  const rawHeadline = s.seasonHeadline ||
     (s.leaguePosition === 1
       ? `${s.leagueCompetition || 'League'} champions — ${s.label}`
       : s.label)
+
+  // Match: optional body text + optional separator + trailing season code
+  // e.g. "Premier League champions — S3" → ["Premier League champions", " — ", "S3"]
+  const seasonCodeMatch = rawHeadline.match(/^(.*?)(\s*—\s*)(S\d{1,2})$/)
+  const standaloneCodeMatch = !seasonCodeMatch && rawHeadline.match(/^(S\d{1,2})$/)
+
+  const headline = seasonCodeMatch ? (
+    <>
+      {seasonCodeMatch[1]}
+      <span>{seasonCodeMatch[2]}</span>
+      <span className={styles.heroSeasonCode}>{seasonCodeMatch[3]}</span>
+    </>
+  ) : standaloneCodeMatch ? (
+    <span className={styles.heroSeasonCode}>{rawHeadline}</span>
+  ) : rawHeadline
 
   const heroLede = buildHeroLede(s.narrativeText)
 
