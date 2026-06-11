@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 72
+// Current: 73
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -68,4 +68,6 @@
 //   71 — SeasonDetail UCL opponent drill-in data scope fix: load all seasons for the club and fetch their matches in parallel; allUclMatches now contains every UCL match across all seasons (not just the current season); opponent card shows correct all-time W/D/L, goals, narrative, and full match log across every season
 //   70 — Targeted patch: Season Detail hero headline wraps season code (S1/S2/S3) in Inter 800 span so Playfair numeral drop is eliminated; UCL opponent card scroll fixed (oppScrollBody flex:1 min-height:0 overflow-y:auto, narrative+finals+matches all scroll together); oppDetailCard height:82dvh for proper flex bounds
 //   69 — Final Seasons polish: Dynasty Arc score consistency (all same size/weight, no permanent tiering), ring pip for finalist vs filled pip for winner; season card score uniform treatment; Season Detail top-bar and hero eyebrow use Inter 700 (no Playfair S3 drop), hero headline clamp reduced; hero lede derived as first sentence ~160 chars (full story retained in Story section, no duplication); trophy PNG shelf 25% larger (65×85px); cup badge text-only gold (no heavy box border), opponent text ivory/slate; UCL Final leg row shows "Final" not "Leg 1", neutral venue H/A/N; KO round rows tappable with chevron to open in-page UCL opponent drill-in; LP matchday rows tappable; UclOpponentDetail overlay (bottom-sheet card, 82dvh, scrollable match log) reuses deriveUclRivals + buildUclRivalNarrative from uclUtils.js; close X returns to same Season Detail, no navigation away
-const SW_VERSION = 71;
+//   72 — Phase 1 Steps A+B: add getSeasonStatsByClub to services.js; UCL tabs (UclPlayers, UclRecords) migrate to scope:'UCL' seasonStats collection
+//   73 — Phase 1 Step C: Records page — All Comps single-season records from scope:'ALL' collection; UCL career + single-season records from scope:'UCL' collection; no silent fallback to embedded array or top-level totals
+const SW_VERSION = 73;

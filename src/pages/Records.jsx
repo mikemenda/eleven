@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getPlayers, getSeasons, getTransfers, getMatchesByClub, getOpponents } from '../firebase/services'
+import { getPlayers, getSeasons, getTransfers, getMatchesByClub, getOpponents, getSeasonStatsByClub } from '../firebase/services'
 import TRANSFER_CLUBS from '../../data/transfer-clubs.json'
 import styles from './Records.module.css'
 
@@ -135,10 +135,16 @@ function isGK(p) {
 }
 
 // ─── Records computation ──────────────────────────────────────────────────────
-function computeAllRecords({ players, seasons, transfers, matches }) {
+function computeAllRecords({ players, seasons, transfers, matches, allStatsDocs, uclStatsDocs }) {
   const active   = players.filter(p => !p.isHistoricalStub)
   const outfield = active.filter(p => !isGK(p))
   const gks      = active.filter(p => isGK(p))
+
+  // Lookup maps — used by all collection-based stat blocks below
+  const playerById     = new Map(players.map(p => [p.id, p]))
+  // scope:'UCL' docs lack a label field; scope:'ALL' docs carry it but we keep
+  // this fallback in case any doc is missing it.
+  const seasonLabelById = new Map((seasons || []).map(s => [s.id, s.label || '—']))
 
   // ── All Comps career ──────────────────────────────────────────────────────
   // Rate threshold: 20 apps (all comps career)
@@ -154,13 +160,21 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
   }
 
   // ── All Comps single season ───────────────────────────────────────────────
-  // Rate threshold: 20 apps (all comps single season)
-  const allSeasonEntries = []
-  for (const p of active) {
-    for (const ss of p.seasonStats || []) {
-      allSeasonEntries.push({ player: p, ss })
+  // Canonical source: scope:'ALL' collection docs.
+  // scope:'ALL' docs carry a label field (stored by seedAllCompsStats.mjs);
+  // seasonLabelById provides a safe fallback if any doc is missing it.
+  const allSeasonEntries = (allStatsDocs || []).map(doc => {
+    const player = playerById.get(doc.playerId)
+    if (!player || player.isHistoricalStub) return null
+    const ss = {
+      label:       doc.label || seasonLabelById.get(doc.seasonId) || '—',
+      apps:        doc.apps        || 0,
+      goals:       doc.goals       || 0,
+      assists:     doc.assists     || 0,
+      cleanSheets: doc.cleanSheets || 0,
     }
-  }
+    return { player, ss }
+  }).filter(Boolean)
   const gkSeasonEntries = allSeasonEntries.filter(e => isGK(e.player))
 
   const acSeason = {
@@ -180,16 +194,39 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
 
   // ── Champions League career ───────────────────────────────────────────────
   // Rate threshold: 5 UCL apps (career)
-  const withUCL = active.map(p => {
-    let uclApps = 0, uclGoals = 0, uclAssists = 0, uclCleanSheets = 0
-    for (const ss of p.seasonStats || []) {
-      uclApps        += ss.uclApps        || 0
-      uclGoals       += ss.uclGoals       || 0
-      uclAssists     += ss.uclAssists     || 0
-      uclCleanSheets += ss.uclCleanSheets || 0
+  // UCL career — canonical: scope:'UCL' collection docs grouped by playerId.
+  // No silent fallback to embedded p.seasonStats or top-level p.uclApps.
+  // Dev warning fires if a player has top-level UCL totals but no collection docs.
+  const uclByPlayer = new Map()
+  for (const doc of (uclStatsDocs || [])) {
+    if (!doc.playerId) continue
+    const p = playerById.get(doc.playerId)
+    if (!p || p.isHistoricalStub) continue
+    if (!uclByPlayer.has(doc.playerId)) {
+      uclByPlayer.set(doc.playerId, {
+        ...p,
+        uclApps: 0, uclGoals: 0, uclAssists: 0, uclCleanSheets: 0,
+      })
     }
-    return { ...p, uclApps, uclGoals, uclAssists, uclCleanSheets }
-  })
+    const acc = uclByPlayer.get(doc.playerId)
+    acc.uclApps        += doc.apps        || 0
+    acc.uclGoals       += doc.goals       || 0
+    acc.uclAssists     += doc.assists     || 0
+    acc.uclCleanSheets += doc.cleanSheets || 0
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    for (const p of active) {
+      if ((p.uclApps || 0) > 0 && !uclByPlayer.has(p.id)) {
+        console.warn(
+          `[Records] ${p.name} has top-level uclApps=${p.uclApps} ` +
+          `but no scope:'UCL' collection docs. Run auditSeasonStats.mjs to diagnose.`
+        )
+      }
+    }
+  }
+
+  const withUCL         = [...uclByPlayer.values()].filter(p => p.uclApps > 0)
   const withUCLOutfield = withUCL.filter(p => !isGK(p))
   const withUCLGks      = withUCL.filter(p => isGK(p))
 
@@ -205,13 +242,22 @@ function computeAllRecords({ players, seasons, transfers, matches }) {
   }
 
   // ── Champions League single season ────────────────────────────────────────
-  // Rate threshold: 5 UCL apps (single season)
-  const uclSeasonEntries = []
-  for (const p of active) {
-    for (const ss of p.seasonStats || []) {
-      if ((ss.uclApps || 0) > 0) uclSeasonEntries.push({ player: p, ss })
-    }
-  }
+  // Canonical source: scope:'UCL' collection docs.
+  // scope:'UCL' docs do NOT carry a label field — join via seasonLabelById.
+  const uclSeasonEntries = (uclStatsDocs || [])
+    .filter(doc => (doc.apps || 0) > 0)
+    .map(doc => {
+      const player = playerById.get(doc.playerId)
+      if (!player || player.isHistoricalStub) return null
+      const ss = {
+        label:          seasonLabelById.get(doc.seasonId) || '—',
+        uclApps:        doc.apps        || 0,
+        uclGoals:       doc.goals       || 0,
+        uclAssists:     doc.assists     || 0,
+        uclCleanSheets: doc.cleanSheets || 0,
+      }
+      return { player, ss }
+    }).filter(Boolean)
 
   const uclSeason = {
     topGoals:   maxByEntry(uclSeasonEntries, e => e.ss.uclGoals || 0),
@@ -854,8 +900,11 @@ export default function Records() {
       getTransfers(activeClub.id),
       getMatchesByClub(activeClub.id),
       getOpponents(),
-    ]).then(([players, seasons, transfers, matches, opps]) => {
-      setData(computeAllRecords({ players, seasons, transfers, matches }))
+      getSeasonStatsByClub(activeClub.id),
+    ]).then(([players, seasons, transfers, matches, opps, statDocs]) => {
+      const allStatsDocs = statDocs.filter(d => d.scope === 'ALL')
+      const uclStatsDocs = statDocs.filter(d => d.scope === 'UCL')
+      setData(computeAllRecords({ players, seasons, transfers, matches, allStatsDocs, uclStatsDocs }))
       setOpponents(opps)
       setLoading(false)
     }).catch(err => {
