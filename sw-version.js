@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 74
+// Current: 75
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -71,4 +71,5 @@
 //   72 — Phase 1 Steps A+B: add getSeasonStatsByClub to services.js; UCL tabs (UclPlayers, UclRecords) migrate to scope:'UCL' seasonStats collection
 //   73 — Phase 1 Step C: Records page — All Comps single-season records from scope:'ALL' collection; UCL career + single-season records from scope:'UCL' collection; no silent fallback to embedded array or top-level totals
 //   74 — Phase 1 Step D: PlayerProfile and PlayerCompare All Comps season tables read from scope:'ALL' seasonStats collection docs via getSeasonStatsByPlayer
-const SW_VERSION = 74;
+//   75 — Phase 1 Step E: Players page season filter reads from scope:'ALL' seasonStats collection via getSeasonStatsByClub
+const SW_VERSION = 75;

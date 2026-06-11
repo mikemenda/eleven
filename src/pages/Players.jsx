@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getPlayers } from '../firebase/services'
+import { getPlayers, getSeasonStatsByClub } from '../firebase/services'
 import styles from './Players.module.css'
 
 // ─── Position constants ────────────────────────────────────────────────────────
@@ -48,10 +48,17 @@ const STAT_COLS = [
 
 // ─── Season stat aggregation ──────────────────────────────────────────────────
 
-function sumSeasonStats(player, selectedSeasons) {
+// sumSeasonStatsDocs — canonical replacement for the old sumSeasonStats.
+// Reads from scope:'ALL' collection docs (allStatsDocs) instead of the
+// embedded player.seasonStats[]. cleanSheets accumulation behaviour is
+// preserved: starts as null, only becomes a number when at least one
+// season doc has a non-null cleanSheets value.
+function sumSeasonStatsDocs(playerId, selectedSeasons, allStatsDocs) {
   if (!selectedSeasons || selectedSeasons.length === 0) return null
 
-  const rows = (player.seasonStats || []).filter(s => selectedSeasons.includes(s.label))
+  const rows = allStatsDocs.filter(
+    d => d.playerId === playerId && selectedSeasons.includes(d.label)
+  )
   if (rows.length === 0) return null
 
   let apps        = 0
@@ -112,12 +119,12 @@ function seasonNum(label) {
   return parseInt((label || '').replace(/\D/g, ''), 10) || 0
 }
 
-function deriveSeasonOptions(players) {
+// deriveSeasonOptions — derives season pill labels from collection docs.
+// Replaces the old version that iterated each player's embedded array.
+function deriveSeasonOptions(allStatsDocs) {
   const labels = new Set()
-  for (const p of players) {
-    for (const ss of p.seasonStats || []) {
-      if (ss.label) labels.add(ss.label)
-    }
+  for (const doc of allStatsDocs) {
+    if (doc.label) labels.add(doc.label)
   }
   return [...labels].sort((a, b) => seasonNum(b) - seasonNum(a))
 }
@@ -186,6 +193,7 @@ export default function Players() {
   const saved = loadState()
 
   const [players,      setPlayers]      = useState([])
+  const [allStatsDocs, setAllStatsDocs] = useState([])  // scope:'ALL' collection docs
   const [loading,      setLoading]      = useState(true)
   const [statusFilter, setStatusFilter] = useState(saved?.statusFilter ?? 'All')
   const [posFilter,    setPosFilter]    = useState(saved?.posFilter    ?? 'All')
@@ -218,7 +226,14 @@ export default function Players() {
   useEffect(() => {
     if (!activeClub) return
     setLoading(true)
-    getPlayers(activeClub.id).then(p => { setPlayers(p); setLoading(false) })
+    Promise.all([
+      getPlayers(activeClub.id),
+      getSeasonStatsByClub(activeClub.id),
+    ]).then(([p, statDocs]) => {
+      setPlayers(p)
+      setAllStatsDocs(statDocs.filter(d => d.scope === 'ALL'))
+      setLoading(false)
+    })
   }, [activeClub])
 
   function toggleSeason(label) {
@@ -283,7 +298,7 @@ export default function Players() {
   const statsMap = new Map()
   for (const p of players) {
     if (seasonFilterActive) {
-      const summed = sumSeasonStats(p, selectedSeasons)
+      const summed = sumSeasonStatsDocs(p.id, selectedSeasons, allStatsDocs)
       statsMap.set(p.id, summed)
     } else {
       statsMap.set(p.id, p)
@@ -318,7 +333,7 @@ export default function Players() {
     Sold:   players.filter(p => p.status === 'Sold').length,
   }
 
-  const seasonOptions = deriveSeasonOptions(players)
+  const seasonOptions = deriveSeasonOptions(allStatsDocs)
 
   const presentPositions = new Set(players.flatMap(p => splitPositions(p.position)))
   const posFilterOptions = [
