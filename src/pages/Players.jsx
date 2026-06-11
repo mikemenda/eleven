@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { getPlayers, getSeasonStatsByClub } from '../firebase/services'
+import { getPlayers, getSeasonStatsByClub, getSeasons } from '../firebase/services'
 import styles from './Players.module.css'
 
 // ─── Position constants ────────────────────────────────────────────────────────
@@ -48,16 +48,24 @@ const STAT_COLS = [
 
 // ─── Season stat aggregation ──────────────────────────────────────────────────
 
-// sumSeasonStatsDocs — canonical replacement for the old sumSeasonStats.
-// Reads from scope:'ALL' collection docs (allStatsDocs) instead of the
-// embedded player.seasonStats[]. cleanSheets accumulation behaviour is
-// preserved: starts as null, only becomes a number when at least one
-// season doc has a non-null cleanSheets value.
-function sumSeasonStatsDocs(playerId, selectedSeasons, allStatsDocs) {
+// sumSeasonStatsDocs — sums scope:'ALL' collection docs for a player.
+// Matches by BOTH doc.label AND doc.seasonId so docs work correctly even
+// when the label field is absent. seasonIdByLabel (Map<label → seasonId>)
+// is built from the seasons collection and passed in from the component.
+// cleanSheets accumulation: starts null, becomes a number only when at
+// least one doc has a non-null cleanSheets value — same as before.
+function sumSeasonStatsDocs(playerId, selectedSeasons, allStatsDocs, seasonIdByLabel) {
   if (!selectedSeasons || selectedSeasons.length === 0) return null
 
-  const rows = allStatsDocs.filter(
-    d => d.playerId === playerId && selectedSeasons.includes(d.label)
+  // Build a Set of seasonIds that correspond to the selected labels.
+  // This is the primary match key — reliable even when doc.label is missing.
+  const selectedSeasonIds = new Set(
+    selectedSeasons.map(label => seasonIdByLabel.get(label)).filter(Boolean)
+  )
+
+  const rows = allStatsDocs.filter(d =>
+    d.playerId === playerId &&
+    (selectedSeasonIds.has(d.seasonId) || selectedSeasons.includes(d.label))
   )
   if (rows.length === 0) return null
 
@@ -119,12 +127,19 @@ function seasonNum(label) {
   return parseInt((label || '').replace(/\D/g, ''), 10) || 0
 }
 
-// deriveSeasonOptions — derives season pill labels from collection docs.
-// Replaces the old version that iterated each player's embedded array.
-function deriveSeasonOptions(allStatsDocs) {
+// deriveSeasonOptions — derives season pill labels from collection docs,
+// using seasonIdByLabel (Map<label → seasonId>) to resolve labels for docs
+// that are missing the label field. Only seasons that have at least one
+// scope:'ALL' doc are shown as pills.
+function deriveSeasonOptions(allStatsDocs, seasonIdByLabel) {
+  // Build the reverse map once for label lookup from seasonId
+  const seasonLabelById = new Map(
+    [...seasonIdByLabel.entries()].map(([label, id]) => [id, label])
+  )
   const labels = new Set()
   for (const doc of allStatsDocs) {
-    if (doc.label) labels.add(doc.label)
+    const label = doc.label || seasonLabelById.get(doc.seasonId)
+    if (label) labels.add(label)
   }
   return [...labels].sort((a, b) => seasonNum(b) - seasonNum(a))
 }
@@ -193,7 +208,8 @@ export default function Players() {
   const saved = loadState()
 
   const [players,      setPlayers]      = useState([])
-  const [allStatsDocs, setAllStatsDocs] = useState([])  // scope:'ALL' collection docs
+  const [allStatsDocs,    setAllStatsDocs]    = useState([])       // scope:'ALL' collection docs
+  const [seasonIdByLabel, setSeasonIdByLabel] = useState(new Map()) // Map<season label → seasonId>
   const [loading,      setLoading]      = useState(true)
   const [statusFilter, setStatusFilter] = useState(saved?.statusFilter ?? 'All')
   const [posFilter,    setPosFilter]    = useState(saved?.posFilter    ?? 'All')
@@ -229,9 +245,11 @@ export default function Players() {
     Promise.all([
       getPlayers(activeClub.id),
       getSeasonStatsByClub(activeClub.id),
-    ]).then(([p, statDocs]) => {
+      getSeasons(activeClub.id),
+    ]).then(([p, statDocs, seasons]) => {
       setPlayers(p)
       setAllStatsDocs(statDocs.filter(d => d.scope === 'ALL'))
+      setSeasonIdByLabel(new Map(seasons.map(s => [s.label, s.id])))
       setLoading(false)
     })
   }, [activeClub])
@@ -298,7 +316,7 @@ export default function Players() {
   const statsMap = new Map()
   for (const p of players) {
     if (seasonFilterActive) {
-      const summed = sumSeasonStatsDocs(p.id, selectedSeasons, allStatsDocs)
+      const summed = sumSeasonStatsDocs(p.id, selectedSeasons, allStatsDocs, seasonIdByLabel)
       statsMap.set(p.id, summed)
     } else {
       statsMap.set(p.id, p)
@@ -333,7 +351,7 @@ export default function Players() {
     Sold:   players.filter(p => p.status === 'Sold').length,
   }
 
-  const seasonOptions = deriveSeasonOptions(allStatsDocs)
+  const seasonOptions = deriveSeasonOptions(allStatsDocs, seasonIdByLabel)
 
   const presentPositions = new Set(players.flatMap(p => splitPositions(p.position)))
   const posFilterOptions = [
