@@ -272,7 +272,7 @@ export default function PlayerProfile() {
   const location = useLocation()
 
   const [player,    setPlayer]    = useState(null)
-  const [allStats,  setAllStats]  = useState([])  // from player.seasonStats embedded array
+  const [allStats,  setAllStats]  = useState([])  // from seasonStats collection, scope='ALL'
   const [uclStats,  setUclStats]  = useState([])  // from seasonStats collection, scope=UCL
   const [transfers, setTransfers] = useState([])
   const [loading,   setLoading]   = useState(true)
@@ -290,12 +290,12 @@ export default function PlayerProfile() {
     ]).then(([p, seasons, statDocs, t]) => {
       setPlayer(p)
 
-      // ── ALL COMPS: read from player.seasonStats embedded array ──────────
-      // This is the original working data source. The embedded array items have:
-      // label (e.g. "S1"), apps, goals, assists, cleanSheets, gPerGame, aPerGame,
-      // cPerGame, csPerGame. No scope field needed — it's all-comps by definition.
-      const embeddedAll = p?.seasonStats || []
-      setAllStats(sortNewestFirst(embeddedAll))
+      // ── ALL COMPS: canonical source — scope:'ALL' collection docs ───────
+      // statDocs already loaded above; filter to ALL scope and attach labels.
+      // scope:'ALL' docs carry a label field from seedAllCompsStats.mjs;
+      // attachLabels adds/overwrites it from seasonMap as a safe fallback.
+      const allDocs = statDocs.filter(d => d.scope === 'ALL')
+      setAllStats(sortNewestFirst(attachLabels(allDocs, seasonMap)))
 
       // ── UCL: read from seasonStats collection, scope=UCL ────────────────
       // Join labels from seasons since collection docs have no label field.

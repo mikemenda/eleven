@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 73
+// Current: 74
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -70,4 +70,5 @@
 //   69 — Final Seasons polish: Dynasty Arc score consistency (all same size/weight, no permanent tiering), ring pip for finalist vs filled pip for winner; season card score uniform treatment; Season Detail top-bar and hero eyebrow use Inter 700 (no Playfair S3 drop), hero headline clamp reduced; hero lede derived as first sentence ~160 chars (full story retained in Story section, no duplication); trophy PNG shelf 25% larger (65×85px); cup badge text-only gold (no heavy box border), opponent text ivory/slate; UCL Final leg row shows "Final" not "Leg 1", neutral venue H/A/N; KO round rows tappable with chevron to open in-page UCL opponent drill-in; LP matchday rows tappable; UclOpponentDetail overlay (bottom-sheet card, 82dvh, scrollable match log) reuses deriveUclRivals + buildUclRivalNarrative from uclUtils.js; close X returns to same Season Detail, no navigation away
 //   72 — Phase 1 Steps A+B: add getSeasonStatsByClub to services.js; UCL tabs (UclPlayers, UclRecords) migrate to scope:'UCL' seasonStats collection
 //   73 — Phase 1 Step C: Records page — All Comps single-season records from scope:'ALL' collection; UCL career + single-season records from scope:'UCL' collection; no silent fallback to embedded array or top-level totals
-const SW_VERSION = 73;
+//   74 — Phase 1 Step D: PlayerProfile and PlayerCompare All Comps season tables read from scope:'ALL' seasonStats collection docs via getSeasonStatsByPlayer
+const SW_VERSION = 74;

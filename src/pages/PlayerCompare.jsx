@@ -408,7 +408,8 @@ export default function PlayerCompare() {
       getSeasonStatsByPlayer(idA),
     ]).then(([p, statDocs]) => {
       setPlayerA(p)
-      setAllStatsA(sortNewestFirst(p?.seasonStats || []))
+      const allDocsA = statDocs.filter(d => d.scope === 'ALL')
+      setAllStatsA(sortNewestFirst(attachLabels(allDocsA, seasonMap)))
       const ucl = statDocs.filter(d => d.scope === 'UCL')
       setUclStatsA(sortNewestFirst(attachLabels(ucl, seasonMap)))
       setLoadingA(false)
@@ -425,7 +426,8 @@ export default function PlayerCompare() {
       getSeasonStatsByPlayer(idB),
     ]).then(([p, statDocs]) => {
       setPlayerB(p)
-      setAllStatsB(sortNewestFirst(p?.seasonStats || []))
+      const allDocsB = statDocs.filter(d => d.scope === 'ALL')
+      setAllStatsB(sortNewestFirst(attachLabels(allDocsB, seasonMap)))
       const ucl = statDocs.filter(d => d.scope === 'UCL')
       setUclStatsB(sortNewestFirst(attachLabels(ucl, seasonMap)))
       setLoadingB(false)
