@@ -98,20 +98,38 @@ function top5ByEntryRate(entries, scoreFn, mapFn) {
   return [...entries].sort((a, b) => scoreFn(b) - scoreFn(a)).slice(0, 5).map(mapFn)
 }
 
-function computeUclRecords(players) {
-  const active = players.filter(p => !p.isHistoricalStub)
+// computeUclRecords — Phase 1 canonical version
+// Reads exclusively from uclStatsDocs (scope:'UCL' collection docs).
+// No reads from player.seasonStats[] or top-level player.uclApps.
+//
+// uclStatsDocs: scope:'UCL' collection docs from getSeasonStatsByClub
+// players:      player docs — used for identity data only (sofifaId, position, name)
+// uclSeasons:   season docs — used to resolve seasonId → label for display
+function computeUclRecords(uclStatsDocs, players, uclSeasons) {
+  // Build lookup maps
+  const playerMap   = new Map(players.map(p => [p.id, p]))
+  const seasonLabel = new Map((uclSeasons || []).map(s => [s.id, s.label || '—']))
 
-  const withUCL = active.map(p => {
-    let uclApps = 0, uclGoals = 0, uclAssists = 0, uclCleanSheets = 0
-    for (const ss of p.seasonStats || []) {
-      uclApps        += ss.uclApps        || 0
-      uclGoals       += ss.uclGoals       || 0
-      uclAssists     += ss.uclAssists     || 0
-      uclCleanSheets += ss.uclCleanSheets || 0
+  // Group collection docs by playerId and sum career totals
+  const careerByPlayer = new Map()
+  for (const doc of uclStatsDocs) {
+    if (!doc.playerId) continue
+    const p = playerMap.get(doc.playerId)
+    if (!p || p.isHistoricalStub) continue
+    if (!careerByPlayer.has(doc.playerId)) {
+      careerByPlayer.set(doc.playerId, {
+        ...p,
+        uclApps: 0, uclGoals: 0, uclAssists: 0, uclCleanSheets: 0,
+      })
     }
-    return { ...p, uclApps, uclGoals, uclAssists, uclCleanSheets }
-  })
+    const acc = careerByPlayer.get(doc.playerId)
+    acc.uclApps        += doc.apps        || 0
+    acc.uclGoals       += doc.goals       || 0
+    acc.uclAssists     += doc.assists     || 0
+    acc.uclCleanSheets += doc.cleanSheets || 0
+  }
 
+  const withUCL         = [...careerByPlayer.values()].filter(p => p.uclApps > 0)
   const withUCLOutfield = withUCL.filter(p => !isGK(p))
   const withUCLGks      = withUCL.filter(p => isGK(p))
 
@@ -126,11 +144,24 @@ function computeUclRecords(players) {
     topApps:    maxBy(withUCLOutfield, p => p.uclApps),
   }
 
+  // Season entries: one entry per collection doc (one player+season combination)
+  // The ss shape is normalised to match the old embedded-array shape so all
+  // downstream record formatters work without change.
   const seasonEntries = []
-  for (const p of active) {
-    for (const ss of p.seasonStats || []) {
-      if ((ss.uclApps || 0) > 0) seasonEntries.push({ player: p, ss })
+  for (const doc of uclStatsDocs) {
+    if (!doc.playerId) continue
+    const p = playerMap.get(doc.playerId)
+    if (!p || p.isHistoricalStub) continue
+    if ((doc.apps || 0) === 0) continue
+    // Normalise collection doc fields to the shape the formatters expect
+    const ss = {
+      label:          seasonLabel.get(doc.seasonId) || '—',
+      uclApps:        doc.apps        || 0,
+      uclGoals:       doc.goals       || 0,
+      uclAssists:     doc.assists     || 0,
+      uclCleanSheets: doc.cleanSheets || 0,
     }
+    seasonEntries.push({ player: p, ss })
   }
 
   const season = {
@@ -311,7 +342,7 @@ function fmtRate(n) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function UclRecords({ players, uclMatches, uclSeasons, opponents, loading }) {
+export default function UclRecords({ players, uclMatches, uclSeasons, opponents, uclStatsDocs, loading }) {
   const navigate = useNavigate()
   const [recordView, setRecordView] = useState('players')
   const [modal,      setModal]      = useState(null)
@@ -331,7 +362,7 @@ export default function UclRecords({ players, uclMatches, uclSeasons, opponents,
     )
   }
 
-  const { career: c, season: s, top5 } = computeUclRecords(players)
+  const { career: c, season: s, top5 } = computeUclRecords(uclStatsDocs || [], players, uclSeasons)
   const club = deriveUclClubRecords(uclMatches, uclSeasons, opponents)
 
   const fromPlayer = p => p ? { id: p.id, name: p.name, sofifaId: p.sofifaId } : null

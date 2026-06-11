@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './UCL.module.css'
-import { isGK } from '../../utils/uclUtils'
+import { isGK, deriveUclPlayerStats } from '../../utils/uclUtils'
 
 // ─── Position constants ───────────────────────────────────────────────────────
 const POS_ORDER = ['GK','CB','LB','RB','LWB','RWB','CDM','CM','CAM','LM','RM','LW','RW','CF','ST']
@@ -24,38 +24,23 @@ function playerMatchesFilter(player, posFilter) {
   return positions.includes(posFilter)
 }
 
-// ─── UCL season stat summation ────────────────────────────────────────────────
-function sumUclSeasonStats(player, seasonLabel) {
-  const rows = (player.seasonStats || []).filter(
-    ss => ss.label === seasonLabel && (ss.uclApps || 0) > 0
-  )
-  if (!rows.length) return null
-  return rows.reduce((acc, ss) => ({
-    uclApps:        acc.uclApps        + (ss.uclApps        || 0),
-    uclGoals:       acc.uclGoals       + (ss.uclGoals       || 0),
-    uclAssists:     acc.uclAssists     + (ss.uclAssists     || 0),
-    uclCleanSheets: acc.uclCleanSheets + (ss.uclCleanSheets || 0),
+// ─── UCL season stat lookup (collection-based) ───────────────────────────────
+// Sums collection docs for a single player filtered to one season.
+// seasonId is resolved by matching seasonLabel against the uclSeasons prop.
+// Returns null if no UCL docs exist for this player+season combination.
+function sumUclSeasonStatsDocs(playerId, seasonId, uclStatsDocs) {
+  const docs = uclStatsDocs.filter(d => d.playerId === playerId && d.seasonId === seasonId)
+  if (!docs.length) return null
+  return docs.reduce((acc, d) => ({
+    uclApps:        acc.uclApps        + (d.apps          || 0),
+    uclGoals:       acc.uclGoals       + (d.goals         || 0),
+    uclAssists:     acc.uclAssists     + (d.assists       || 0),
+    uclCleanSheets: acc.uclCleanSheets + (d.cleanSheets   || 0),
   }), { uclApps: 0, uclGoals: 0, uclAssists: 0, uclCleanSheets: 0 })
 }
 
-// ─── Derive UCL stats for a single player (career totals) ────────────────────
-function derivePlayerUclStats(player) {
-  let uclApps = 0, uclGoals = 0, uclAssists = 0, uclCleanSheets = 0
-  if (player.seasonStats?.length) {
-    for (const ss of player.seasonStats) {
-      uclApps        += ss.uclApps        || 0
-      uclGoals       += ss.uclGoals       || 0
-      uclAssists     += ss.uclAssists     || 0
-      uclCleanSheets += ss.uclCleanSheets || 0
-    }
-  } else {
-    uclApps        = player.uclApps        || 0
-    uclGoals       = player.uclGoals       || 0
-    uclAssists     = player.uclAssists     || 0
-    uclCleanSheets = player.uclCleanSheets || 0
-  }
-  return { uclApps, uclGoals, uclAssists, uclCleanSheets }
-}
+// derivePlayerUclStats (inline, embedded-based) removed in Phase 1.
+// Career totals now come from deriveUclPlayerStats(uclStatsDocs, players) in uclUtils.js.
 
 // ─── Player photo ─────────────────────────────────────────────────────────────
 function PlayerImg({ sofifaId, name, size = 28 }) {
@@ -125,7 +110,7 @@ function enrichStats(raw) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function UclPlayers({ players, uclSeasons, loading }) {
+export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading }) {
   const navigate = useNavigate()
 
   const [posFilter,    setPosFilter]    = useState('All')
@@ -138,14 +123,37 @@ export default function UclPlayers({ players, uclSeasons, loading }) {
     return <div className={styles.loadWrap}><div className={styles.spinner} /></div>
   }
 
+  // Build a seasonLabel → seasonId map from the uclSeasons prop.
+  // Used for the season filter — collection docs carry seasonId, not label.
+  const seasonIdByLabel = {}
+  for (const s of (uclSeasons || [])) {
+    if (s.label && s.id) seasonIdByLabel[s.label] = s.id
+  }
+
+  // Career view: derive totals from collection docs via uclUtils (no embedded reads)
+  const careerStats = deriveUclPlayerStats(uclStatsDocs || [], players)
+  // Build a playerId → career stats lookup for O(1) access
+  const careerByPlayerId = new Map(careerStats.map(s => [s.id, s]))
+
   const base = players.filter(p => !p.isHistoricalStub)
 
   const withStats = base.map(p => {
     let raw
     if (seasonFilter === 'all') {
-      raw = derivePlayerUclStats(p)
+      // Use pre-computed career totals — already derived from collection docs
+      const career = careerByPlayerId.get(p.id)
+      if (!career) return null
+      raw = {
+        uclApps:        career.uclApps,
+        uclGoals:       career.uclGoals,
+        uclAssists:     career.uclAssists,
+        uclCleanSheets: career.uclCleanSheets,
+      }
     } else {
-      raw = sumUclSeasonStats(p, seasonFilter)
+      // Season filter: look up the seasonId for this label, then sum docs
+      const seasonId = seasonIdByLabel[seasonFilter]
+      if (!seasonId) return null
+      raw = sumUclSeasonStatsDocs(p.id, seasonId, uclStatsDocs || [])
       if (!raw) return null
     }
     return {

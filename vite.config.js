@@ -24,7 +24,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        cacheId: 'eleven-v71',
+        cacheId: 'eleven-v72',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {

@@ -12,8 +12,9 @@
 //   uclFinalOpponent, uclFinalScore, uclLeaguePhasePosition, uclLPP/W/D/L/GF/GA/Pts,
 //   uclR16/QF/SF Opponent+Score
 //
-// Player docs (Path A): uclApps, uclGoals, uclAssists, uclCleanSheets (top-level totals)
-//   seasonStats[] (embedded array) — each entry has uclApps, uclGoals, uclAssists, uclCleanSheets
+// Player UCL stats (Phase 1 canonical source): seasonStats collection, scope:'UCL' docs
+//   loaded once in UCL/index.jsx as uclStatsDocs, passed as a prop to UclPlayers + UclRecords.
+//   Top-level player.uclApps etc. are cached totals — not read directly by UCL tab components.
 //
 // Opponents map: opponentKey → { displayName, country, sofifaTeamId, crestUrl, ... }
 
@@ -352,46 +353,74 @@ export function deriveUclFinals(uclSeasons, uclMatches, opponents) {
 }
 
 // ─── UCL PLAYER STATS ─────────────────────────────────────────────────────────
-// Derives UCL career totals from player docs (Path A — embedded seasonStats / top-level fields).
-// This is intentionally Path A only for v50 main table — complete across all seasons.
-// Path B (scope=UCL seasonStats collection) is used for per-season drilldowns in v51.
-export function deriveUclPlayerStats(players) {
-  return players
-    .filter(p => !p.isHistoricalStub)
-    .map(p => {
-      // Prefer summing from embedded seasonStats UCL fields (most accurate)
-      // Fall back to top-level uclApps/uclGoals/uclAssists if no embedded array
-      let uclApps = 0, uclGoals = 0, uclAssists = 0, uclCleanSheets = 0
-      if (p.seasonStats?.length) {
-        for (const ss of p.seasonStats) {
-          uclApps        += ss.uclApps        || 0
-          uclGoals       += ss.uclGoals       || 0
-          uclAssists     += ss.uclAssists     || 0
-          uclCleanSheets += ss.uclCleanSheets || 0
-        }
-      } else {
-        uclApps        = p.uclApps        || 0
-        uclGoals       = p.uclGoals       || 0
-        uclAssists     = p.uclAssists     || 0
-        uclCleanSheets = p.uclCleanSheets || 0
+// Derives UCL career totals from the canonical seasonStats collection docs.
+//
+// Primary source: uclStatsDocs — scope:'UCL' collection docs loaded by UCL/index.jsx.
+// These are grouped by playerId and summed to produce career totals.
+//
+// No silent fallback to embedded player.seasonStats[] or top-level player.uclApps.
+// If a player has top-level UCL totals but no matching collection docs, a dev warning
+// is logged. The player is excluded from the table rather than showing stale/unverified
+// cached values. This makes missing docs visible instead of hiding them.
+//
+// players param: still required for identity data (sofifaId, position, status, name)
+// that is not stored on the stat docs.
+export function deriveUclPlayerStats(uclStatsDocs, players) {
+  // Build playerId → player lookup for identity enrichment
+  const playerMap = new Map(players.map(p => [p.id, p]))
+
+  // Group collection docs by playerId, summing all seasons
+  const statsByPlayer = new Map()
+  for (const doc of uclStatsDocs) {
+    if (!doc.playerId) continue
+    if (!statsByPlayer.has(doc.playerId)) {
+      statsByPlayer.set(doc.playerId, { uclApps: 0, uclGoals: 0, uclAssists: 0, uclCleanSheets: 0 })
+    }
+    const acc = statsByPlayer.get(doc.playerId)
+    acc.uclApps        += doc.apps          || 0
+    acc.uclGoals       += doc.goals         || 0
+    acc.uclAssists     += doc.assists       || 0
+    acc.uclCleanSheets += doc.cleanSheets   || 0
+  }
+
+  // Warn in development about players with top-level UCL totals but no collection docs
+  if (process.env.NODE_ENV === 'development') {
+    for (const p of players) {
+      if (p.isHistoricalStub) continue
+      if ((p.uclApps || 0) > 0 && !statsByPlayer.has(p.id)) {
+        console.warn(
+          `[deriveUclPlayerStats] ${p.name} has top-level uclApps=${p.uclApps} ` +
+          `but no scope:'UCL' docs in the collection. ` +
+          `Run auditSeasonStats.mjs to diagnose.`
+        )
       }
-      return {
-        id:            p.id,
-        name:          p.name,
-        position:      p.position,
-        sofifaId:      p.sofifaId,
-        status:        p.status,
-        uclApps,
-        uclGoals,
-        uclAssists,
-        uclCleanSheets,
-        uclContrib:    uclGoals + uclAssists,
-        uclGpg:        uclApps > 0 ? uclGoals   / uclApps : 0,
-        uclApg:        uclApps > 0 ? uclAssists / uclApps : 0,
-        uclCpg:        uclApps > 0 ? (uclGoals + uclAssists) / uclApps : 0,
-      }
+    }
+  }
+
+  // Build the result — only players who have collection docs with UCL apps
+  const result = []
+  for (const [playerId, totals] of statsByPlayer) {
+    if (totals.uclApps === 0) continue
+    const p = playerMap.get(playerId)
+    if (!p || p.isHistoricalStub) continue
+    const { uclApps, uclGoals, uclAssists, uclCleanSheets } = totals
+    result.push({
+      id:            p.id,
+      name:          p.name,
+      position:      p.position,
+      sofifaId:      p.sofifaId,
+      status:        p.status,
+      uclApps,
+      uclGoals,
+      uclAssists,
+      uclCleanSheets,
+      uclContrib:    uclGoals + uclAssists,
+      uclGpg:        uclApps > 0 ? uclGoals   / uclApps : 0,
+      uclApg:        uclApps > 0 ? uclAssists / uclApps : 0,
+      uclCpg:        uclApps > 0 ? (uclGoals + uclAssists) / uclApps : 0,
     })
-    .filter(p => p.uclApps > 0)
+  }
+  return result
 }
 
 // ─── UCL RIVALS ───────────────────────────────────────────────────────────────

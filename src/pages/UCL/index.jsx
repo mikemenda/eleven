@@ -6,6 +6,7 @@ import {
   getSeasons,
   getPlayers,
   getOpponents,
+  getSeasonStatsByClub,
 } from '../../firebase/services'
 import {
   getUclMatches,
@@ -52,6 +53,7 @@ export default function UCL() {
   const [players,    setPlayers]    = useState([])
   const [opponents,  setOpponents]  = useState(new Map())
   const [loading,    setLoading]    = useState(true)
+  const [uclStatsDocs, setUclStatsDocs] = useState([])
 
   useEffect(() => {
     if (!activeClub) return
@@ -61,7 +63,8 @@ export default function UCL() {
       getSeasons(activeClub.id),
       getPlayers(activeClub.id),
       getOpponents(),
-    ]).then(([matches, seasons, plrs, oppMap]) => {
+      getSeasonStatsByClub(activeClub.id),
+    ]).then(([matches, seasons, plrs, oppMap, statDocs]) => {
       const seasonLabelMap = {}
       for (const s of seasons) {
         if (s.id) seasonLabelMap[s.id] = s.label || ''
@@ -72,10 +75,14 @@ export default function UCL() {
         seasonLabel: seasonLabelMap[m.seasonId] || m.seasonLabel || '',
       }))
 
+      // Filter once at load time — only UCL-scope docs are needed by the UCL tabs
+      const uclDocs = statDocs.filter(d => d.scope === 'UCL')
+
       setAllMatches(enrichedMatches)
       setAllSeasons(seasons)
       setPlayers(plrs)
       setOpponents(oppMap)
+      setUclStatsDocs(uclDocs)
       setLoading(false)
     }).catch(err => {
       console.error('[UCL] data load error:', err)
@@ -157,6 +164,7 @@ export default function UCL() {
           <UclPlayers
             players={players}
             uclSeasons={uclSeasons}
+            uclStatsDocs={uclStatsDocs}
             loading={loading}
           />
         ) : tab === 'records' ? (
@@ -165,6 +173,7 @@ export default function UCL() {
             uclMatches={uclMatches}
             uclSeasons={uclSeasons}
             opponents={opponents}
+            uclStatsDocs={uclStatsDocs}
             loading={loading}
           />
         ) : tab === 'rivals' ? (
