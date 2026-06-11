@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import {
   getSeason,
+  getSeasons,
   updateSeason,
   getTrophiesForSeason,
   addTrophy,
@@ -792,12 +793,30 @@ const SeasonDetail = () => {
       setTrophies(t)
       setMatches(m)
       setOpponents(opp)
-      // Enrich match docs with seasonLabel for the rival narrative builder
-      const enriched = m.map(match => ({
-        ...match,
-        seasonLabel: match.seasonLabel || s.label || '',
-      }))
-      setAllUclMatches(enriched)
+
+      // Build all-time UCL match set for the opponent drill-in card.
+      // getMatches(seasonId) only covers this season — we need every season
+      // for the club so the rival record is accurate across all seasons.
+      const allSeasons = await getSeasons(s.clubId)
+      const matchArrays = await Promise.all(
+        allSeasons.map(season => getMatches(season.id))
+      )
+      // Build a seasonId → label map so match rows show the right season
+      const labelMap = {}
+      for (const season of allSeasons) {
+        labelMap[season.id] = season.label || season.id
+      }
+      // Flatten, filter to UCL only, and attach seasonLabel
+      const allEnriched = matchArrays
+        .flat()
+        .filter(match =>
+          ['UCL_LP','UCL_R16','UCL_QF','UCL_SF','UCL_Final'].includes(match.competition)
+        )
+        .map(match => ({
+          ...match,
+          seasonLabel: match.seasonLabel || labelMap[match.seasonId] || '',
+        }))
+      setAllUclMatches(allEnriched)
     } catch (e) {
       console.error(e); setLoadErr('Failed to load season.')
     } finally {
