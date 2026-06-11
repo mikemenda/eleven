@@ -290,8 +290,10 @@ export default function PlayerProfile() {
     ]).then(([p, seasons, statDocs, t]) => {
       setPlayer(p)
 
+      // seasonMap is used by both ALL and UCL paths below — declare first.
+      const seasonMap = new Map(seasons.map(s => [s.id, s.label]))
+
       // ── ALL COMPS: canonical source — scope:'ALL' collection docs ───────
-      // statDocs already loaded above; filter to ALL scope and attach labels.
       // scope:'ALL' docs carry a label field from seedAllCompsStats.mjs;
       // attachLabels adds/overwrites it from seasonMap as a safe fallback.
       const allDocs = statDocs.filter(d => d.scope === 'ALL')
@@ -299,7 +301,6 @@ export default function PlayerProfile() {
 
       // ── UCL: read from seasonStats collection, scope=UCL ────────────────
       // Join labels from seasons since collection docs have no label field.
-      const seasonMap = new Map(seasons.map(s => [s.id, s.label]))
       const uclDocs = statDocs.filter(d => d.scope === 'UCL')
       setUclStats(sortNewestFirst(attachLabels(uclDocs, seasonMap)))
 
