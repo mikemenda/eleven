@@ -28,7 +28,7 @@ function buildDeck(season) {
 }
 
 // Map a competition key to its trophy PNG or SVG fallback
-function TrophyIcon({ competitionKey, className, imgClassName }) {
+function TrophyIcon({ competitionKey, imgClassName, className }) {
   const png = TROPHY_PNG_MAP[competitionKey]
   if (png) {
     return <img src={png} alt={competitionKey} className={imgClassName || className} />
@@ -58,15 +58,6 @@ function getFinalist(season) {
   return null
 }
 
-function scoreClass(season) {
-  const d = season.dynastyScore
-  if (d == null) return styles.arcScore_none
-  if (d >= 85 || season.uclResult === 'Champions') return styles.arcScore_peak
-  if (d >= 70) return styles.arcScore_mid
-  if (d >= 60) return styles.arcScore_mid
-  return styles.arcScore_dip
-}
-
 function isPeak(season) {
   return (
     (season.dynastyScore != null && season.dynastyScore >= 85) ||
@@ -75,6 +66,8 @@ function isPeak(season) {
 }
 
 // ─── DYNASTY ARC ─────────────────────────────────────────────────────────────
+// All scores use the same size/weight. No permanent tiering.
+// Pips show honours won (gold) and finals reached (slate ring).
 
 function DynastyArc({ seasons, onNavigate }) {
   if (!seasons.length) return null
@@ -99,10 +92,25 @@ function DynastyArc({ seasons, onNavigate }) {
                 onKeyDown={e => e.key === 'Enter' && onNavigate(s.id)}
               >
                 <div className={styles.arcPips}>
-                  {honours.map(h => <span key={h.key} className={styles.pipGold} />)}
-                  {finalist && <span className={styles.pipSlate} />}
+                  {honours.map(h => (
+                    <span
+                      key={h.key}
+                      className={styles.pipGold}
+                      title={h.label}
+                    />
+                  ))}
+                  {finalist && (
+                    <span
+                      className={styles.pipRing}
+                      title="UCL Finalist"
+                    />
+                  )}
+                  {!honours.length && !finalist && (
+                    <span className={styles.pipEmpty} />
+                  )}
                 </div>
-                <span className={`${styles.arcScore} ${scoreClass(s)}`}>
+                {/* All scores same size — no permanent size tiering */}
+                <span className={`${styles.arcScore} ${s.dynastyScore == null ? styles.arcScoreNone : ''}`}>
                   {s.dynastyScore ?? '—'}
                 </span>
                 <span className={styles.arcSeasonLabel}>{s.label}</span>
@@ -132,6 +140,7 @@ function SeasonRow({ season, onClick }) {
       />
       <div className={styles.seasonRowBody}>
         <div className={styles.rowMeta}>
+          {/* Season label — Inter 700, no display-font weirdness */}
           <span className={styles.rowLabel}>{season.label}</span>
           {season.year && <span className={styles.rowYear}>{season.year}</span>}
         </div>
@@ -162,9 +171,7 @@ function SeasonRow({ season, onClick }) {
             )}
           </div>
           {season.dynastyScore != null && (
-            <span
-              className={`${styles.rowScore} ${peak ? styles.rowScorePeak : ''}`}
-            >
+            <span className={styles.rowScore}>
               {season.dynastyScore}
             </span>
           )}

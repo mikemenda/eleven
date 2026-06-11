@@ -42,11 +42,11 @@
 .backBtn:hover { color: var(--en-text-1); }
 .topCenter { flex: 1; display: flex; align-items: center; gap: 8px; }
 
-/* Inter labels — no mono tracking */
+/* Season label — Inter 700, clean — no Playfair/display-font S3 weirdness */
 .topLabel {
   font-family: var(--font-inter);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--en-text-2);
 }
@@ -58,7 +58,7 @@
 }
 .topRight { display: flex; align-items: center; gap: 8px; }
 
-/* Complete badge — quiet slate pill */
+/* Complete — quiet slate pill */
 .badgeComplete {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -71,7 +71,7 @@
   color: #8899aa;
   border: 0.5px solid rgba(136,153,170,0.35);
 }
-/* In progress badge — gold tint */
+/* In progress — gold tint */
 .badgeLive {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -94,7 +94,6 @@
   font-size: 13px;
   border-bottom: 0.5px solid var(--en-rule);
 }
-/* Edit bar — gold tint background */
 .editBar   { background: rgba(224,194,122,0.06); border-bottom-color: rgba(224,194,122,0.25); }
 .lockedBar { background: transparent; }
 .toolbar   { background: transparent; }
@@ -104,7 +103,6 @@
   color: var(--en-text-2);
   font-family: var(--font-inter); font-size: 12px;
 }
-/* Gold pulsing dot for edit state */
 .editDot {
   width: 5px; height: 5px;
   border-radius: 50%;
@@ -121,7 +119,6 @@
   transition: color 0.15s;
 }
 .cancelEditBtn:hover { color: var(--en-text-2); }
-/* Save button — gold */
 .saveBtn {
   display: flex; align-items: center; gap: 6px;
   font-family: var(--font-inter); font-size: 12px; font-weight: 600;
@@ -142,15 +139,12 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Locked bar — Inter, slate */
 .lockedText {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-inter); font-size: 11px;
-  font-weight: 600;
+  font-family: var(--font-inter); font-size: 11px; font-weight: 600;
   letter-spacing: 0.04em; text-transform: uppercase;
   color: #8899aa;
 }
-/* Unlock button — gold */
 .unlockBtn {
   font-family: var(--font-inter); font-size: 11px; font-weight: 600;
   letter-spacing: 0.04em; text-transform: uppercase;
@@ -158,8 +152,6 @@
   transition: opacity 0.15s;
 }
 .unlockBtn:hover { opacity: 0.75; }
-
-/* Edit button — Inter, slate */
 .editBtn {
   display: flex; align-items: center; gap: 6px;
   font-family: var(--font-inter); font-size: 11px; font-weight: 600;
@@ -168,8 +160,6 @@
   transition: color 0.15s;
 }
 .editBtn:hover { color: var(--en-text-2); }
-
-/* Complete button — gold */
 .completeBtn {
   font-family: var(--font-inter); font-size: 11px; font-weight: 600;
   letter-spacing: 0.04em; text-transform: uppercase;
@@ -177,21 +167,18 @@
   transition: opacity 0.15s;
 }
 .completeBtn:hover { opacity: 0.75; }
-
 .saveErr {
   font-family: var(--font-inter); font-size: 12px; color: var(--danger);
   padding: 10px 20px;
   border-bottom: 0.5px solid rgba(248,113,113,0.2);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   HERO — reduced size for mobile usability
-═══════════════════════════════════════════════════════════════════ */
+/* ─── HERO ───────────────────────────────────────────────────────── */
 .hero {
-  padding: 24px 20px 20px;
+  padding: 22px 20px 18px;
   border-bottom: 0.5px solid var(--en-rule);
 }
-/* Gold eyebrow — Inter, matches Seasons list */
+/* Gold eyebrow — Inter 700. Season label here is plain Inter (no Playfair). */
 .heroEyebrow {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -202,17 +189,16 @@
   opacity: 0.85;
   margin-bottom: 10px;
 }
-/* Reduced headline — still Playfair editorial, tighter clamp */
+/* Headline — Playfair for editorial titles only, reduced size for mobile */
 .heroHeadline {
   font-family: var(--font-playfair);
   font-weight: 700;
-  font-size: clamp(20px, 5.5vw, 26px);
+  font-size: clamp(18px, 5vw, 24px);
   color: var(--en-text-1);
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: -0.2px;
   margin-bottom: 12px;
 }
-/* Gold gradient rule — matches Seasons list */
 .heroIdentityRule {
   width: 100%;
   height: 1px;
@@ -220,7 +206,7 @@
   opacity: 0.5;
   margin-bottom: 12px;
 }
-/* Lede — slightly smaller, better breathing room */
+/* Short lede — first sentence only, not the full story */
 .heroLede {
   font-family: var(--font-inter);
   font-size: 13px;
@@ -230,18 +216,16 @@
   margin: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   TROPHY SHELF — real PNGs, premium spacing
-═══════════════════════════════════════════════════════════════════ */
+/* ─── TROPHY SHELF — larger PNGs ─────────────────────────────────── */
 .trophyShelf {
   padding: 0 20px;
   border-bottom: 0.5px solid var(--en-rule);
 }
 .trophyShelfItems {
   display: flex;
-  gap: 24px;
+  gap: 28px;
   overflow-x: auto;
-  padding: 20px 0;
+  padding: 22px 0;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -253,20 +237,18 @@
   align-items: center;
   gap: 8px;
 }
-/* Real PNG — generous size */
+/* ~25% larger than v68's 52×68 */
 .trophyPng {
-  width: 52px;
-  height: 68px;
+  width: 65px;
+  height: 85px;
   object-fit: contain;
   flex-shrink: 0;
 }
-/* SVG fallback */
 .trophySvgWon {
-  width: 40px; height: 54px;
+  width: 50px; height: 66px;
   color: var(--en-gold);
   flex-shrink: 0;
 }
-/* Trophy name — Inter, readable slate */
 .trophyName {
   font-family: var(--font-inter);
   font-size: 9px;
@@ -275,18 +257,15 @@
   text-transform: uppercase;
   color: #8899aa;
   text-align: center;
-  max-width: 64px;
+  max-width: 72px;
   line-height: 1.4;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SHARED SECTION WRAPPER
-═══════════════════════════════════════════════════════════════════ */
+/* ─── SHARED SECTION ─────────────────────────────────────────────── */
 .section {
-  padding: 24px 20px 20px;
+  padding: 22px 20px 18px;
   border-bottom: 0.5px solid var(--en-rule);
 }
-/* Unified section label — Inter 700, readable slate, minimal tracking */
 .sectionLabel {
   font-family: var(--font-inter);
   font-size: 11px;
@@ -297,9 +276,7 @@
   margin-bottom: 14px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   THE STORY
-═══════════════════════════════════════════════════════════════════ */
+/* ─── THE STORY ──────────────────────────────────────────────────── */
 .storyBody {
   font-family: var(--font-inter);
   font-size: 14px;
@@ -312,9 +289,7 @@
 }
 .storyBody p { margin: 0; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   KEY MOMENTS
-═══════════════════════════════════════════════════════════════════ */
+/* ─── KEY MOMENTS ────────────────────────────────────────────────── */
 .momentsList {
   display: flex;
   flex-direction: column;
@@ -328,7 +303,6 @@
   align-items: flex-start;
 }
 .moment:last-child { border-bottom: none; }
-/* Gold number — editorial pull-out feel */
 .momentIndex {
   font-family: var(--font-inter);
   font-weight: 800;
@@ -346,10 +320,7 @@
   color: var(--en-text-2);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   THE LEAGUE
-═══════════════════════════════════════════════════════════════════ */
-/* Keep Playfair for the editorial statement */
+/* ─── THE LEAGUE ─────────────────────────────────────────────────── */
 .leagueStatement {
   font-family: var(--font-playfair);
   font-weight: 700;
@@ -359,8 +330,6 @@
   letter-spacing: -0.2px;
   margin-bottom: 16px;
 }
-
-/* Record grid — restrained ivory values, gold only for Pts highlight */
 .recordGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -376,10 +345,8 @@
 }
 .recordCell:nth-child(4n) { border-right: none; }
 .recordCell:nth-last-child(-n+4) { border-bottom: none; }
-/* Gold highlight cell — for Pts */
+/* Gold only for Pts */
 .recordCellHighlight .rcVal { color: var(--en-gold) !important; }
-
-/* Stat values — Inter 700, ivory */
 .rcVal {
   font-family: var(--font-inter);
   font-weight: 700;
@@ -388,7 +355,6 @@
   line-height: 1;
   margin-bottom: 4px;
 }
-/* Stat labels — Inter, readable slate */
 .rcLbl {
   font-family: var(--font-inter);
   font-size: 9px;
@@ -398,10 +364,7 @@
   color: #8899aa;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   UCL JOURNEY — major section
-═══════════════════════════════════════════════════════════════════ */
-/* Gold left border for the opener — not blue */
+/* ─── UCL JOURNEY ────────────────────────────────────────────────── */
 .uclOpener {
   font-family: var(--font-inter);
   font-size: 14px;
@@ -411,17 +374,12 @@
   padding-left: 14px;
   border-left: 2px solid rgba(224,194,122,0.45);
 }
-
-.uclBlock {
-  margin-bottom: 22px;
-}
+.uclBlock { margin-bottom: 22px; }
 .uclBlock:last-child { margin-bottom: 0; }
 .uclBlock + .uclBlock {
   padding-top: 18px;
   border-top: 0.5px solid rgba(255,255,255,0.05);
 }
-
-/* Sub-block label — Inter, readable slate */
 .uclBlockLabel {
   font-family: var(--font-inter);
   font-size: 11px;
@@ -431,7 +389,6 @@
   color: #8899aa;
   margin-bottom: 10px;
 }
-
 .uclLPPosition {
   font-family: var(--font-inter);
   font-size: 13px;
@@ -439,21 +396,18 @@
   margin-bottom: 12px;
 }
 
-/* ── Match table (LP matchdays) ── */
+/* Match table */
 .matchTable {
   width: 100%;
   border-top: 0.5px solid rgba(255,255,255,0.07);
   border-bottom: 0.5px solid rgba(255,255,255,0.07);
-  margin-bottom: 0;
 }
 .matchTableHead {
   display: grid;
   grid-template-columns: 28px 1fr 32px 52px 24px;
-  gap: 0;
   padding: 6px 0;
   border-bottom: 0.5px solid rgba(255,255,255,0.05);
 }
-/* Inter table headers — readable slate */
 .matchTableHead span {
   font-family: var(--font-inter);
   font-size: 9px;
@@ -462,16 +416,26 @@
   text-transform: uppercase;
   color: #8899aa;
 }
+/* LP match rows are now buttons for drill-in tap */
 .matchRow {
   display: grid;
   grid-template-columns: 28px 1fr 32px 52px 24px;
-  gap: 0;
   padding: 9px 0;
   border-bottom: 0.5px solid rgba(255,255,255,0.04);
   align-items: center;
+  width: 100%;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  text-align: left;
+  transition: background 0.1s;
 }
 .matchRow:last-child { border-bottom: none; }
-/* Round col — Inter, slate */
+.matchRowClickable { cursor: pointer; }
+.matchRowClickable:hover { background: rgba(255,255,255,0.025); }
+.matchRow:disabled { cursor: default; }
+
 .mtColRound {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -492,12 +456,10 @@
   gap: 6px;
 }
 .mtCrest {
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   object-fit: contain;
   flex-shrink: 0;
 }
-/* H/A — Inter, colour applied inline */
 .mtColVenue {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -505,14 +467,13 @@
   letter-spacing: 0.04em;
   text-align: center;
 }
-/* Score — Inter for alignment context */
 .mtColScore {
   font-family: var(--font-inter);
   font-size: 12px;
   font-weight: 600;
   color: var(--en-text-2);
-  letter-spacing: 0.02em;
   text-align: center;
+  letter-spacing: 0.02em;
 }
 .mtColResult {
   font-family: var(--font-inter);
@@ -522,37 +483,38 @@
   text-align: center;
 }
 
-/* Result colours — semantic W/D/L only inside match tables */
+/* Semantic W/D/L — only inside match result tables */
 .resW { color: #4ade80; }
 .resD { color: var(--en-text-3); }
 .resL { color: #f87171; }
 
-/* ── Knockout rounds ── */
-.koRounds {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
+/* KO rounds */
+.koRounds { display: flex; flex-direction: column; }
 .koRound {
   padding: 12px 0;
   border-bottom: 0.5px solid rgba(255,255,255,0.05);
 }
 .koRound:first-child { border-top: 0.5px solid rgba(255,255,255,0.05); }
 .koRound:last-child  { border-bottom: none; }
-/* Final row — gold left accent when won */
+/* Won final — gold left accent */
 .koRoundFinal {
   border-left: 2px solid var(--en-gold);
   padding-left: 12px;
   background: rgba(224,194,122,0.03);
   border-top-color: transparent;
 }
-
 .koRoundHeader {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-/* Round label — Inter, readable slate */
+.koRoundHeaderClickable {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: opacity 0.15s;
+}
+.koRoundHeaderClickable:hover { opacity: 0.75; }
+
 .koRoundLabel {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -564,11 +526,9 @@
   min-width: 80px;
 }
 .koCrest {
-  width: 18px;
-  height: 18px;
+  width: 18px; height: 18px;
   object-fit: contain;
   flex-shrink: 0;
-  vertical-align: middle;
   margin-right: 2px;
 }
 .koOpponent {
@@ -583,8 +543,6 @@
   align-items: center;
   gap: 6px;
 }
-
-/* Aggregate score badge — gold for W, rust for L */
 .koAgg {
   font-family: var(--font-inter);
   font-size: 11px;
@@ -594,29 +552,27 @@
   flex-shrink: 0;
   letter-spacing: 0.02em;
 }
-/* Gold win badge — not neon green */
 .koAggWon     { background: rgba(224,194,122,0.1); color: var(--en-gold); border: 0.5px solid rgba(224,194,122,0.3); }
 .koAggLost    { background: rgba(248,113,113,0.08); color: #f87171; border: 0.5px solid rgba(248,113,113,0.25); }
 .koAggNeutral { background: rgba(255,255,255,0.04); color: var(--en-text-2); border: 0.5px solid rgba(255,255,255,0.08); }
+/* Chevron for clickable KO rows */
+.koChevron { color: #8899aa; flex-shrink: 0; }
 
-/* Per-leg detail rows */
+/* Per-leg rows */
 .koLegs {
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 0;
   padding-left: 80px;
 }
 .koLeg {
   display: grid;
-  grid-template-columns: 48px 32px 52px 24px;
-  gap: 0;
+  grid-template-columns: 56px 32px 52px 24px;
   padding: 5px 0;
   border-bottom: 0.5px solid rgba(255,255,255,0.04);
   align-items: center;
 }
 .koLeg:last-child { border-bottom: none; }
-/* Inter for all leg cells */
 .koLegNum {
   font-family: var(--font-inter);
   font-size: 10px;
@@ -646,16 +602,13 @@
   letter-spacing: 0.04em;
   text-align: center;
 }
-
 .dimText {
   font-family: var(--font-inter);
   font-size: 12px;
   color: var(--en-text-4);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   CUPS — with trophy PNG icons
-═══════════════════════════════════════════════════════════════════ */
+/* ─── CUPS ───────────────────────────────────────────────────────── */
 .cupRows { display: flex; flex-direction: column; }
 .cupRow {
   display: flex;
@@ -665,25 +618,15 @@
   border-bottom: 0.5px solid rgba(255,255,255,0.05);
 }
 .cupRow:last-child { border-bottom: none; }
-
-/* Left side — trophy icon + label */
-.cupLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-/* Cup trophy PNG — small but present */
+.cupLeft { display: flex; align-items: center; gap: 10px; }
 .cupTrophyImg {
-  width: 24px;
-  height: 32px;
+  width: 24px; height: 32px;
   object-fit: contain;
   flex-shrink: 0;
   opacity: 0.85;
 }
-/* SVG fallback for cup rows */
 .cupTrophySvg {
-  width: 20px;
-  height: 26px;
+  width: 20px; height: 26px;
   color: var(--en-gold);
   flex-shrink: 0;
   opacity: 0.7;
@@ -694,29 +637,32 @@
   font-weight: 500;
   color: var(--en-text-2);
 }
-
-.cupRight { display: flex; align-items: center; gap: 10px; }
-
-/* Cup badge — Inter, no mono */
+.cupRight { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+/* Badge — no heavy button border/background; clean text treatment */
 .cupBadge {
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 3px;
+  padding: 2px 0;
 }
-.cupWon     { background: rgba(224,194,122,0.12); color: var(--en-gold); border: 0.5px solid rgba(224,194,122,0.35); }
-.cupFinal   { background: transparent; color: #8899aa; border: 0.5px solid rgba(136,153,170,0.3); }
-.cupDefault { background: transparent; color: var(--en-text-4); border: 0.5px solid rgba(255,255,255,0.08); }
+/* Winner — gold text only, no background box */
+.cupWon   { color: var(--en-gold); }
+/* Finalist — slate */
+.cupFinal { color: #8899aa; }
+/* Other rounds — muted */
+.cupDefault { color: var(--en-text-4); }
+/* Opponent text — clearly readable slate/ivory */
+.cupOpponent {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--en-text-3);
+}
 
-/* ═══════════════════════════════════════════════════════════════════
-   DYNASTY VERDICT
-═══════════════════════════════════════════════════════════════════ */
+/* ─── DYNASTY VERDICT ────────────────────────────────────────────── */
 .dynastyVerdictBlock { padding: 24px 20px 32px; }
-
-/* Gold left border — not blue */
 .dynastyVerdictText {
   font-family: var(--font-playfair);
   font-weight: 400;
@@ -731,14 +677,12 @@
 }
 .dynastyVerdictText::before { content: open-quote; }
 .dynastyVerdictText::after  { content: close-quote; }
-
 .dynastyScoreRow {
   display: flex;
   align-items: baseline;
   gap: 8px;
   margin-bottom: 12px;
 }
-/* Keep large gold score number — it's the reveal moment */
 .dynastyNum {
   font-family: var(--font-inter);
   font-weight: 800;
@@ -747,7 +691,6 @@
   line-height: 1;
   letter-spacing: -2px;
 }
-/* /100 — Inter, readable slate (no mono tracking) */
 .dynastyOf {
   font-family: var(--font-inter);
   font-size: 13px;
@@ -768,129 +711,257 @@
   border-radius: 2px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   UCL OPPONENT DRILL-IN OVERLAY
+   Full-page overlay with a scrollable card — stays within SeasonDetail
+═══════════════════════════════════════════════════════════════════ */
+.oppDetailOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(8, 13, 26, 0.88);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  animation: overlayIn 0.18s ease both;
+}
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.oppDetailCard {
+  background: var(--en-bg);
+  border: 0.5px solid var(--en-rule);
+  border-radius: 14px 14px 0 0;
+  max-height: 82dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: cardUp 0.22s cubic-bezier(0.32, 0.72, 0, 1) both;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+@keyframes cardUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Header row — close X + crest + name */
+.oppDetailHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
+}
+.oppDetailClose {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: transparent; border: none; border-radius: 50%;
+  color: var(--en-text-3); cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.oppDetailClose:hover { color: var(--en-text-1); }
+.oppDetailCrest {
+  width: 28px; height: 28px;
+  object-fit: contain; flex-shrink: 0;
+}
+.oppDetailTitleBlock {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.oppDetailName {
+  font-family: var(--font-playfair);
+  font-size: 17px; font-weight: 700;
+  color: var(--en-text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.oppDetailLeague {
+  font-family: var(--font-inter);
+  font-size: 11px;
+  color: #8899aa;
+  letter-spacing: 0.03em;
+}
+
+/* H2H stat bar */
+.oppH2H {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
+}
+.oppH2HItem {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 14px 8px; gap: 4px;
+  border-right: 0.5px solid var(--en-rule);
+}
+.oppH2HItem:last-child { border-right: none; }
+.oppH2HVal {
+  font-family: var(--font-inter);
+  font-size: 20px; font-weight: 700;
+  color: var(--en-text-1); line-height: 1;
+}
+.oppH2HKey {
+  font-family: var(--font-inter);
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #8899aa;
+}
+
+/* Narrative */
+.oppNarrative {
+  font-family: var(--font-inter);
+  font-size: 13px; color: var(--en-text-2); line-height: 1.55;
+  padding: 14px 16px; margin: 0;
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
+}
+
+/* Finals note */
+.oppFinalsNote {
+  font-family: var(--font-inter);
+  font-size: 11px; font-weight: 600;
+  color: var(--en-gold); letter-spacing: 0.03em;
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--en-rule);
+  flex-shrink: 0;
+}
+
+/* Match log — scrollable area */
+.oppMatchLog {
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 0;
+}
+.oppSeasonDivider {
+  font-family: var(--font-inter);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #8899aa;
+  padding: 8px 16px 4px;
+}
+.oppMatchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
+}
+.oppMatchRow:last-child { border-bottom: none; }
+.oppMatchRes {
+  font-family: var(--font-inter);
+  font-size: 12px; font-weight: 700;
+  width: 16px; flex-shrink: 0;
+}
+.oppMatchInfo {
+  display: flex; align-items: center; gap: 6px; flex: 1;
+}
+.oppMatchComp {
+  font-family: var(--font-inter);
+  font-size: 12px; color: var(--en-text-2);
+}
+.oppMatchLeg {
+  font-family: var(--font-inter);
+  font-size: 10px; color: #8899aa;
+}
+/* Score — Inter (acceptable in score alignment context) */
+.oppMatchScore {
+  font-family: var(--font-inter);
+  font-size: 13px; font-weight: 600;
+  color: var(--en-text-1);
+}
+.oppMatchVenue {
+  font-family: var(--font-inter);
+  font-size: 11px; min-width: 18px; text-align: right;
+}
+/* Empty state inside overlay */
+.oppDetailEmpty {
+  font-family: var(--font-inter);
+  font-size: 13px; color: var(--en-text-3);
+  padding: 24px 16px; text-align: center;
+}
+
 /* ─── EDIT FORM ──────────────────────────────────────────────────── */
-.editForm { display: flex; flex-direction: column; gap: 0; }
+.editForm { display: flex; flex-direction: column; }
 .editSection {
   padding: 20px;
   border-bottom: 0.5px solid var(--en-rule);
 }
 .editSection:last-child { border-bottom: none; }
-/* Edit section heads — Inter, readable slate */
 .editSectionHead {
   font-family: var(--font-inter);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  color: #8899aa;
-  margin-bottom: 16px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: #8899aa; margin-bottom: 16px;
 }
 .fieldGroup  { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
 .fieldLabel  { font-family: var(--font-inter); font-size: 12px; font-weight: 400; color: var(--en-text-3); }
 .fieldHint   { font-family: var(--font-inter); font-size: 11px; color: var(--en-text-4); }
 .fieldError  { font-family: var(--font-inter); font-size: 11px; color: var(--danger); }
 .input {
-  background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 4px;
-  color: var(--en-text-1);
-  font-family: var(--font-inter);
-  font-size: 14px;
-  padding: 8px 10px;
-  width: 100%;
-  outline: none;
-  -webkit-appearance: none;
-  transition: border-color 0.15s;
+  background: var(--en-surface); border: 0.5px solid var(--en-rule);
+  border-radius: 4px; color: var(--en-text-1);
+  font-family: var(--font-inter); font-size: 14px; padding: 8px 10px;
+  width: 100%; outline: none; -webkit-appearance: none; transition: border-color 0.15s;
 }
 .input:focus { border-color: rgba(224,194,122,0.5); }
 .select {
-  background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 4px;
-  color: var(--en-text-1);
-  font-family: var(--font-inter);
-  font-size: 14px;
-  padding: 8px 10px;
-  width: 100%;
-  outline: none;
-  -webkit-appearance: none;
-  cursor: pointer;
+  background: var(--en-surface); border: 0.5px solid var(--en-rule);
+  border-radius: 4px; color: var(--en-text-1);
+  font-family: var(--font-inter); font-size: 14px; padding: 8px 10px;
+  width: 100%; outline: none; -webkit-appearance: none; cursor: pointer;
 }
 .select:focus { border-color: rgba(224,194,122,0.5); }
 .textarea {
-  background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 4px;
-  color: var(--en-text-1);
-  font-family: var(--font-inter);
-  font-size: 14px;
-  padding: 10px;
-  width: 100%;
-  outline: none;
-  resize: vertical;
-  line-height: 1.65;
+  background: var(--en-surface); border: 0.5px solid var(--en-rule);
+  border-radius: 4px; color: var(--en-text-1);
+  font-family: var(--font-inter); font-size: 14px; padding: 10px;
+  width: 100%; outline: none; resize: vertical; line-height: 1.65;
 }
 .textarea:focus { border-color: rgba(224,194,122,0.5); }
 .derivedField {
-  background: var(--en-surface-2);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 4px;
-  color: var(--en-text-3);
-  font-family: var(--font-inter);
-  font-size: 14px;
-  padding: 8px 10px;
+  background: var(--en-surface-2); border: 0.5px solid var(--en-rule);
+  border-radius: 4px; color: var(--en-text-3);
+  font-family: var(--font-inter); font-size: 14px; padding: 8px 10px;
 }
 .warning {
-  font-family: var(--font-inter);
-  font-size: 11px;
-  color: var(--warning);
-  background: rgba(251,191,36,0.06);
-  border: 0.5px solid rgba(251,191,36,0.2);
-  border-radius: 4px;
-  padding: 7px 10px;
-  margin-top: 4px;
+  font-family: var(--font-inter); font-size: 11px; color: var(--warning);
+  background: rgba(251,191,36,0.06); border: 0.5px solid rgba(251,191,36,0.2);
+  border-radius: 4px; padding: 7px 10px; margin-top: 4px;
 }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 .row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-
-/* Sub-headings in edit form — Inter, readable slate */
 .subHeading {
-  font-family: var(--font-inter);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8899aa;
-  margin: 14px 0 8px;
+  font-family: var(--font-inter); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #8899aa; margin: 14px 0 8px;
 }
 .toggleRow {
   display: flex; align-items: center; justify-content: space-between;
   padding: 4px 0 12px; cursor: pointer;
 }
-/* Toggle — gold active state */
 .toggle {
   width: 36px; height: 20px;
-  background: var(--en-surface-2);
-  border: 0.5px solid var(--en-rule);
-  border-radius: 10px;
-  position: relative;
-  cursor: pointer;
+  background: var(--en-surface-2); border: 0.5px solid var(--en-rule);
+  border-radius: 10px; position: relative; cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
 .toggleOn { background: rgba(224,194,122,0.15); border-color: rgba(224,194,122,0.5); }
 .toggleThumb {
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
+  position: absolute; top: 3px; left: 3px;
+  width: 12px; height: 12px; border-radius: 50%;
   background: var(--en-text-4);
   transition: transform 0.2s, background 0.2s;
 }
 .toggleOn .toggleThumb { transform: translateX(16px); background: var(--en-gold); }
-
 .momentsHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-/* Moments count — Inter, slate */
 .momentsCount  { font-family: var(--font-inter); font-size: 10px; color: #8899aa; letter-spacing: 0.04em; }
 .momentsList_edit { display: flex; flex-direction: column; gap: 6px; }
 .momentRow   { display: flex; align-items: center; gap: 8px; }
@@ -902,13 +973,12 @@
   border-radius: 4px; color: var(--en-text-4); cursor: pointer;
 }
 .momentRemove:hover { color: var(--danger); border-color: rgba(248,113,113,0.3); }
-/* Add moment — Inter, gold dashed */
 .addMoment {
   display: flex; align-items: center; gap: 6px;
   font-family: var(--font-inter); font-size: 10px; font-weight: 600;
   letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--en-gold);
-  background: transparent; border: 0.5px dashed rgba(224,194,122,0.4);
+  color: var(--en-gold); background: transparent;
+  border: 0.5px dashed rgba(224,194,122,0.4);
   border-radius: 4px; padding: 8px 12px; cursor: pointer;
   transition: background 0.15s;
 }
@@ -922,12 +992,8 @@
   padding: 0 0 env(safe-area-inset-bottom, 0);
 }
 .dialog {
-  background: var(--en-surface);
-  border: 0.5px solid var(--en-rule);
-  padding: 28px 20px;
-  width: 100%;
-  max-width: 480px;
-  text-align: center;
+  background: var(--en-surface); border: 0.5px solid var(--en-rule);
+  padding: 28px 20px; width: 100%; max-width: 480px; text-align: center;
 }
 .trophyIcon   { font-size: 32px; margin-bottom: 12px; }
 .dialogTitle  { font-family: var(--font-playfair); font-weight: 700; font-size: 16px; color: var(--en-text-1); margin-bottom: 8px; }
@@ -938,15 +1004,13 @@
   border: 0.5px solid var(--en-rule); background: transparent;
   font-family: var(--font-inter); font-size: 13px; color: var(--en-text-3); cursor: pointer;
 }
-/* Confirm — gold */
 .dialogConfirm {
   flex: 1; padding: 11px; border-radius: 4px;
   border: 0.5px solid rgba(224,194,122,0.5); background: rgba(224,194,122,0.1);
   font-family: var(--font-inter); font-size: 13px; font-weight: 600; color: var(--en-gold); cursor: pointer;
 }
 .dialogConfirmDanger {
-  border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08);
-  color: var(--danger);
+  border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); color: var(--danger);
 }
 
 /* ─── LOADING / ERROR ────────────────────────────────────────────── */
@@ -968,8 +1032,6 @@
   gap: 12px; padding: 20px;
 }
 .errorText {
-  font-family: var(--font-inter);
-  font-size: 14px;
-  color: var(--en-text-3);
-  text-align: center;
+  font-family: var(--font-inter); font-size: 14px;
+  color: var(--en-text-3); text-align: center;
 }
