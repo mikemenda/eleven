@@ -21,9 +21,18 @@
  *   · UCL Final entry has a leg field
  *   · Season label already exists in Firestore
  *   · Any player match is ambiguous (multiple Firestore candidates)
+ *   · Any new player is missing a verified sofifaId in the season JSON
  *   · Any UCL opponent is unmatched in opponents-seed.json
  *   · Any transfer club is unmatched in transfer-clubs.json
  *   · Post-build invariant fails (Σ collection docs ≠ computed totals)
+ *
+ * sofifaId policy for new players:
+ *   · The CSV/SoFIFA matcher is advisory only — it suggests an ID but never
+ *     writes it. The season JSON must include a verified sofifaId for every
+ *     new player. If sofifaId is absent from the JSON, --write is blocked.
+ *   · Existing Firestore players: sofifaId is never touched by the importer.
+ *   · To add sofifaId to a new player entry in the JSON:
+ *       { "name": "Player Name", "sofifaId": 123456, "allComps": { … } }
  *
  * Usage:
  *   node scripts/importSeason.mjs --season S4 --file data/uploads/S4.json
@@ -336,15 +345,38 @@ async function main() {
         warnings.push(`Low CSV confidence for "${entry.name}" → "${csvR.csvLongName}" (${Math.round(csvR.matchConfidence*100)}%) — verify`)
       }
       if (statusTransition) console.log(`     ⚠  status transition: Active → Sold  (OUT transfer)`)
-      playerMatches.push({ entry, category: 'matched', fp, csvR, isGK, matchMethod, statusTransition })
-    } else if (csvR && !csvR.isGenerated) {
-      console.log(`  ⚠  ${entry.name.padEnd(30)} → [NEW — sofifaId:${csvR.sofifaId}  ${csvR.nationality}]`)
-      warnings.push(`New player to create: "${entry.name}"  (sofifaId:${csvR.sofifaId})`)
-      playerMatches.push({ entry, category: 'new', fp: null, csvR, isGK, statusTransition })
+      // Existing player: sofifaId lives in Firestore and is never touched by the importer.
+      // resolvedSofifaId is null here — it is only relevant for new player doc creation.
+      playerMatches.push({ entry, category: 'matched', fp, csvR, isGK, matchMethod, statusTransition, resolvedSofifaId: null })
     } else {
-      console.log(`  ⚠  ${entry.name.padEnd(30)} → [NEW GENERATED — not in CSV, will be silhouette]`)
-      warnings.push(`New generated player: "${entry.name}" — no sofifaId, renders as silhouette`)
-      playerMatches.push({ entry, category: 'new_generated', fp: null, csvR: null, isGK, statusTransition })
+      // ── New player — sofifaId guardrail ────────────────────────────────────
+      // The CSV matcher is advisory only. The season JSON must supply a verified
+      // sofifaId via entry.sofifaId. If it is absent, --write is blocked.
+      const jsonSofifaId = entry.sofifaId != null ? Number(entry.sofifaId) : null
+      const csvSofifaId  = (csvR && !csvR.isGenerated) ? csvR.sofifaId : null
+      const resolvedSofifaId = jsonSofifaId  // JSON value is authoritative; CSV is advisory only
+
+      if (jsonSofifaId != null) {
+        // Identity verified — JSON provides the sofifaId
+        const csvNote = csvSofifaId != null
+          ? (csvSofifaId === jsonSofifaId
+              ? `  CSV agrees: ${csvSofifaId}`
+              : `  CSV suggests: ${csvSofifaId} (JSON overrides)`)
+          : '  (no CSV match)'
+        console.log(`  ⚠  ${entry.name.padEnd(30)} → [NEW — JSON sofifaId:${jsonSofifaId}${csvNote}]`)
+        warnings.push(`New player to create: "${entry.name}"  (verified JSON sofifaId:${jsonSofifaId})`)
+      } else {
+        // Identity not verified — JSON is missing sofifaId; block write
+        const csvHint = csvSofifaId != null
+          ? `CSV suggests ${csvSofifaId} — verify on sofifa.com then add "sofifaId": ${csvSofifaId} to their JSON entry`
+          : 'Not found in CSV either — look up on sofifa.com and add "sofifaId": <number> to their JSON entry'
+        console.log(`  ✗  ${entry.name.padEnd(30)} → [NEW — sofifaId MISSING in JSON]  ${csvHint}`)
+        errors.push(`New player "${entry.name}" requires verified sofifaId in JSON before write (${csvHint})`)
+      }
+
+      const category = (csvSofifaId == null && jsonSofifaId == null) ? 'new_generated' : 'new'
+      if (statusTransition) console.log(`     ⚠  status transition: Active → Sold  (OUT transfer)`)
+      playerMatches.push({ entry, category, fp: null, csvR, isGK, statusTransition, resolvedSofifaId })
     }
   }
 
@@ -432,9 +464,15 @@ async function main() {
   }
 
   // ── New player docs ──────────────────────────────────────────────────────────
-  // Cache totals are seeded directly from S4 stats (their first season).
+  // Cache totals are seeded directly from this season's stats (their first season).
   // New players are not in playerUpdates (which only covers existing Firestore
   // players), so their totals must be correct from the moment the doc is created.
+  //
+  // sofifaId: ONLY written from pm.resolvedSofifaId, which is sourced exclusively
+  // from the season JSON (entry.sofifaId). The CSV matcher is never the write source.
+  // If resolvedSofifaId is null, sofifaId is written as null (silhouette face).
+  // The isWriteSafe gate above prevents this from reaching --write, but null is
+  // the safe last resort if the gate were somehow bypassed.
   const newPlayerDocs = playerMatches
     .filter(pm => pm.category === 'new' || pm.category === 'new_generated')
     .map(pm => {
@@ -446,7 +484,7 @@ async function main() {
         name: pm.entry.name,
         position: pm.entry.position ?? (isGK ? 'GK' : 'Unknown'),
         status: 'Active',
-        sofifaId: pm.csvR?.sofifaId ?? null,
+        sofifaId: pm.resolvedSofifaId ?? null,          // JSON-verified only; never from CSV
         nationality: pm.csvR?.nationality ?? null,
         isHistoricalStub: false,
         // Seed cache totals from this season's stats — correct from day one
@@ -746,6 +784,31 @@ async function main() {
   playerMatches.filter(p => p.category !== 'matched' && p.category !== 'ambiguous').forEach(pm =>
     console.log(`    ⚠  ${pm.entry.name}  (${pm.category})`)
   )
+
+  // New Player Identity Review
+  const newPlayerMatchList = playerMatches.filter(p => p.category === 'new' || p.category === 'new_generated')
+  if (newPlayerMatchList.length > 0) {
+    header('New Player Identity Review')
+    console.log()
+    console.log('  ' + 'Name'.padEnd(28) + 'JSON sofifaId'.padEnd(18) + 'CSV suggestion'.padEnd(18) + 'Write value'.padEnd(16) + 'Status')
+    console.log('  ' + '─'.repeat(88))
+    for (const pm of newPlayerMatchList) {
+      const jsonId  = pm.resolvedSofifaId != null ? String(pm.resolvedSofifaId) : '(missing)'
+      const csvId   = (pm.csvR && !pm.csvR.isGenerated) ? String(pm.csvR.sofifaId) : '(none)'
+      const writeId = pm.resolvedSofifaId != null ? String(pm.resolvedSofifaId) : 'null'
+      const status  = pm.resolvedSofifaId != null ? '✓ PASS' : '✗ BLOCK'
+      console.log('  ' + pm.entry.name.padEnd(28) + jsonId.padEnd(18) + csvId.padEnd(18) + writeId.padEnd(16) + status)
+    }
+    const identityBlockers = newPlayerMatchList.filter(p => p.resolvedSofifaId == null).length
+    const identityPassed   = newPlayerMatchList.filter(p => p.resolvedSofifaId != null).length
+    console.log()
+    console.log(`  ${identityPassed} player(s) identity verified   ${identityBlockers > 0 ? identityBlockers + ' player(s) blocking write — add sofifaId to JSON' : '(none blocking)'}`)
+    if (identityBlockers > 0) {
+      console.log()
+      console.log('  To fix: add "sofifaId": <number> to the player entry in the season JSON.')
+      console.log('  Verify the correct ID at sofifa.com/player/<sofifaId>')
+    }
+  }
 
   // Opponents
   header('UCL Opponents')
