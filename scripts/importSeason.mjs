@@ -23,7 +23,15 @@
  *   · Any player match is ambiguous (multiple Firestore candidates)
  *   · Any new player is missing a verified sofifaId in the season JSON
  *   · Any UCL opponent is unmatched in opponents-seed.json
+ *   · Any UCL opponent matched in seed has sofifaTeamId of 0 or absent
  *   · Any transfer club is unmatched in transfer-clubs.json
+ *
+ * UCL opponent Firestore auto-seed:
+ *   · If a matched UCL opponent is missing from the Firestore `opponents`
+ *     collection, the importer creates its doc in the same batch automatically.
+ *   · Missing from Firestore is NOT a blocker — it is resolved during import.
+ *   · The doc is built from opponents-seed.json fields + computed crestUrl.
+ *   · If the seed entry has no valid sofifaTeamId, write IS blocked.
  *   · Post-build invariant fails (Σ collection docs ≠ computed totals)
  *
  * sofifaId policy for new players:
@@ -173,11 +181,16 @@ async function main() {
   console.log(`\n  Club : ${club.name}  (${club.id})`)
   console.log('  Loading Firestore data…\n')
 
-  const [seasonsSnap, playersSnap, ssSnap] = await Promise.all([
+  const [seasonsSnap, playersSnap, ssSnap, opponentsSnap] = await Promise.all([
     db.collection('seasons').where('clubId', '==', club.id).get(),
     db.collection('players').where('clubId', '==', club.id).get(),
     db.collection('seasonStats').get(),
+    db.collection('opponents').get(),
   ])
+
+  // Set of opponentKeys that already exist in Firestore — used in STAGE 3 to
+  // detect missing opponent docs and auto-stage them in the same batch.
+  const existingOpponentKeys = new Set(opponentsSnap.docs.map(d => d.id))
 
   const existingSeasons = seasonsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
   const existingPlayers = playersSnap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -207,6 +220,9 @@ async function main() {
 
   const opponentSeed = loadSeed()
   const aliasMap     = buildAliasMap(opponentSeed)
+  // Full seed entry lookup by opponentKey — used in STAGE 3 to retrieve
+  // displayName, country, sofifaTeamId, and aliases for auto-seeding Firestore.
+  const seedByKey    = new Map(opponentSeed.map(e => [e.opponentKey, e]))
 
   // Accumulators — errors and blockers both prevent --write; only display label differs
   const errors   = []   // ✗  structural/arithmetic failures
@@ -392,16 +408,39 @@ async function main() {
   for (const raw of uniqueOpps) {
     const result = matchOpponent(raw, opponentSeed, aliasMap)
     if (result?.confidence === 'high') {
-      console.log(`  ✓  ${raw.padEnd(32)} → ${result.opponentKey}  (${result.strategy})`)
-      oppResults.push({ raw, match: result })
+      // ── Firestore existence check ──────────────────────────────────────────
+      // A high-confidence seed match doesn't mean the Firestore doc exists.
+      // Check existingOpponentKeys and, if missing, validate the seed entry
+      // has a usable sofifaTeamId so we can build a correct crestUrl.
+      const seedEntry = seedByKey.get(result.opponentKey) ?? null
+      const fsExists  = existingOpponentKeys.has(result.opponentKey)
+
+      if (!fsExists) {
+        const hasSofifaTeamId = seedEntry?.sofifaTeamId != null && seedEntry.sofifaTeamId !== 0
+        if (!hasSofifaTeamId) {
+          // Cannot build crestUrl — block write so identity is verified first
+          console.log(`  ✗  ${raw.padEnd(32)} → ${result.opponentKey}  (seed sofifaTeamId missing/0 — blocks --write)`)
+          errors.push(`Opponent "${result.opponentKey}" is missing from Firestore and seed has no valid sofifaTeamId — add sofifaTeamId to opponents-seed.json`)
+          oppResults.push({ raw, match: result, seedEntry, fsExists, willCreate: false })
+        } else {
+          // Will be auto-seeded in the same batch — not a blocker
+          console.log(`  ✓  ${raw.padEnd(32)} → ${result.opponentKey}  (${result.strategy})  ⚠ missing from Firestore — will create`)
+          oppResults.push({ raw, match: result, seedEntry, fsExists, willCreate: true })
+        }
+      } else {
+        console.log(`  ✓  ${raw.padEnd(32)} → ${result.opponentKey}  (${result.strategy})`)
+        oppResults.push({ raw, match: result, seedEntry, fsExists, willCreate: false })
+      }
     } else if (result?.confidence === 'medium' || result?.confidence === 'low') {
+      const seedEntry = seedByKey.get(result.opponentKey) ?? null
+      const fsExists  = existingOpponentKeys.has(result.opponentKey)
       console.log(`  ⚠  ${raw.padEnd(32)} → ${result.opponentKey}  (${result.confidence} — review)`)
       warnings.push(`Opponent "${raw}" matched with ${result.confidence} confidence → "${result.opponentKey}" — verify`)
-      oppResults.push({ raw, match: result })
+      oppResults.push({ raw, match: result, seedEntry, fsExists, willCreate: false })
     } else {
       console.log(`  ✗  ${raw.padEnd(32)} → NO MATCH  (blocks --write)`)
       blockers.push(`Opponent "${raw}" not found in opponents-seed.json — add entry before writing`)
-      oppResults.push({ raw, match: null })
+      oppResults.push({ raw, match: null, seedEntry: null, fsExists: false, willCreate: false })
     }
   }
 
@@ -656,12 +695,30 @@ async function main() {
     })
   }
 
+  // ── New opponent docs ─────────────────────────────────────────────────────
+  // Built from oppResults entries where willCreate is true (matched in seed,
+  // missing from Firestore, valid sofifaTeamId). Committed in the same batch
+  // as everything else — no separate seeding step needed after import.
+  const newOpponentDocs = oppResults
+    .filter(o => o.willCreate && o.seedEntry)
+    .map(o => ({
+      opponentKey:  o.match.opponentKey,
+      data: {
+        displayName:  o.seedEntry.displayName,
+        country:      o.seedEntry.country      ?? null,
+        sofifaTeamId: o.seedEntry.sofifaTeamId,
+        aliases:      o.seedEntry.aliases      ?? [],
+        crestUrl:     `${WORKER_BASE}/${o.seedEntry.sofifaTeamId}`,
+      },
+    }))
+
   row('Season doc',           '1  (new)')
   row('New player docs',      `${newPlayerDocs.length}${newPlayerDocs.length > 0 ? '  ⚠' : ''}`)
   row('scope:ALL stat docs',  String(newAllStatsDocs.length))
   row('scope:UCL stat docs',  String(newUclStatsDocs.length))
   row('UCL match docs',       String(newMatchDocs.length))
   row('Transfer docs',        String(newTransferDocs.length))
+  row('New opponent docs',    newOpponentDocs.length > 0 ? `${newOpponentDocs.length}  ⚠ missing from Firestore — will create` : '0')
 
   // ════════════════════════════════════════════════════════════════
   // STAGE 6 — Compute updated player top-level totals
@@ -761,7 +818,7 @@ async function main() {
   const isWriteSafe = allBlockers.length === 0
   const totalOps    = 1 + newPlayerDocs.length + newAllStatsDocs.length + newUclStatsDocs.length +
                       newMatchDocs.length + newTransferDocs.length + playerUpdates.length +
-                      soldOutsideStats.length
+                      soldOutsideStats.length + newOpponentDocs.length
 
   console.log('\n' + '═'.repeat(62))
   console.log('  DRY-RUN SUMMARY')
@@ -812,12 +869,24 @@ async function main() {
 
   // Opponents
   header('UCL Opponents')
-  const oppHigh    = oppResults.filter(o => o.match?.confidence === 'high').length
-  const oppWarn    = oppResults.filter(o => o.match && o.match.confidence !== 'high').length
-  const oppFail    = oppResults.filter(o => !o.match).length
-  row('Matched (high)',           String(oppHigh))
-  row('Matched (review)',         oppWarn > 0 ? `${oppWarn}  ⚠` : '0')
-  row('Unmatched (blocks --write)', oppFail > 0 ? `${oppFail}  ✗` : '0')
+  const oppHigh        = oppResults.filter(o => o.match?.confidence === 'high').length
+  const oppWarn        = oppResults.filter(o => o.match && o.match.confidence !== 'high').length
+  const oppFail        = oppResults.filter(o => !o.match).length
+  const oppWillCreate  = oppResults.filter(o => o.willCreate).length
+  const oppFsOk        = oppResults.filter(o => o.match && o.fsExists).length
+  row('Matched (high)',                  String(oppHigh))
+  row('Matched (review)',                oppWarn > 0 ? `${oppWarn}  ⚠` : '0')
+  row('Unmatched (blocks --write)',      oppFail > 0 ? `${oppFail}  ✗` : '0')
+  row('Already in Firestore',           String(oppFsOk))
+  row('Missing — will auto-create',     oppWillCreate > 0 ? `${oppWillCreate}  ⚠ (staged in same batch)` : '0')
+  if (oppWillCreate > 0) {
+    console.log()
+    oppResults.filter(o => o.willCreate).forEach(o => {
+      const crestUrl = `${WORKER_BASE}/${o.seedEntry.sofifaTeamId}`
+      console.log(`    ⚠  ${o.match.opponentKey.padEnd(24)}  "${o.seedEntry.displayName}"  sofifaTeamId:${o.seedEntry.sofifaTeamId}`)
+      console.log(`       crestUrl : ${crestUrl}`)
+    })
+  }
   if (oppFail > 0) {
     console.log('\n  To fix — add to data/opponents-seed.json:')
     oppResults.filter(o => !o.match).forEach(o =>
@@ -948,6 +1017,15 @@ async function main() {
   function bSet(ref, data)   { batch.set(ref, data);    opCount++ }
   function bUpdate(ref, flds){ batch.update(ref, flds); opCount++ }
 
+  // 0 — Missing opponent identity docs (auto-seeded in same batch)
+  // These are opponents matched in opponents-seed.json that have no Firestore
+  // doc yet. Creating them here means the app can resolve crestUrl immediately
+  // after import without a separate seeding step.
+  // Uses db.collection().doc(key) — the opponentKey IS the Firestore doc ID.
+  for (const opp of newOpponentDocs) {
+    bSet(db.collection('opponents').doc(opp.opponentKey), opp.data)
+  }
+
   // 1 — Season doc
   bSet(seasonRef, seasonDoc)
 
@@ -1012,8 +1090,9 @@ async function main() {
 
   // ── Log what is staged ───────────────────────────────────────────────────────
   console.log()
+  console.log(`  Staged  ${newOpponentDocs.length}  opponent identity doc(s)  (auto-seeded from opponents-seed.json)`)
   console.log(`  Staged  1  season doc`)
-  console.log(`  Staged  ${newPlayerDocs.length}  new player doc(s)  (cache totals seeded from S4 stats)`)
+  console.log(`  Staged  ${newPlayerDocs.length}  new player doc(s)  (cache totals seeded from this season's stats)`)
   console.log(`  Staged  ${allStaged}  scope:ALL stat doc(s)${allSkipped > 0 ? `  (${allSkipped} skipped — already exist)` : ''}`)
   console.log(`  Staged  ${uclStaged}  scope:UCL stat doc(s)${uclSkipped > 0 ? `  (${uclSkipped} skipped — already exist)` : ''}`)
   console.log(`  Staged  ${newMatchDocs.length}  UCL match doc(s)`)
