@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 75
+// Current: 76
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -72,4 +72,5 @@
 //   73 — Phase 1 Step C: Records page — All Comps single-season records from scope:'ALL' collection; UCL career + single-season records from scope:'UCL' collection; no silent fallback to embedded array or top-level totals
 //   74 — Phase 1 Step D: PlayerProfile and PlayerCompare All Comps season tables read from scope:'ALL' seasonStats collection docs via getSeasonStatsByPlayer
 //   75 — Phase 1 Step E: Players page season filter reads from scope:'ALL' seasonStats collection via getSeasonStatsByClub
-const SW_VERSION = 75;
+//   76 — PWA cache bust: transfer-clubs.json updated with Marseille/Levante/Sevilla entries; forces fresh bundle for transfer club crest resolution
+const SW_VERSION = 76;
