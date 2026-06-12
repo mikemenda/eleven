@@ -1,0 +1,238 @@
+{
+  "season": {
+    "label": "S4",
+    "year": "2029/30",
+    "leagueCompetition": "Premier League",
+    "leaguePosition": 1,
+    "leagueP": 38,
+    "leagueW": 23,
+    "leagueD": 9,
+    "leagueL": 6,
+    "leagueGF": 79,
+    "leagueGA": 43,
+    "leaguePts": 78,
+    "leagueTop5": [
+      "FC Richport — 78",
+      "Newcastle — 70",
+      "Liverpool — 69",
+      "Arsenal — 68",
+      "Spurs — 67",
+      "Man City — 62"
+    ],
+    "uclEntered": true,
+    "uclResult": "QF",
+    "uclTournamentWinner": "Barcelona",
+    "uclFinalOpponent": null,
+    "uclFinalScore": null,
+    "uclLeaguePhasePosition": 4,
+    "uclLPP": 8,
+    "uclLPW": 5,
+    "uclLPD": 2,
+    "uclLPL": 1,
+    "uclLPGF": 22,
+    "uclLPGA": 11,
+    "uclLPPts": 17,
+    "uclR16Opponent": "Borussia Dortmund",
+    "uclR16Score": "6\u20132",
+    "uclQFOpponent": "Rangers",
+    "uclQFScore": "3\u20136",
+    "uclSFOpponent": null,
+    "uclSFScore": null,
+    "faCupResult": "QF",
+    "faCupFinalOpponent": null,
+    "faCupWinner": "Liverpool",
+    "carabaoCupResult": "QF",
+    "carabaoCupFinalOpponent": null,
+    "carabaoCupWinner": "Manchester City",
+    "dynastyScore": 53,
+    "dynastyVerdict": "Strong Season",
+    "seasonHeadline": null,
+    "narrativeText": "The most disappointing season of the Richport era despite a fourth consecutive Premier League title. A catastrophic UCL first leg against Rangers (1\u20135) ended European ambitions in shocking fashion. Nico Williams collapsed to 8 goals from 55 appearances after three strong seasons. Squad transition was heavy with multiple arrivals and departures failing to gel before the knockout rounds hit. The dynasty score of 53 is the lowest in club history at that point.",
+    "keyMoments": [
+      "Musiala reaches 100 career goals \u2014 first Richport player to achieve the milestone",
+      "Rangers shock exit \u2014 1\u20135 in UCL QF first leg, worst single result in Richport UCL history",
+      "Wirtz sold for \u20ac272.5M after just one season \u2014 built into a \u20ac272M player at Richport",
+      "Saliba returns to Richport after being sold in S2",
+      "Raphinha returns to Richport after being sold in S2",
+      "Nico Williams collapses to 8 goals \u2014 lowest output in his Richport career by far",
+      "Lowest Dynasty Score in club history at the time: 53",
+      "FC Barcelona win the UCL \u2014 former Richport nemesis Real Madrid not involved"
+    ],
+    "isComplete": true
+  },
+  "playerStats": [
+    {
+      "name": "Juli\u00e1n \u00c1lvarez",
+      "position": "ST",
+      "allComps": { "apps": 36, "goals": 28, "assists": 7 },
+      "ucl": { "apps": 7, "goals": 6, "assists": 2 }
+    },
+    {
+      "name": "Victor Osimhen",
+      "position": "ST",
+      "allComps": { "apps": 28, "goals": 19, "assists": 7 },
+      "ucl": { "apps": 7, "goals": 11, "assists": 2 }
+    },
+    {
+      "name": "Yan Diomande",
+      "position": "RM/LM",
+      "allComps": { "apps": 17, "goals": 8, "assists": 5 },
+      "ucl": { "apps": 3, "goals": 2, "assists": 3 }
+    },
+    {
+      "name": "Lamine Yamal",
+      "position": "RM/CAM",
+      "allComps": { "apps": 54, "goals": 16, "assists": 23 },
+      "ucl": { "apps": 12, "goals": 1, "assists": 9 }
+    },
+    {
+      "name": "Jamal Musiala",
+      "position": "CAM",
+      "allComps": { "apps": 48, "goals": 24, "assists": 6 },
+      "ucl": { "apps": 9, "goals": 6, "assists": 3 }
+    },
+    {
+      "name": "Karim Adeyemi",
+      "position": "RM",
+      "allComps": { "apps": 13, "goals": 5, "assists": 1 },
+      "ucl": { "apps": 1, "goals": 1, "assists": 0 }
+    },
+    {
+      "name": "Nico Williams",
+      "position": "LM",
+      "allComps": { "apps": 55, "goals": 8, "assists": 12 },
+      "ucl": { "apps": 12, "goals": 2, "assists": 5 }
+    },
+    {
+      "name": "Michael Olise",
+      "position": "RM/CAM",
+      "allComps": { "apps": 45, "goals": 9, "assists": 7 },
+      "ucl": { "apps": 6, "goals": 1, "assists": 2 }
+    },
+    {
+      "name": "Rayan Cherki",
+      "position": "CAM",
+      "allComps": { "apps": 7, "goals": 1, "assists": 1 },
+      "ucl": { "apps": 1, "goals": 0, "assists": 1 }
+    },
+    {
+      "name": "Pedri",
+      "position": "CM",
+      "allComps": { "apps": 58, "goals": 4, "assists": 13 },
+      "ucl": { "apps": 12, "goals": 1, "assists": 2 }
+    },
+    {
+      "name": "Raphinha",
+      "position": "RM",
+      "allComps": { "apps": 14, "goals": 1, "assists": 2 },
+      "ucl": { "apps": 2, "goals": 0, "assists": 1 }
+    },
+    {
+      "name": "Gavi",
+      "position": "CM",
+      "allComps": { "apps": 19, "goals": 1, "assists": 3 },
+      "ucl": { "apps": 4, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Eduardo Camavinga",
+      "position": "CM",
+      "allComps": { "apps": 38, "goals": 2, "assists": 5 }
+    },
+    {
+      "name": "Gerard Martin",
+      "position": "LB",
+      "allComps": { "apps": 15, "goals": 1, "assists": 1 }
+    },
+    {
+      "name": "Patrick Dorgu",
+      "position": "LB",
+      "allComps": { "apps": 10, "goals": 1, "assists": 0 }
+    },
+    {
+      "name": "Jules Kound\u00e9",
+      "position": "RB",
+      "allComps": { "apps": 53, "goals": 1, "assists": 4 }
+    },
+    {
+      "name": "Micky van de Ven",
+      "position": "CB",
+      "allComps": { "apps": 34, "goals": 1, "assists": 2 }
+    },
+    {
+      "name": "Milos Kerkez",
+      "position": "LB",
+      "allComps": { "apps": 16, "goals": 0, "assists": 1 }
+    },
+    {
+      "name": "Wesley",
+      "position": "RM",
+      "allComps": { "apps": 19, "goals": 0, "assists": 1 }
+    },
+    {
+      "name": "Schlotterbeck",
+      "position": "CB",
+      "allComps": { "apps": 32, "goals": 0, "assists": 1 }
+    },
+    {
+      "name": "William Saliba",
+      "position": "CB",
+      "allComps": { "apps": 36, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Ousmane Diomand\u00e9",
+      "position": "CB",
+      "allComps": { "apps": 29, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Endrick",
+      "position": "ST",
+      "allComps": { "apps": 6, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Fabio Carvalho",
+      "position": "CAM",
+      "allComps": { "apps": 5, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Joan Garc\u00eda",
+      "position": "GK",
+      "isGK": true,
+      "allComps": { "apps": 61, "cleanSheets": 13 },
+      "ucl": { "apps": 12, "cleanSheets": 3 }
+    }
+  ],
+  "uclMatches": [
+    { "competition": "UCL_LP", "round": "MD1", "opponent": "Monaco",            "home_away": "N", "score_for": 5, "score_against": 2 },
+    { "competition": "UCL_LP", "round": "MD2", "opponent": "Real Madrid",        "home_away": "N", "score_for": 1, "score_against": 2 },
+    { "competition": "UCL_LP", "round": "MD3", "opponent": "Inter Milan",        "home_away": "N", "score_for": 3, "score_against": 0 },
+    { "competition": "UCL_LP", "round": "MD4", "opponent": "Lech Poznan",        "home_away": "N", "score_for": 2, "score_against": 2 },
+    { "competition": "UCL_LP", "round": "MD5", "opponent": "Sporting",           "home_away": "N", "score_for": 3, "score_against": 3 },
+    { "competition": "UCL_LP", "round": "MD6", "opponent": "AEK Athens",         "home_away": "N", "score_for": 4, "score_against": 1 },
+    { "competition": "UCL_LP", "round": "MD7", "opponent": "Real Sociedad",      "home_away": "N", "score_for": 2, "score_against": 1 },
+    { "competition": "UCL_LP", "round": "MD8", "opponent": "Feyenoord",          "home_away": "N", "score_for": 2, "score_against": 0 },
+    { "competition": "UCL_R16", "leg": 1, "opponent": "Borussia Dortmund",       "home_away": "N", "score_for": 4, "score_against": 2 },
+    { "competition": "UCL_R16", "leg": 2, "opponent": "Borussia Dortmund",       "home_away": "N", "score_for": 2, "score_against": 0 },
+    { "competition": "UCL_QF",  "leg": 1, "opponent": "Rangers",                 "home_away": "N", "score_for": 1, "score_against": 5 },
+    { "competition": "UCL_QF",  "leg": 2, "opponent": "Rangers",                 "home_away": "N", "score_for": 2, "score_against": 1 }
+  ],
+  "transfers": [
+    { "direction": "IN",  "player": "Michael Olise",    "position": "RM/CAM", "from_club": "Chelsea",    "fee_eur": 120000000, "window": "Summer",  "rule": "Emergency Credit" },
+    { "direction": "IN",  "player": "Gerard Martin",    "position": "LB",     "from_club": "Marseille",  "fee_eur": 33000000,  "window": "Summer",  "rule": "Exchange" },
+    { "direction": "IN",  "player": "William Saliba",   "position": "CB",     "from_club": "Man City",   "fee_eur": 119000000, "window": "Summer",  "rule": "Exchange" },
+    { "direction": "IN",  "player": "Victor Osimhen",   "position": "ST",     "from_club": "Arsenal",    "fee_eur": 90000000,  "window": "Summer",  "rule": "Exchange" },
+    { "direction": "IN",  "player": "Ivan Marino",      "position": "RB",     "from_club": "Levante",    "fee_eur": 9000000,   "window": "Summer",  "rule": "Forced-List" },
+    { "direction": "OUT", "player": "Antonio Silva",    "position": "CB",     "to_club": "Tottenham",    "fee_eur": 210200000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Sergi\u00f1o Dest", "position": "RB",    "to_club": "Marseille",    "fee_eur": 57300000,  "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Hugo Ekit\u00eek\u00e9", "position": "ST", "to_club": "Man City",   "fee_eur": 188500000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Florian Wirtz",    "position": "CAM",    "to_club": "Arsenal",      "fee_eur": 272500000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Kambwala",         "position": "CB",     "to_club": "Levante",      "fee_eur": 10400000,  "window": "Summer",  "rule": "Forced-List" },
+    { "direction": "IN",  "player": "Raphinha",         "position": "RM",     "from_club": "Arsenal",    "fee_eur": 86000000,  "window": "January", "rule": "Exchange" },
+    { "direction": "IN",  "player": "Gavi",             "position": "CM",     "from_club": "Barcelona",  "fee_eur": 65200000,  "window": "January", "rule": "Emergency Credit" },
+    { "direction": "IN",  "player": "Patrick Dorgu",    "position": "LB",     "from_club": "West Ham",   "fee_eur": 44600000,  "window": "January", "rule": "Emergency Credit" },
+    { "direction": "IN",  "player": "Rayan Cherki",     "position": "CAM",    "from_club": "Man City",   "fee_eur": 102000000, "window": "January", "rule": "Exchange" },
+    { "direction": "OUT", "player": "Yan Diomande",     "position": "RM/LM",  "to_club": "Arsenal",      "fee_eur": 149300000, "window": "January", "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Milos Kerkez",     "position": "LB",     "to_club": "Sevilla",      "fee_eur": 81600000,  "window": "January", "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Endrick",          "position": "ST",     "to_club": "Liverpool",    "fee_eur": 115400000, "window": "January", "rule": "Optional" },
+    { "direction": "OUT", "player": "Karim Adeyemi",    "position": "RM",     "to_club": "Man City",     "fee_eur": 138600000, "window": "January", "rule": "Optional" }
+  ]
+}

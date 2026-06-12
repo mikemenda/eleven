@@ -1,70 +1,243 @@
 {
   "_comment": "Transfer club identity map. Keys are normalised (lowercase + trimmed). All sofifaTeamIds verified against sofifa.com/team/{id}. Worker URL: https://fifa-img.michaelmenda92.workers.dev/team/{sofifaTeamId}",
-
-  "manchester city": { "displayName": "Manchester City",   "sofifaTeamId": 10 },
-  "man city":        { "displayName": "Manchester City",   "sofifaTeamId": 10 },
-  "mci":             { "displayName": "Manchester City",   "sofifaTeamId": 10 },
-
-  "paris saint-germain": { "displayName": "Paris Saint-Germain", "sofifaTeamId": 73 },
-  "paris saint germain": { "displayName": "Paris Saint-Germain", "sofifaTeamId": 73 },
-  "psg":                 { "displayName": "Paris Saint-Germain", "sofifaTeamId": 73 },
-
-  "borussia dortmund": { "displayName": "Borussia Dortmund", "sofifaTeamId": 22 },
-  "bvb":               { "displayName": "Borussia Dortmund", "sofifaTeamId": 22 },
-  "dortmund":          { "displayName": "Borussia Dortmund", "sofifaTeamId": 22 },
-
-  "fc bayern münchen": { "displayName": "Bayern Munich", "sofifaTeamId": 21 },
-  "fc bayern munchen": { "displayName": "Bayern Munich", "sofifaTeamId": 21 },
-  "bayern munich":     { "displayName": "Bayern Munich", "sofifaTeamId": 21 },
-  "bayern münchen":    { "displayName": "Bayern Munich", "sofifaTeamId": 21 },
-  "bayern":            { "displayName": "Bayern Munich", "sofifaTeamId": 21 },
-
-  "atlético madrid":    { "displayName": "Atlético Madrid", "sofifaTeamId": 240 },
-  "atletico madrid":    { "displayName": "Atlético Madrid", "sofifaTeamId": 240 },
-  "atlético de madrid": { "displayName": "Atlético Madrid", "sofifaTeamId": 240 },
-  "atletico":           { "displayName": "Atlético Madrid", "sofifaTeamId": 240 },
-
-  "rb leipzig":       { "displayName": "RB Leipzig", "sofifaTeamId": 112172 },
-  "red bull leipzig": { "displayName": "RB Leipzig", "sofifaTeamId": 112172 },
-  "leipzig":          { "displayName": "RB Leipzig", "sofifaTeamId": 112172 },
-
-  "manchester united": { "displayName": "Manchester United", "sofifaTeamId": 11 },
-  "man united":        { "displayName": "Manchester United", "sofifaTeamId": 11 },
-  "man utd":           { "displayName": "Manchester United", "sofifaTeamId": 11 },
-
-  "aston villa": { "displayName": "Aston Villa", "sofifaTeamId": 2 },
-
-  "inter milan":    { "displayName": "Inter Milan", "sofifaTeamId": 44 },
-  "inter":          { "displayName": "Inter Milan", "sofifaTeamId": 44 },
-  "internazionale": { "displayName": "Inter Milan", "sofifaTeamId": 44 },
-
-  "bayer 04 leverkusen": { "displayName": "Bayer Leverkusen", "sofifaTeamId": 32 },
-  "bayer leverkusen":    { "displayName": "Bayer Leverkusen", "sofifaTeamId": 32 },
-  "leverkusen":          { "displayName": "Bayer Leverkusen", "sofifaTeamId": 32 },
-
-  "real madrid": { "displayName": "Real Madrid", "sofifaTeamId": 243 },
-
-  "juventus": { "displayName": "Juventus", "sofifaTeamId": 45 },
-  "juve":     { "displayName": "Juventus", "sofifaTeamId": 45 },
-
-  "liverpool":           { "displayName": "Liverpool",           "sofifaTeamId": 9    },
-  "chelsea":             { "displayName": "Chelsea",             "sofifaTeamId": 5    },
-  "arsenal":             { "displayName": "Arsenal",             "sofifaTeamId": 1    },
-  "tottenham hotspur":   { "displayName": "Tottenham Hotspur",   "sofifaTeamId": 18   },
-  "tottenham":           { "displayName": "Tottenham Hotspur",   "sofifaTeamId": 18   },
-  "spurs":               { "displayName": "Tottenham Hotspur",   "sofifaTeamId": 18   },
-  "newcastle united":    { "displayName": "Newcastle United",    "sofifaTeamId": 23   },
-  "newcastle":           { "displayName": "Newcastle United",    "sofifaTeamId": 23   },
-  "west ham united":     { "displayName": "West Ham United",     "sofifaTeamId": 37   },
-  "west ham":            { "displayName": "West Ham United",     "sofifaTeamId": 37   },
-  "everton":             { "displayName": "Everton",             "sofifaTeamId": 7    },
-  "brighton & hove albion": { "displayName": "Brighton & Hove Albion", "sofifaTeamId": 1808 },
-  "brighton":               { "displayName": "Brighton & Hove Albion", "sofifaTeamId": 1808 },
-  "brentford":           { "displayName": "Brentford",           "sofifaTeamId": 1925 },
-  "brentform":           { "displayName": "Brentford",           "sofifaTeamId": 1925 },
-  "roma":                { "displayName": "Roma",                "sofifaTeamId": 52   },
-  "as roma":             { "displayName": "Roma",                "sofifaTeamId": 52   },
-  "a.s. roma":           { "displayName": "Roma",                "sofifaTeamId": 52   },
-  "barcelona":           { "displayName": "Barcelona",           "sofifaTeamId": 241  },
-  "fc barcelona":        { "displayName": "Barcelona",           "sofifaTeamId": 241  }
+  "manchester city": {
+    "displayName": "Manchester City",
+    "sofifaTeamId": 10
+  },
+  "man city": {
+    "displayName": "Manchester City",
+    "sofifaTeamId": 10
+  },
+  "mci": {
+    "displayName": "Manchester City",
+    "sofifaTeamId": 10
+  },
+  "paris saint-germain": {
+    "displayName": "Paris Saint-Germain",
+    "sofifaTeamId": 73
+  },
+  "paris saint germain": {
+    "displayName": "Paris Saint-Germain",
+    "sofifaTeamId": 73
+  },
+  "psg": {
+    "displayName": "Paris Saint-Germain",
+    "sofifaTeamId": 73
+  },
+  "borussia dortmund": {
+    "displayName": "Borussia Dortmund",
+    "sofifaTeamId": 22
+  },
+  "bvb": {
+    "displayName": "Borussia Dortmund",
+    "sofifaTeamId": 22
+  },
+  "dortmund": {
+    "displayName": "Borussia Dortmund",
+    "sofifaTeamId": 22
+  },
+  "fc bayern münchen": {
+    "displayName": "Bayern Munich",
+    "sofifaTeamId": 21
+  },
+  "fc bayern munchen": {
+    "displayName": "Bayern Munich",
+    "sofifaTeamId": 21
+  },
+  "bayern munich": {
+    "displayName": "Bayern Munich",
+    "sofifaTeamId": 21
+  },
+  "bayern münchen": {
+    "displayName": "Bayern Munich",
+    "sofifaTeamId": 21
+  },
+  "bayern": {
+    "displayName": "Bayern Munich",
+    "sofifaTeamId": 21
+  },
+  "atlético madrid": {
+    "displayName": "Atlético Madrid",
+    "sofifaTeamId": 240
+  },
+  "atletico madrid": {
+    "displayName": "Atlético Madrid",
+    "sofifaTeamId": 240
+  },
+  "atlético de madrid": {
+    "displayName": "Atlético Madrid",
+    "sofifaTeamId": 240
+  },
+  "atletico": {
+    "displayName": "Atlético Madrid",
+    "sofifaTeamId": 240
+  },
+  "rb leipzig": {
+    "displayName": "RB Leipzig",
+    "sofifaTeamId": 112172
+  },
+  "red bull leipzig": {
+    "displayName": "RB Leipzig",
+    "sofifaTeamId": 112172
+  },
+  "leipzig": {
+    "displayName": "RB Leipzig",
+    "sofifaTeamId": 112172
+  },
+  "manchester united": {
+    "displayName": "Manchester United",
+    "sofifaTeamId": 11
+  },
+  "man united": {
+    "displayName": "Manchester United",
+    "sofifaTeamId": 11
+  },
+  "man utd": {
+    "displayName": "Manchester United",
+    "sofifaTeamId": 11
+  },
+  "aston villa": {
+    "displayName": "Aston Villa",
+    "sofifaTeamId": 2
+  },
+  "inter milan": {
+    "displayName": "Inter Milan",
+    "sofifaTeamId": 44
+  },
+  "inter": {
+    "displayName": "Inter Milan",
+    "sofifaTeamId": 44
+  },
+  "internazionale": {
+    "displayName": "Inter Milan",
+    "sofifaTeamId": 44
+  },
+  "bayer 04 leverkusen": {
+    "displayName": "Bayer Leverkusen",
+    "sofifaTeamId": 32
+  },
+  "bayer leverkusen": {
+    "displayName": "Bayer Leverkusen",
+    "sofifaTeamId": 32
+  },
+  "leverkusen": {
+    "displayName": "Bayer Leverkusen",
+    "sofifaTeamId": 32
+  },
+  "real madrid": {
+    "displayName": "Real Madrid",
+    "sofifaTeamId": 243
+  },
+  "juventus": {
+    "displayName": "Juventus",
+    "sofifaTeamId": 45
+  },
+  "juve": {
+    "displayName": "Juventus",
+    "sofifaTeamId": 45
+  },
+  "liverpool": {
+    "displayName": "Liverpool",
+    "sofifaTeamId": 9
+  },
+  "chelsea": {
+    "displayName": "Chelsea",
+    "sofifaTeamId": 5
+  },
+  "arsenal": {
+    "displayName": "Arsenal",
+    "sofifaTeamId": 1
+  },
+  "tottenham hotspur": {
+    "displayName": "Tottenham Hotspur",
+    "sofifaTeamId": 18
+  },
+  "tottenham": {
+    "displayName": "Tottenham Hotspur",
+    "sofifaTeamId": 18
+  },
+  "spurs": {
+    "displayName": "Tottenham Hotspur",
+    "sofifaTeamId": 18
+  },
+  "newcastle united": {
+    "displayName": "Newcastle United",
+    "sofifaTeamId": 23
+  },
+  "newcastle": {
+    "displayName": "Newcastle United",
+    "sofifaTeamId": 23
+  },
+  "west ham united": {
+    "displayName": "West Ham United",
+    "sofifaTeamId": 37
+  },
+  "west ham": {
+    "displayName": "West Ham United",
+    "sofifaTeamId": 37
+  },
+  "everton": {
+    "displayName": "Everton",
+    "sofifaTeamId": 7
+  },
+  "brighton & hove albion": {
+    "displayName": "Brighton & Hove Albion",
+    "sofifaTeamId": 1808
+  },
+  "brighton": {
+    "displayName": "Brighton & Hove Albion",
+    "sofifaTeamId": 1808
+  },
+  "brentford": {
+    "displayName": "Brentford",
+    "sofifaTeamId": 1925
+  },
+  "brentform": {
+    "displayName": "Brentford",
+    "sofifaTeamId": 1925
+  },
+  "roma": {
+    "displayName": "Roma",
+    "sofifaTeamId": 52
+  },
+  "as roma": {
+    "displayName": "Roma",
+    "sofifaTeamId": 52
+  },
+  "a.s. roma": {
+    "displayName": "Roma",
+    "sofifaTeamId": 52
+  },
+  "barcelona": {
+    "displayName": "Barcelona",
+    "sofifaTeamId": 241
+  },
+  "fc barcelona": {
+    "displayName": "Barcelona",
+    "sofifaTeamId": 241
+  },
+  "marseille": {
+    "displayName": "Olympique de Marseille",
+    "sofifaTeamId": 219
+  },
+  "olympique de marseille": {
+    "displayName": "Olympique de Marseille",
+    "sofifaTeamId": 219
+  },
+  "levante": {
+    "displayName": "Levante UD",
+    "sofifaTeamId": 1853
+  },
+  "levante ud": {
+    "displayName": "Levante UD",
+    "sofifaTeamId": 1853
+  },
+  "sevilla": {
+    "displayName": "Sevilla FC",
+    "sofifaTeamId": 481
+  },
+  "sevilla fc": {
+    "displayName": "Sevilla FC",
+    "sofifaTeamId": 481
+  }
 }

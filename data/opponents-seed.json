@@ -868,5 +868,31 @@
       "qarabag fk",
       "qarabag"
     ]
+  },
+  {
+    "opponentKey": "lech-poznan",
+    "displayName": "Lech Poznań",
+    "shortName": "Lech Poznań",
+    "abbreviation": "LEP",
+    "country": "Poland",
+    "sofifaTeamId": 873,
+    "aliases": [
+      "lech poznan",
+      "lech poznań",
+      "kks lech poznan"
+    ]
+  },
+  {
+    "opponentKey": "real-sociedad",
+    "displayName": "Real Sociedad",
+    "shortName": "Real Sociedad",
+    "abbreviation": "RSO",
+    "country": "Spain",
+    "sofifaTeamId": 457,
+    "aliases": [
+      "real sociedad",
+      "real sociedad de futbol",
+      "rso"
+    ]
   }
 ]
