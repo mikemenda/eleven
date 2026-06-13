@@ -75,6 +75,13 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Solid html background ensures the safe-area zone at top and bottom is
+   painted with the app colour in PWA standalone mode, preventing the iOS
+   wallpaper from bleeding through semi-transparent nav/header backgrounds. */
+html {
+  background: #080B12;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg);

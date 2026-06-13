@@ -4,17 +4,31 @@
   bottom: 0; left: 0; right: 0;
   z-index: 90;
   display: flex;
-  /* Height = content zone + safe-area. Background fills all the way to screen edge. */
+  /* Full height = 60px content zone + safe-area. Icons centered in full height
+     so they sit naturally in the lower-center of the bar, not pinned to top. */
   height: calc(60px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
-  /* Push items to the top of the nav so they sit in the 60px content zone,
-     not down into the home-indicator area. */
-  align-items: flex-start;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: center;
+  /* No padding-bottom — items center in the full height including safe-area zone,
+     which naturally places them closer to the bottom like a native tab bar. */
   background: rgba(6, 9, 16, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 0.5px solid rgba(255,255,255,0.08);
+}
+
+/* Solid fill for the safe-area zone — guarantees the background reaches the
+   physical screen edge regardless of rgba compositing behaviour in PWA mode. */
+.nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: #060910;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .item {
@@ -29,8 +43,7 @@
   transition: color 0.15s ease;
   padding: 6px 2px;
   -webkit-tap-highlight-color: transparent;
-  height: 60px;
-  flex-shrink: 0;
+  /* No explicit height — items size naturally and center within the full nav height. */
 }
 
 .item:hover { color: #8899aa; }
