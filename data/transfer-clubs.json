@@ -239,5 +239,13 @@
   "sevilla fc": {
     "displayName": "Sevilla FC",
     "sofifaTeamId": 481
+  },
+  "villarreal": {
+    "displayName": "Villarreal CF",
+    "sofifaTeamId": 483
+  },
+  "villarreal cf": {
+    "displayName": "Villarreal CF",
+    "sofifaTeamId": 483
   }
 }
