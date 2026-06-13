@@ -89,8 +89,7 @@
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: #8899aa;
 }
 .heroNat {
@@ -102,8 +101,7 @@
   font-family: var(--font-inter);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 .heroName {
   font-family: var(--font-playfair);
@@ -117,8 +115,7 @@
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--en-text-4);
 }
 

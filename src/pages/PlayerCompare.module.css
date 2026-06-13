@@ -73,8 +73,7 @@
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: #8899aa; margin: 0;
 }
 
@@ -148,8 +147,7 @@
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--en-gold); text-align: left;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
@@ -158,8 +156,7 @@
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--en-gold); text-align: right;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
@@ -387,7 +384,6 @@
   font-family: var(--font-inter);
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: #8899aa; display: block; margin-top: 2px;
 }

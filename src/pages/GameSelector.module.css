@@ -81,10 +81,10 @@
   font-family: var(--font-inter, 'Inter', system-ui, sans-serif);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.20em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: #6B7A8D;
-  margin-right: -0.20em;
+  margin-right: -0.10em;
 }
 
 .promptSub {

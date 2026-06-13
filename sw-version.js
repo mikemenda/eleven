@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 77
+// Current: 78
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -74,4 +74,5 @@
 //   75 — Phase 1 Step E: Players page season filter reads from scope:'ALL' seasonStats collection via getSeasonStatsByClub
 //   76 — PWA cache bust: transfer-clubs.json updated with Marseille/Levante/Sevilla entries; forces fresh bundle for transfer club crest resolution
 //   77 — S5 import data: S5.json generated; opponents-seed + transfer-clubs updated (Athletic Club, Stuttgart, Hoffenheim, AC Milan, Bournemouth, Napoli)
-const SW_VERSION = 77;
+//   78 — Typography cleanup: remove dashboard-style uppercase/tracking from player meta (heroPos, heroStatus, heroSeasons, heroMeta, colLabelA/B, pickerRowMeta, entryCompName); reduce over-tracked season dividers (rvSeasonDivider, oppSeasonDivider) and modalRegion; halve GameSelector prompt tracking; replace --font-mono with --font-inter in CreateSeasonModal (eyebrow, hintText, errorText, submitError)
+const SW_VERSION = 78;
