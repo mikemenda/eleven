@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 83
+// Current: 84
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -80,4 +80,5 @@
 //   81 — Fix PWA bottom nav: full-height calc(60px + safe-area-inset-bottom) so background reaches screen edge; icons stay in 60px content zone
 //   82 — Lower PWA nav content: align-items:center in full height (no padding-bottom), ::after solid safe-area fill, html background #080B12 for compositing hygiene
 //   83 — Fix PWA nav height cancellation: nav fixed at 60px (no safe-area addition); viewport-fit=cover already gains the safe-area height, adding it to nav was cancelling the gain
-const SW_VERSION = 83;
+//   84 — S6 import data: transfer-clubs.json Newcastle ID correction and cache bump for updated transfer club map
+const SW_VERSION = 84;

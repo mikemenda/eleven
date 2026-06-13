@@ -585,6 +585,20 @@
     ]
   },
   {
+    "opponentKey": "eintracht-frankfurt",
+    "displayName": "Eintracht Frankfurt",
+    "shortName": "Frankfurt",
+    "abbreviation": "SGE",
+    "country": "Germany",
+    "sofifaTeamId": 1824,
+    "aliases": [
+      "eintracht frankfurt",
+      "frankfurt",
+      "sge",
+      "die adler"
+    ]
+  },
+  {
     "opponentKey": "paris-sg",
     "displayName": "Paris Saint-Germain",
     "shortName": "PSG",
@@ -790,6 +804,22 @@
     ]
   },
   {
+    "opponentKey": "fenerbahce",
+    "displayName": "Fenerbahçe SK",
+    "shortName": "Fenerbahçe",
+    "abbreviation": "FEN",
+    "country": "Turkey",
+    "sofifaTeamId": 326,
+    "aliases": [
+      "fenerbahce sk",
+      "fenerbahce",
+      "fenerbahçe sk",
+      "fenerbahçe",
+      "fener",
+      "fen"
+    ]
+  },
+  {
     "opponentKey": "salzburg",
     "displayName": "FC Red Bull Salzburg",
     "shortName": "Salzburg",
@@ -895,6 +925,22 @@
     "aliases": [
       "qarabag fk",
       "qarabag"
+    ]
+  },
+  {
+    "opponentKey": "ferencvaros-tc",
+    "displayName": "Ferencváros TC",
+    "shortName": "Ferencváros",
+    "abbreviation": "FTC",
+    "country": "Hungary",
+    "sofifaTeamId": 1874,
+    "aliases": [
+      "ferencvaros tc",
+      "ferencváros tc",
+      "ferencvaros",
+      "ferencváros",
+      "fradi",
+      "ftc"
     ]
   }
 ]

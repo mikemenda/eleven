@@ -1,0 +1,238 @@
+{
+  "season": {
+    "label": "S6",
+    "year": "2031/32",
+    "leagueCompetition": "Premier League",
+    "leaguePosition": 1,
+    "leagueP": 38,
+    "leagueW": 29,
+    "leagueD": 6,
+    "leagueL": 3,
+    "leagueGF": 90,
+    "leagueGA": 34,
+    "leaguePts": 93,
+    "leagueTop5": [
+      "Manchester City — 79",
+      "Manchester United — 65",
+      "Brighton & Hove Albion — 65",
+      "Arsenal — 63",
+      "Newcastle United — 63"
+    ],
+    "uclEntered": true,
+    "uclResult": "Runners-Up",
+    "uclTournamentWinner": "Real Madrid",
+    "uclFinalOpponent": "Real Madrid",
+    "uclFinalScore": "1–2",
+    "uclLeaguePhasePosition": 1,
+    "uclLPP": 8,
+    "uclLPW": 6,
+    "uclLPD": 2,
+    "uclLPL": 0,
+    "uclLPGF": 27,
+    "uclLPGA": 7,
+    "uclLPPts": 20,
+    "uclR16Opponent": "Lazio",
+    "uclR16Score": "9–1",
+    "uclQFOpponent": "Barcelona",
+    "uclQFScore": "8–3",
+    "uclSFOpponent": "Sporting CP",
+    "uclSFScore": "6–3",
+    "faCupResult": "R32",
+    "faCupFinalOpponent": null,
+    "faCupWinner": "Tottenham Hotspur",
+    "carabaoCupResult": "Winner",
+    "carabaoCupFinalOpponent": "Chelsea",
+    "carabaoCupWinner": null,
+    "dynastyScore": 80,
+    "dynastyVerdict": "Dominant Season",
+    "seasonHeadline": null,
+    "narrativeText": "FC Richport delivered the deepest European run since S2, powering through to the UCL Final with dominant performances against Lazio, Barcelona, and Sporting — only for Real Madrid to deny them once again, a haunting echo of the S1 humiliation that now carries an unmistakable dynasty-defining weight. Julián Álvarez shattered the club's single-season goals record with 50 in all competitions, the first Richport player to reach that mark, while a sixth consecutive Premier League title and the Carabao Cup confirmed the domestic machine remains untouched. The continental ceiling, though, stood unbroken.",
+    "keyMoments": [
+      "Julián Álvarez scores 50 goals — new all-time single-season goals record (surpasses Musiala's 40 in S3)",
+      "UCL Final reached for the second time in club history — Real Madrid deny Richport once again (1–2)",
+      "Six consecutive Premier League titles — the most dominant domestic run in English football at the time",
+      "João Neves sold for €255.4M — new highest fee received for a CM in club history",
+      "Joan García reaches 390 career appearances — most ever by any Richport player at the time",
+      "Pedri reaches 357 career appearances — most ever for an outfield player at the time",
+      "Back-to-back UCL Final / Runner-up exits to the same opponent separated by five seasons",
+      "Carabao Cup won for a third time — Richport def. Chelsea 3–1 in Final"
+    ],
+    "isComplete": true
+  },
+
+  "playerStats": [
+    {
+      "name": "Julián Álvarez",
+      "position": "ST",
+      "allComps": { "apps": 56, "goals": 50, "assists": 26 },
+      "ucl":      { "apps": 13, "goals": 19, "assists": 13 }
+    },
+    {
+      "name": "Nico Williams",
+      "position": "LM",
+      "allComps": { "apps": 52, "goals": 30, "assists": 12 },
+      "ucl":      { "apps": 14, "goals": 11, "assists": 6 }
+    },
+    {
+      "name": "Lamine Yamal",
+      "position": "CAM",
+      "allComps": { "apps": 57, "goals": 20, "assists": 17 },
+      "ucl":      { "apps": 13, "goals": 5,  "assists": 2  }
+    },
+    {
+      "name": "Jamal Musiala",
+      "position": "CAM",
+      "allComps": { "apps": 45, "goals": 23, "assists": 9  },
+      "ucl":      { "apps": 9,  "goals": 5,  "assists": 2  }
+    },
+    {
+      "name": "Xavi Simons",
+      "position": "CAM",
+      "sofifaId": 245367,
+      "allComps": { "apps": 16, "goals": 7,  "assists": 7  },
+      "ucl":      { "apps": 4,  "goals": 1,  "assists": 2  }
+    },
+    {
+      "name": "Charalampos Kostoulas",
+      "position": "ST",
+      "sofifaId": 73885,
+      "allComps": { "apps": 20, "goals": 12, "assists": 1  },
+      "ucl":      { "apps": 4,  "goals": 3,  "assists": 1  }
+    },
+    {
+      "name": "Pedri",
+      "position": "CM",
+      "allComps": { "apps": 57, "goals": 9,  "assists": 15 },
+      "ucl":      { "apps": 12, "goals": 3,  "assists": 4  }
+    },
+    {
+      "name": "Fermín López",
+      "position": "CAM",
+      "allComps": { "apps": 30, "goals": 8,  "assists": 9  },
+      "ucl":      { "apps": 6,  "goals": 1,  "assists": 3  }
+    },
+    {
+      "name": "Gavi",
+      "position": "CM",
+      "allComps": { "apps": 41, "goals": 3,  "assists": 10 },
+      "ucl":      { "apps": 9,  "goals": 1,  "assists": 1  }
+    },
+    {
+      "name": "Gonçalo Quenda",
+      "position": "RM",
+      "allComps": { "apps": 28, "goals": 3,  "assists": 8  },
+      "ucl":      { "apps": 6,  "goals": 1,  "assists": 5  }
+    },
+    {
+      "name": "Estêvão",
+      "position": "RM",
+      "allComps": { "apps": 30, "goals": 4,  "assists": 2  },
+      "ucl":      { "apps": 3,  "goals": 1,  "assists": 0  }
+    },
+    {
+      "name": "Kenan Yıldız",
+      "position": "CAM",
+      "sofifaId": 277954,
+      "allComps": { "apps": 22, "goals": 2,  "assists": 1  },
+      "ucl":      { "apps": 8,  "goals": 0,  "assists": 0  }
+    },
+    {
+      "name": "Piero Hincapié",
+      "position": "CB",
+      "allComps": { "apps": 60, "goals": 0,  "assists": 0  }
+    },
+    {
+      "name": "Givairo Read",
+      "position": "RB",
+      "sofifaId": 271266,
+      "allComps": { "apps": 48, "goals": 1,  "assists": 2  }
+    },
+    {
+      "name": "Nuno Mendes",
+      "position": "LB",
+      "allComps": { "apps": 42, "goals": 0,  "assists": 4  }
+    },
+    {
+      "name": "William Saliba",
+      "position": "CB",
+      "allComps": { "apps": 46, "goals": 1,  "assists": 1  }
+    },
+    {
+      "name": "Abdukodir Khusanov",
+      "position": "CB",
+      "sofifaId": 277031,
+      "allComps": { "apps": 36, "goals": 0,  "assists": 0  }
+    },
+    {
+      "name": "Lewis Hall",
+      "position": "LB",
+      "sofifaId": 266127,
+      "allComps": { "apps": 33, "goals": 2,  "assists": 3  }
+    },
+    {
+      "name": "El Chadaille Bitshiabu",
+      "position": "CB",
+      "sofifaId": 263193,
+      "allComps": { "apps": 8,  "goals": 0,  "assists": 0  }
+    },
+    {
+      "name": "Renato Veiga",
+      "position": "CB",
+      "sofifaId": 273906,
+      "allComps": { "apps": 4,  "goals": 0,  "assists": 0  }
+    },
+    {
+      "name": "Joan García",
+      "position": "GK",
+      "isGK": true,
+      "allComps": { "apps": 65, "cleanSheets": 24 },
+      "ucl":      { "apps": 15, "cleanSheets": 5  }
+    }
+  ],
+
+  "uclMatches": [
+    { "competition": "UCL_LP",    "round": "G1", "opponent": "AEK Athens",    "home_away": "N", "score_for": 2, "score_against": 0 },
+    { "competition": "UCL_LP",    "round": "G2", "opponent": "Marseille",      "home_away": "N", "score_for": 1, "score_against": 1 },
+    { "competition": "UCL_LP",    "round": "G3", "opponent": "Frankfurt",      "home_away": "N", "score_for": 5, "score_against": 3 },
+    { "competition": "UCL_LP",    "round": "G4", "opponent": "Real Madrid",    "home_away": "N", "score_for": 3, "score_against": 0 },
+    { "competition": "UCL_LP",    "round": "G5", "opponent": "PSV",            "home_away": "N", "score_for": 3, "score_against": 1 },
+    { "competition": "UCL_LP",    "round": "G6", "opponent": "Fenerbahce",     "home_away": "N", "score_for": 4, "score_against": 0 },
+    { "competition": "UCL_LP",    "round": "G7", "opponent": "Barcelona",      "home_away": "N", "score_for": 1, "score_against": 1 },
+    { "competition": "UCL_LP",    "round": "G8", "opponent": "Ferencváros TC", "home_away": "N", "score_for": 8, "score_against": 1 },
+
+    { "competition": "UCL_R16", "leg": 1, "opponent": "Lazio",       "home_away": "N", "score_for": 6, "score_against": 0 },
+    { "competition": "UCL_R16", "leg": 2, "opponent": "Lazio",       "home_away": "N", "score_for": 3, "score_against": 1 },
+
+    { "competition": "UCL_QF",  "leg": 1, "opponent": "Barcelona",   "home_away": "N", "score_for": 3, "score_against": 3 },
+    { "competition": "UCL_QF",  "leg": 2, "opponent": "Barcelona",   "home_away": "N", "score_for": 5, "score_against": 0 },
+
+    { "competition": "UCL_SF",  "leg": 1, "opponent": "Sporting CP", "home_away": "N", "score_for": 6, "score_against": 1 },
+    { "competition": "UCL_SF",  "leg": 2, "opponent": "Sporting CP", "home_away": "N", "score_for": 0, "score_against": 2 },
+
+    { "competition": "UCL_Final",           "opponent": "Real Madrid",  "home_away": "N", "score_for": 1, "score_against": 2 }
+  ],
+
+  "transfers": [
+    { "direction": "IN",  "player": "Kenan Yıldız",          "position": "CAM", "from_club": "Juventus",          "fee_eur": 126400000, "window": "Summer",  "rule": "Exchange"        },
+    { "direction": "IN",  "player": "Givairo Read",           "position": "RB",  "from_club": "Barcelona",         "fee_eur": 104600000, "window": "Summer",  "rule": "Emergency Credit" },
+    { "direction": "IN",  "player": "Lewis Hall",             "position": "LB",  "from_club": "Newcastle United",  "fee_eur":  70000000, "window": "Summer",  "rule": "Exchange"        },
+    { "direction": "IN",  "player": "Abdukodir Khusanov",     "position": "CB",  "from_club": "Manchester City",   "fee_eur":  72000000, "window": "Summer",  "rule": "Forced-List"     },
+    { "direction": "IN",  "player": "Renato Veiga",           "position": "CB",  "from_club": "Villarreal",        "fee_eur":  32000000, "window": "Summer",  "rule": "Exchange"        },
+    { "direction": "IN",  "player": "Xavi Simons",            "position": "CAM", "from_club": "Tottenham Hotspur", "fee_eur":  45000000, "window": "Summer",  "rule": "Exchange"        },
+    { "direction": "IN",  "player": "Charalampos Kostoulas",  "position": "ST",  "from_club": "Brighton",          "fee_eur":  72000000, "window": "Summer",  "rule": "Emergency Credit" },
+
+    { "direction": "OUT", "player": "Victor Osimhen",         "position": "ST",  "to_club": "Juventus",            "fee_eur": 158100000, "window": "Summer",  "rule": "Mandatory"       },
+    { "direction": "OUT", "player": "Alejandro Baldé",        "position": "LB",  "to_club": "Atlético Madrid",     "fee_eur": 134600000, "window": "Summer",  "rule": "Mandatory"       },
+    { "direction": "OUT", "player": "Santiago Mourinho",      "position": "RB",  "to_club": "Villarreal",          "fee_eur":  54600000, "window": "Summer",  "rule": "Mandatory"       },
+    { "direction": "OUT", "player": "Marc Pubill",            "position": "CB",  "to_club": "Newcastle United",    "fee_eur":  75500000, "window": "Summer",  "rule": "Mandatory"       },
+    { "direction": "OUT", "player": "Jules Koundé",           "position": "RB",  "to_club": "Arsenal",             "fee_eur": 169100000, "window": "Summer",  "rule": "Optional"        },
+    { "direction": "OUT", "player": "Gilberto Mora",          "position": "CAM", "to_club": "Tottenham Hotspur",   "fee_eur":  62500000, "window": "Summer",  "rule": "Optional"        },
+    { "direction": "OUT", "player": "Savinho",                "position": "RM",  "to_club": "Manchester City",     "fee_eur":  98400000, "window": "Summer",  "rule": "Forced-List"     },
+
+    { "direction": "IN",  "player": "Koriche",                "position": "?",   "from_club": "Bayern Munich",     "fee_eur":  30000000, "window": "January", "rule": "Exchange"        },
+    { "direction": "IN",  "player": "El Chadaille Bitshiabu", "position": "CB",  "from_club": "Liverpool",         "fee_eur":  88800000, "window": "January", "rule": "Forced-List"     },
+
+    { "direction": "OUT", "player": "Pedro Porro",            "position": "RB",  "to_club": "Bayern Munich",       "fee_eur":  47800000, "window": "January", "rule": "Mandatory"       },
+    { "direction": "OUT", "player": "João Neves",             "position": "CM",  "to_club": "Liverpool",           "fee_eur": 255400000, "window": "January", "rule": "Forced-List"     }
+  ]
+}
