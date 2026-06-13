@@ -51,21 +51,22 @@ const CampaignsIcon = () => (
 
 const KOAppsIcon = () => (
   <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <path d="M10 3L17 7.5V12.5L10 17L3 12.5V7.5L10 3Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-    <path d="M10 3V17M3 7.5L17 12.5M17 7.5L3 12.5" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.4"/>
+    {/* Two left entries → merge lines → single winner on right */}
+    <path d="M3 5h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M3 15h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M7 5v3.5M7 15v-3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M7 8.5h3M7 11.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M10 8.5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M10 10h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M14 10h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
   </svg>
 )
 
 const FinalsIcon = () => (
   <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <path d="M6 3h8l1 2H5L6 3Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-    <path d="M5 5c0 0-1.5 0-1.5 2S5 10 10 10s6.5-2 6.5-3-1.5-2-1.5-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M3.5 7c-.8 0-1.2.8-1.2 1.3S2.8 9.8 3.5 9.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-    <path d="M16.5 7c.8 0 1.2.8 1.2 1.3s-.5 1.5-1.2 1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-    <path d="M7.5 10v1.5M12.5 10v1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-    <rect x="6" y="11.5" width="8" height="1.8" rx="0.9" stroke="currentColor" strokeWidth="1.2"/>
-    <path d="M5 17h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <rect x="8" y="13.3" width="4" height="3.7" rx="0.8" stroke="currentColor" strokeWidth="1.2"/>
+    {/* Medal: circle head + two ribbon tails */}
+    <circle cx="10" cy="12" r="4" stroke="currentColor" strokeWidth="1.4"/>
+    <path d="M7.5 8.5L6 3h8l-1.5 5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 )
 

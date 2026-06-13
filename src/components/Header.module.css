@@ -6,8 +6,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 max(20px, env(safe-area-inset-right, 20px)) 0 max(20px, env(safe-area-inset-left, 20px));
-  height: 56px;
+  padding: env(safe-area-inset-top, 0) max(20px, env(safe-area-inset-right, 20px)) 0 max(20px, env(safe-area-inset-left, 20px));
+  height: calc(56px + env(safe-area-inset-top, 0));
   background: rgba(8, 13, 26, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);

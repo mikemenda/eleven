@@ -237,7 +237,7 @@ function SortTh({ label, colKey, sortKey, sortDir, onSort, className }) {
       onClick={() => onSort(colKey)}
       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2,
-               width: '100%', font: 'inherit' }}
+               width: '100%' }}
     >
       {label}
       {active && <span style={{ fontSize: 9 }}>{sortDir === 'desc' ? '↓' : '↑'}</span>}

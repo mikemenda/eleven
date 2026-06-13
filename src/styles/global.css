@@ -57,6 +57,9 @@
   --font-plex:      'IBM Plex Mono', 'JetBrains Mono', monospace;
 
   /* Pitch texture overlay */
+  /* Nav height including safe area — useful for page bottom-padding */
+  --nav-h: calc(60px + max(env(safe-area-inset-bottom, 0px), 0px));
+
   --pitch-lines: repeating-linear-gradient(
     0deg,
     transparent,

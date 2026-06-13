@@ -16,12 +16,16 @@ function splitPositions(posStr) {
   return posStr.split(/[,\/]+/).map(p => p.trim()).filter(Boolean)
 }
 
-function playerMatchesFilter(player, posFilter) {
-  if (posFilter === 'All') return true
-  if (posFilter === 'GK')  return isGK(player)
-  const positions = splitPositions(player.position)
-  if (ROLE_GROUPS[posFilter]) return positions.some(p => ROLE_GROUPS[posFilter].includes(p))
-  return positions.includes(posFilter)
+// Multi-select aware: posFilters is [] (All) or an array of filter keys.
+// Player passes if it matches ANY selected key.
+function playerMatchesPosFilters(player, posFilters) {
+  if (posFilters.length === 0) return true
+  return posFilters.some(f => {
+    if (f === 'GK') return isGK(player)
+    const positions = splitPositions(player.position)
+    if (ROLE_GROUPS[f]) return positions.some(p => ROLE_GROUPS[f].includes(p))
+    return positions.includes(f)
+  })
 }
 
 // ─── UCL season stat lookup (collection-based) ───────────────────────────────
@@ -113,8 +117,9 @@ function enrichStats(raw) {
 export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading }) {
   const navigate = useNavigate()
 
-  const [posFilter,    setPosFilter]    = useState('All')
-  const [seasonFilter, setSeasonFilter] = useState('all')
+  // Multi-select: [] = All, [...keys] = selected filters
+  const [posFilters,    setPosFilters]    = useState([])
+  const [seasonFilters, setSeasonFilters] = useState([])
   // Default sort: G+A descending
   const [sortKey,      setSortKey]      = useState('uclContrib')
   const [sortDir,      setSortDir]      = useState('desc')
@@ -139,8 +144,8 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
 
   const withStats = base.map(p => {
     let raw
-    if (seasonFilter === 'all') {
-      // Use pre-computed career totals — already derived from collection docs
+    if (seasonFilters.length === 0) {
+      // All seasons: use pre-computed career totals from collection docs
       const career = careerByPlayerId.get(p.id)
       if (!career) return null
       raw = {
@@ -150,11 +155,22 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
         uclCleanSheets: career.uclCleanSheets,
       }
     } else {
-      // Season filter: look up the seasonId for this label, then sum docs
-      const seasonId = seasonIdByLabel[seasonFilter]
-      if (!seasonId) return null
-      raw = sumUclSeasonStatsDocs(p.id, seasonId, uclStatsDocs || [])
-      if (!raw) return null
+      // Multi-season: sum UCL docs across all selected seasons
+      let apps = 0, goals = 0, assists = 0, cleanSheets = 0
+      let hasAny = false
+      for (const label of seasonFilters) {
+        const seasonId = seasonIdByLabel[label]
+        if (!seasonId) continue
+        const s = sumUclSeasonStatsDocs(p.id, seasonId, uclStatsDocs || [])
+        if (!s) continue
+        hasAny    = true
+        apps     += s.uclApps        || 0
+        goals    += s.uclGoals       || 0
+        assists  += s.uclAssists     || 0
+        cleanSheets += s.uclCleanSheets || 0
+      }
+      if (!hasAny) return null
+      raw = { uclApps: apps, uclGoals: goals, uclAssists: assists, uclCleanSheets: cleanSheets }
     }
     return {
       id:       p.id,
@@ -172,8 +188,8 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
         <span className={styles.emptyIcon}>👤</span>
         <p className={styles.emptyText}>No UCL stats found</p>
         <p className={styles.emptyHint}>
-          {seasonFilter !== 'all'
-            ? `No UCL data for ${seasonFilter}.`
+          {seasonFilters.length > 0
+            ? `No UCL data for ${seasonFilters.join(', ')}.`
             : 'Player UCL stats appear once seasonStats are seeded.'}
         </p>
       </div>
@@ -212,10 +228,12 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
     .map(s => s.label)
     .filter(Boolean)
 
-  const cols = (posFilter === 'GK' || (posFilter === 'All' && withStats.every(p => isGK(p))))
+  // GK cols if: only GK is selected, or no pos filter and all players are GK
+  const onlyGkSelected = posFilters.length === 1 && posFilters[0] === 'GK'
+  const cols = (onlyGkSelected || (posFilters.length === 0 && withStats.every(p => isGK(p))))
     ? GK_COLS : OUTFIELD_COLS
 
-  const filtered = withStats.filter(p => playerMatchesFilter(p, posFilter))
+  const filtered = withStats.filter(p => playerMatchesPosFilters(p, posFilters))
 
   const sorted = [...filtered].sort((a, b) => {
     const av = a[sortKey] ?? 0
@@ -228,14 +246,30 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
     else { setSortKey(key); setSortDir('desc') }
   }
 
+  // Toggle a position filter key. 'All' clears the array.
   function handlePosFilter(key) {
-    setPosFilter(key)
+    if (key === 'All') {
+      setPosFilters([])
+    } else {
+      setPosFilters(prev =>
+        prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+      )
+    }
     setSortKey('uclContrib')
     setSortDir('desc')
   }
 
+  // Toggle a season label. Clears when already the only item selected.
   function handleSeasonFilter(label) {
-    setSeasonFilter(label)
+    setSeasonFilters(prev =>
+      prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
+    )
+    setSortKey('uclContrib')
+    setSortDir('desc')
+  }
+
+  function clearSeasonFilters() {
+    setSeasonFilters([])
     setSortKey('uclContrib')
     setSortDir('desc')
   }
@@ -251,15 +285,15 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
       {seasonLabels.length > 0 && (
         <div className={styles.plSeasonBar}>
           <button
-            className={`${styles.plSeasonBtn} ${seasonFilter === 'all' ? styles.plSeasonActive : ''}`}
-            onClick={() => handleSeasonFilter('all')}
+            className={`${styles.plSeasonBtn} ${seasonFilters.length === 0 ? styles.plSeasonActive : ''}`}
+            onClick={clearSeasonFilters}
           >
             All Seasons
           </button>
           {seasonLabels.map(label => (
             <button
               key={label}
-              className={`${styles.plSeasonBtn} ${seasonFilter === label ? styles.plSeasonActive : ''}`}
+              className={`${styles.plSeasonBtn} ${seasonFilters.includes(label) ? styles.plSeasonActive : ''}`}
               onClick={() => handleSeasonFilter(label)}
             >
               {label}
@@ -273,7 +307,11 @@ export default function UclPlayers({ players, uclSeasons, uclStatsDocs, loading 
         {posFilterOptions.map(f => (
           <button
             key={f.key}
-            className={`${styles.plFilterBtn} ${posFilter === f.key ? styles.plFilterActive : ''}`}
+            className={`${styles.plFilterBtn} ${
+              f.key === 'All'
+                ? posFilters.length === 0 ? styles.plFilterActive : ''
+                : posFilters.includes(f.key) ? styles.plFilterActive : ''
+            }`}
             onClick={() => handlePosFilter(f.key)}
           >
             {f.label}

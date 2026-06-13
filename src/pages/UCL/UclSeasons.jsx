@@ -138,7 +138,7 @@ function CampaignCard({ summary, opponents, onSelect }) {
 
 // ─── Campaign detail ──────────────────────────────────────────────────────────
 function CampaignDetail({ summary, opponents, onBack }) {
-  const { season, lpRecord, koPath, matchRecord, biggestWin } = summary
+  const { season, lpRecord, koPath, matchRecord } = summary
   const finish      = season.uclResult
   const finishLabel = FINISH_DISPLAY[finish] || finish || '—'
   const isChampion  = finish === 'Champions'
@@ -332,17 +332,6 @@ function CampaignDetail({ summary, opponents, onBack }) {
         </div>
       )}
 
-      {/* Biggest Win */}
-      {biggestWin && (
-        <div className={styles.sznDetailSection}>
-          <p className={styles.sznDetailSectionLabel}>Biggest Win</p>
-          <div className={styles.sznDetailNote}>
-            {fmtScore(biggestWin.score_for, biggestWin.score_against)}
-            {' vs '}
-            {matchOppName(biggestWin, opponents) || '—'}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -194,16 +194,16 @@
 .thIdentity {
   left: 0;
   z-index: 21;
-  min-width: 170px;
-  max-width: 200px;
+  min-width: 195px;
+  max-width: 230px;
 }
 .tdIdentity {
   position: sticky;
   left: 0;
   background: var(--en-bg);
   z-index: 10;
-  min-width: 170px;
-  max-width: 200px;
+  min-width: 195px;
+  max-width: 230px;
 }
 .thIdentity,
 .tdIdentity {
@@ -316,7 +316,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  max-width: 150px;
 }
 .playerPos {
   font-family: var(--font-inter);
