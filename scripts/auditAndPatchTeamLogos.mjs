@@ -496,47 +496,24 @@ async function main() {
   row('Opponent docs that will be patched (--write)',  String(opponentPatches.length))
   console.log()
 
-  // ── Importer gap analysis ────────────────────────────────────────────────
-  header('Importer Gap Analysis — importSeason.mjs')
+  // ── Importer status note ───────────────────────────────────────────────
+  header('Importer Status — importSeason.mjs')
   console.log(`
-  The following gaps in importSeason.mjs can cause logo issues in future seasons.
-  No immediate fix is needed for the current import (this script patches Firestore).
-  Apply the fix to importSeason.mjs before importing the next season.
+  importSeason.mjs has been hardened for future imports.
 
-  GAP 1 — shortName and abbreviation not written to opponent docs
-  ──────────────────────────────────────────────────────────────
-  Current importer writes to opponents collection:
-    displayName, country, sofifaTeamId, aliases, crestUrl
+  Current expected behavior:
+    ✓ matched UCL opponent docs are upserted, not only created
+    ✓ existing opponent docs are refreshed from opponents-seed.json
+    ✓ full identity fields are written:
+      displayName, shortName, abbreviation, country, sofifaTeamId, aliases, crestUrl
+    ✓ transfer clubs are cross-checked against opponents-seed.json where possible
 
-  Missing:
-    shortName    — used by app for compact display in tight UI
-    abbreviation — used by app for badge/table abbreviation
+  If this audit reports:
+    - 0 missing/bad UCL opponent docs
+    - 0 transfer club resolution failures
+    - 0 sofifaTeamId cross-check mismatches
 
-  Fix: in the newOpponentDocs .map() (around the "New opponent docs" comment),
-  add shortName and abbreviation from the seed entry:
-
-    data: {
-      displayName:  o.seedEntry.displayName,
-      shortName:    o.seedEntry.shortName    ?? o.seedEntry.displayName,
-      abbreviation: o.seedEntry.abbreviation ?? null,   // ← add
-      country:      o.seedEntry.country      ?? null,
-      sofifaTeamId: o.seedEntry.sofifaTeamId,
-      aliases:      o.seedEntry.aliases      ?? [],
-      crestUrl:     \`\${WORKER_BASE}/\${o.seedEntry.sofifaTeamId}\`,
-    }
-
-  GAP 2 — Existing opponent docs are never updated, only created
-  ──────────────────────────────────────────────────────────────
-  If an opponent doc already exists in Firestore (fsExists: true), the importer
-  skips it even if the doc has wrong or missing fields. This means a bad doc
-  from a manual seed, an old import, or a seed update will silently persist.
-
-  Fix: change willCreate logic so that docs with missing/wrong sofifaTeamId or
-  crestUrl are also included in newOpponentDocs (using batch.set to overwrite).
-  Alternatively, always upsert all matched opponents regardless of fsExists.
-
-  This script (auditAndPatchTeamLogos.mjs --write) is the remediation tool
-  for any season where this gap caused a missing logo.
+  then no logo identity repair is needed for this season.
 `)
 
   // ── Write safety gate ────────────────────────────────────────────────────
