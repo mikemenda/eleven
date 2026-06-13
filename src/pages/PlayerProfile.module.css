@@ -104,9 +104,10 @@
   letter-spacing: 0.01em;
 }
 .heroName {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--en-text-1);
   line-height: 1.1;
   margin: 0 0 4px;

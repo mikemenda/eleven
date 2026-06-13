@@ -477,9 +477,10 @@
   flex: 1;
 }
 .sznDetailSeason {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--en-text-1);
 }
 .sznDetailYear {
@@ -1018,9 +1019,10 @@
 .rMetaBtn:disabled { cursor: default; opacity: 1; }
 
 .rHolder {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-size: 15px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--en-text-1);
   white-space: nowrap;
   overflow: hidden;
@@ -1285,9 +1287,10 @@
   min-width: 0;
 }
 .rvDetailName {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-size: 17px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--en-text-1);
 }
 /* League subtitle in detail — upgraded from near-invisible */
@@ -1559,9 +1562,10 @@
   flex-shrink: 0;
 }
 .rModalTitle {
-  font-family: var(--font-playfair);
+  font-family: var(--font-inter);
   font-size: 16px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--en-text-1);
 }
 .rModalClose {

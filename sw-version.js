@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 78
+// Current: 79
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -75,4 +75,5 @@
 //   76 — PWA cache bust: transfer-clubs.json updated with Marseille/Levante/Sevilla entries; forces fresh bundle for transfer club crest resolution
 //   77 — S5 import data: S5.json generated; opponents-seed + transfer-clubs updated (Athletic Club, Stuttgart, Hoffenheim, AC Milan, Bournemouth, Napoli)
 //   78 — Typography cleanup: remove dashboard-style uppercase/tracking from player meta (heroPos, heroStatus, heroSeasons, heroMeta, colLabelA/B, pickerRowMeta, entryCompName); reduce over-tracked season dividers (rvSeasonDivider, oppSeasonDivider) and modalRegion; halve GameSelector prompt tracking; replace --font-mono with --font-inter in CreateSeasonModal (eyebrow, hintText, errorText, submitError)
-const SW_VERSION = 78;
+//   79 — Remove Playfair serif from all content typography: player names, club/opponent names, season labels, page titles, headlines, record holders, modal titles; keep only Home XI monogram
+const SW_VERSION = 79;
