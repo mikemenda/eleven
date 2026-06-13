@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 82
+// Current: 83
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -79,4 +79,5 @@
 //   80 — PWA safe-area for header + bottom nav; Home trophy bottom-align; UCL Overview icon refresh (bracket + medal); UCL Seasons remove Biggest Win; UCL Players multi-select season + position filters; UCL Opponents table header font fix; Players name column wider
 //   81 — Fix PWA bottom nav: full-height calc(60px + safe-area-inset-bottom) so background reaches screen edge; icons stay in 60px content zone
 //   82 — Lower PWA nav content: align-items:center in full height (no padding-bottom), ::after solid safe-area fill, html background #080B12 for compositing hygiene
-const SW_VERSION = 82;
+//   83 — Fix PWA nav height cancellation: nav fixed at 60px (no safe-area addition); viewport-fit=cover already gains the safe-area height, adding it to nav was cancelling the gain
+const SW_VERSION = 83;
