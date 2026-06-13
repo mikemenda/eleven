@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 80
+// Current: 81
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -77,4 +77,5 @@
 //   78 — Typography cleanup: remove dashboard-style uppercase/tracking from player meta (heroPos, heroStatus, heroSeasons, heroMeta, colLabelA/B, pickerRowMeta, entryCompName); reduce over-tracked season dividers (rvSeasonDivider, oppSeasonDivider) and modalRegion; halve GameSelector prompt tracking; replace --font-mono with --font-inter in CreateSeasonModal (eyebrow, hintText, errorText, submitError)
 //   79 — Remove Playfair serif from all content typography: player names, club/opponent names, season labels, page titles, headlines, record holders, modal titles; keep only Home XI monogram
 //   80 — PWA safe-area for header + bottom nav; Home trophy bottom-align; UCL Overview icon refresh (bracket + medal); UCL Seasons remove Biggest Win; UCL Players multi-select season + position filters; UCL Opponents table header font fix; Players name column wider
-const SW_VERSION = 80;
+//   81 — Fix PWA bottom nav: full-height calc(60px + safe-area-inset-bottom) so background reaches screen edge; icons stay in 60px content zone
+const SW_VERSION = 81;
