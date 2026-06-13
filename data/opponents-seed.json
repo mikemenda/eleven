@@ -942,5 +942,34 @@
       "fradi",
       "ftc"
     ]
+  },
+  {
+    "opponentKey": "fc-basel-1893",
+    "displayName": "FC Basel 1893",
+    "shortName": "FC Basel",
+    "abbreviation": "BSL",
+    "country": "Switzerland",
+    "sofifaTeamId": 896,
+    "aliases": [
+      "fc basel 1893",
+      "fc basel",
+      "basel 1893",
+      "basel"
+    ]
+  },
+  {
+    "opponentKey": "dinamo-zagreb",
+    "displayName": "Dinamo Zagreb",
+    "shortName": "Dinamo Zagreb",
+    "abbreviation": "DZG",
+    "country": "Croatia",
+    "sofifaTeamId": 211,
+    "aliases": [
+      "dinamo zagreb",
+      "gnk dinamo zagreb",
+      "gnk dinamo",
+      "dinamo",
+      "zagreb"
+    ]
   }
 ]

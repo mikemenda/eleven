@@ -1,0 +1,609 @@
+{
+  "season": {
+    "label": "S7",
+    "year": "2032/33",
+    "leagueCompetition": "Premier League",
+    "leaguePosition": 1,
+    "leagueP": 38,
+    "leagueW": 26,
+    "leagueD": 6,
+    "leagueL": 6,
+    "leagueGF": 99,
+    "leagueGA": 50,
+    "leaguePts": 84,
+    "leagueTop5": [
+      "FC Richport — 84",
+      "Manchester City — 78",
+      "Chelsea — 69"
+    ],
+    "uclEntered": true,
+    "uclResult": "Champions",
+    "uclTournamentWinner": null,
+    "uclFinalOpponent": "Manchester City",
+    "uclFinalScore": "2–1",
+    "uclLeaguePhasePosition": 1,
+    "uclLPP": 8,
+    "uclLPW": 7,
+    "uclLPD": 0,
+    "uclLPL": 1,
+    "uclLPGF": 43,
+    "uclLPGA": 11,
+    "uclLPPts": 21,
+    "uclR16Opponent": "RB Leipzig",
+    "uclR16Score": "7–0",
+    "uclQFOpponent": "Athletic Club",
+    "uclQFScore": "9–4",
+    "uclSFOpponent": "Brighton",
+    "uclSFScore": "7–4",
+    "faCupResult": "Winner",
+    "faCupFinalOpponent": "Brighton",
+    "faCupWinner": null,
+    "carabaoCupResult": "R32",
+    "carabaoCupFinalOpponent": null,
+    "carabaoCupWinner": "Arsenal",
+    "dynastyScore": 89,
+    "dynastyVerdict": "Legendary Season",
+    "seasonHeadline": null,
+    "narrativeText": "FC Richport's greatest UCL triumph arrived in S7 as the club dismantled RB Leipzig, Athletic Club, and Brighton before defeating Manchester City 2–1 in the Final to claim a second Champions League title. Julián Álvarez was the undisputed protagonist — obliterating his own single-season records with 55 goals and 82 contributions, the finest individual season in dynasty history by a considerable margin. The domestic machine remained ruthless: a seventh consecutive Premier League title and an FA Cup completed a True Treble, while Nico Williams' landmark €315.7M sale to Chelsea — the largest in club history — marked the end of an era for the dynasty's original star.",
+    "keyMoments": [
+      "Álvarez shatters single-season goals record: 55 (surpasses his own 50 from S6)",
+      "Álvarez shatters single-season contributions record: 82 (surpasses Musiala's 63 from S3)",
+      "Álvarez sets new single-season C/Game record: 1.44 (surpasses his own 1.36 from S6, min 15 apps)",
+      "UCL Champions for second time — first since S2 — defeating Man City 2–1 in the Final",
+      "True Treble: Premier League + FA Cup + UCL",
+      "Seven consecutive Premier League titles",
+      "Nico Williams sold for €315.7M — new all-time highest fee received in club history",
+      "Nico Williams departs as the dynasty's original star after six seasons (S1–S6)",
+      "Musiala overtakes Nico Williams as all-time leading scorer: 169 career goals (vs 149)",
+      "Musiala becomes first Richport player to reach 150 career goals",
+      "Yamal overtakes Nico Williams as all-time contributions leader: 284 (vs 238)",
+      "Álvarez overtakes Osimhen as best career G/Game (min 30 apps): 0.82 (vs 0.79)",
+      "Pedri passes 400 career appearances — first outfield player to reach the milestone",
+      "Joan García passes 450 career appearances"
+    ],
+    "isComplete": true
+  },
+  "playerStats": [
+    {
+      "name": "Julián Álvarez",
+      "position": "ST",
+      "allComps": {
+        "apps": 57,
+        "goals": 55,
+        "assists": 27
+      },
+      "ucl": {
+        "apps": 14,
+        "goals": 24,
+        "assists": 11
+      }
+    },
+    {
+      "name": "Jamal Musiala",
+      "position": "CAM",
+      "allComps": {
+        "apps": 53,
+        "goals": 32,
+        "assists": 23
+      },
+      "ucl": {
+        "apps": 13,
+        "goals": 12,
+        "assists": 12
+      }
+    },
+    {
+      "name": "Lamine Yamal",
+      "position": "CAM",
+      "allComps": {
+        "apps": 54,
+        "goals": 29,
+        "assists": 19
+      },
+      "ucl": {
+        "apps": 13,
+        "goals": 7,
+        "assists": 5
+      }
+    },
+    {
+      "name": "Désiré Doué",
+      "position": "RM",
+      "sofifaId": 271421,
+      "allComps": {
+        "apps": 36,
+        "goals": 11,
+        "assists": 21
+      },
+      "ucl": {
+        "apps": 11,
+        "goals": 6,
+        "assists": 13
+      }
+    },
+    {
+      "name": "Endrick",
+      "position": "ST",
+      "sofifaId": 272505,
+      "allComps": {
+        "apps": 18,
+        "goals": 11,
+        "assists": 5
+      },
+      "ucl": {
+        "apps": 3,
+        "goals": 4,
+        "assists": 2
+      }
+    },
+    {
+      "name": "Fermín López",
+      "position": "CAM",
+      "allComps": {
+        "apps": 38,
+        "goals": 20,
+        "assists": 10
+      },
+      "ucl": {
+        "apps": 10,
+        "goals": 6,
+        "assists": 4
+      }
+    },
+    {
+      "name": "Bradley Barcola",
+      "position": "LM",
+      "sofifaId": 264652,
+      "allComps": {
+        "apps": 16,
+        "goals": 6,
+        "assists": 3
+      },
+      "ucl": {
+        "apps": 4,
+        "goals": 2,
+        "assists": 0
+      }
+    },
+    {
+      "name": "Xavi Simons",
+      "position": "CAM",
+      "allComps": {
+        "apps": 17,
+        "goals": 4,
+        "assists": 3
+      },
+      "ucl": {
+        "apps": 4,
+        "goals": 1,
+        "assists": 1
+      }
+    },
+    {
+      "name": "Giovani Quenda",
+      "position": "RM",
+      "allComps": {
+        "apps": 42,
+        "goals": 6,
+        "assists": 11
+      },
+      "ucl": {
+        "apps": 10,
+        "goals": 3,
+        "assists": 4
+      }
+    },
+    {
+      "name": "Pedri",
+      "position": "CM",
+      "allComps": {
+        "apps": 56,
+        "goals": 5,
+        "assists": 16
+      },
+      "ucl": {
+        "apps": 13,
+        "goals": 0,
+        "assists": 4
+      }
+    },
+    {
+      "name": "Rio Ngumoha",
+      "position": "LM",
+      "sofifaId": 80376,
+      "allComps": {
+        "apps": 12,
+        "goals": 0,
+        "assists": 2
+      }
+    },
+    {
+      "name": "Gavi",
+      "position": "CM",
+      "allComps": {
+        "apps": 36,
+        "goals": 1,
+        "assists": 4
+      },
+      "ucl": {
+        "apps": 6,
+        "goals": 0,
+        "assists": 2
+      }
+    },
+    {
+      "name": "Givairo Read",
+      "position": "RB",
+      "allComps": {
+        "apps": 64,
+        "goals": 3,
+        "assists": 4
+      }
+    },
+    {
+      "name": "Francesco Camarda",
+      "position": "ST",
+      "sofifaId": 279202,
+      "allComps": {
+        "apps": 10,
+        "goals": 1,
+        "assists": 0
+      }
+    },
+    {
+      "name": "Nuno Mendes",
+      "position": "LB",
+      "allComps": {
+        "apps": 43,
+        "goals": 1,
+        "assists": 3
+      }
+    },
+    {
+      "name": "Joel Ordoñez",
+      "position": "CB",
+      "sofifaId": 268611,
+      "allComps": {
+        "apps": 16,
+        "goals": 1,
+        "assists": 0
+      }
+    },
+    {
+      "name": "Micky van de Ven",
+      "position": "CB",
+      "sofifaId": 264453,
+      "allComps": {
+        "apps": 38,
+        "goals": 1,
+        "assists": 0
+      }
+    },
+    {
+      "name": "Lewis Hall",
+      "position": "LB",
+      "allComps": {
+        "apps": 32,
+        "goals": 0,
+        "assists": 1
+      }
+    },
+    {
+      "name": "William Saliba",
+      "position": "CB",
+      "allComps": {
+        "apps": 57,
+        "goals": 0,
+        "assists": 0
+      }
+    },
+    {
+      "name": "Nico Schlotterbeck",
+      "position": "CB",
+      "sofifaId": 247819,
+      "allComps": {
+        "apps": 52,
+        "goals": 0,
+        "assists": 0
+      }
+    },
+    {
+      "name": "Joan García",
+      "position": "GK",
+      "isGK": true,
+      "allComps": {
+        "apps": 64,
+        "cleanSheets": 15
+      },
+      "ucl": {
+        "apps": 15,
+        "cleanSheets": 6
+      }
+    }
+  ],
+  "uclMatches": [
+    {
+      "competition": "UCL_LP",
+      "round": "G1",
+      "opponent": "Celtic",
+      "home_away": "N",
+      "score_for": 8,
+      "score_against": 1
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G2",
+      "opponent": "Sporting CP",
+      "home_away": "N",
+      "score_for": 3,
+      "score_against": 0
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G3",
+      "opponent": "Real Madrid",
+      "home_away": "N",
+      "score_for": 2,
+      "score_against": 5
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G4",
+      "opponent": "AS Roma",
+      "home_away": "N",
+      "score_for": 2,
+      "score_against": 0
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G5",
+      "opponent": "Dynamo Kyiv",
+      "home_away": "N",
+      "score_for": 6,
+      "score_against": 2
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G6",
+      "opponent": "FC Porto",
+      "home_away": "N",
+      "score_for": 6,
+      "score_against": 3
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G7",
+      "opponent": "FC Basel 1893",
+      "home_away": "N",
+      "score_for": 6,
+      "score_against": 0
+    },
+    {
+      "competition": "UCL_LP",
+      "round": "G8",
+      "opponent": "Dinamo Zagreb",
+      "home_away": "N",
+      "score_for": 10,
+      "score_against": 0
+    },
+    {
+      "competition": "UCL_R16",
+      "leg": 1,
+      "opponent": "RB Leipzig",
+      "home_away": "N",
+      "score_for": 4,
+      "score_against": 0
+    },
+    {
+      "competition": "UCL_R16",
+      "leg": 2,
+      "opponent": "RB Leipzig",
+      "home_away": "N",
+      "score_for": 3,
+      "score_against": 0
+    },
+    {
+      "competition": "UCL_QF",
+      "leg": 1,
+      "opponent": "Athletic Club",
+      "home_away": "N",
+      "score_for": 5,
+      "score_against": 2
+    },
+    {
+      "competition": "UCL_QF",
+      "leg": 2,
+      "opponent": "Athletic Club",
+      "home_away": "N",
+      "score_for": 4,
+      "score_against": 2
+    },
+    {
+      "competition": "UCL_SF",
+      "leg": 1,
+      "opponent": "Brighton & Hove Albion",
+      "home_away": "N",
+      "score_for": 2,
+      "score_against": 1
+    },
+    {
+      "competition": "UCL_SF",
+      "leg": 2,
+      "opponent": "Brighton & Hove Albion",
+      "home_away": "N",
+      "score_for": 5,
+      "score_against": 3
+    },
+    {
+      "competition": "UCL_Final",
+      "opponent": "Manchester City",
+      "home_away": "N",
+      "score_for": 2,
+      "score_against": 1
+    }
+  ],
+  "transfers": [
+    {
+      "direction": "IN",
+      "player": "Endrick",
+      "position": "ST",
+      "from_club": "Brighton",
+      "fee_eur": 81000000,
+      "window": "Summer",
+      "rule": "Exchange"
+    },
+    {
+      "direction": "IN",
+      "player": "Bradley Barcola",
+      "position": "LM",
+      "from_club": "Como",
+      "fee_eur": 80000000,
+      "window": "Summer",
+      "rule": "Emergency Credit"
+    },
+    {
+      "direction": "IN",
+      "player": "Désiré Doué",
+      "position": "RM",
+      "from_club": "Bayern Munich",
+      "fee_eur": 125000000,
+      "window": "Summer",
+      "rule": "Emergency Credit"
+    },
+    {
+      "direction": "IN",
+      "player": "Micky van de Ven",
+      "position": "CB",
+      "from_club": "Juventus",
+      "fee_eur": 55000000,
+      "window": "Summer",
+      "rule": "Exchange"
+    },
+    {
+      "direction": "IN",
+      "player": "Joel Ordoñez",
+      "position": "CB",
+      "from_club": "Osasuna",
+      "fee_eur": 51400000,
+      "window": "Summer",
+      "rule": "Exchange"
+    },
+    {
+      "direction": "IN",
+      "player": "Antonio Nusa",
+      "position": "LM",
+      "from_club": "Brentford",
+      "fee_eur": 80000000,
+      "window": "Summer",
+      "rule": "Emergency Credit"
+    },
+    {
+      "direction": "IN",
+      "player": "Francesco Camarda",
+      "position": "ST",
+      "from_club": "Brighton",
+      "fee_eur": 0,
+      "window": "Summer",
+      "rule": "Swap"
+    },
+    {
+      "direction": "OUT",
+      "player": "Koriche",
+      "position": "?",
+      "to_club": "Brighton",
+      "fee_eur": 67800000,
+      "window": "Summer",
+      "rule": "Mandatory"
+    },
+    {
+      "direction": "OUT",
+      "player": "Charalampos Kostoulas",
+      "position": "ST",
+      "to_club": "Bologna",
+      "fee_eur": 105100000,
+      "window": "Summer",
+      "rule": "Mandatory"
+    },
+    {
+      "direction": "OUT",
+      "player": "Nico Williams",
+      "position": "LM",
+      "to_club": "Chelsea",
+      "fee_eur": 315700000,
+      "window": "Summer",
+      "rule": "Mandatory"
+    },
+    {
+      "direction": "OUT",
+      "player": "Abdukodir Khusanov",
+      "position": "CB",
+      "to_club": "Juventus",
+      "fee_eur": 91800000,
+      "window": "Summer",
+      "rule": "Mandatory"
+    },
+    {
+      "direction": "OUT",
+      "player": "Renato Veiga",
+      "position": "CB",
+      "to_club": "Osasuna",
+      "fee_eur": 64300000,
+      "window": "Summer",
+      "rule": "Optional"
+    },
+    {
+      "direction": "OUT",
+      "player": "Kenan Yıldız",
+      "position": "CAM",
+      "to_club": "Chelsea",
+      "fee_eur": 162200000,
+      "window": "Summer",
+      "rule": "Optional"
+    },
+    {
+      "direction": "OUT",
+      "player": "El Chadaille Bitshiabu",
+      "position": "CB",
+      "to_club": "Brighton",
+      "fee_eur": 0,
+      "window": "Summer",
+      "rule": "Swap"
+    },
+    {
+      "direction": "IN",
+      "player": "Nico Schlotterbeck",
+      "position": "CB",
+      "from_club": "Manchester City",
+      "fee_eur": 85000000,
+      "window": "January",
+      "rule": "Exchange"
+    },
+    {
+      "direction": "IN",
+      "player": "Rio Ngumoha",
+      "position": "LM",
+      "from_club": "Bayern Munich",
+      "fee_eur": 100000000,
+      "window": "January",
+      "rule": "Exchange"
+    },
+    {
+      "direction": "OUT",
+      "player": "Piero Hincapié",
+      "position": "CB",
+      "to_club": "Manchester City",
+      "fee_eur": 185100000,
+      "window": "January",
+      "rule": "Mandatory"
+    },
+    {
+      "direction": "OUT",
+      "player": "Estevão",
+      "position": "RM",
+      "to_club": "Bayern Munich",
+      "fee_eur": 176100000,
+      "window": "January",
+      "rule": "Optional"
+    }
+  ]
+}

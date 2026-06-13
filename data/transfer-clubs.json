@@ -247,5 +247,33 @@
   "villarreal cf": {
     "displayName": "Villarreal CF",
     "sofifaTeamId": 483
+  },
+  "como": {
+    "displayName": "Como 1907",
+    "sofifaTeamId": 1745
+  },
+  "como 1907": {
+    "displayName": "Como 1907",
+    "sofifaTeamId": 1745
+  },
+  "osasuna": {
+    "displayName": "CA Osasuna",
+    "sofifaTeamId": 479
+  },
+  "ca osasuna": {
+    "displayName": "CA Osasuna",
+    "sofifaTeamId": 479
+  },
+  "bologna": {
+    "displayName": "Bologna FC",
+    "sofifaTeamId": 189
+  },
+  "bologna fc": {
+    "displayName": "Bologna FC",
+    "sofifaTeamId": 189
+  },
+  "fc bologna": {
+    "displayName": "Bologna FC",
+    "sofifaTeamId": 189
   }
 }

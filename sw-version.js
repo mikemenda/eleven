@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 85
+// Current: 86
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -82,4 +82,5 @@
 //   83 — Fix PWA nav height cancellation: nav fixed at 60px (no safe-area addition); viewport-fit=cover already gains the safe-area height, adding it to nav was cancelling the gain
 //   84 — S6 import data: transfer-clubs.json Newcastle ID correction and cache bump for updated transfer club map
 //   85 — Fix West Ham transfer club sofifaTeamId
-const SW_VERSION = 85;
+//   86 — Add S7 import data and transfer club mappings
+const SW_VERSION = 86;
