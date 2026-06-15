@@ -1,61 +1,44 @@
 /**
- * createClub.mjs
+ * patchClubMetadata.mjs
  *
- * Creates a new club doc in the Firestore clubs collection.
- * Default: dry-run (read-only). Use --write to create the doc.
+ * Patches an existing club doc with gameId and optional metadata fields
+ * so the club appears in the frontend save selector.
+ * Default: dry-run (read-only). Use --write to apply.
  *
- * Every club created by this script writes gameId, so the club
- * automatically appears in the frontend save selector without
- * any frontend code change.
+ * The frontend selector loads clubs via:
+ *   getClubs(activeGame.id)  →  where('gameId', '==', activeGame.id)
+ *
+ * A club doc missing gameId is permanently invisible in the selector,
+ * regardless of how many seasons it has. This script adds that field
+ * and any other optional metadata fields in a single atomic update.
  *
  * Game resolution:
  *   --game="FC 26"   looks up the game by title in the games collection (preferred)
  *   --gameId=<id>    explicit Firestore document ID (fallback)
  *
- * Either --game or --gameId is required. Clubs created without a gameId
- * are permanently invisible in the selector — this script no longer
- * allows that to happen.
+ * Only fields you explicitly pass are written — existing fields are preserved.
+ * Never touches: seasons · players · seasonStats · matches · transfers
+ *               opponents · games
  *
  * Usage:
  *   cd /Users/MichaelMenda/Documents/Mike/1Apps/eleven/1Repo
  *
  *   # Dry-run (always run first):
- *   node scripts/createClub.mjs \
- *     --name="FC Montverd" \
+ *   node scripts/patchClubMetadata.mjs \
+ *     --clubId=xhAwkYVCNY8nGLqIiU5X \
  *     --game="FC 26" \
  *     --manager="Pep Guardiola" \
  *     --formation="4-3-3" \
  *     --league="Premier League"
  *
- *   # Write (only after reviewing dry-run output):
- *   node scripts/createClub.mjs \
- *     --name="FC Montverd" \
+ *   # Apply patch (only after reviewing dry-run output):
+ *   node scripts/patchClubMetadata.mjs \
+ *     --clubId=xhAwkYVCNY8nGLqIiU5X \
  *     --game="FC 26" \
  *     --manager="Pep Guardiola" \
  *     --formation="4-3-3" \
  *     --league="Premier League" \
  *     --write
- *
- * Optional metadata:
- *   --manager     Manager name     default: ""
- *   --formation   Tactical shape   default: ""
- *   --league      Starting league  default: ""
- *   --crestColor  Hex color        default: "#D4AF37"
- *
- * What it writes (clubs collection):
- *   name · gameId · manager · formation · league · crestColor
- *   seasonsLogged · trophyCount · createdAt
- *
- * What it does NOT touch:
- *   seasons · players · seasonStats · matches · transfers · opponents · games
- *
- * After running --write, note the club ID printed in the output.
- * All subsequent commands for this club require --clubId=<id>.
- * All existing clubs also require --clubId once multiple clubs exist:
- *
- *   node scripts/importSeason.mjs --season=S1 --file=data/uploads/montverd/S1.json --clubId=<new-id>
- *   node scripts/validateDataHealth.mjs --clubId=<new-id>
- *   node scripts/auditAndPatchTeamLogos.mjs --season=S1 --clubId=<new-id>
  *
  * serviceAccountKey.json must be at the project root (never committed).
  */
@@ -111,8 +94,8 @@ async function resolveGame(db) {
 
   // Lookup by title
   if (args.game) {
-    const snap  = await db.collection('games').get()
-    const all   = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    const snap = await db.collection('games').get()
+    const all  = snap.docs.map(d => ({ id: d.id, ...d.data() }))
     const query = args.game.toLowerCase().trim()
     const matches = all.filter(g =>
       (g.title || g.name || g.label || '').toLowerCase().trim() === query
@@ -136,19 +119,13 @@ async function resolveGame(db) {
     return matches[0]
   }
 
-  // Neither provided
   console.error('\n✗ Game is required. Pass either:')
   console.error('     --game="FC 26"   (preferred — looks up by title)')
-  console.error('     --gameId=<id>    (explicit Firestore document ID)')
-  console.error()
-  console.error('  Clubs created without a gameId are permanently invisible')
-  console.error('  in the frontend save selector. This script requires a game.\n')
+  console.error('     --gameId=<id>    (explicit Firestore document ID)\n')
   process.exit(1)
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function normName(s) { return (s || '').trim().toLowerCase() }
 
 function header(t) {
   console.log('\n' + '─'.repeat(62))
@@ -156,8 +133,12 @@ function header(t) {
   console.log('─'.repeat(62))
 }
 
-function row(label, value) {
-  console.log(`  ${label.padEnd(18)} ${value}`)
+function field(label, value) {
+  const display = value === undefined ? '(not set)'
+                : value === ''        ? '(empty string)'
+                : value === null      ? 'null'
+                : String(value)
+  console.log(`  ${label.padEnd(18)} ${display}`)
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -165,38 +146,49 @@ function row(label, value) {
 async function main() {
 
   // ── Validate CLI ────────────────────────────────────────────────────────────
-  if (!args.name) {
-    console.error('\n✗ --name is required  (e.g. --name="FC Montverd")\n')
+  if (!args.clubId) {
+    console.error('\n✗ --clubId is required  (e.g. --clubId=xhAwkYVCNY8nGLqIiU5X)\n')
     process.exit(1)
   }
 
   if (!args.game && !args.gameId) {
-    console.error('\n✗ --game or --gameId is required.')
-    console.error('  Every club must be linked to a game so it appears in the selector.')
-    console.error('  Example: --game="FC 26"\n')
+    console.error('\n✗ Game is required. Pass either:')
+    console.error('     --game="FC 26"   (preferred — looks up by title)')
+    console.error('     --gameId=<id>    (explicit Firestore document ID)\n')
     process.exit(1)
   }
-
-  const clubName = args.name.trim()
-
-  if (!clubName) {
-    console.error('\n✗ --name cannot be empty\n')
-    process.exit(1)
-  }
-
-  // Resolve optional metadata with defaults
-  const manager    = typeof args.manager    === 'string' ? args.manager    : ''
-  const formation  = typeof args.formation  === 'string' ? args.formation  : ''
-  const league     = typeof args.league     === 'string' ? args.league     : ''
-  const crestColor = typeof args.crestColor === 'string' ? args.crestColor : '#D4AF37'
 
   console.log('\n══════════════════════════════════════════════════════════════')
-  console.log(`  createClub — ${WRITE ? '⚠️  WRITE MODE' : 'DRY RUN (default)'}`)
-  console.log(`  Name    : ${clubName}`)
+  console.log(`  patchClubMetadata — ${WRITE ? '⚠️  WRITE MODE' : 'DRY RUN (default)'}`)
+  console.log(`  Club ID : ${args.clubId}`)
   console.log(`  Game    : ${args.game || `(explicit gameId: ${args.gameId})`}`)
   console.log('══════════════════════════════════════════════════════════════')
 
   const db = initFirebase()
+
+  // ── Load club doc ────────────────────────────────────────────────────────────
+  header('Current Club State')
+  console.log()
+
+  const clubRef  = db.collection('clubs').doc(args.clubId)
+  const clubSnap = await clubRef.get()
+
+  if (!clubSnap.exists) {
+    console.error(`  ✗ No club found with id: "${args.clubId}"`)
+    console.error('    Verify the clubId and try again.\n')
+    process.exit(1)
+  }
+
+  const existing = clubSnap.data()
+  console.log(`  ✓ Club doc found\n`)
+
+  field('name',       existing.name)
+  field('gameId',     existing.gameId)
+  field('manager',    existing.manager)
+  field('formation',  existing.formation)
+  field('league',     existing.league)
+  field('crestColor', existing.crestColor)
+  field('createdAt',  existing.createdAt?.toDate?.().toISOString() ?? existing.createdAt)
 
   // ── Resolve game ─────────────────────────────────────────────────────────────
   header('Game Resolution')
@@ -207,128 +199,118 @@ async function main() {
   console.log(`    id    : ${game.id}`)
   console.log(`    title : ${game.title || game.name || '(no title field)'}`)
 
-  // ── Load existing clubs ───────────────────────────────────────────────────────
-  header('Existing Clubs')
+  // ── Build patch ──────────────────────────────────────────────────────────────
+  header('Proposed Patch')
   console.log()
 
-  const snap = await db.collection('clubs').get()
-  const existingClubs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  // gameId is always patched (the main purpose of this script).
+  // Cosmetic fields are only included if explicitly passed as args.
+  const patch = { gameId: game.id }
 
-  if (existingClubs.length === 0) {
-    console.log('  (no clubs found in Firestore — this will be the first)')
-  } else {
-    for (const club of existingClubs) {
-      const gid   = club.gameId ? ` gameId:${club.gameId}` : ' ⚠ no gameId'
-      const sameGame = club.gameId === game.id ? ' ← same game' : ''
-      console.log(`  ✓  ${club.id}  "${club.name}"${gid}${sameGame}`)
+  if (typeof args.manager   === 'string') patch.manager   = args.manager
+  if (typeof args.formation === 'string') patch.formation = args.formation
+  if (typeof args.league    === 'string') patch.league    = args.league
+  if (typeof args.crestColor === 'string') patch.crestColor = args.crestColor
+
+  // Identify which fields are actually changing vs. already correct
+  const changes  = []
+  const noChange = []
+
+  for (const [key, val] of Object.entries(patch)) {
+    if (existing[key] === val) {
+      noChange.push(key)
+    } else {
+      changes.push({ key, from: existing[key], to: val })
     }
   }
 
-  // ── Name collision check ──────────────────────────────────────────────────────
-  const duplicate = existingClubs.find(c => normName(c.name) === normName(clubName))
-  if (duplicate) {
-    console.error(`\n✗ A club named "${clubName}" already exists (id: ${duplicate.id}).`)
-    console.error('  No action taken. Use the existing club ID with --clubId.\n')
-    process.exit(1)
+  if (changes.length === 0 && noChange.length > 0) {
+    console.log('  ✓ All patched fields already have the correct values.')
+    console.log('    No Firestore write is needed.')
+    noChange.forEach(k => console.log(`    ${k.padEnd(14)} already: ${patch[k]}`))
+    console.log('\n══════════════════════════════════════════════════════════════')
+    console.log('  DRY RUN COMPLETE — nothing to write.')
+    console.log('══════════════════════════════════════════════════════════════\n')
+    return
   }
 
-  // ── Write plan ────────────────────────────────────────────────────────────────
-  header('Write Plan')
-  console.log()
-
-  const clubDoc = {
-    name:          clubName,
-    gameId:        game.id,
-    manager:       manager,
-    formation:     formation,
-    league:        league,
-    crestColor:    crestColor,
-    seasonsLogged: 0,
-    trophyCount:   0,
-    createdAt:     admin.firestore.FieldValue.serverTimestamp(),
+  console.log('  Fields that will change:')
+  for (const { key, from, to } of changes) {
+    const fromStr = from === undefined ? '(not set)' : from === '' ? '(empty)' : String(from)
+    console.log(`    ${key.padEnd(14)} ${fromStr.padEnd(30)} → "${to}"`)
   }
 
-  console.log('  Will create 1 doc in: clubs/')
-  console.log()
-  row('name',          `"${clubDoc.name}"`)
-  row('gameId',        clubDoc.gameId)
-  row('manager',       `"${clubDoc.manager}"`)
-  row('formation',     `"${clubDoc.formation}"`)
-  row('league',        `"${clubDoc.league}"`)
-  row('crestColor',    `"${clubDoc.crestColor}"`)
-  row('seasonsLogged', String(clubDoc.seasonsLogged))
-  row('trophyCount',   String(clubDoc.trophyCount))
-  row('createdAt',     '<server timestamp>')
-  console.log()
-  console.log('  Collections NOT touched:')
+  if (noChange.length > 0) {
+    console.log('\n  Fields already correct (will not be touched):')
+    noChange.forEach(k => console.log(`    ${k.padEnd(14)} "${patch[k]}"`))
+  }
+
+  console.log('\n  Fields NOT in patch (preserved as-is):')
+  const allKnown = new Set(['name', 'gameId', 'manager', 'formation', 'league', 'crestColor',
+                             'style', 'seasonsLogged', 'trophyCount', 'createdAt'])
+  const preserved = Object.keys(existing).filter(k => !Object.keys(patch).includes(k))
+  if (preserved.length === 0) {
+    console.log('    (none)')
+  } else {
+    preserved.forEach(k => console.log(`    ${k}`))
+  }
+
+  console.log('\n  Collections NOT touched:')
   console.log('    seasons · players · seasonStats · matches · transfers · opponents · games')
 
   // ── Dry-run exit ─────────────────────────────────────────────────────────────
   if (!WRITE) {
     console.log('\n══════════════════════════════════════════════════════════════')
     console.log('  DRY RUN COMPLETE — no data was written.')
-    console.log(`  Run with --write to create "${clubName}".`)
+    console.log(`  ${changes.length} field(s) would be updated.`)
+    console.log('  Run with --write to apply.')
     console.log('══════════════════════════════════════════════════════════════\n')
     return
   }
 
   // ── Write ─────────────────────────────────────────────────────────────────────
-  header('Creating Club')
+  header('Applying Patch')
   console.log()
 
-  const clubRef = db.collection('clubs').doc()
-  const clubId  = clubRef.id
-
+  // update() merges fields — does not overwrite fields not in patch
   try {
-    await clubRef.set(clubDoc)
+    await clubRef.update(patch)
   } catch (err) {
-    console.error(`\n  ✗ Firestore write FAILED. No club was created.`)
+    console.error(`\n  ✗ Firestore update FAILED. Club doc is unchanged.`)
     console.error(`  Error: ${err.message}\n`)
     process.exit(1)
   }
 
-  // ── Verify ────────────────────────────────────────────────────────────────────
-  const verify = await db.collection('clubs').doc(clubId).get()
-  if (!verify.exists) {
-    console.error('\n  ✗ Post-write verification FAILED — doc not found after write.\n')
+  // ── Post-write verification ───────────────────────────────────────────────────
+  const verifySnap = await clubRef.get()
+  if (!verifySnap.exists) {
+    console.error('\n  ✗ Post-write verification FAILED — doc missing after update.\n')
     process.exit(1)
   }
 
-  const written = verify.data()
-  const verifyFields = ['name', 'gameId', 'manager', 'formation', 'league', 'crestColor']
+  const written = verifySnap.data()
   let verifyPass = true
 
-  for (const f of verifyFields) {
-    if (written[f] !== clubDoc[f]) {
-      console.log(`  ✗ ${f}: written "${written[f]}" ≠ expected "${clubDoc[f]}"`)
+  for (const [key, val] of Object.entries(patch)) {
+    if (written[key] !== val) {
+      console.log(`  ✗ ${key}: written "${written[key]}" ≠ expected "${val}"`)
       verifyPass = false
     }
   }
 
   console.log('\n══════════════════════════════════════════════════════════════')
   if (verifyPass) {
-    console.log('  ✅  CLUB CREATED')
+    console.log('  ✅  PATCH APPLIED')
     console.log()
-    console.log(`  Name      : ${written.name}`)
-    console.log(`  Club ID   : ${clubId}`)
-    console.log(`  gameId    : ${written.gameId}`)
+    console.log(`  Club : ${written.name}`)
+    console.log(`  ID   : ${args.clubId}`)
+    console.log(`  gameId set to: ${written.gameId}`)
     console.log()
-    console.log('  ── Copy this ID — required for all subsequent commands ──')
-    console.log()
-    console.log('  Import S1 (dry-run first):')
-    console.log(`    node scripts/importSeason.mjs --season=S1 --file=data/uploads/<save>/S1.json --clubId=${clubId}`)
-    console.log()
-    console.log('  Health check:')
-    console.log(`    node scripts/validateDataHealth.mjs --clubId=${clubId}`)
-    console.log()
-    console.log('  ── Existing clubs now require --clubId too ──')
-    console.log()
-    existingClubs.forEach(c => {
-      console.log(`  ${c.name.padEnd(22)} --clubId=${c.id}`)
-    })
+    console.log('  The club will now appear in the frontend save selector')
+    console.log('  under the game it was linked to. Reload the PWA to confirm.')
   } else {
-    console.log('  ⚠   Club created but post-write verification found mismatches.')
-    console.log('  Check Firestore directly and re-run the dry-run to diagnose.')
+    console.log('  ⚠   Patch applied but post-write verification found mismatches.')
+    console.log('  Read the fields above and check Firestore directly.')
   }
   console.log('══════════════════════════════════════════════════════════════\n')
 }
