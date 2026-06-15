@@ -275,5 +275,21 @@
   "fc bologna": {
     "displayName": "Bologna FC",
     "sofifaTeamId": 189
+  },
+  "ac milan": {
+    "displayName": "AC Milan",
+    "sofifaTeamId": 47
+  },
+  "milan": {
+    "displayName": "AC Milan",
+    "sofifaTeamId": 47
+  },
+  "sunderland": {
+    "displayName": "Sunderland AFC",
+    "sofifaTeamId": 106
+  },
+  "sunderland afc": {
+    "displayName": "Sunderland AFC",
+    "sofifaTeamId": 106
   }
 }
