@@ -342,7 +342,7 @@ function fmtRate(n) {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function UclRecords({ players, uclMatches, uclSeasons, opponents, uclStatsDocs, loading }) {
+export default function UclRecords({ players, uclMatches, uclSeasons, opponents, uclStatsDocs, loading, activeClub }) {
   const navigate = useNavigate()
   const [recordView, setRecordView] = useState('players')
   const [modal,      setModal]      = useState(null)
@@ -545,7 +545,7 @@ export default function UclRecords({ players, uclMatches, uclSeasons, opponents,
                 holder={mgc.label}
                 value={`${gpgVal} G/G`}
                 ctx={`${mgc.p} matches · ${mgc.gf} goals`}
-                crestUrl={null} />
+                crestUrl={activeClub?.crestUrl || null} />
             )
           })()}
           {fcc && (() => {
@@ -555,7 +555,7 @@ export default function UclRecords({ players, uclMatches, uclSeasons, opponents,
                 holder={fcc.label}
                 value={`${gcgVal} GA/G`}
                 ctx={`${fcc.p} matches · ${fcc.ga} conceded`}
-                crestUrl={null} />
+                crestUrl={activeClub?.crestUrl || null} />
             )
           })()}
           {bc && (
@@ -563,7 +563,7 @@ export default function UclRecords({ players, uclMatches, uclSeasons, opponents,
               holder={bc.label}
               value={`${bc.pts} pts`}
               ctx={`${bc.record} · ${bc.gf}–${bc.ga}`}
-              crestUrl={null} />
+              crestUrl={activeClub?.crestUrl || null} />
           )}
         </Section>
       )}

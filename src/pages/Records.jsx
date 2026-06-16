@@ -557,7 +557,9 @@ function RecordCard({ label, player, value, ctx, onCardClick, onPlayerClick }) {
 
 function ClubRecordCard({ label, holder, value, ctx, crestUrl, crestType, onCardClick }) {
   // crestType: 'opp' = opponent crest, 'richport' = XI monogram, undefined = generic fallback
-  const crestEl = crestType === 'richport'
+  // Own-club rows: use crestUrl image if present, fall back to RichportMark
+  // Opponent rows: always use OppCrest (no crestType set on those calls)
+  const crestEl = (crestType === 'richport' && !crestUrl)
     ? <RichportMark size={36} />
     : <OppCrest crestUrl={crestUrl || null} size={36} />
 
@@ -784,7 +786,7 @@ function UCLTab({ r, onCardClick, onPlayerClick }) {
   )
 }
 
-function ClubTab({ r, opponents, onCardClick }) {
+function ClubTab({ r, opponents, onCardClick, activeClub }) {
   const { club: c } = r
 
   // Resolve opponent crest URL from opponents map (same pattern as UCL Records)
@@ -811,30 +813,35 @@ function ClubTab({ r, opponents, onCardClick }) {
           value={c.byPts ? `${c.byPts.leaguePts} pts` : '—'}
           ctx={c.byPts ? `${c.byPts.leagueW}W ${c.byPts.leagueD}D ${c.byPts.leagueL}L` : null}
           crestType="richport"
+          crestUrl={activeClub?.crestUrl || null}
           onCardClick={()=>onCardClick('club_pts','Most League Points')} />
         <ClubRecordCard label="Most League Goals"
           holder={c.byGoals?.label}
           value={c.byGoals ? `${c.byGoals.leagueGF} goals` : '—'}
           ctx={c.byGoals?.leagueP > 0 ? `${(c.byGoals.leagueGF/c.byGoals.leagueP).toFixed(2)} G/game` : null}
           crestType="richport"
+          crestUrl={activeClub?.crestUrl || null}
           onCardClick={()=>onCardClick('club_goals','Most League Goals')} />
         <ClubRecordCard label="Best Goals/Game"
           holder={c.byGpg?.label}
           value={c.byGpg ? `${c.byGpg.gpg.toFixed(2)} G/game` : '—'}
           ctx={c.byGpg ? `${c.byGpg.leagueGF} goals · ${c.byGpg.leagueP} games` : null}
           crestType="richport"
+          crestUrl={activeClub?.crestUrl || null}
           onCardClick={()=>onCardClick('club_gpg','Best Goals/Game')} />
         <ClubRecordCard label="Fewest Goals Conceded"
           holder={c.byGA?.label}
           value={c.byGA ? `${c.byGA.leagueGA} conceded` : '—'}
           ctx={c.byGA ? `${c.byGA.leagueP} games` : null}
           crestType="richport"
+          crestUrl={activeClub?.crestUrl || null}
           onCardClick={()=>onCardClick('club_ga','Fewest Goals Conceded')} />
         <ClubRecordCard label="Best Dynasty Score"
           holder={c.byDynasty?.label}
           value={c.byDynasty ? `${c.byDynasty.dynastyScore} pts` : '—'}
           ctx={c.byDynasty?.year}
           crestType="richport"
+          crestUrl={activeClub?.crestUrl || null}
           onCardClick={()=>onCardClick('club_dynasty','Best Dynasty Score')} />
         {c.biggestWin ? (
           <ClubRecordCard label="Biggest Win"
@@ -844,7 +851,8 @@ function ClubTab({ r, opponents, onCardClick }) {
             crestUrl={oppCrest(c.biggestWin.opponent)}
             onCardClick={()=>onCardClick('club_win','Biggest Win')} />
         ) : (
-          <ClubRecordCard label="Biggest Win" holder="No match data yet" value="—" crestType="richport" />
+          <ClubRecordCard label="Biggest Win" holder="No match data yet" value="—" crestType="richport"
+          crestUrl={activeClub?.crestUrl || null} />
         )}
       </Section>
 
@@ -949,7 +957,7 @@ export default function Records() {
         ) : tab === 'champions' ? (
           <UCLTab r={data} onCardClick={handleCardClick} onPlayerClick={handlePlayerClick} />
         ) : (
-          <ClubTab r={data} opponents={opponents} onCardClick={handleCardClick} />
+          <ClubTab r={data} opponents={opponents} onCardClick={handleCardClick} activeClub={activeClub} />
         )}
       </div>
 

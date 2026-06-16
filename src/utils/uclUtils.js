@@ -647,11 +647,13 @@ export function deriveUclClubRecords(uclMatches, uclSeasons, opponents) {
     } : null,
     mostGoalsCampaign:    mostGoalsCampaign ? {
       gf:     mostGoalsCampaign.gf,
+      p:      mostGoalsCampaign.p,
       label:  mostGoalsCampaign.label,
       record: `${mostGoalsCampaign.w}W ${mostGoalsCampaign.d}D ${mostGoalsCampaign.l}L`,
     } : null,
     fewestConcededCampaign: fewestConcededCampaign ? {
       ga:     fewestConcededCampaign.ga,
+      p:      fewestConcededCampaign.p,
       label:  fewestConcededCampaign.label,
       record: `${fewestConcededCampaign.w}W ${fewestConcededCampaign.d}D ${fewestConcededCampaign.l}L`,
     } : null,

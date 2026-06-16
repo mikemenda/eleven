@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 89
+// Current: 90
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -81,6 +81,5 @@
 //   82 — Lower PWA nav content: align-items:center in full height (no padding-bottom), ::after solid safe-area fill, html background #080B12 for compositing hygiene
 //   83 — Fix PWA nav height cancellation: nav fixed at 60px (no safe-area addition); viewport-fit=cover already gains the safe-area height, adding it to nav was cancelling the gain
 //   87 — Add FC Montverd S1 import data and transfer club mappings
-//   88 — Club badge system: Header shows real crestUrl image (18px, natural shape) with crestColor dot fallback; ClubCard shows real badge (36px, no circle crop) with gold initial fallback; patchClubCrestUrl.mjs script to write crestUrl to club doc
-//   89 — Add repo-hosted official club badge PNG assets under public/club-crests and cache-bust PWA for crestUrl images
-const SW_VERSION = 89;
+//   90 — Fix club crest usage in Records and UCL Records: own-club rows use activeClub.crestUrl; UCL club records show correct G/G and GA/G rates (p field added to mostGoalsCampaign and fewestConcededCampaign); Home hero badge dark box removed
+const SW_VERSION = 90;

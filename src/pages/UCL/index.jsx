@@ -175,6 +175,7 @@ export default function UCL() {
             opponents={opponents}
             uclStatsDocs={uclStatsDocs}
             loading={loading}
+            activeClub={activeClub}
           />
         ) : tab === 'rivals' ? (
           <UclRivals
