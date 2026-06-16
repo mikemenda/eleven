@@ -176,6 +176,15 @@
   justify-content: space-between;
 }
 
+/* Real club badge — natural shield/square shape, no circle crop */
+.crestBadgeImg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
 /* Crest circle — gold palette override, ignores stored crestColor */
 .crestCircle {
   width: 36px;

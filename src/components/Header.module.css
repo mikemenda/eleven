@@ -82,6 +82,16 @@
 }
 .contextClub:hover { color: #f0f4f8; }
 
+/* Real club badge image — 18×18px, natural shape, no crop */
+.crestImg {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Fallback colored dot — shown when crestUrl is absent */
 .crestDot {
   display: inline-block;
   width: 8px;

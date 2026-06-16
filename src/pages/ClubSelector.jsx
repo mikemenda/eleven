@@ -182,12 +182,23 @@ const ClubCard = ({ club, isActive, index, onSelect }) => (
 
     <div className={styles.cardBody}>
       <div className={styles.cardTop}>
-        {/* Crest monogram — always gold/ivory palette regardless of stored crestColor */}
-        <div className={styles.crestCircle}>
-          <span className={styles.crestInitial}>
-            {club.name?.[0] || '?'}
-          </span>
-        </div>
+        {/* Club badge — real image if crestUrl present, gold initial circle fallback */}
+        {club.crestUrl
+          ? (
+            <img
+              src={club.crestUrl}
+              alt={club.name}
+              className={styles.crestBadgeImg}
+            />
+          )
+          : (
+            <div className={styles.crestCircle}>
+              <span className={styles.crestInitial}>
+                {club.name?.[0] || '?'}
+              </span>
+            </div>
+          )
+        }
         {isActive && (
           <span className={styles.activeBadge}>Active</span>
         )}

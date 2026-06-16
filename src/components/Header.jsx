@@ -45,12 +45,24 @@ const Header = () => {
                 onClick={handleClubBadge}
                 title="Switch club"
               >
-                {activeClub.crestColor && (
-                  <span
-                    className={styles.crestDot}
-                    style={{ background: activeClub.crestColor }}
-                  />
-                )}
+                {/* Club badge: real image if crestUrl exists, colored dot fallback */}
+                {activeClub.crestUrl
+                  ? (
+                    <img
+                      src={activeClub.crestUrl}
+                      alt=""
+                      className={styles.crestImg}
+                    />
+                  )
+                  : activeClub.crestColor
+                    ? (
+                      <span
+                        className={styles.crestDot}
+                        style={{ background: activeClub.crestColor }}
+                      />
+                    )
+                    : null
+                }
                 {activeClub.name}
               </button>
             </>
