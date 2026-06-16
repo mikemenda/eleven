@@ -641,6 +641,77 @@ async function main() {
   console.log(`\n  SECTION 4 RESULT:  ${verdictMark(sec4Verdict)} ${sec4Verdict}`)
 
   // ════════════════════════════════════════════════════════════════
+  // SECTION 5 — Player Identity (sofifaId presence)
+  // ════════════════════════════════════════════════════════════════
+  //
+  // The app derives every player face from player.sofifaId:
+  //   https://fifa-img.michaelmenda92.workers.dev/{sofifaId}
+  //
+  // There is no stored playerFaceUrl field. A null or missing sofifaId
+  // means a silhouette face — not a crash, but a visible data gap.
+  //
+  // Rule:
+  //   · Active non-stub players with apps > 0 should have a sofifaId.
+  //   · Generated / fictional players (AI transfers, no apps) may legitimately
+  //     lack a sofifaId — they are never shown in the main players list.
+  //   · Historical stubs are excluded (they are display-only records).
+  //   · Verdict is WARNING, never FAIL, because the app renders silhouettes
+  //     gracefully and missing sofifaId is not a data-integrity failure.
+  //
+  // To fix: run scripts/auditAndPatchPlayerFaces.mjs --clubId=<id>
+  //         with --source-file=<season JSON> to patch from verified sofifaIds.
+
+  header('SECTION 5 — Player Identity (sofifaId presence)')
+
+  const sec5Issues   = []
+  const sec5Warnings = []
+
+  // Active, non-stub players who have played at least 1 game
+  const identitySubjects = activePlayers.filter(p => (p.apps ?? 0) > 0)
+  const missingFace = identitySubjects.filter(p => {
+    const sid = p.sofifaId
+    return sid == null || sid === 0 || sid === '' || sid === '0'
+  })
+
+  if (missingFace.length > 0) {
+    console.log()
+    console.log(`  ⚠  ${missingFace.length} active player(s) with apps but missing sofifaId (will render as silhouette):`)
+    for (const p of missingFace) {
+      const appsStr = String(p.apps ?? 0)
+      console.log(`       ${p.name.padEnd(32)}  apps:${appsStr}`)
+      sec5Warnings.push(`${p.name}: sofifaId missing (apps:${appsStr})`)
+    }
+    console.log()
+    console.log('  To fix: node scripts/auditAndPatchPlayerFaces.mjs --clubId=<id> --source-file=<season JSON>')
+  }
+
+  // Also warn if sofifaId is present but looks suspiciously low (≤ 100),
+  // which could indicate a placeholder or zero written as a number.
+  const suspectId = identitySubjects.filter(p => {
+    const sid = Number(p.sofifaId)
+    return p.sofifaId != null && !isNaN(sid) && sid > 0 && sid <= 100
+  })
+  if (suspectId.length > 0) {
+    console.log()
+    console.log(`  ⚠  ${suspectId.length} player(s) with suspiciously low sofifaId (≤ 100):`)
+    for (const p of suspectId) {
+      console.log(`       ${p.name.padEnd(32)}  sofifaId:${p.sofifaId}`)
+      sec5Warnings.push(`${p.name}: sofifaId=${p.sofifaId} looks like a placeholder (≤ 100)`)
+    }
+  }
+
+  row('\n  Active players with apps checked', identitySubjects.length, null)
+  row('Missing sofifaId (WARNING)',        missingFace.length === 0 ? '0  ✓' : `${missingFace.length}  ⚠`, null)
+  row('Suspect low sofifaId ≤ 100 (WARNING)', suspectId.length === 0 ? '0  ✓' : `${suspectId.length}  ⚠`, null)
+
+  const sec5Verdict = (missingFace.length > 0 || suspectId.length > 0) ? WARNING : PASS
+  for (let i = 0; i < missingFace.length + suspectId.length; i++) record(WARNING)
+  if (sec5Verdict === PASS) record(PASS)
+
+  sectionVerdicts.push(sec5Verdict)
+  console.log(`\n  SECTION 5 RESULT:  ${verdictMark(sec5Verdict)} ${sec5Verdict}`)
+
+  // ════════════════════════════════════════════════════════════════
   // SUMMARY
   // ════════════════════════════════════════════════════════════════
 
@@ -679,6 +750,11 @@ async function main() {
     console.log('  Review warnings above before the next import — some may indicate')
     console.log('  edge cases that the importer should handle consistently.')
     if (totalWarn > 0) console.log(`  ${totalWarn} warning(s) listed above.`)
+    if (sec5Warnings.length > 0) {
+      console.log()
+      console.log('  ⚠  Player face warnings detected. Run to patch:')
+      console.log('     node scripts/auditAndPatchPlayerFaces.mjs --clubId=<id> --source-file=<season JSON>')
+    }
   } else {
     console.log('  ✗   REPAIR NEEDED')
     console.log('  At least one blocking failure detected. See FAIL items above.')

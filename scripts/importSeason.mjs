@@ -873,23 +873,51 @@ async function main() {
   )
 
   // New Player Identity Review
+  // Columns: Name | Pos | JSON sofifaId | CSV suggestion | Expected face URL | Status
+  // The face URL column lets you visually catch a wrong sofifaId before --write:
+  //   open https://fifa-img.michaelmenda92.workers.dev/<sofifaId> in a browser
+  //   to confirm the correct player face appears.
+  const FACE_BASE_IMPORT = 'https://fifa-img.michaelmenda92.workers.dev'
   const newPlayerMatchList = playerMatches.filter(p => p.category === 'new' || p.category === 'new_generated')
   if (newPlayerMatchList.length > 0) {
     header('New Player Identity Review')
     console.log()
-    console.log('  ' + 'Name'.padEnd(28) + 'JSON sofifaId'.padEnd(18) + 'CSV suggestion'.padEnd(18) + 'Write value'.padEnd(16) + 'Status')
-    console.log('  ' + '─'.repeat(88))
+    console.log('  ' +
+      'Name'.padEnd(28) +
+      'Pos'.padEnd(8) +
+      'JSON sofifaId'.padEnd(16) +
+      'CSV suggestion'.padEnd(16) +
+      'Expected Face URL'.padEnd(52) +
+      'Status'
+    )
+    console.log('  ' + '─'.repeat(126))
     for (const pm of newPlayerMatchList) {
       const jsonId  = pm.resolvedSofifaId != null ? String(pm.resolvedSofifaId) : '(missing)'
       const csvId   = (pm.csvR && !pm.csvR.isGenerated) ? String(pm.csvR.sofifaId) : '(none)'
-      const writeId = pm.resolvedSofifaId != null ? String(pm.resolvedSofifaId) : 'null'
+      const faceUrl = pm.resolvedSofifaId != null
+        ? `${FACE_BASE_IMPORT}/${pm.resolvedSofifaId}`
+        : '(no face — will render as silhouette)'
       const status  = pm.resolvedSofifaId != null ? '✓ PASS' : '✗ BLOCK'
-      console.log('  ' + pm.entry.name.padEnd(28) + jsonId.padEnd(18) + csvId.padEnd(18) + writeId.padEnd(16) + status)
+      const pos     = (pm.entry.position ?? '?')
+      console.log(
+        '  ' +
+        pm.entry.name.padEnd(28) +
+        pos.padEnd(8) +
+        jsonId.padEnd(16) +
+        csvId.padEnd(16) +
+        faceUrl.padEnd(52) +
+        status
+      )
     }
     const identityBlockers = newPlayerMatchList.filter(p => p.resolvedSofifaId == null).length
     const identityPassed   = newPlayerMatchList.filter(p => p.resolvedSofifaId != null).length
     console.log()
     console.log(`  ${identityPassed} player(s) identity verified   ${identityBlockers > 0 ? identityBlockers + ' player(s) blocking write — add sofifaId to JSON' : '(none blocking)'}`)
+    if (identityPassed > 0) {
+      console.log()
+      console.log('  Verify face URLs above by opening each link in a browser before --write.')
+      console.log('  The correct player photo must appear — a wrong sofifaId shows the wrong face.')
+    }
     if (identityBlockers > 0) {
       console.log()
       console.log('  To fix: add "sofifaId": <number> to the player entry in the season JSON.')

@@ -63,7 +63,7 @@
     {
       "name": "Lautaro Martínez",
       "position": "ST",
-      "sofifaId": 199971,
+      "sofifaId": 231478,
       "allComps": {
         "apps": 32,
         "goals": 28,
@@ -78,7 +78,7 @@
     {
       "name": "Victor Osimhen",
       "position": "ST",
-      "sofifaId": 220834,
+      "sofifaId": 232293,
       "allComps": {
         "apps": 42,
         "goals": 31,
@@ -93,7 +93,7 @@
     {
       "name": "Raphinha",
       "position": "LM/CAM",
-      "sofifaId": 231571,
+      "sofifaId": 233419,
       "allComps": {
         "apps": 45,
         "goals": 20,
@@ -108,7 +108,7 @@
     {
       "name": "Florian Wirtz",
       "position": "CAM",
-      "sofifaId": 259332,
+      "sofifaId": 256630,
       "allComps": {
         "apps": 57,
         "goals": 36,
@@ -123,7 +123,7 @@
     {
       "name": "Ousmane Dembélé",
       "position": "ST/CAM/RM",
-      "sofifaId": 209331,
+      "sofifaId": 231443,
       "allComps": {
         "apps": 44,
         "goals": 23,
@@ -138,7 +138,7 @@
     {
       "name": "Lamine Yamal",
       "position": "RM/CAM",
-      "sofifaId": 270678,
+      "sofifaId": 277643,
       "allComps": {
         "apps": 60,
         "goals": 18,
@@ -153,7 +153,7 @@
     {
       "name": "Khvicha Kvaratskhelia",
       "position": "LM",
-      "sofifaId": 244765,
+      "sofifaId": 247635,
       "allComps": {
         "apps": 51,
         "goals": 16,
@@ -168,7 +168,7 @@
     {
       "name": "Pedri",
       "position": "CM",
-      "sofifaId": 258700,
+      "sofifaId": 251854,
       "allComps": {
         "apps": 59,
         "goals": 11,
@@ -183,7 +183,7 @@
     {
       "name": "Dominik Szoboszlai",
       "position": "CAM",
-      "sofifaId": 250413,
+      "sofifaId": 236772,
       "allComps": {
         "apps": 30,
         "goals": 5,
@@ -198,7 +198,7 @@
     {
       "name": "Frenkie de Jong",
       "position": "CM",
-      "sofifaId": 218667,
+      "sofifaId": 228702,
       "allComps": {
         "apps": 18,
         "goals": 0,
@@ -228,7 +228,7 @@
     {
       "name": "Alphonso Davies",
       "position": "LB",
-      "sofifaId": 221307,
+      "sofifaId": 234396,
       "allComps": {
         "apps": 52,
         "goals": 0,
@@ -243,7 +243,7 @@
     {
       "name": "Jeremie Frimpong",
       "position": "RB",
-      "sofifaId": 231591,
+      "sofifaId": 253149,
       "allComps": {
         "apps": 35,
         "goals": 2,
@@ -258,7 +258,7 @@
     {
       "name": "Nuno Mendes",
       "position": "LB",
-      "sofifaId": 262450,
+      "sofifaId": 252145,
       "allComps": {
         "apps": 25,
         "goals": 1,
@@ -273,7 +273,7 @@
     {
       "name": "William Saliba",
       "position": "CB",
-      "sofifaId": 239085,
+      "sofifaId": 243715,
       "allComps": {
         "apps": 43,
         "goals": 1,
@@ -288,7 +288,7 @@
     {
       "name": "Jules Koundé",
       "position": "RB",
-      "sofifaId": 226628,
+      "sofifaId": 241486,
       "allComps": {
         "apps": 45,
         "goals": 1,
@@ -303,7 +303,7 @@
     {
       "name": "Pau Cubarsí",
       "position": "CB",
-      "sofifaId": 267882,
+      "sofifaId": 278046,
       "allComps": {
         "apps": 29,
         "goals": 0,
@@ -333,7 +333,7 @@
     {
       "name": "Micky van de Ven",
       "position": "CB",
-      "sofifaId": 256579,
+      "sofifaId": 264453,
       "allComps": {
         "apps": 39,
         "goals": 0,
