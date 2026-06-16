@@ -8,10 +8,16 @@
  * wherever the club identity is shown (Header, ClubCard, Home hero, History).
  * This script is the only supported way to set or update that field.
  *
- * Upload flow (do this first — no upload script):
- *   1. Firebase Console → Storage → Upload your badge image (PNG or SVG)
- *   2. Click the uploaded file → "Get download URL" → copy the URL
- *   3. Run this script with --crestUrl=<url> (dry-run first, then --write)
+ * Badge file setup (do this first — no upload script):
+ *   1. Place the badge PNG at: public/club-crests/<slug>.png in the repo
+ *   2. The app-relative URL is: /eleven/club-crests/<slug>.png
+ *   3. Run this script with --crestUrl=/eleven/club-crests/<slug>.png
+ *      (dry-run first, then --write)
+ *
+ * Accepted crestUrl formats:
+ *   /eleven/...    app-relative path for repo-hosted badges (preferred)
+ *   https://...    external URL (e.g. future CDN)
+ *   Anything else is rejected.
  *
  * Important — AppContext caching:
  *   activeClub is stored in localStorage by the app. After patching Firestore,
@@ -28,12 +34,12 @@
  *   # Dry-run (always run first):
  *   node scripts/patchClubCrestUrl.mjs \
  *     --clubId=kqhz2LAYC1pOzOtLehR4 \
- *     --crestUrl=https://firebasestorage.googleapis.com/v0/b/...
+ *     --crestUrl=/eleven/club-crests/richport.png
  *
  *   # Apply patch (only after reviewing dry-run output):
  *   node scripts/patchClubCrestUrl.mjs \
  *     --clubId=kqhz2LAYC1pOzOtLehR4 \
- *     --crestUrl=https://firebasestorage.googleapis.com/v0/b/... \
+ *     --crestUrl=/eleven/club-crests/richport.png \
  *     --write
  *
  * serviceAccountKey.json must be at the project root (never committed).
@@ -98,7 +104,7 @@ async function main() {
   // ── Validate CLI ────────────────────────────────────────────────────────────
   if (!args.clubId) {
     console.error('\n✗ --clubId is required')
-    console.error('  Example: node scripts/patchClubCrestUrl.mjs --clubId=kqhz2LAYC1pOzOtLehR4 --crestUrl=https://...\n')
+    console.error('  Example: node scripts/patchClubCrestUrl.mjs --clubId=kqhz2LAYC1pOzOtLehR4 --crestUrl=/eleven/club-crests/richport.png\n')
     process.exit(1)
   }
 
@@ -108,10 +114,14 @@ async function main() {
     process.exit(1)
   }
 
-  // Basic URL sanity check
-  if (!args.crestUrl.startsWith('https://')) {
-    console.error(`\n✗ --crestUrl must start with https://`)
-    console.error(`  Received: "${args.crestUrl}"\n`)
+  // URL format validation: accept /eleven/... (repo-hosted) or https:// (external)
+  const isRepoPath = args.crestUrl.startsWith('/eleven/')
+  const isHttpsUrl = args.crestUrl.startsWith('https://')
+  if (!isRepoPath && !isHttpsUrl) {
+    console.error(`\n✗ --crestUrl must start with /eleven/ or https://`)
+    console.error(`  Received: "${args.crestUrl}"`)
+    console.error('  For repo-hosted badges: /eleven/club-crests/<slug>.png')
+    console.error('  For external URLs:      https://...\n')
     process.exit(1)
   }
 
