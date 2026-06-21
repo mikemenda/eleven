@@ -312,6 +312,115 @@ async function main() {
   }
 
   // ════════════════════════════════════════════════════════════════
+  // STAGE 1B — External Competition Results Validation
+  // ════════════════════════════════════════════════════════════════
+  //
+  // externalLeagueResults / externalCupResults record competitions the club
+  // was NOT necessarily involved in (other leagues' champions, full cup
+  // winner+finalist+score for any competition) without touching the club's
+  // own per-competition path fields (leagueCompetition/uclResult/faCupResult/
+  // carabaoCupResult/uclFinalOpponent/uclFinalScore/faCupFinalOpponent/
+  // faCupFinalScore/etc — none of those are read or written here).
+  //
+  // VALID_LEAGUE_NAMES / VALID_CUP_NAMES are a deliberate local mirror of the
+  // `HISTORY_COMPETITIONS` registry in src/utils/historyUtils.js. They are
+  // duplicated (not imported) because this is a standalone Node script and
+  // historyUtils.js lives in the Vite-aliased frontend src tree. If a new
+  // competition is ever added, add it to HISTORY_COMPETITIONS first, then
+  // mirror the exact same string here.
+  header('STAGE 1B — External Competition Results Validation')
+  console.log()
+
+  const VALID_LEAGUE_NAMES = new Set([
+    'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1', 'English Championship',
+  ])
+  const VALID_CUP_NAMES = new Set([
+    'UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League',
+    'FA Cup', 'Carabao Cup', 'Copa del Rey', 'Coppa Italia', 'DFB-Pokal', 'Coupe de France',
+  ])
+
+  const externalLeagueResults = si.externalLeagueResults ?? []
+  const externalCupResults    = si.externalCupResults    ?? []
+
+  if (externalLeagueResults.length === 0 && externalCupResults.length === 0) {
+    console.log('  ─  No externalLeagueResults / externalCupResults in this file — skipping')
+  } else {
+
+    // ── externalLeagueResults ────────────────────────────────────────────────
+    const seenLeagueNames = new Set()
+    for (const ext of externalLeagueResults) {
+      const name = ext?.competition
+      if (!name) { errors.push('externalLeagueResults entry missing "competition"'); console.log('  ✗  (missing competition name)'); continue }
+
+      // Premier League (or whatever the club's own league is) belongs on the
+      // native leagueCompetition/leaguePosition/... fields, never duplicated here.
+      if (name === 'Premier League' || name === si.leagueCompetition) {
+        errors.push(`externalLeagueResults entry "${name}" duplicates the club's own leagueCompetition — use the native league fields instead`)
+        console.log(`  ✗  ${name.padEnd(28)} — duplicates the club's own league (use native fields, not externalLeagueResults)`)
+        continue
+      }
+      if (!VALID_LEAGUE_NAMES.has(name)) {
+        errors.push(`externalLeagueResults competition "${name}" not in the known league registry`)
+        console.log(`  ✗  ${name.padEnd(28)} — not in VALID_LEAGUE_NAMES (add to historyUtils.js HISTORY_COMPETITIONS first, then mirror here)`)
+        continue
+      }
+      if (seenLeagueNames.has(name)) {
+        errors.push(`externalLeagueResults has duplicate competition "${name}"`)
+        console.log(`  ✗  ${name.padEnd(28)} — duplicate entry within externalLeagueResults`)
+        continue
+      }
+      seenLeagueNames.add(name)
+
+      const rec  = ext.record ?? {}
+      let   ok   = true
+      const sumPD = (rec.w ?? 0) + (rec.d ?? 0) + (rec.l ?? 0)
+      if (rec.p != null && sumPD !== rec.p) {
+        errors.push(`externalLeagueResults "${name}" W+D+L ${sumPD} ≠ P ${rec.p}`)
+        console.log(`  ✗  ${name.padEnd(28)} W+D+L ${sumPD} ≠ P ${rec.p}`)
+        ok = false
+      }
+      const ptsCalc = (rec.w ?? 0) * 3 + (rec.d ?? 0)
+      if (rec.pts != null && ptsCalc !== rec.pts) {
+        errors.push(`externalLeagueResults "${name}" W×3+D ${ptsCalc} ≠ Pts ${rec.pts}`)
+        console.log(`  ✗  ${name.padEnd(28)} W×3+D ${ptsCalc} ≠ Pts ${rec.pts}`)
+        ok = false
+      }
+      if (!ext.champion) {
+        warnings.push(`externalLeagueResults "${name}" has no champion set`)
+      }
+      if (ok) {
+        console.log(`  ✓  ${name.padEnd(28)} ${ext.champion ?? '(no champion)'}  ${rec.w ?? '?'}W ${rec.d ?? '?'}D ${rec.l ?? '?'}L  ${rec.pts ?? '?'}pts`)
+      }
+    }
+
+    // ── externalCupResults ───────────────────────────────────────────────────
+    const seenCupNames = new Set()
+    for (const ext of externalCupResults) {
+      const name = ext?.competition
+      if (!name) { errors.push('externalCupResults entry missing "competition"'); console.log('  ✗  (missing competition name)'); continue }
+
+      if (!VALID_CUP_NAMES.has(name)) {
+        errors.push(`externalCupResults competition "${name}" not in the known cup registry`)
+        console.log(`  ✗  ${name.padEnd(28)} — not in VALID_CUP_NAMES (add to historyUtils.js HISTORY_COMPETITIONS first, then mirror here)`)
+        continue
+      }
+      if (seenCupNames.has(name)) {
+        errors.push(`externalCupResults has duplicate competition "${name}"`)
+        console.log(`  ✗  ${name.padEnd(28)} — duplicate entry within externalCupResults`)
+        continue
+      }
+      seenCupNames.add(name)
+
+      if (!ext.winner) {
+        warnings.push(`externalCupResults "${name}" has no winner set`)
+        console.log(`  ⚠  ${name.padEnd(28)} — no winner set`)
+      } else {
+        console.log(`  ✓  ${name.padEnd(28)} ${ext.winner}${ext.finalScore ? `  ${ext.finalScore}` : ''}${ext.finalist ? `  vs ${ext.finalist}` : ''}`)
+      }
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
   // STAGE 2 — Match players
   // ════════════════════════════════════════════════════════════════
   header('STAGE 2 — Player Matching')
@@ -511,6 +620,10 @@ async function main() {
     leagueP: si.leagueP ?? null, leagueW: si.leagueW ?? null, leagueD: si.leagueD ?? null,
     leagueL: si.leagueL ?? null, leagueGF: si.leagueGF ?? null, leagueGA: si.leagueGA ?? null,
     leaguePts: si.leaguePts ?? null, leagueTop5: si.leagueTop5 ?? [],
+    // External competition results — see STAGE 1B. Never touches the club's
+    // own per-competition path fields below (uclResult, faCupResult, etc.).
+    externalLeagueResults: si.externalLeagueResults ?? [],
+    externalCupResults:    si.externalCupResults    ?? [],
     uclEntered: si.uclEntered ?? false,
     uclResult: si.uclResult ?? null, uclTournamentWinner: si.uclTournamentWinner ?? null,
     uclFinalOpponent: si.uclFinalOpponent ?? null, uclFinalScore: si.uclFinalScore ?? null,
@@ -742,6 +855,8 @@ async function main() {
     }))
 
   row('Season doc',              '1  (new)')
+  row('External league results', String(externalLeagueResults.length))
+  row('External cup results',    String(externalCupResults.length))
   row('New player docs',         `${newPlayerDocs.length}${newPlayerDocs.length > 0 ? '  ⚠' : ''}`)
   row('scope:ALL stat docs',     String(newAllStatsDocs.length))
   row('scope:UCL stat docs',     String(newUclStatsDocs.length))

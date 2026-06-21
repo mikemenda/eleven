@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 90
+// Current: 91
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -82,4 +82,5 @@
 //   83 — Fix PWA nav height cancellation: nav fixed at 60px (no safe-area addition); viewport-fit=cover already gains the safe-area height, adding it to nav was cancelling the gain
 //   87 — Add FC Montverd S1 import data and transfer club mappings
 //   90 — Fix club crest usage in Records and UCL Records: own-club rows use activeClub.crestUrl; UCL club records show correct G/G and GA/G rates (p field added to mostGoalsCampaign and fewestConcededCampaign); Home hero badge dark box removed
-const SW_VERSION = 90;
+//   91 — External competition results: historyUtils.js reads new season-doc arrays externalLeagueResults/externalCupResults (additive, alongside existing flat fields); merges finalist+score into existing FA Cup/Carabao Cup/UCL History entries without duplicating rows; adds new History entries for La Liga, Serie A, Ligue 1, Bundesliga, Coupe de France, DFB-Pokal, Coppa Italia, Copa del Rey, UEFA Europa League, UEFA Conference League; repaired leagueTop5 data shape (object rows, not strings) so the Premier League top-5 table renders correctly; importSeason.mjs now writes + validates both new arrays for future season imports; FC Montverd S1 backfilled via one-time patch script
+const SW_VERSION = 91;

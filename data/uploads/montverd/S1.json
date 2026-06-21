@@ -13,9 +13,28 @@
     "leagueGA": 44,
     "leaguePts": 95,
     "leagueTop5": [
-      "1. Montverd — 95 pts",
-      "2. Arsenal — 86 pts",
-      "3. Manchester City — 73 pts"
+      { "position": 1, "club": "FC Montverd",       "p": 38, "w": 29, "d": 8,  "l": 1,  "gf": 92, "ga": 44, "gd": 48, "pts": 95 },
+      { "position": 2, "club": "Arsenal",            "p": 38, "w": 25, "d": 11, "l": 2,  "gf": 81, "ga": 32, "gd": 49, "pts": 86 },
+      { "position": 3, "club": "Manchester City",    "p": 38, "w": 21, "d": 10, "l": 7,  "gf": 77, "ga": 39, "gd": 38, "pts": 73 },
+      { "position": 4, "club": "Aston Villa",        "p": 38, "w": 20, "d": 8,  "l": 10, "gf": 55, "ga": 44, "gd": 11, "pts": 68 },
+      { "position": 5, "club": "Tottenham Hotspur",  "p": 38, "w": 19, "d": 10, "l": 9,  "gf": 61, "ga": 41, "gd": 20, "pts": 67 }
+    ],
+    "externalLeagueResults": [
+      { "competition": "La Liga",    "champion": "Real Madrid",         "record": { "p": 38, "w": 26, "d": 8, "l": 4, "gf": 82, "ga": 34, "gd": 48, "pts": 86 } },
+      { "competition": "Serie A",    "champion": "Inter Milan",         "record": { "p": 38, "w": 28, "d": 7, "l": 3, "gf": 84, "ga": 34, "gd": 50, "pts": 91 } },
+      { "competition": "Ligue 1",    "champion": "Strasbourg",          "record": { "p": 34, "w": 21, "d": 7, "l": 6, "gf": 57, "ga": 34, "gd": 23, "pts": 70 } },
+      { "competition": "Bundesliga", "champion": "FC Bayern München",   "record": { "p": 34, "w": 26, "d": 8, "l": 0, "gf": 86, "ga": 34, "gd": 52, "pts": 86 } }
+    ],
+    "externalCupResults": [
+      { "competition": "FA Cup",                 "winner": "Newcastle United",  "finalist": "Chelsea",           "finalScore": "2–1" },
+      { "competition": "Carabao Cup",            "winner": "FC Montverd",       "finalist": "Liverpool",         "finalScore": "4–0" },
+      { "competition": "Coupe de France",        "winner": "Marseille",         "finalist": "RC Lens",           "finalScore": "3–1" },
+      { "competition": "DFB-Pokal",               "winner": "Bayer Leverkusen",  "finalist": "1. FSV Mainz 05",   "finalScore": "3–1" },
+      { "competition": "Coppa Italia",            "winner": "Juventus",          "finalist": "Inter Milan",       "finalScore": "2–1" },
+      { "competition": "Copa del Rey",            "winner": "Real Madrid",       "finalist": "Getafe CF",         "finalScore": "4–2" },
+      { "competition": "UEFA Champions League",   "winner": "Real Madrid",       "finalist": "Manchester City",   "finalScore": "2–0" },
+      { "competition": "UEFA Europa League",      "winner": "Chelsea",           "finalist": "AS Monaco",         "finalScore": "2–1" },
+      { "competition": "UEFA Conference League",  "winner": "Aston Villa",       "finalist": "SC Braga",          "finalScore": "3–2" }
     ],
     "uclEntered": true,
     "uclResult": "SF",

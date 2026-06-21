@@ -10,7 +10,7 @@
 //   s.leagueCompetition        — which domestic league FC Richport played in
 //   s.leaguePosition           — finish position (1 = champion)
 //   s.leaguePts, leagueW/D/L/GF/GA
-//   s.leagueTop5               — array [{position,club,pts,w,d,l,gf,ga}] (future upload)
+//   s.leagueTop5               — array [{position,club,p,w,d,l,gf,ga,gd,pts}] (full table; current render uses position/club/pts only)
 //   s.uclEntered, s.uclResult  — FC Richport's UCL participation + result
 //   s.uclTournamentWinner      — who actually won UCL (may be another team)
 //   s.uclFinalOpponent         — opponent in UCL final
@@ -31,6 +31,30 @@
 //   s.coppaItaliaResult, s.coppaItaliaWinner, s.coppaItaliaFinalOpponent, s.coppaItaliaFinalScore
 //   s.dfbPokalResult, s.dfbPokalWinner, s.dfbPokalFinalOpponent, s.dfbPokalFinalScore
 //   s.coupeDeFranceResult, s.coupeDeFranceWinner, s.coupeDeFranceFinalOpponent, s.coupeDeFranceFinalScore
+//
+// ─── EXTERNAL COMPETITION RESULT ARRAYS (added — now the preferred path) ────
+// Two additional, independent season-doc fields:
+//   s.externalLeagueResults — array [{competition, champion, record:{p,w,d,l,gf,ga,gd,pts}}]
+//     For leagues the active club did NOT play in that season (e.g. La Liga
+//     while the club is in the Premier League). The club's own league never
+//     appears here — it stays on leagueCompetition/leaguePosition/... above.
+//   s.externalCupResults — array [{competition, winner, finalist, finalScore}]
+//     Self-contained winner + finalist + score for ANY competition, including
+//     ones the active club has its own result in (FA Cup, Carabao Cup, UEFA
+//     Champions League). Intentionally redundant with uclTournamentWinner /
+//     faCupWinner / carabaoCupWinner in those three cases — an entry here
+//     must never require a reader to cross-reference the legacy fields above.
+//
+// Why two parallel paths exist: the "Future fields" block above was the
+// original plan for this data, but several of its final-opponent/final-score
+// fields (faCupFinalOpponent, faCupFinalScore, uclFinalOpponent, uclFinalScore)
+// double as the active club's OWN competition path on SeasonDetail.jsx, and
+// can't safely hold a different team's final without misrepresenting the
+// club's own history when the club didn't reach that final. Those "future
+// fields" were therefore never actually written and are kept below only for
+// backward compatibility. externalLeagueResults/externalCupResults are the
+// array-based, collision-free replacement and are what importSeason.mjs
+// writes going forward — see the merge logic inside deriveHistoryFromSeasons().
 
 // ─── COMPETITION REGISTRY ─────────────────────────────────────────────────────
 // Canonical competition list with tier + country group.
@@ -315,6 +339,66 @@ export function deriveHistoryFromSeasons(seasons, clubName = 'FC Richport') {
         s.coupeDeFranceResult, s.coupeDeFranceWinner, s.coupeDeFranceFinalOpponent, s.coupeDeFranceFinalScore
       )
       if (entry) entries.push(entry)
+    }
+
+    // ── EXTERNAL LEAGUE RESULTS (array-based, additive — see header note) ───
+    // Leagues the active club did NOT play in this season. The club's own
+    // league always stays on the native leagueCompetition/... fields above;
+    // importSeason.mjs blocks externalLeagueResults entries that duplicate it.
+    for (const ext of (s.externalLeagueResults ?? [])) {
+      if (!ext?.competition) continue
+      const rec = ext.record ?? {}
+      const leagueRecord = (rec.w != null || rec.d != null)
+        ? `${rec.w ?? '?'}W ${rec.d ?? '?'}D ${rec.l ?? '?'}L`
+        : null
+
+      entries.push({
+        ...base,
+        competition:        ext.competition,
+        winner:              ext.champion || null,
+        runnerUp:            null,
+        finalScore:          null,
+        fcRichportWon:       false,
+        fcRichportRunnerUp:  false,
+        fcRichportPosition:  null,
+        leaguePts:           rec.pts ?? null,
+        leagueRecord,
+        leagueTop5:          null,
+        hasData:             !!ext.champion,
+      })
+    }
+
+    // ── EXTERNAL CUP RESULTS (array-based, additive — see header note) ──────
+    // Self-contained winner + finalist + finalScore for any competition.
+    // If a legacy-field-derived entry for this same competition + season
+    // already exists (FA Cup, Carabao Cup, UEFA Champions League above),
+    // this only ENRICHES it — fills runnerUp/finalScore if still null — and
+    // never overwrites winner/fcRichportWon/fcRichportPosition, and never
+    // creates a duplicate row. Otherwise a new entry is created (Coupe de
+    // France, DFB-Pokal, Coppa Italia, Copa del Rey, UEL, UECL — none of
+    // which have a club-path field at all).
+    for (const ext of (s.externalCupResults ?? [])) {
+      if (!ext?.competition) continue
+      const existing = entries.find(e => e.seasonId === s.id && e.competition === ext.competition)
+      if (existing) {
+        if (existing.runnerUp == null && ext.finalist)     existing.runnerUp   = ext.finalist
+        if (existing.finalScore == null && ext.finalScore) existing.finalScore = ext.finalScore
+      } else {
+        entries.push({
+          ...base,
+          competition:        ext.competition,
+          winner:              ext.winner     || null,
+          runnerUp:            ext.finalist   || null,
+          finalScore:          ext.finalScore || null,
+          fcRichportWon:       false,
+          fcRichportRunnerUp:  false,
+          fcRichportPosition:  null,
+          leaguePts:           null,
+          leagueRecord:        null,
+          leagueTop5:          null,
+          hasData:             !!ext.winner,
+        })
+      }
     }
   }
 
