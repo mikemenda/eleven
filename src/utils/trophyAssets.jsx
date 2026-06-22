@@ -19,6 +19,8 @@ import serieAPng        from '../assets/trophies/serie-a.png'
 import coppaItaliaPng   from '../assets/trophies/coppa-italia.png'
 import ligue1Png        from '../assets/trophies/ligue-1.png'
 import coupeDeeFrancePng from '../assets/trophies/coupe-de-france.png'
+import europaLeaguePng  from '../assets/trophies/europa-league.png'
+import europaConferenceLeaguePng from '../assets/trophies/europa-conference-league.png'
 
 export const TROPHY_PNG_MAP = {
   'UEFA Champions League':  uclPng,
@@ -33,8 +35,10 @@ export const TROPHY_PNG_MAP = {
   'Coppa Italia':           coppaItaliaPng,
   'Ligue 1':                ligue1Png,
   'Coupe de France':        coupeDeeFrancePng,
-  // No PNG available for: English Championship, UEFA Europa League, UEFA Conference League
-  // Those fall back to TrophySVG below.
+  'UEFA Europa League':     europaLeaguePng,
+  'UEFA Conference League': europaConferenceLeaguePng,
+  // No PNG available for: English Championship
+  // Falls back to TrophySVG below.
 }
 
 // ─── SVG FALLBACK COMPONENTS ──────────────────────────────────────────────────
