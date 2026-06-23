@@ -1,5 +1,5 @@
 // Cache version — bump this number on every deployment.
-// Current: 91
+// Current: 93
 // History:
 //   1  — initial build (Phase 1 scaffold)
 //   2  — Phase 2 Home screen + NavBar
@@ -84,4 +84,5 @@
 //   90 — Fix club crest usage in Records and UCL Records: own-club rows use activeClub.crestUrl; UCL club records show correct G/G and GA/G rates (p field added to mostGoalsCampaign and fewestConcededCampaign); Home hero badge dark box removed
 //   91 — External competition results: historyUtils.js reads new season-doc arrays externalLeagueResults/externalCupResults (additive, alongside existing flat fields); merges finalist+score into existing FA Cup/Carabao Cup/UCL History entries without duplicating rows; adds new History entries for La Liga, Serie A, Ligue 1, Bundesliga, Coupe de France, DFB-Pokal, Coppa Italia, Copa del Rey, UEFA Europa League, UEFA Conference League; repaired leagueTop5 data shape (object rows, not strings) so the Premier League top-5 table renders correctly; importSeason.mjs now writes + validates both new arrays for future season imports; FC Montverd S1 backfilled via one-time patch script
 //   92 — Trophy assets: added real PNG trophies for UEFA Europa League and UEFA Conference League; trophyAssets.jsx TROPHY_PNG_MAP now resolves both competitions to PNGs instead of the SVG fallback; only English Championship remains SVG-only
-const SW_VERSION = 92;
+//   93 — History crest fix: add Napoli/SSC Napoli, Athletic Club/Athletic Bilbao, Real Sociedad, FC Lorient/Lorient, Real Betis/Betis, Lazio, RC Lens/Lens to transfer-clubs.json — fixes outlined-shield fallback on History page for FC Montverd S2 external cup winner/finalist crests (resolveTeamId() in History.jsx does an exact lowercase-key lookup against transfer-clubs.json; these 7 clubs had never been a transfer counterparty for either club, so no entry existed)
+const SW_VERSION = 93;

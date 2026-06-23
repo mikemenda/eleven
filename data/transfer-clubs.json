@@ -291,5 +291,53 @@
   "sunderland afc": {
     "displayName": "Sunderland AFC",
     "sofifaTeamId": 106
+  },
+  "napoli": {
+    "displayName": "Napoli",
+    "sofifaTeamId": 48
+  },
+  "ssc napoli": {
+    "displayName": "Napoli",
+    "sofifaTeamId": 48
+  },
+  "athletic club": {
+    "displayName": "Athletic Club",
+    "sofifaTeamId": 448
+  },
+  "athletic bilbao": {
+    "displayName": "Athletic Club",
+    "sofifaTeamId": 448
+  },
+  "real sociedad": {
+    "displayName": "Real Sociedad",
+    "sofifaTeamId": 457
+  },
+  "fc lorient": {
+    "displayName": "FC Lorient",
+    "sofifaTeamId": 217
+  },
+  "lorient": {
+    "displayName": "FC Lorient",
+    "sofifaTeamId": 217
+  },
+  "real betis": {
+    "displayName": "Real Betis",
+    "sofifaTeamId": 449
+  },
+  "betis": {
+    "displayName": "Real Betis",
+    "sofifaTeamId": 449
+  },
+  "lazio": {
+    "displayName": "Lazio",
+    "sofifaTeamId": 46
+  },
+  "rc lens": {
+    "displayName": "RC Lens",
+    "sofifaTeamId": 64
+  },
+  "lens": {
+    "displayName": "RC Lens",
+    "sofifaTeamId": 64
   }
 }
