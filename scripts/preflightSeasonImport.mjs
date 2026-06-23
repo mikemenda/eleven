@@ -365,6 +365,16 @@ async function main() {
   // ════════════════════════════════════════════════════════════════
   // CHECK 4 — Transfer-Club Readiness  (real transfer-clubs.json lookup)
   // ════════════════════════════════════════════════════════════════
+  // Covers the union of every club name that depends on transfer-clubs.json
+  // for crest resolution:
+  //   · transfers[].from_club / to_club            (original scope)
+  //   · externalLeagueResults[].champion             — renders on History
+  //   · externalCupResults[].winner / .finalist       — renders on History
+  // The external-results sources were added specifically to catch the class
+  // of gap that caused a History crest fallback failure — those names never
+  // go through opponents-seed.json (they aren't UCL opponents) and the
+  // importer itself does not validate them at all today, so this is the
+  // only place they get checked before they reach Firestore.
   header('CHECK 4 — Transfer-Club Readiness')
   console.log()
 
@@ -375,19 +385,48 @@ async function main() {
     fail(`Could not load data/transfer-clubs.json: ${e.message}`)
   }
 
-  const uniqueClubs = [...new Set(transfers.flatMap(t => [t.from_club, t.to_club].filter(Boolean)))]
+  // raw club name → { raw, labels: Set<string> } — a club can legitimately
+  // come from more than one source (e.g. a club that's both a transfer
+  // counterparty and an external league champion); it's still one lookup.
+  const clubSources = new Map()
+  function trackClub(raw, label) {
+    if (!raw) return
+    if (!clubSources.has(raw)) clubSources.set(raw, { raw, labels: new Set() })
+    clubSources.get(raw).labels.add(label)
+  }
 
-  if (uniqueClubs.length === 0) {
-    note('No transfer clubs found in transfers — skipping')
+  for (const t of transfers) {
+    trackClub(t.from_club, 'Transfer club')
+    trackClub(t.to_club,   'Transfer club')
+  }
+  for (const ext of externalLeagueResults) {
+    trackClub(ext?.champion, 'External league champion')
+  }
+  for (const ext of externalCupResults) {
+    trackClub(ext?.winner,   'External cup winner/finalist')
+    trackClub(ext?.finalist, 'External cup winner/finalist')
+  }
+
+  if (clubSources.size === 0) {
+    note('No transfer or external-result clubs found — skipping')
   } else {
-    for (const rawClub of uniqueClubs) {
-      const entry = transferClubs[normClubKey(rawClub)]
+    for (const { raw, labels } of clubSources.values()) {
+      const sourceTag = `[${[...labels].join(', ')}]`
+      const entry = transferClubs[normClubKey(raw)]
       if (entry) {
-        pass(`${rawClub.padEnd(30)} → "${entry.displayName}"  sofifaTeamId:${entry.sofifaTeamId}`)
+        pass(`${raw.padEnd(30)} → "${entry.displayName}"  sofifaTeamId:${entry.sofifaTeamId}  ${sourceTag}`)
       } else {
-        fail(`${rawClub.padEnd(30)} — not found in transfer-clubs.json (would block --write)`)
+        // Only a "Transfer club" source actually blocks importSeason.mjs
+        // --write today; the external-results sources aren't validated by
+        // the importer at all, so an unmapped club there fails by quietly
+        // rendering without a crest on History, not by blocking the import.
+        // Either way, this preflight treats it as a hard blocker.
+        const consequence = labels.has('Transfer club')
+          ? 'would block --write'
+          : 'would render without a crest on the History page'
+        fail(`${raw.padEnd(30)} — not found in transfer-clubs.json (${consequence})  ${sourceTag}`)
         console.log(`       To fix — add to data/transfer-clubs.json:`)
-        console.log(`         "${normClubKey(rawClub)}": { "displayName": "${rawClub}", "sofifaTeamId": 0 }`)
+        console.log(`         "${normClubKey(raw)}": { "displayName": "${raw}", "sofifaTeamId": 0 }`)
       }
     }
   }
