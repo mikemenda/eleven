@@ -1,0 +1,247 @@
+{
+  "season": {
+    "label": "S2",
+    "year": "2027/28",
+    "isComplete": true,
+    "leagueCompetition": "Premier League",
+    "leaguePosition": 1,
+    "leagueP": 38,
+    "leagueW": 27,
+    "leagueD": 8,
+    "leagueL": 3,
+    "leagueGF": 91,
+    "leagueGA": 42,
+    "leaguePts": 89,
+    "leagueTop5": [
+      { "position": 1, "club": "FC Montverd",    "p": 38, "w": 27, "d": 8,  "l": 3, "gf": 91, "ga": 42, "gd": 49, "pts": 89 },
+      { "position": 2, "club": "Arsenal",          "p": 38, "w": 23, "d": 9,  "l": 6, "gf": 72, "ga": 43, "gd": 29, "pts": 78 },
+      { "position": 3, "club": "Chelsea",          "p": 38, "w": 21, "d": 13, "l": 4, "gf": 71, "ga": 40, "gd": 31, "pts": 76 },
+      { "position": 4, "club": "Liverpool",        "p": 38, "w": 22, "d": 7,  "l": 9, "gf": 64, "ga": 42, "gd": 22, "pts": 73 },
+      { "position": 5, "club": "Manchester City",  "p": 38, "w": 20, "d": 11, "l": 7, "gf": 70, "ga": 47, "gd": 23, "pts": 71 }
+    ],
+    "externalLeagueResults": [
+      { "competition": "Ligue 1", "champion": "Paris Saint-Germain", "record": { "p": 34, "w": 27, "d": 1,  "l": 6, "gf": 72, "ga": 33, "gd": 39, "pts": 82 } },
+      { "competition": "Bundesliga",         "champion": "FC Bayern München",    "record": { "p": 34, "w": 23, "d": 7,  "l": 4, "gf": 70, "ga": 33, "gd": 37, "pts": 76 } },
+      { "competition": "Serie A",    "champion": "Juventus",             "record": { "p": 38, "w": 24, "d": 11, "l": 3, "gf": 82, "ga": 38, "gd": 44, "pts": 83 } },
+      { "competition": "La Liga",   "champion": "Real Madrid",          "record": { "p": 38, "w": 30, "d": 4,  "l": 4, "gf": 82, "ga": 33, "gd": 49, "pts": 94 } }
+    ],
+    "externalCupResults": [
+      { "competition": "FA Cup",            "winner": "Tottenham Hotspur",      "finalist": "Manchester City",   "finalScore": "3–1" },
+      { "competition": "Coupe de France", "winner": "Olympique de Marseille", "finalist": "FC Lorient",   "finalScore": "3–0" },
+      { "competition": "DFB-Pokal",                   "winner": "Borussia Dortmund",      "finalist": "Bayer Leverkusen", "finalScore": "2–0" },
+      { "competition": "Copa del Rey",              "winner": "FC Barcelona",           "finalist": "Real Betis",      "finalScore": "1–1 (4–2 pens)" },
+      { "competition": "Coppa Italia",   "winner": "SSC Napoli",             "finalist": "Lazio",            "finalScore": "3–1" },
+      { "competition": "UEFA Europa League",          "winner": "Athletic Club",           "finalist": "Bayer Leverkusen", "finalScore": "2–1" },
+      { "competition": "UEFA Conference League",      "winner": "Real Sociedad",           "finalist": "RC Lens",          "finalScore": "2–1" }
+    ],
+    "uclEntered": true,
+    "uclResult": "Champions",
+    "uclTournamentWinner": null,
+    "uclFinalOpponent": "Real Madrid",
+    "uclFinalScore": "3–2",
+    "uclLeaguePhasePosition": 2,
+    "uclLPP": 8,
+    "uclLPW": 7,
+    "uclLPD": 0,
+    "uclLPL": 1,
+    "uclLPGF": 27,
+    "uclLPGA": 11,
+    "uclLPPts": 21,
+    "uclR16Opponent": "Arsenal",
+    "uclR16Score": "8–3",
+    "uclQFOpponent": "Inter Milan",
+    "uclQFScore": "13–3",
+    "uclSFOpponent": "Napoli",
+    "uclSFScore": "11–3",
+    "faCupResult": "R4",
+    "faCupFinalOpponent": null,
+    "faCupWinner": "Tottenham Hotspur",
+    "carabaoCupResult": "Winner",
+    "carabaoCupFinalOpponent": "AFC Bournemouth",
+    "carabaoCupWinner": null,
+    "dynastyScore": 90,
+    "dynastyVerdict": "Legendary Season",
+    "seasonHeadline": null,
+    "narrativeText": "FC Montverd's second season under Pep Guardiola delivered an unprecedented domestic and continental treble. Playing a 4-2-3-1 captained by Pedri, and built around the protected core of Pedri, Lamine Yamal and Raphinha, Montverd retained the Premier League title with 89 points from 27 wins and only three defeats. In Europe, the league phase finish slipped to second (7-0-1) after a single loss away to Real Madrid, but the knockout run was ruthless — Arsenal, Inter Milan and SSC Napoli were swept aside, including a 7–1 second-leg demolition in Milan, to reach a first UEFA Champions League final in club history. There, trailing Real Madrid 2–0 at halftime, Montverd produced the defining comeback of the season: Ousmane Dembélé and Florian Wirtz levelled inside six second-half minutes before substitute Rayan Cherki — on for just seven minutes — struck the 78th-minute winner to complete a 3–2 triumph. The Carabao Cup followed with a 6–2 final rout of AFC Bournemouth, with only a 1–2 FA Cup Round 4 exit to Arsenal denying a clean sweep of every competition entered. Raphinha was the standout performer, setting a new club record with 52 goal contributions — 29 goals and 23 assists — across all competitions.",
+    "keyMoments": [
+      "True Treble: Premier League, Carabao Cup and the UEFA Champions League — the most decorated season in club history",
+      "First UEFA Champions League title in club history, beating Real Madrid 3–2 in the final",
+      "UCL Final comeback from 2–0 down at halftime: Ousmane Dembélé (48'), Florian Wirtz (54') and substitute Rayan Cherki (78', on for the 71st minute) sealed a 3–2 win over Real Madrid",
+      "Carabao Cup won with a 6–2 final victory over AFC Bournemouth",
+      "UCL quarter-final second leg: a 7–1 away win at Inter Milan sealed a 13–3 aggregate",
+      "Raphinha set a new single-season club record with 52 goal contributions — 29 goals and 23 assists",
+      "Premier League title retained — 89 points, 27 wins, only 3 defeats",
+      "FA Cup Round 4 exit to Arsenal (1–2) — the season's sole domestic-cup blemish",
+      "UCL league phase: 2nd place, 7W-0D-1L, 27 GF / 11 GA — the sole defeat coming away to eventual final opponents Real Madrid (1–3)",
+      "Squad rebuild funded through outgoing sales: Rayan Cherki (100% from the Osimhen sale), Warren Zaïre-Emery (60% from Koundé) and Willian Pacho (80% from Nuno Mendes) all arrived via Mandatory Exchange deals",
+      "Rafael Leão, Achraf Hakimi and Dayot Upamecano joined via Emergency Credit mechanisms, with Hakimi (75%) and Upamecano (50%) financed by the Szoboszlai and Cubarsí sales respectively"
+    ]
+  },
+  "playerStats": [
+    {
+      "name": "Ousmane Dembélé",
+      "position": "ST/RM",
+      "sofifaId": 231443,
+      "allComps": { "apps": 45, "goals": 22, "assists": 25 },
+      "ucl": { "apps": 11, "goals": 7, "assists": 7 }
+    },
+    {
+      "name": "Lautaro Martínez",
+      "position": "ST",
+      "sofifaId": 231478,
+      "allComps": { "apps": 45, "goals": 30, "assists": 10 },
+      "ucl": { "apps": 10, "goals": 11, "assists": 3 }
+    },
+    {
+      "name": "Raphinha",
+      "position": "CAM/LM",
+      "sofifaId": 233419,
+      "allComps": { "apps": 59, "goals": 29, "assists": 23 },
+      "ucl": { "apps": 15, "goals": 11, "assists": 12 }
+    },
+    {
+      "name": "Lamine Yamal",
+      "position": "CAM/RM",
+      "sofifaId": 277643,
+      "allComps": { "apps": 58, "goals": 31, "assists": 16 },
+      "ucl": { "apps": 15, "goals": 13, "assists": 4 }
+    },
+    {
+      "name": "Florian Wirtz",
+      "position": "CAM",
+      "sofifaId": 256630,
+      "allComps": { "apps": 52, "goals": 23, "assists": 13 },
+      "ucl": { "apps": 9, "goals": 8, "assists": 8 }
+    },
+    {
+      "name": "Khvicha Kvaratskhelia",
+      "position": "LM",
+      "sofifaId": 247635,
+      "allComps": { "apps": 42, "goals": 18, "assists": 9 },
+      "ucl": { "apps": 8, "goals": 3, "assists": 5 }
+    },
+    {
+      "name": "Rafael Leão",
+      "position": "LM",
+      "sofifaId": 241721,
+      "allComps": { "apps": 28, "goals": 10, "assists": 8 },
+      "ucl": { "apps": 9, "goals": 4, "assists": 5 }
+    },
+    {
+      "name": "Rayan Cherki",
+      "position": "RM/CAM",
+      "sofifaId": 251570,
+      "allComps": { "apps": 44, "goals": 14, "assists": 14 },
+      "ucl": { "apps": 10, "goals": 5, "assists": 6 }
+    },
+    {
+      "name": "Pedri",
+      "position": "CM",
+      "sofifaId": 251854,
+      "allComps": { "apps": 59, "goals": 2, "assists": 10 },
+      "ucl": { "apps": 15, "goals": 0, "assists": 3 }
+    },
+    {
+      "name": "Achraf Hakimi",
+      "position": "RB",
+      "sofifaId": 235212,
+      "allComps": { "apps": 38, "goals": 2, "assists": 4 },
+      "ucl": { "apps": 9, "goals": 0, "assists": 2 }
+    },
+    {
+      "name": "Frenkie de Jong",
+      "position": "CM",
+      "sofifaId": 228702,
+      "allComps": { "apps": 28, "goals": 2, "assists": 1 },
+      "ucl": { "apps": 3, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Warren Zaïre-Emery",
+      "position": "CM/RB",
+      "sofifaId": 270673,
+      "allComps": { "apps": 29, "goals": 2, "assists": 1 },
+      "ucl": { "apps": 7, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "William Saliba",
+      "position": "CB",
+      "sofifaId": 243715,
+      "allComps": { "apps": 41, "goals": 1, "assists": 3 },
+      "ucl": { "apps": 9, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Alphonso Davies",
+      "position": "LB",
+      "sofifaId": 234396,
+      "allComps": { "apps": 44, "goals": 1, "assists": 2 },
+      "ucl": { "apps": 8, "goals": 0, "assists": 1 }
+    },
+    {
+      "name": "Jorrel Hato",
+      "position": "LB/CB",
+      "sofifaId": 272978,
+      "allComps": { "apps": 26, "goals": 1, "assists": 0 },
+      "ucl": { "apps": 7, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Micky van de Ven",
+      "position": "LB/CB",
+      "sofifaId": 264453,
+      "allComps": { "apps": 38, "goals": 0, "assists": 1 },
+      "ucl": { "apps": 8, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Willian Pacho",
+      "position": "CB",
+      "sofifaId": 256196,
+      "allComps": { "apps": 36, "goals": 0, "assists": 0 },
+      "ucl": { "apps": 8, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Dayot Upamecano",
+      "position": "CB",
+      "sofifaId": 229558,
+      "allComps": { "apps": 19, "goals": 0, "assists": 0 },
+      "ucl": { "apps": 11, "goals": 0, "assists": 0 }
+    },
+    {
+      "name": "Joan García",
+      "position": "GK",
+      "sofifaId": 259532,
+      "isGK": true,
+      "allComps": { "apps": 65, "cleanSheets": 14 },
+      "ucl": { "apps": 15, "cleanSheets": 3 }
+    }
+  ],
+  "uclMatches": [
+    { "competition": "UCL_LP", "round": "MD1", "opponent": "Jagiellonia Białystok", "home_away": "H", "score_for": 2, "score_against": 0 },
+    { "competition": "UCL_LP", "round": "MD2", "opponent": "Strasbourg",            "home_away": "A", "score_for": 3, "score_against": 0 },
+    { "competition": "UCL_LP", "round": "MD3", "opponent": "AEK Athens",            "home_away": "H", "score_for": 6, "score_against": 3 },
+    { "competition": "UCL_LP", "round": "MD4", "opponent": "Atlético de Madrid",    "home_away": "H", "score_for": 2, "score_against": 1 },
+    { "competition": "UCL_LP", "round": "MD5", "opponent": "FC Bayern München",     "home_away": "H", "score_for": 5, "score_against": 0 },
+    { "competition": "UCL_LP", "round": "MD6", "opponent": "Real Madrid",           "home_away": "A", "score_for": 1, "score_against": 3 },
+    { "competition": "UCL_LP", "round": "MD7", "opponent": "HJK Helsinki",          "home_away": "A", "score_for": 4, "score_against": 2 },
+    { "competition": "UCL_LP", "round": "MD8", "opponent": "Fenerbahçe",            "home_away": "A", "score_for": 4, "score_against": 2 },
+    { "competition": "UCL_R16", "leg": 1, "opponent": "Arsenal",     "home_away": "A", "score_for": 6, "score_against": 2 },
+    { "competition": "UCL_R16", "leg": 2, "opponent": "Arsenal",     "home_away": "H", "score_for": 2, "score_against": 1 },
+    { "competition": "UCL_QF",  "leg": 1, "opponent": "Inter Milan", "home_away": "H", "score_for": 6, "score_against": 2 },
+    { "competition": "UCL_QF",  "leg": 2, "opponent": "Inter Milan", "home_away": "A", "score_for": 7, "score_against": 1 },
+    { "competition": "UCL_SF",  "leg": 1, "opponent": "Napoli",      "home_away": "A", "score_for": 5, "score_against": 2 },
+    { "competition": "UCL_SF",  "leg": 2, "opponent": "Napoli",      "home_away": "H", "score_for": 6, "score_against": 1 },
+    { "competition": "UCL_Final", "opponent": "Real Madrid", "home_away": "N", "score_for": 3, "score_against": 2 }
+  ],
+  "transfers": [
+    { "direction": "IN",  "player": "Rayan Cherki",          "position": "RM/CAM", "from_club": "Manchester City",     "fee_eur": 115000000, "window": "Summer",  "rule": "Mandatory Exchange" },
+    { "direction": "IN",  "player": "Warren Zaïre-Emery",    "position": "CM/RB",  "from_club": "Paris Saint-Germain",  "fee_eur": 75000000,  "window": "Summer",  "rule": "Mandatory Exchange" },
+    { "direction": "IN",  "player": "Willian Pacho",         "position": "CB",     "from_club": "Paris Saint-Germain",  "fee_eur": 100000000, "window": "Summer",  "rule": "Mandatory Exchange" },
+    { "direction": "IN",  "player": "Rafael Leão",           "position": "LM",     "from_club": "Borussia Dortmund",    "fee_eur": 61000000,  "window": "Summer",  "rule": "Emergency Credit" },
+    { "direction": "IN",  "player": "Achraf Hakimi",         "position": "RB",     "from_club": "Real Madrid",          "fee_eur": 96750000,  "window": "Summer",  "rule": "Emergency Credit OOL" },
+    { "direction": "OUT", "player": "Victor Osimhen",        "position": "ST",     "to_club": "Manchester City",        "fee_eur": 219100000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Jules Koundé",          "position": "RB",     "to_club": "Paris Saint-Germain",    "fee_eur": 155700000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Nuno Mendes",           "position": "LB",     "to_club": "Paris Saint-Germain",    "fee_eur": 198600000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Jeremie Frimpong",      "position": "RB",     "to_club": "Bayer Leverkusen",       "fee_eur": 127300000, "window": "Summer",  "rule": "Mandatory" },
+    { "direction": "OUT", "player": "Dominik Szoboszlai",    "position": "CAM",    "to_club": "Arsenal",                "fee_eur": 61900000,  "window": "Summer",  "rule": "Forced-List" },
+    { "direction": "IN",  "player": "Dayot Upamecano",       "position": "CB",     "from_club": "FC Bayern München",    "fee_eur": 70000000,  "window": "January", "rule": "Emergency Credit OOL" },
+    { "direction": "OUT", "player": "Pau Cubarsí",           "position": "CB",     "to_club": "Arsenal",                "fee_eur": 139900000, "window": "January", "rule": "Mandatory" }
+  ]
+}

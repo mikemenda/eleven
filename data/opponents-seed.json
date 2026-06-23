@@ -972,5 +972,43 @@
       "dinamo",
       "zagreb"
     ]
+  },
+  {
+    "opponentKey": "jagiellonia-bialystok",
+    "displayName": "Jagiellonia Białystok",
+    "shortName": "Jagiellonia",
+    "abbreviation": "JAG",
+    "country": "Poland",
+    "sofifaTeamId": 110745,
+    "aliases": [
+      "jagiellonia bialystok",
+      "jagiellonia"
+    ]
+  },
+  {
+    "opponentKey": "strasbourg",
+    "displayName": "RC Strasbourg Alsace",
+    "shortName": "Strasbourg",
+    "abbreviation": "RCS",
+    "country": "France",
+    "sofifaTeamId": 76,
+    "aliases": [
+      "rc strasbourg alsace",
+      "rc strasbourg",
+      "strasbourg"
+    ]
+  },
+  {
+    "opponentKey": "hjk-helsinki",
+    "displayName": "HJK Helsinki",
+    "shortName": "HJK",
+    "abbreviation": "HJK",
+    "country": "Finland",
+    "sofifaTeamId": 100325,
+    "aliases": [
+      "hjk helsinki",
+      "hjk",
+      "helsingin jalkapalloklubi"
+    ]
   }
 ]
